@@ -1,0 +1,8 @@
+<div>
+  <p-inputSwitch
+    [styleClass]="'mr-2'"
+    [ngModel]="isDark"
+    (ngModelChange)="switchTheme($event)"
+  ></p-inputSwitch>
+  <i [ngClass]="{ pi: true, 'pi-sun': !isDark, 'pi-moon': isDark }"></i>
+</div>
