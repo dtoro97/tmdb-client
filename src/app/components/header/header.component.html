@@ -1,13 +1,39 @@
 <div class="w-full header">
   <p-menubar [model]="items">
     <ng-template #end>
-      <p-button
-        icon="{{ isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon' }}"
-        [rounded]="true"
-        [text]="true"
-        severity="secondary"
-        (click)="toggleDarkMode()"
-      ></p-button>
+      <div class="flex flex-row">
+        <p-autocomplete
+          #searchBar
+          (onSelect)="onSearchSelect($event.value, searchBar)"
+          [suggestions]="searchResults"
+          (completeMethod)="search($event.query)"
+        >
+          <ng-template let-item #item>
+            <div class="flex flex-row w-full">
+              <img
+                class="border-round-sm"
+                src="{{ item.poster_path || item.profile_path | imgSrc }}"
+                [style.width.px]="60"
+              />
+              <div class="flex flex-column">
+                <span class="font-bold pb-3 ml-3 result-title">
+                  {{ item.title || item.name }}
+                </span>
+              </div>
+              <div class="ml-auto">
+                <p-chip [label]="item.type"></p-chip>
+              </div>
+            </div>
+          </ng-template>
+        </p-autocomplete>
+        <p-button
+          icon="{{ isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon' }}"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          (click)="toggleDarkMode()"
+        ></p-button>
+      </div>
     </ng-template>
   </p-menubar>
 </div>

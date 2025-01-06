@@ -9,6 +9,24 @@
       border: unset;
       max-width: 1400px;
       margin: auto;
+
+      .p-menubar-end {
+        .p-autocomplete {
+          width: 280px;
+
+          input {
+            width: 100%;
+          }
+        }
+      }
     }
+  }
+}
+
+::ng-deep {
+  .result-title {
+    max-width: 40px;
+    text-wrap: wrap;
+    text-overflow: ellipsis;
   }
 }

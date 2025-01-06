@@ -43,4 +43,20 @@
       </ng-template>
     </p-carousel>
   </div>
+  <div class="flex flex-column">
+    <div class="column-header ml-6 mb-4">
+      <h2>Upcoming Movies</h2>
+    </div>
+    <p-carousel
+      [value]="upcomingMovies$ | async"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-movie pTemplate="item">
+        <app-card [item]="movie" [type]="'movie'"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
 </div>
