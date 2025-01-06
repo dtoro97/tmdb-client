@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { TmdbService } from '../../services/tmdb.service';
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
-import { BehaviorSubject, map, Observable, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, first, map, Observable, switchMap, tap } from 'rxjs';
 import { LoaderService } from '../../services';
-import { SessionQuery } from '../../state/session.query';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +14,7 @@ import { SessionQuery } from '../../state/session.query';
 export class HomeComponent implements OnInit {
   trending$: Observable<any>;
   popular$: Observable<any>;
+  upcomingMovies$: Observable<any>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   trendingOptions = [
     { label: 'Today', value: 'day' },
@@ -22,11 +22,11 @@ export class HomeComponent implements OnInit {
   ];
   popularOptions = [
     {
-      label: 'Streaming',
+      label: 'TV Shows',
       value: 'tv',
     },
     {
-      label: 'In Theatres',
+      label: 'Movies',
       value: 'movie',
     },
   ];
@@ -38,11 +38,9 @@ export class HomeComponent implements OnInit {
   private _selectedPopular: BehaviorSubject<string> = new BehaviorSubject('tv');
   constructor(
     private tmdbService: TmdbService,
-    private loader: LoaderService,
-    private sessionQuery: SessionQuery
+    private loader: LoaderService
   ) {}
   ngOnInit(): void {
-    console.log(this.sessionQuery.providerIds);
     this.selectedTrending$ = this._selectedTrending.asObservable();
     this.selectedPopular$ = this._selectedPopular.asObservable();
     this.trending$ = this.selectedTrending$.pipe(
@@ -51,6 +49,10 @@ export class HomeComponent implements OnInit {
       }),
       map((data) => data?.results || []),
       tap(() => this.loader.setLoading(false))
+    );
+    this.upcomingMovies$ = this.tmdbService.getUpcomingMovies().pipe(
+      first(),
+      map((data) => data?.results || [])
     );
 
     this.popular$ = this.selectedPopular$.pipe(

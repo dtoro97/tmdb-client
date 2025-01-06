@@ -4,7 +4,7 @@
     <div class="flex justify-content-between flex-row" *ngIf="!person">
       <span class="pb-3"
         ><i class="fa-solid fa-star"></i>&nbsp;{{
-          item.vote_average | number
+          item.vote_average | number : "1.1-1"
         }}</span
       >
       <span class="font-light">{{

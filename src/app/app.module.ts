@@ -18,6 +18,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { HomeComponent } from './components/home/home.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { ChipModule } from 'primeng/chip';
 
 const components = [HeaderComponent, CardComponent, HomeComponent];
 const pipes = [ImagePipe];
@@ -25,6 +27,7 @@ const pipes = [ImagePipe];
 @NgModule({
   declarations: [AppComponent, ...components],
   imports: [
+    AutoCompleteModule,
     BrowserModule,
     ProgressBarModule,
     AppRoutingModule,
@@ -35,6 +38,7 @@ const pipes = [ImagePipe];
     HttpClientModule,
     CarouselModule,
     SelectButtonModule,
+    ChipModule,
     ...pipes,
   ],
   providers: [

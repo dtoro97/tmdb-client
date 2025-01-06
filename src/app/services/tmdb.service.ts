@@ -10,7 +10,7 @@ import { environment } from '../../environments/environment';
 export class TmdbService {
   constructor(private http: HttpClient) {}
 
-  public getTrending(
+  getTrending(
     mediaType: string,
     timeWindow = 'day'
   ): Observable<ResponseDataModel> {
@@ -24,13 +24,38 @@ export class TmdbService {
     );
   }
 
-  public getPopular(mediaType: string): Observable<ResponseDataModel> {
+  getPopular(mediaType: string): Observable<ResponseDataModel> {
     return this.http.get<ResponseDataModel>(
       `${environment.apiUrl}/${mediaType}/popular`,
       {
         params: {
           api_key: environment.apiKey,
           include_video: true,
+        },
+      }
+    );
+  }
+
+  getUpcomingMovies(): Observable<ResponseDataModel> {
+    return this.http.get<ResponseDataModel>(
+      `${environment.apiUrl}/movie/upcoming`,
+      {
+        params: {
+          api_key: environment.apiKey,
+          page: 1,
+        },
+      }
+    );
+  }
+
+  search(mediaType: string, query: string): Observable<ResponseDataModel> {
+    return this.http.get<ResponseDataModel>(
+      `${environment.apiUrl}/search/${mediaType}`,
+      {
+        params: {
+          api_key: environment.apiKey,
+          page: 1,
+          query,
         },
       }
     );
