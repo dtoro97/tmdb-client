@@ -1,0 +1,13 @@
+<div class="w-full header">
+  <p-menubar [model]="items">
+    <ng-template #end>
+      <p-button
+        icon="{{ isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon' }}"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (click)="toggleDarkMode()"
+      ></p-button>
+    </ng-template>
+  </p-menubar>
+</div>

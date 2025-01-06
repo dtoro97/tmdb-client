@@ -1,0 +1,46 @@
+<div class="h-full flex flex-column">
+  <div class="flex flex-column">
+    <div class="column-header ml-6 mb-4">
+      <h2>Trending</h2>
+      <p-select-button
+        [options]="trendingOptions"
+        [ngModel]="selectedTrending$ | async"
+        (ngModelChange)="changeTrending($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <p-carousel
+      [value]="trending$ | async"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-movie pTemplate="item">
+        <app-card [item]="movie" [type]="'tv'"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
+  <div class="flex flex-column">
+    <div class="column-header ml-6 mb-4">
+      <h2>What's Popular</h2>
+      <p-select-button
+        [options]="popularOptions"
+        [ngModel]="selectedPopular$ | async"
+        (ngModelChange)="changePopular($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <p-carousel
+      [value]="popular$ | async"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-movie pTemplate="item">
+        <app-card [item]="movie" [type]="'tv'"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+<div class="main-layout">
+  <app-header></app-header>
+  <p-progress-bar
+    mode="indeterminate"
+    [style]="{ height: '4px' }"
+    *ngIf="isLoading$ | async"
+  ></p-progress-bar>
+  <div class="relative flex-1 py-4 inner-container">
+    <router-outlet></router-outlet>
+  </div>
+</div>
