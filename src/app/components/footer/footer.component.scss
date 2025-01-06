@@ -1,0 +1,41 @@
+footer {
+  background-color: var(--p-menubar-background);
+  border-top: 1px solid var(--p-menubar-border-color);
+
+  .inner-container {
+    max-width: 1400px;
+    margin: auto;
+    width: 100%;
+
+    a {
+      color: var(--p-form-field-color);
+      text-decoration: none;
+      &:last-child {
+        transition: opacity 0.2s ease-in-out;
+        &:hover {
+          opacity: 0.6;
+        }
+      }
+    }
+
+    i {
+      font-size: 2rem;
+      cursor: pointer;
+      color: rgba(124, 124, 124, 0.596);
+      transition: color 0.2s ease-in-out;
+
+      &:hover {
+        color: white;
+      }
+    }
+
+    p {
+      color: rgba(124, 124, 124, 0.596);
+    }
+
+    svg {
+      width: 200px;
+      opacity: 0.8;
+    }
+  }
+}

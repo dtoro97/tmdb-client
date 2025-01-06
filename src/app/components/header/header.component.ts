@@ -13,6 +13,7 @@ import {
   tap,
 } from 'rxjs';
 import { AutoComplete } from 'primeng/autocomplete';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-header',
@@ -43,17 +44,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ];
   autoCompleteValue: string;
   searchResults: any[];
+  isMobile$: Observable<boolean>;
   search$: Observable<string>;
   private _search: Subject<string> = new Subject();
   private _sub: Subscription;
 
   constructor(
     private tmdbService: TmdbService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
     this.search$ = this._search.asObservable();
+    this.isMobile$ = this.breakpointObserver
+      .observe('(max-width: 400px)')
+      .pipe(map((state) => state.matches));
     this._sub = this.search$
       .pipe(
         tap(() => this.loaderService.setLoading(true)),

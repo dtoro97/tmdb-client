@@ -1,4 +1,4 @@
-<div class="w-full header">
+<div class="w-full header" [ngClass]="{ mobile: isMobile$ | async }">
   <p-menubar [model]="items">
     <ng-template #end>
       <div class="flex flex-row">
@@ -7,13 +7,16 @@
           (onSelect)="onSearchSelect($event.value, searchBar)"
           [suggestions]="searchResults"
           (completeMethod)="search($event.query)"
+          placeholder="Search..."
         >
           <ng-template let-item #item>
-            <div class="flex flex-row w-full">
+            <div
+              class="flex flex-row w-full autocomplete-item"
+              [ngClass]="{ mobile: isMobile$ | async }"
+            >
               <img
                 class="border-round-sm"
                 src="{{ item.poster_path || item.profile_path | imgSrc }}"
-                [style.width.px]="60"
               />
               <div class="flex flex-column">
                 <span class="font-bold pb-3 ml-3 result-title">

@@ -20,8 +20,14 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ChipModule } from 'primeng/chip';
+import { FooterComponent } from './components/footer/footer.component';
 
-const components = [HeaderComponent, CardComponent, HomeComponent];
+const components = [
+  HeaderComponent,
+  CardComponent,
+  HomeComponent,
+  FooterComponent,
+];
 const pipes = [ImagePipe];
 
 @NgModule({
