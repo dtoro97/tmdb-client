@@ -9,24 +9,54 @@
       border: unset;
       max-width: 1400px;
       margin: auto;
-
-      .p-menubar-end {
-        .p-autocomplete {
-          width: 280px;
-
-          input {
-            width: 100%;
-          }
-        }
-      }
     }
   }
 }
 
 ::ng-deep {
-  .result-title {
-    max-width: 40px;
-    text-wrap: wrap;
-    text-overflow: ellipsis;
+  .p-menubar-end {
+    .p-autocomplete {
+      width: 500px;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  .p-autocomplete-list-container {
+    max-height: 400px !important;
+    .autocomplete-item {
+      img {
+        width: 100px;
+      }
+
+      &.mobile {
+        img {
+          width: 40px;
+        }
+        .result-title {
+          // max-width: 40px;
+          text-wrap: wrap;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .p-chip-label {
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .mobile {
+    .p-menubar-end {
+      .p-autocomplete {
+        width: 280px;
+
+        input {
+          width: 100%;
+        }
+      }
+    }
   }
 }
