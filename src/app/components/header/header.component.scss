@@ -1,0 +1,14 @@
+:host ::ng-deep {
+  .header {
+    border-bottom: 1px solid var(--p-menubar-border-color);
+    background: var(--p-menubar-background);
+    height: 60px;
+
+    .p-menubar {
+      border-radius: unset;
+      border: unset;
+      max-width: 1400px;
+      margin: auto;
+    }
+  }
+}

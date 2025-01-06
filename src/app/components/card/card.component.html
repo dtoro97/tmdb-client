@@ -1,0 +1,16 @@
+<div class="card" *ngIf="item" routerLink="/{{ type }}/{{ item.id }}">
+  <img src="{{ item.poster_path || item.profile_path | imgSrc }}" />
+  <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
+    <div class="flex justify-content-between flex-row" *ngIf="!person">
+      <span class="pb-3"
+        ><i class="fa-solid fa-star"></i>&nbsp;{{
+          item.vote_average | number
+        }}</span
+      >
+      <span class="font-light">{{
+        item.release_date || item.first_air_date | date : "yyyy"
+      }}</span>
+    </div>
+    <span class="font-bold pb-3">{{ item.title || item.name }}</span>
+  </div>
+</div>
