@@ -14,11 +14,13 @@ export class SessionService {
     this.loader.setLoading(true);
     const providers = await this.tmdbService.getProviders('tv').toPromise();
     const regions = await this.tmdbService.getAvailableRegions().toPromise();
+    const tvGenres = await this.tmdbService.getGenres('tv').toPromise();
+    const movieGenres = await this.tmdbService.getGenres('movie').toPromise();
     this.sessionStore.update((state) => ({
       providers: providers.results,
       regions: regions.results,
+      genres: tvGenres.genres.concat(movieGenres.genres),
     }));
     this.loader.setLoading(false);
-    console.log(regions);
   }
 }

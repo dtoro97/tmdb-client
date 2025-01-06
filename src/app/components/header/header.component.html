@@ -18,10 +18,13 @@
                 class="border-round-sm"
                 src="{{ item.poster_path || item.profile_path | imgSrc }}"
               />
-              <div class="flex flex-column">
-                <span class="font-bold pb-3 ml-3 result-title">
+              <div class="flex flex-column ml-3">
+                <span class="font-bold pb-1 result-title">
                   {{ item.title || item.name }}
                 </span>
+                <span class="text-sm pb-3">{{
+                  item.release_date || item.first_air_date | date : "yyyy"
+                }}</span>
               </div>
               <div class="ml-auto">
                 <p-chip [label]="item.type"></p-chip>

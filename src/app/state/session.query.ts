@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class SessionQuery extends Query<SessionState> {
   providers$: Observable<any[]> = this.select((state) => state.providers);
+  genres$: Observable<any[]> = this.select((state) => state.genres);
   constructor(store: SessionStore) {
     super(store);
   }
