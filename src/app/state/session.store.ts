@@ -4,12 +4,14 @@ import { Store, StoreConfig } from '@datorama/akita';
 export interface SessionState {
   providers: any[];
   regions: any[];
+  genres: any[];
 }
 
 export function createInitialState(): SessionState {
   return {
     providers: [],
     regions: [],
+    genres: [],
   };
 }
 @Injectable({ providedIn: 'root' })

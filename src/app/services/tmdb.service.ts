@@ -61,6 +61,17 @@ export class TmdbService {
     );
   }
 
+  getGenres(mediaType: string): Observable<any> {
+    return this.http.get<ResponseDataModel>(
+      `${environment.apiUrl}/genre/${mediaType}/list`,
+      {
+        params: {
+          api_key: environment.apiKey,
+        },
+      }
+    );
+  }
+
   getAvailableRegions(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/watch/providers/regions`, {
       params: {
