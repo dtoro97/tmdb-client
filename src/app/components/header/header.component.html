@@ -1,7 +1,7 @@
 <div class="w-full header" [ngClass]="{ mobile: isMobile$ | async }">
   <p-menubar [model]="items">
     <ng-template #end>
-      <div class="flex flex-row">
+      <div class="flex flex-row align-items-center gap-1">
         <p-autocomplete
           #searchBar
           (onSelect)="onSearchSelect($event.value, searchBar)"
@@ -13,12 +13,15 @@
             <div
               class="flex flex-row w-full autocomplete-item"
               [ngClass]="{ mobile: isMobile$ | async }"
+              [routerLink]="
+                '/details' + '/' + (type || item.type) + '/' + item.id
+              "
             >
               <img
                 class="border-round-sm"
                 src="{{ item.poster_path || item.profile_path | imgSrc }}"
               />
-              <div class="flex flex-column ml-3">
+              <div class="flex flex-column pl-3 pr-3">
                 <span class="font-bold pb-1 result-title">
                   {{ item.title || item.name }}
                 </span>
@@ -26,15 +29,11 @@
                   item.release_date || item.first_air_date | date : "yyyy"
                 }}</span>
               </div>
-              <div class="ml-auto">
-                <p-chip [label]="item.type"></p-chip>
-              </div>
             </div>
           </ng-template>
         </p-autocomplete>
         <p-button
           icon="{{ isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon' }}"
-          [rounded]="true"
           [text]="true"
           severity="secondary"
           (click)="toggleDarkMode()"

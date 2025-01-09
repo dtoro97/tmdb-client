@@ -90,4 +90,53 @@ export class TmdbService {
       }
     );
   }
+
+  getMediaDetails(mediaType: string, id: number): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/${mediaType}/${id}`, {
+      params: {
+        api_key: environment.apiKey,
+      },
+    });
+  }
+
+  getLanguages(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/configuration/languages`, {
+      params: {
+        api_key: environment.apiKey,
+      },
+    });
+  }
+
+  getCredits(id: number, mediaType: string): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/${mediaType}/${id}/credits`,
+      {
+        params: {
+          api_key: environment.apiKey,
+        },
+      }
+    );
+  }
+
+  getVideos(id: number, mediaType: string): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/${mediaType}/${id}/videos`,
+      {
+        params: {
+          api_key: environment.apiKey,
+        },
+      }
+    );
+  }
+
+  getRecommendations(id: number, mediaType: string): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/${mediaType}/${id}/recommendations`,
+      {
+        params: {
+          api_key: environment.apiKey,
+        },
+      }
+    );
+  }
 }

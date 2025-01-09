@@ -1,4 +1,4 @@
-<div class="h-full flex flex-column">
+<div class="h-full flex flex-column py-4">
   <div class="flex flex-column">
     <div class="column-header ml-6 mb-4">
       <h2>Trending</h2>
@@ -17,7 +17,7 @@
       [responsiveOptions]="breakpoints"
     >
       <ng-template let-movie pTemplate="item">
-        <app-card [item]="movie" [type]="'tv'"></app-card>
+        <app-card [item]="movie"></app-card>
       </ng-template>
     </p-carousel>
   </div>
@@ -39,7 +39,7 @@
       [responsiveOptions]="breakpoints"
     >
       <ng-template let-movie pTemplate="item">
-        <app-card [item]="movie" [type]="'tv'"></app-card>
+        <app-card [item]="movie" [type]="selectedPopular$ | async"></app-card>
       </ng-template>
     </p-carousel>
   </div>

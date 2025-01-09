@@ -14,6 +14,8 @@ import {
 } from 'rxjs';
 import { AutoComplete } from 'primeng/autocomplete';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { SessionQuery } from '../../state/session.query';
+import { SessionService } from '../../state/session.service';
 
 @Component({
   selector: 'app-header',
@@ -23,11 +25,12 @@ import { BreakpointObserver } from '@angular/cdk/layout';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  isDarkMode = true;
+  isDarkMode$: Observable<boolean>;
   items: MenuItem[] = [
     {
       label: 'Home',
       icon: 'fa-solid fa-house',
+      routerLink: '/',
     },
     {
       label: 'Movies',
@@ -52,14 +55,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private tmdbService: TmdbService,
     private loaderService: LoaderService,
-    private breakpointObserver: BreakpointObserver
+    private sessionQuery: SessionQuery,
+    private sessionService: SessionService
   ) {}
 
   ngOnInit(): void {
+    this.isMobile$ = this.sessionQuery.isMobile$;
     this.search$ = this._search.asObservable();
-    this.isMobile$ = this.breakpointObserver
-      .observe('(max-width: 400px)')
-      .pipe(map((state) => state.matches));
+    this.isDarkMode$ = this.sessionQuery.isDarkMode$;
     this._sub = this.search$
       .pipe(
         tap(() => this.loaderService.setLoading(true)),
@@ -74,15 +77,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
         map((data) => {
           const tv = (data[0].results || []).map((show) => ({
             ...show,
-            type: 'TV Show',
+            type: 'tv',
           }));
           const movies = (data[1].results || []).map((movie) => ({
             ...movie,
-            type: 'Movie',
+            type: 'movie',
           }));
           const people = (data[2].results || []).map((movie) => ({
             ...movie,
-            type: 'Person',
+            type: 'person',
           }));
           return tv.concat(movies).concat(people);
         })
@@ -100,7 +103,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   toggleDarkMode() {
     const element = document.querySelector('html');
     element!.classList.toggle('dark');
-    this.isDarkMode = !this.isDarkMode;
+    this.sessionService.toggleDarkMode();
   }
 
   search(term: string) {

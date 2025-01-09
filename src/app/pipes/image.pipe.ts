@@ -3,9 +3,9 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'imgSrc',
 })
 export class ImagePipe implements PipeTransform {
-  transform(value: string): string {
+  transform(value: string, options = 'w500'): string {
     if (value) {
-      return `https://image.tmdb.org/t/p/w500${value}`;
+      return `https://image.tmdb.org/t/p/${options}${value}`;
     }
     return 'http://placehold.jp/8a8a8a/fcfcfc/500x750.jpg?text=No%20Poster';
   }

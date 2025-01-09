@@ -9,8 +9,6 @@ import { Component, Input } from '@angular/core';
 })
 export class CardComponent {
   @Input() public item?: any;
-  @Input() public type?: string;
-  @Input() public person = false;
-
+  @Input() public type: string;
   constructor() {}
 }
