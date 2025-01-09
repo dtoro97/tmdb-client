@@ -1,0 +1,10 @@
+<div
+  class="actor-card flex flex-column align-items-center"
+  [ngClass]="{ mobile: isMobile$ | async }"
+>
+  <img src="{{ actor.profile_path | imgSrc }}" />
+  <p class="font-medium text-lg text-center mb-0">{{ actor.name }}</p>
+  <p class="text-sm text-center mt-1 px-3 secondary">
+    {{ actor.character }}
+  </p>
+</div>

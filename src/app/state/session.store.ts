@@ -5,6 +5,8 @@ export interface SessionState {
   providers: any[];
   regions: any[];
   genres: any[];
+  isDarkMode: boolean;
+  languages: any[];
 }
 
 export function createInitialState(): SessionState {
@@ -12,6 +14,8 @@ export function createInitialState(): SessionState {
     providers: [],
     regions: [],
     genres: [],
+    isDarkMode: true,
+    languages: [],
   };
 }
 @Injectable({ providedIn: 'root' })

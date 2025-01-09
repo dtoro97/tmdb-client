@@ -21,18 +21,26 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ChipModule } from 'primeng/chip';
 import { FooterComponent } from './components/footer/footer.component';
+import { MediaDetailsComponent } from './components/media-details/media-details.component';
+import { MinutesToHours } from './pipes/time.pipe';
+import { ActorCardComponent } from './components/actor-card/actor-card.component';
+import { YoutubeLinkPipe } from './pipes/youtube-link.pipe';
+import { RatingModule } from 'primeng/rating';
 
 const components = [
   HeaderComponent,
   CardComponent,
   HomeComponent,
   FooterComponent,
+  MediaDetailsComponent,
+  ActorCardComponent,
 ];
-const pipes = [ImagePipe];
+const pipes = [ImagePipe, MinutesToHours, YoutubeLinkPipe];
 
 @NgModule({
   declarations: [AppComponent, ...components],
   imports: [
+    RatingModule,
     AutoCompleteModule,
     BrowserModule,
     ProgressBarModule,

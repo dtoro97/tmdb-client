@@ -16,11 +16,21 @@ export class SessionService {
     const regions = await this.tmdbService.getAvailableRegions().toPromise();
     const tvGenres = await this.tmdbService.getGenres('tv').toPromise();
     const movieGenres = await this.tmdbService.getGenres('movie').toPromise();
+    const languages = await this.tmdbService.getLanguages().toPromise();
     this.sessionStore.update((state) => ({
       providers: providers.results,
       regions: regions.results,
       genres: tvGenres.genres.concat(movieGenres.genres),
+      languages,
     }));
     this.loader.setLoading(false);
+  }
+
+  toggleDarkMode(): void {
+    const isDarkMode = this.sessionStore.getValue().isDarkMode;
+    this.sessionStore.update((state) => ({
+      ...state,
+      isDarkMode: !isDarkMode,
+    }));
   }
 }

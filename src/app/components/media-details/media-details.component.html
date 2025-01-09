@@ -1,0 +1,100 @@
+<div
+  class="h-full details-container"
+  [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
+>
+  <div class="relative">
+    <img
+      src="{{ item.backdrop_path | imgSrc : 'w1920_and_h800_multi_faces' }}"
+      alt=""
+      class="backdrop-image"
+    />
+    <div class="gradient-cover"></div>
+  </div>
+  <div
+    class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
+    [style.maxWidth.px]="1400"
+  >
+    <div class="flex md:flex-row flex-column">
+      <div class="">
+        <img
+          src="{{ item.poster_path | imgSrc : 'w500' }}"
+          class="poster-image border-round-md"
+        />
+      </div>
+      <div class="flex flex-column mt-2 md:mt-8 gap-2 md:ml-6">
+        <h1 class="m-0">{{ item.title || item.name }}</h1>
+        <p class="m-0">
+          {{ item.release_date || item.first_air_date | date : "yyyy" }} ●
+          {{ language$ | async }} ●
+          {{
+            mediaType === "tv"
+              ? item.number_of_episodes + " Episodes"
+              : (item.runtime | m2h)
+          }}
+        </p>
+        <p-rating
+          [ngModel]="item.vote_average / 2"
+          [readonly]="true"
+        ></p-rating>
+        <div class="flex flex-row mt-2 gap-2">
+          <ng-container *ngFor="let genre of item.genres">
+            <p-chip [label]="genre.name"></p-chip>
+          </ng-container>
+        </div>
+        <p class="mt-2 line-height-4" [style.maxWidth.px]="550">
+          {{ item.overview }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="inner-container mt-4 md:mt-8">
+    <div>
+      <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+        Full Cast
+      </p>
+      <p-carousel
+        [value]="cast"
+        [numVisible]="8"
+        [numScroll]="8"
+        [showIndicators]="false"
+        [responsiveOptions]="breakpointsSmall"
+      >
+        <ng-template let-actor pTemplate="item">
+          <app-actor-card [actor]="actor"></app-actor-card>
+        </ng-template>
+      </p-carousel>
+    </div>
+  </div>
+  <div class="inner-container" *ngIf="videos?.length">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+      Videos
+    </p>
+    <div class="flex flex-row gap-2 px-4 overflow-y-hidden overflow-x-auto">
+      <div class="video-frame" *ngFor="let video of videos">
+        <iframe
+          [src]="video | yt"
+          title="{{ video.name }}"
+          frameborder="0"
+          allowedfullscreen
+          class="iframe"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+  <div class="inner-container pb-6">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+      Recommendations
+    </p>
+    <p-carousel
+      [value]="recommendations"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-media pTemplate="item">
+        <app-card [item]="media"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
+</div>
