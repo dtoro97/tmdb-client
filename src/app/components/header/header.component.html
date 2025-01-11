@@ -13,15 +13,16 @@
             <div
               class="flex flex-row w-full autocomplete-item"
               [ngClass]="{ mobile: isMobile$ | async }"
-              [routerLink]="
-                '/details' + '/' + (type || item.type) + '/' + item.id
-              "
+              [routerLink]="'/details' + '/' + item.type + '/' + item.id"
             >
               <img
-                class="border-round-sm"
+                class="border-round-md"
                 src="{{ item.poster_path || item.profile_path | imgSrc }}"
               />
-              <div class="flex flex-column pl-3 pr-3">
+              <div
+                class="flex flex-column pl-3 pr-3 overflow-hidden"
+                [ngStyle]="{ 'text-wrap': 'wrap' }"
+              >
                 <span class="font-bold pb-1 result-title">
                   {{ item.title || item.name }}
                 </span>

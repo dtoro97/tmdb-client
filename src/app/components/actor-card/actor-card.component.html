@@ -1,5 +1,6 @@
 <div
-  class="actor-card flex flex-column align-items-center"
+  class="actor-card flex flex-column align-items-center cursor-pointer"
+  routerLink="/details/person/{{ actor.id }}"
   [ngClass]="{ mobile: isMobile$ | async }"
 >
   <img src="{{ actor.profile_path | imgSrc }}" />

@@ -1,4 +1,9 @@
 .actor-card {
+  transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+  &:hover {
+    opacity: 0.6;
+    //transform: scale(1.05);
+  }
   &.mobile {
     img {
       width: 80px;
