@@ -2,19 +2,18 @@
   transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
   &:hover {
     opacity: 0.6;
-    //transform: scale(1.05);
   }
   &.mobile {
     img {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
     }
   }
   img {
     background-position: center;
     object-fit: cover;
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     border-radius: 9999px;
   }
 

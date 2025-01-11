@@ -23,7 +23,7 @@ export class SessionQuery extends Query<SessionState> {
 
   get isMobile$() {
     return this.breakpointObserver
-      .observe('(max-width: 400px)')
+      .observe('(max-width: 768px)')
       .pipe(map((state) => state.matches));
   }
 }

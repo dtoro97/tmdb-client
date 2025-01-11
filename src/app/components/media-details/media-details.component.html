@@ -1,5 +1,5 @@
 <div
-  class="h-full details-container pb-6"
+  class="h-full details-container pb-4"
   [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
 >
   <div class="relative">
@@ -27,12 +27,6 @@
         <h1 class="m-0">{{ item.title || item.name }}</h1>
         <p class="m-0">
           {{ item.release_date || item.first_air_date | date : "yyyy" }}
-          <!-- {{ language$ | async }} ●
-          {{
-            mediaType === "tv"
-              ? item.number_of_episodes + " Episodes"
-              : (item.runtime | m2h)
-          }} -->
         </p>
         <div class="flex flex-row gap-2">
           <p-rating
@@ -125,9 +119,9 @@
       </div>
     </div>
   </div>
-  <div class="inner-container mt-4 md:mt-8" *ngIf="cast.length">
+  <div class="mt-4 md:mt-8" *ngIf="cast.length">
     <div class="flex justify-content-center flex-column">
-      <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+      <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
         Full Cast
       </p>
       <p-carousel
@@ -143,11 +137,13 @@
       </p-carousel>
     </div>
   </div>
-  <div class="inner-container" *ngIf="videos?.length">
-    <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+  <div *ngIf="videos?.length">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
       Videos
     </p>
-    <div class="flex flex-row gap-2 px-4 overflow-y-hidden overflow-x-auto">
+    <div
+      class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
+    >
       <div class="video-frame" *ngFor="let video of videos">
         <iframe
           [src]="video | yt"
@@ -159,8 +155,8 @@
       </div>
     </div>
   </div>
-  <div class="inner-container" *ngIf="recommendations?.length">
-    <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+  <div *ngIf="recommendations?.length">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
       Recommendations
     </p>
     <p-carousel

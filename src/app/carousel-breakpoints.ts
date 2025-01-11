@@ -34,23 +34,23 @@ export const CAROUSEL_BREAKPOINTS = [
 export const CAROUSEL_SM_BREAKPOINTS = [
   {
     breakpoint: '2000px',
+    numVisible: 10,
+    numScroll: 10,
+  },
+  {
+    breakpoint: '1600px',
     numVisible: 8,
     numScroll: 8,
   },
   {
-    breakpoint: '1600px',
-    numVisible: 6,
-    numScroll: 6,
-  },
-  {
     breakpoint: '1500px',
-    numVisible: 6,
-    numScroll: 6,
+    numVisible: 7,
+    numScroll: 7,
   },
   {
     breakpoint: '1400px',
-    numVisible: 4,
-    numScroll: 4,
+    numVisible: 6,
+    numScroll: 6,
   },
   {
     breakpoint: '920px',
@@ -67,18 +67,18 @@ export const CAROUSEL_SM_BREAKPOINTS = [
 export const CAROUSEL_YT_BREAKPOINTS = [
   {
     breakpoint: '2000px',
-    numVisible: 3,
-    numScroll: 3,
+    numVisible: 4,
+    numScroll: 4,
   },
   {
     breakpoint: '1600px',
-    numVisible: 3,
-    numScroll: 3,
+    numVisible: 4,
+    numScroll: 4,
   },
   {
     breakpoint: '1500px',
-    numVisible: 2,
-    numScroll: 2,
+    numVisible: 3,
+    numScroll: 3,
   },
   {
     breakpoint: '1400px',
