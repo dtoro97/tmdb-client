@@ -1,9 +1,9 @@
 <div
-  class="h-full details-container py-2 md:py-6"
+  class="h-full details-container p-4"
   [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
 >
-  <div class="flex flex-wrap flex-row gap-3 md:gap-6 p-4 md:p-0">
-    <div [style.maxWidth.px]="350">
+  <div class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0">
+    <div class="ml-auto mr-auto md:mx-2 md:mx-6" [style.maxWidth.px]="350">
       <img
         src="{{ actor.profile_path | imgSrc : 'w500' }}"
         class="actor-image border-round-xl"
@@ -40,8 +40,8 @@
       </ul>
     </div>
   </div>
-  <div class="inner-container" *ngIf="credits.length">
-    <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+  <div *ngIf="credits.length">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
       Known For
     </p>
     <p-carousel
