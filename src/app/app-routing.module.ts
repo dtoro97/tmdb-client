@@ -6,8 +6,20 @@ import { MediaDetailsResolver } from './resolvers/media-details.resolver';
 import { CreditsResolver } from './resolvers/credits.resolver';
 import { VideosResolver } from './resolvers/videos.resolver';
 import { RecommendationsResolver } from './resolvers/recommendations.resolver';
+import { ActorDetailsComponent } from './components/actor-details/actor-details.component';
+import { PersonDetailsResolver } from './resolvers/person-details.resolver';
+import { PersonCreditsResolver } from './resolvers/person-credits.resolver';
 
 const routes: Routes = [
+  {
+    path: 'details/person/:id',
+    component: ActorDetailsComponent,
+    resolve: {
+      item: PersonDetailsResolver,
+      credits: PersonCreditsResolver,
+    },
+    pathMatch: 'full',
+  },
   {
     path: 'details/:type/:id',
     component: MediaDetailsComponent,
@@ -18,7 +30,13 @@ const routes: Routes = [
       recommendations: RecommendationsResolver,
     },
   },
-  { path: '', component: HomeComponent, pathMatch: 'full' },
+
+  {
+    path: '',
+    component: HomeComponent,
+    pathMatch: 'full',
+    title: 'Browse Movies, TV Shows and People',
+  },
   { path: '**', component: HomeComponent },
 ];
 

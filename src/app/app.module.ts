@@ -26,6 +26,8 @@ import { MinutesToHours } from './pipes/time.pipe';
 import { ActorCardComponent } from './components/actor-card/actor-card.component';
 import { YoutubeLinkPipe } from './pipes/youtube-link.pipe';
 import { RatingModule } from 'primeng/rating';
+import { ActorDetailsComponent } from './components/actor-details/actor-details.component';
+import { sortPipe } from './pipes/sort.pipe';
 
 const components = [
   HeaderComponent,
@@ -34,8 +36,9 @@ const components = [
   FooterComponent,
   MediaDetailsComponent,
   ActorCardComponent,
+  ActorDetailsComponent,
 ];
-const pipes = [ImagePipe, MinutesToHours, YoutubeLinkPipe];
+const pipes = [ImagePipe, MinutesToHours, YoutubeLinkPipe, sortPipe];
 
 @NgModule({
   declarations: [AppComponent, ...components],

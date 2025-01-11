@@ -1,0 +1,59 @@
+<div
+  class="h-full details-container py-2 md:py-6"
+  [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
+>
+  <div class="flex flex-wrap flex-row gap-3 md:gap-6 p-4 md:p-0">
+    <div [style.maxWidth.px]="350">
+      <img
+        src="{{ actor.profile_path | imgSrc : 'w500' }}"
+        class="actor-image border-round-xl"
+      />
+    </div>
+    <div class="flex-1">
+      <h1 class="m-0 mb-2">{{ actor.name }}</h1>
+      <p class="m-0 line-height-4">
+        {{ actor.biography }}
+      </p>
+      <ul class="list-none line-height-4 mt-4 pl-0">
+        <li class="flex">
+          <div class="actor-info-label">Known For</div>
+          <div class="flex-1">{{ actor.known_for_department }}</div>
+        </li>
+        <li class="flex" *ngIf="actor.birthday">
+          <div class="actor-info-label">Born</div>
+          <div class="flex-1">
+            <span>{{ actor.birthday | date }}</span
+            ><span *ngIf="!actor.deathday"> (age {{ actorAge }})</span>
+          </div>
+        </li>
+        <li class="flex" *ngIf="actor.deathday">
+          <div class="actor-info-label">Died</div>
+          <div class="flex-1">
+            <span>{{ actor.deathday | date }}</span
+            ><span> (age {{ actorAge }})</span>
+          </div>
+        </li>
+        <li class="flex" *ngIf="actor.place_of_birth">
+          <div class="actor-info-label">Place of Birth</div>
+          <div class="flex-1">{{ actor.place_of_birth }}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="inner-container" *ngIf="credits.length">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg mb-3 md:px-8 px-4">
+      Known For
+    </p>
+    <p-carousel
+      [value]="credits | sort : 'vote_average'"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-media pTemplate="item">
+        <app-card [item]="media"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
+</div>

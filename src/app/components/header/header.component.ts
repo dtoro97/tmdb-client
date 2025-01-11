@@ -1,9 +1,8 @@
-import { Component, OnDestroy, OnInit, viewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { LoaderService, TmdbService } from '../../services';
 import {
   combineLatest,
-  debounce,
   debounceTime,
   map,
   Observable,
@@ -13,7 +12,6 @@ import {
   tap,
 } from 'rxjs';
 import { AutoComplete } from 'primeng/autocomplete';
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { SessionQuery } from '../../state/session.query';
 import { SessionService } from '../../state/session.service';
 

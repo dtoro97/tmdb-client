@@ -99,6 +99,10 @@ export class TmdbService {
     });
   }
 
+  getPersonDetails(id: number): Observable<any> {
+    return this.getMediaDetails('person', id);
+  }
+
   getLanguages(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/configuration/languages`, {
       params: {
@@ -110,6 +114,17 @@ export class TmdbService {
   getCredits(id: number, mediaType: string): Observable<any> {
     return this.http.get<any>(
       `${environment.apiUrl}/${mediaType}/${id}/credits`,
+      {
+        params: {
+          api_key: environment.apiKey,
+        },
+      }
+    );
+  }
+
+  getCreditsForPerson(id: number): Observable<any> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/person/${id}/combined_credits`,
       {
         params: {
           api_key: environment.apiKey,
