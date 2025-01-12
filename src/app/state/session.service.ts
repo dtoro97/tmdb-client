@@ -20,7 +20,8 @@ export class SessionService {
     this.sessionStore.update((state) => ({
       providers: providers.results,
       regions: regions.results,
-      genres: tvGenres.genres.concat(movieGenres.genres),
+      tvGenres: tvGenres.genres,
+      movieGenres: movieGenres.genres,
       languages,
     }));
     this.loader.setLoading(false);

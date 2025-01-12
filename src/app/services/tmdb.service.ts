@@ -154,4 +154,24 @@ export class TmdbService {
       }
     );
   }
+
+  discover(mediaType: string, query = {}): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/discover/${mediaType}`, {
+      params: {
+        api_key: environment.apiKey,
+        ...query,
+      },
+    });
+  }
+
+  getExternalIds(mediaType: string, id: number): Observable<any[]> {
+    return this.http.get<any>(
+      `${environment.apiUrl}/${mediaType}/${id}/external_ids`,
+      {
+        params: {
+          api_key: environment.apiKey,
+        },
+      }
+    );
+  }
 }

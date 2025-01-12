@@ -9,6 +9,10 @@
       border: unset;
       max-width: 1400px;
       margin: auto;
+
+      &-item-link-active {
+        background: var(--p-menubar-item-focus-background);
+      }
     }
   }
 }

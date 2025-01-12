@@ -15,6 +15,7 @@ import {
 } from '../../carousel-breakpoints';
 import { ViewportScroller } from '@angular/common';
 import { Title } from '@angular/platform-browser';
+import { LoaderService } from '../../services';
 
 @Component({
   selector: 'app-media-details',
@@ -36,25 +37,29 @@ export class MediaDetailsComponent implements OnInit, OnDestroy {
   breakpointsSmall = CAROUSEL_SM_BREAKPOINTS;
   breakpointsYoutube = CAROUSEL_YT_BREAKPOINTS;
   hasPoster = false;
+  externalIds: any;
   private routeSubscription: Subscription;
   constructor(
     private route: ActivatedRoute,
     private sessionQuery: SessionQuery,
-    private scroler: ViewportScroller,
-    private titleService: Title
+    private scroller: ViewportScroller,
+    private titleService: Title,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
     this.routeSubscription = this.route.data.subscribe((data) => {
       this.item = data['item'];
+      this.externalIds = data['externalIds'];
       this.cast = data['credits']['cast'];
       this.videos = data['videos']
         .filter((video: any) => video.site === 'YouTube')
         .slice(0, 5);
       console.log(this.item);
       this.recommendations = data['recommendations'];
-      this.scroler.scrollToPosition([0, 0]);
+      this.scroller.scrollToPosition([0, 0]);
       this.hasPoster = this.hasMediaPoster();
+      this.loaderService.setLoading(false);
     });
     this.route.params.subscribe((params) => {
       this.mediaType = params['type'];

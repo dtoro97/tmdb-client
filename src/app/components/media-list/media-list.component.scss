@@ -1,0 +1,20 @@
+:host ::ng-deep {
+  .mobile {
+    app-card {
+      .card {
+        width: 150px;
+      }
+    }
+  }
+  app-card {
+    .card {
+      margin: 0;
+      width: 200px;
+    }
+  }
+  .p-chip {
+    &.selected {
+      background: var(--p-primary-color);
+    }
+  }
+}

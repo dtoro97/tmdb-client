@@ -1,4 +1,4 @@
-export interface IActorDetails {
+export interface IPersonDetails {
   adult: boolean;
   also_known_as?: string[] | null;
   biography: string;

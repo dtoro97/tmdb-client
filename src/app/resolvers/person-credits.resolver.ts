@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { LoaderService, TmdbService } from '../services';
 
@@ -16,8 +15,6 @@ export class PersonCreditsResolver implements Resolve<any> {
   resolve(route: ActivatedRouteSnapshot): Observable<any> {
     this.loader.setLoading(true);
     const id = route.params['id'];
-    return this.tmdbService
-      .getCreditsForPerson(id)
-      .pipe(tap(() => this.loader.setLoading(false)));
+    return this.tmdbService.getCreditsForPerson(id);
   }
 }

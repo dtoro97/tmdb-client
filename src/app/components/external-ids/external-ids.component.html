@@ -1,0 +1,29 @@
+<div class="flex flex-row justify-content-center gap-3">
+  <ng-container *ngIf="ids.facebook_id">
+    <a href="{{ 'https://facebook.com/' + ids.facebook_id }}" target="_blank">
+      <i class="fa-brands fa-facebook"></i
+    ></a>
+  </ng-container>
+  <ng-container *ngIf="ids.imdb_id">
+    <a href="{{ 'https://imdb.com/name/' + ids.imdb_id }}" target="_blank">
+      <i class="fa-brands fa-imdb"></i>
+    </a>
+  </ng-container>
+
+  <ng-container *ngIf="ids.instagram_id">
+    <a href="{{ 'https://instagram.com/' + ids.instagram_id }}" target="_blank">
+      <i class="fa-brands fa-instagram"></i
+    ></a>
+  </ng-container>
+  <ng-container *ngIf="ids.twitter_id">
+    <a href="{{ 'https://twitter.com/' + ids.twitter_id }}" target="_blank"
+      ><i class="fa-brands fa-twitter"></i
+    ></a>
+  </ng-container>
+  <p-divider layout="vertical" *ngIf="item.homepage"></p-divider>
+  <ng-container *ngIf="item.homepage">
+    <a href="{{ homepage_id }}" target="_blank"
+      ><i class="fa-solid fa-link"></i
+    ></a>
+  </ng-container>
+</div>

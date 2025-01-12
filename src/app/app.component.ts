@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoaderService } from './services';
 import { SessionService } from './state/session.service';
@@ -8,6 +8,7 @@ import { SessionService } from './state/session.service';
   templateUrl: './app.component.html',
   standalone: false,
   styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
   isLoading$: Observable<boolean>;
