@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { SessionQuery } from '../../state/session.query';
 import { Observable } from 'rxjs';
+import { IPerson } from '../../interfaces';
 
 @Component({
   selector: 'app-actor-card',
@@ -10,7 +11,7 @@ import { Observable } from 'rxjs';
   styleUrl: './actor-card.component.scss',
 })
 export class ActorCardComponent implements OnInit {
-  @Input() actor: any;
+  @Input() actor: IPerson;
   isMobile$: Observable<boolean>;
 
   constructor(private sessionQuery: SessionQuery) {}

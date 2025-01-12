@@ -1,8 +1,9 @@
-export interface IPersonDetails {
+export interface IPerson {
   adult: boolean;
   also_known_as?: string[] | null;
   biography: string;
   birthday: string;
+  character?: string;
   deathday: string;
   gender: number;
   homepage: string;
