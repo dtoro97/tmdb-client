@@ -9,6 +9,10 @@ import { RecommendationsResolver } from './resolvers/recommendations.resolver';
 import { ActorDetailsComponent } from './components/actor-details/actor-details.component';
 import { PersonDetailsResolver } from './resolvers/person-details.resolver';
 import { PersonCreditsResolver } from './resolvers/person-credits.resolver';
+import { MediaListComponent } from './components/media-list/media-list.component';
+import { MediaListGuard } from './guards/media-list.guard';
+import { MediaExternalIdResolver } from './resolvers/media-external-id.resolver';
+import { PersonExternalIdResolver } from './resolvers/person-external-id.resolver';
 
 const routes: Routes = [
   {
@@ -17,6 +21,10 @@ const routes: Routes = [
     resolve: {
       item: PersonDetailsResolver,
       credits: PersonCreditsResolver,
+      externalIds: PersonExternalIdResolver,
+    },
+    data: {
+      title: 'Popular Person',
     },
     pathMatch: 'full',
   },
@@ -28,9 +36,14 @@ const routes: Routes = [
       credits: CreditsResolver,
       videos: VideosResolver,
       recommendations: RecommendationsResolver,
+      externalIds: MediaExternalIdResolver,
     },
   },
-
+  {
+    path: 'list/:type',
+    component: MediaListComponent,
+    canActivate: [MediaListGuard],
+  },
   {
     path: '',
     component: HomeComponent,

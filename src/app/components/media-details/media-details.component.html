@@ -22,6 +22,12 @@
           src="{{ item.poster_path | imgSrc : 'w500' }}"
           class="poster-image border-round-lg"
         />
+        <div class="mt-4 mb-3">
+          <app-external-ids
+            [ids]="externalIds"
+            [item]="item"
+          ></app-external-ids>
+        </div>
       </div>
       <div class="flex flex-column mt-2 md:mt-8 gap-2 md:ml-6">
         <h1 class="m-0">{{ item.title || item.name }}</h1>

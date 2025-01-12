@@ -1,0 +1,118 @@
+<div
+  class="h-full details-container px-4 pt-4"
+  [ngClass]="{ mobile: isMobile$ | async }"
+>
+  <h2 class="{{ type === 'person' ? 'ml-6' : 'ml-2' }}">{{ title }}</h2>
+  <div class="m-0 grid">
+    <div
+      class="col col-12 md:col-2 flex flex-column gap-2"
+      *ngIf="type !== 'person'"
+    >
+      <div class="w-full">
+        <p-button
+          class="p-button-primary"
+          styleClass="w-full"
+          (click)="search()"
+          >Search</p-button
+        >
+      </div>
+      <p-accordion [value]="1">
+        <p-accordion-panel [value]="0">
+          <p-accordion-header>Sort</p-accordion-header>
+          <p-accordion-content>
+            <div class="w-full">
+              <p-select
+                appendTo="body"
+                [options]="sortOptions"
+                [(ngModel)]="filters.sortBy"
+                [showClear]="true"
+                optionLabel="label"
+                optionValue="value"
+                styleClass="w-full"
+              ></p-select>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel> </p-accordion
+      ><p-accordion value="1">
+        <p-accordion-panel value="1">
+          <p-accordion-header>Filters</p-accordion-header>
+          <p-accordion-content>
+            <div class="w-full flex flex-column">
+              <h3>{{ type === "tv" ? "Air Dates" : "Release Date" }}</h3>
+              <div class="flex justify-content-between align-items-center mt-2">
+                <span [style.width.px]="100">from</span>
+                <p-date-picker
+                  appendTo="body"
+                  [(ngModel)]="filters.fromDate"
+                ></p-date-picker>
+              </div>
+              <div class="flex justify-content-between align-items-center mt-2">
+                <span [style.width.px]="100">to</span>
+                <p-date-picker
+                  appendTo="body"
+                  [(ngModel)]="filters.toDate"
+                ></p-date-picker>
+              </div>
+              <p-divider></p-divider>
+              <h3>Genres</h3>
+              <div
+                class="flex justify-content-start align-items-center mt-2 flex-wrap gap-2"
+              >
+                <p-chip
+                  *ngFor="let genre of genres$ | async"
+                  styleClass="cursor-pointer text-sm"
+                  [ngClass]="{ selected: isGenreSelected(genre) }"
+                  [label]="genre.name"
+                  (click)="toggleGenreSelection(genre)"
+                >
+                </p-chip>
+              </div>
+              <p-divider></p-divider>
+              <h3>User Score</h3>
+              <p-slider
+                [(ngModel)]="filters.voteAverage"
+                [step]="1"
+                [min]="0"
+                [max]="10"
+                [range]="true"
+                styleClass="w-full"
+              />
+              <div class="flex justify-content-center flex-row mt-2">
+                <span>{{ filters.voteAverage[0] }}</span> -
+                <span>{{ filters.voteAverage[1] }}</span>
+              </div>
+              <p-divider></p-divider>
+              <h3>Minimum User Votes</h3>
+              <p-slider
+                [(ngModel)]="filters.minVoteCount"
+                [step]="10"
+                [min]="0"
+                [max]="500"
+                styleClass="w-full"
+              />
+              <div class="flex justify-content-center flex-row mt-2">
+                <span>{{ filters.minVoteCount }}</span>
+              </div>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel>
+      </p-accordion>
+    </div>
+    <div class="col col-12 lg:col flex flex-wrap gap-2 justify-content-center">
+      <ng-container *ngFor="let item of data$ | async">
+        <app-card [item]="item" [type]="type"></app-card>
+      </ng-container>
+      <div class="w-full flex justify-content-center m4-t">
+        <p-paginator
+          [first]="skip"
+          [rows]="20"
+          [totalRecords]="total"
+          [alwaysShow]="false"
+          [styleClass]="'paginator'"
+          (onPageChange)="onPageChange($event)"
+        >
+        </p-paginator>
+      </div>
+    </div>
+  </div>
+</div>

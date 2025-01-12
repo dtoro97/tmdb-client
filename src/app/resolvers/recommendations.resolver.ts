@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { map, Observable } from 'rxjs';
 
 import { LoaderService, TmdbService } from '../services';
 
@@ -17,9 +16,8 @@ export class RecommendationsResolver implements Resolve<any> {
     this.loader.setLoading(true);
     const type = route.params['type'];
     const id = route.params['id'];
-    return this.tmdbService.getRecommendations(id, type).pipe(
-      map((data) => data.results),
-      tap(() => this.loader.setLoading(false))
-    );
+    return this.tmdbService
+      .getRecommendations(id, type)
+      .pipe(map((data) => data.results));
   }
 }

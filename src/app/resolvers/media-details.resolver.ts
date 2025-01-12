@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { LoaderService, TmdbService } from '../services';
 
@@ -17,8 +16,6 @@ export class MediaDetailsResolver implements Resolve<any> {
     this.loader.setLoading(true);
     const type = route.params['type'];
     const id = route.params['id'];
-    return this.tmdbService
-      .getMediaDetails(type, id)
-      .pipe(tap(() => this.loader.setLoading(false)));
+    return this.tmdbService.getMediaDetails(type, id);
   }
 }

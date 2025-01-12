@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store, StoreConfig } from '@datorama/akita';
+import { IGenre } from '../interfaces';
 
 export interface SessionState {
   providers: any[];
   regions: any[];
-  genres: any[];
+  movieGenres: IGenre[];
+  tvGenres: IGenre[];
   isDarkMode: boolean;
   languages: any[];
 }
@@ -13,7 +15,8 @@ export function createInitialState(): SessionState {
   return {
     providers: [],
     regions: [],
-    genres: [],
+    movieGenres: [],
+    tvGenres: [],
     isDarkMode: true,
     languages: [],
   };

@@ -24,25 +24,7 @@ import { SessionService } from '../../state/session.service';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   isDarkMode$: Observable<boolean>;
-  items: MenuItem[] = [
-    {
-      label: 'Home',
-      icon: 'fa-solid fa-house',
-      routerLink: '/',
-    },
-    {
-      label: 'Movies',
-      icon: 'fa-solid fa-clapperboard',
-    },
-    {
-      label: 'TV Shows',
-      icon: 'fa-solid fa-tv',
-    },
-    {
-      label: 'People',
-      icon: 'fa-solid fa-user',
-    },
-  ];
+  items: MenuItem[];
   autoCompleteValue: string;
   searchResults: any[];
   isMobile$: Observable<boolean>;
@@ -58,6 +40,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.items = this.getMenuItems();
     this.isMobile$ = this.sessionQuery.isMobile$;
     this.search$ = this._search.asObservable();
     this.isDarkMode$ = this.sessionQuery.isDarkMode$;
@@ -110,5 +93,95 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   onSearchSelect(value: any, searchBar: AutoComplete) {
     searchBar.clear();
+  }
+
+  private getMenuItems(): MenuItem[] {
+    return [
+      {
+        label: 'Home',
+        icon: 'fa-solid fa-house',
+        routerLink: '/',
+        routerLinkActiveOptions: { exact: true },
+      },
+      {
+        label: 'Movies',
+        icon: 'fa-solid fa-clapperboard',
+        items: [
+          {
+            label: 'Popular',
+            routerLink: '/list/movie',
+            queryParams: { sort_by: 'popularity.desc' },
+            routerLinkActiveOptions: { exact: true },
+          },
+          {
+            label: 'Now Playing',
+            routerLink: '/list/movie/',
+            queryParams: {
+              'primary_release_date.gte': this.getSpecificISODate(-30),
+              'primary_release_date.lte': this.getSpecificISODate(+7),
+              sort_by: 'popularity.desc',
+            },
+          },
+          {
+            label: 'Upcoming',
+            routerLink: '/list/movie/',
+            queryParams: {
+              'primary_release_date.gte': this.getSpecificISODate(-3),
+              'primary_release_date.lte': this.getSpecificISODate(+7),
+              sort_by: 'popularity.desc',
+            },
+          },
+          {
+            label: 'Top Rated',
+            routerLink: '/list/movie',
+            queryParams: {
+              sort_by: 'vote_average.desc',
+              'vote_count.gte': 300,
+            },
+          },
+        ],
+      },
+      {
+        label: 'TV Shows',
+        icon: 'fa-solid fa-tv',
+        items: [
+          {
+            label: 'Popular',
+            routerLink: '/list/tv',
+            queryParams: { sort_by: 'popularity.desc' },
+            routerLinkActiveOptions: { exact: true },
+          },
+          {
+            label: 'Airing Today',
+            routerLink: '/list/movie/',
+            queryParams: {
+              'primary_release_date.gte': this.getSpecificISODate(+0),
+              'primary_release_date.lte': this.getSpecificISODate(+0),
+              sort_by: 'popularity.desc',
+            },
+          },
+          {
+            label: 'Top Rated',
+            routerLink: '/list/tv',
+            queryParams: {
+              sort_by: 'vote_average.desc',
+              'vote_count.gte': 300,
+            },
+          },
+        ],
+      },
+      {
+        label: 'People',
+        icon: 'fa-solid fa-user',
+        routerLink: '/list/person',
+        routerLinkActiveOptions: { exact: false },
+      },
+    ];
+  }
+
+  private getSpecificISODate(daysToAdd: number): string {
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + daysToAdd);
+    return currentDate.toISOString().split('T')[0];
   }
 }

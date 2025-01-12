@@ -2,42 +2,58 @@
   class="h-full details-container p-4"
   [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
 >
-  <div class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0">
-    <div class="ml-auto mr-auto md:mx-2 md:mx-6" [style.maxWidth.px]="350">
+  <div class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0 inner-container">
+    <div
+      class="ml-auto mr-auto md:mx-2 md:mx-6 image-container"
+      [style.maxWidth.px]="350"
+    >
       <img
-        src="{{ actor.profile_path | imgSrc : 'w500' }}"
-        class="actor-image border-round-xl"
+        src="{{ person.profile_path | imgSrc : 'w500' }}"
+        class="person-image border-round-xl"
       />
-    </div>
-    <div class="flex-1">
-      <h1 class="m-0 mb-2">{{ actor.name }}</h1>
-      <p class="m-0 line-height-4">
-        {{ actor.biography }}
-      </p>
-      <ul class="list-none line-height-4 mt-4 pl-0">
+      <h1 class="m-0" *ngIf="(isMobile$ | async) === true">
+        {{ person.name }}
+      </h1>
+      <div class="mt-4 mb-3">
+        <app-external-ids
+          [ids]="externalIds"
+          [item]="person"
+        ></app-external-ids>
+      </div>
+      <h2 class="m-0" *ngIf="(isMobile$ | async) === false">Personal Info</h2>
+      <ul class="list-none line-height-4 pl-0">
         <li class="flex">
-          <div class="actor-info-label">Known For</div>
-          <div class="flex-1">{{ actor.known_for_department }}</div>
+          <div class="person-info-label">Known For</div>
+          <div class="flex-1">{{ person.known_for_department }}</div>
         </li>
-        <li class="flex" *ngIf="actor.birthday">
-          <div class="actor-info-label">Born</div>
+        <li class="flex" *ngIf="person.birthday">
+          <div class="person-info-label">Born</div>
           <div class="flex-1">
-            <span>{{ actor.birthday | date }}</span
-            ><span *ngIf="!actor.deathday"> (age {{ actorAge }})</span>
+            <span>{{ person.birthday | date }}</span
+            ><span *ngIf="!person.deathday"> (age {{ personAge }})</span>
           </div>
         </li>
-        <li class="flex" *ngIf="actor.deathday">
-          <div class="actor-info-label">Died</div>
+        <li class="flex" *ngIf="person.deathday">
+          <div class="person-info-label">Died</div>
           <div class="flex-1">
-            <span>{{ actor.deathday | date }}</span
-            ><span> (age {{ actorAge }})</span>
+            <span>{{ person.deathday | date }}</span
+            ><span> (age {{ personAge }})</span>
           </div>
         </li>
-        <li class="flex" *ngIf="actor.place_of_birth">
-          <div class="actor-info-label">Place of Birth</div>
-          <div class="flex-1">{{ actor.place_of_birth }}</div>
+        <li class="flex" *ngIf="person.place_of_birth">
+          <div class="person-info-label">Place of Birth</div>
+          <div class="flex-1">{{ person.place_of_birth }}</div>
         </li>
       </ul>
+    </div>
+    <div class="flex-1">
+      <h1 class="m-0 mb-4" *ngIf="(isMobile$ | async) === false">
+        {{ person.name }}
+      </h1>
+      <h2 class="m-0 mb-2">Biography</h2>
+      <p class="m-0 line-height-4">
+        {{ person.biography }}
+      </p>
     </div>
   </div>
   <div *ngIf="credits.length">
