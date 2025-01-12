@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IPersonDetails } from '../../interfaces';
+import { IPerson } from '../../interfaces';
 
 @Component({
   selector: 'app-external-ids',

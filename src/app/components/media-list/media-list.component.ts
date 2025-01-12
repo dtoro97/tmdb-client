@@ -99,7 +99,9 @@ export class MediaListComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(change: any): void {
+    console.log(change);
     this.filters.page = change.page + 1;
+    this.skip = change.skip;
     this.search();
     this.scroller.scrollToPosition([0, 0]);
   }
@@ -133,7 +135,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
       ] = this.filters.toDate.toISOString().split('T')[0];
     }
     if (this.filters.genres.length > 0) {
-      queryParams['with_genres'] = this.filters.genres.join(',');
+      queryParams['with_genres'] = this.filters.genres.join('|');
     }
     if (this.filters.voteAverage[0]) {
       queryParams['vote_average.gte'] = this.filters.voteAverage[0];
@@ -142,7 +144,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
       queryParams['vote_average.lte'] = this.filters.voteAverage[1];
     }
     if (this.filters.minVoteCount) {
-      queryParams['vote_count.gte'] = this.filters.minVoteCount[0];
+      queryParams['vote_count.gte'] = this.filters.minVoteCount;
     }
     return queryParams;
   }
@@ -176,7 +178,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
       }
     }
     if (queryParams.with_genres) {
-      set(filters, 'genres', queryParams.with_genres.split(','));
+      set(filters, 'genres', queryParams.with_genres.split('|'));
     } else {
       set(filters, 'genres', []);
     }

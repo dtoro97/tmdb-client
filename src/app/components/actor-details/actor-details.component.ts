@@ -12,7 +12,7 @@ import { Title } from '@angular/platform-browser';
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
 import { LoaderService } from '../../services';
 import { get, set } from 'lodash';
-import { IPersonDetails } from '../../interfaces';
+import { IPerson } from '../../interfaces';
 
 @Component({
   selector: 'app-actor-details',
@@ -22,7 +22,7 @@ import { IPersonDetails } from '../../interfaces';
   styleUrl: './actor-details.component.scss',
 })
 export class ActorDetailsComponent implements OnInit, OnDestroy {
-  person: IPersonDetails;
+  person: IPerson;
   credits: any;
   personAge: number;
   isMobile$: Observable<boolean>;
