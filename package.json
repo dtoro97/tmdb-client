@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "ng build --base-href \"https://dtoro97.github.io/tmdb-client/\" && npx angular-cli-ghpages --dir=dist/tmdb-client/"
   },
   "private": true,
   "dependencies": {
