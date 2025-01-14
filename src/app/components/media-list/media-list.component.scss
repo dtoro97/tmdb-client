@@ -1,4 +1,7 @@
 :host ::ng-deep {
+  .search-button {
+    color: var(--p-text-color);
+  }
   .mobile {
     app-card {
       .card {

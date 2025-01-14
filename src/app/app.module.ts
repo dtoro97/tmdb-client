@@ -15,6 +15,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DividerModule } from 'primeng/divider';
 import { InputTextModule } from 'primeng/inputtext';
 import { SliderModule } from 'primeng/slider';
+import { TabsModule } from 'primeng/tabs';
 
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
@@ -24,8 +25,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ActorCardComponent } from './components/actor-card/actor-card.component';
-import { ActorDetailsComponent } from './components/actor-details/actor-details.component';
+import { PersonCardComponent } from './components/person-card/person-card.component';
+import { PersonDetailsComponent } from './components/person-details/person-details.component';
 import { CardComponent } from './components/card/card.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -37,7 +38,8 @@ import { sortPipe } from './pipes/sort.pipe';
 import { MinutesToHours } from './pipes/time.pipe';
 import { YoutubeLinkPipe } from './pipes/youtube-link.pipe';
 import { tmdbPreset } from './tmdb-preset';
-import { ExternalIdsComponent } from './components/external-ids/external-ids.component';
+import { SocialLinksComponent } from './components/social-links/social-links.component';
+import { CreditsListComponent } from './components/credits-list/credits-list.component';
 
 const components = [
   HeaderComponent,
@@ -45,10 +47,11 @@ const components = [
   HomeComponent,
   FooterComponent,
   MediaDetailsComponent,
-  ActorCardComponent,
-  ActorDetailsComponent,
+  PersonCardComponent,
+  PersonDetailsComponent,
   MediaListComponent,
-  ExternalIdsComponent,
+  SocialLinksComponent,
+  CreditsListComponent,
 ];
 const pipes = [ImagePipe, MinutesToHours, YoutubeLinkPipe, sortPipe];
 
@@ -75,6 +78,7 @@ const pipes = [ImagePipe, MinutesToHours, YoutubeLinkPipe, sortPipe];
     DividerModule,
     InputTextModule,
     SliderModule,
+    TabsModule,
     ...pipes,
   ],
   providers: [

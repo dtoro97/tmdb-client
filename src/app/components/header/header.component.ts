@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { LoaderService, TmdbService } from '../../services';
+import { AutoComplete } from 'primeng/autocomplete';
 import {
   combineLatest,
   debounceTime,
+  from,
   map,
   Observable,
   Subject,
@@ -11,9 +11,13 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { AutoComplete } from 'primeng/autocomplete';
-import { SessionQuery } from '../../state/session.query';
-import { SessionService } from '../../state/session.service';
+import { MultiSearchResult } from 'tmdb-ts';
+
+import { Component, OnDestroy, OnInit } from '@angular/core';
+
+import { TmdbService } from '../../services';
+import { StateQuery } from '../../state/state.query';
+import { StateService } from '../../state/state.service';
 
 @Component({
   selector: 'app-header',
@@ -26,55 +30,36 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isDarkMode$: Observable<boolean>;
   items: MenuItem[];
   autoCompleteValue: string;
-  searchResults: any[];
+  searchResults: MultiSearchResult[];
   isMobile$: Observable<boolean>;
   search$: Observable<string>;
   private _search: Subject<string> = new Subject();
   private _sub: Subscription;
 
   constructor(
-    private tmdbService: TmdbService,
-    private loaderService: LoaderService,
-    private sessionQuery: SessionQuery,
-    private sessionService: SessionService
+    private tmdb: TmdbService,
+    private stateService: StateService,
+    private stateQuery: StateQuery,
+    private sessionService: StateService
   ) {}
 
   ngOnInit(): void {
     this.items = this.getMenuItems();
-    this.isMobile$ = this.sessionQuery.isMobile$;
+    this.isMobile$ = this.stateQuery.isMobile$;
     this.search$ = this._search.asObservable();
-    this.isDarkMode$ = this.sessionQuery.isDarkMode$;
+    this.isDarkMode$ = this.stateQuery.isDarkMode$;
     this._sub = this.search$
       .pipe(
-        tap(() => this.loaderService.setLoading(true)),
+        tap(() => this.stateService.setLoading(true)),
         debounceTime(500),
-        switchMap((term) => {
-          return combineLatest([
-            this.tmdbService.search('tv', term),
-            this.tmdbService.search('movie', term),
-            this.tmdbService.search('person', term),
-          ]);
-        }),
-        map((data) => {
-          const tv = (data[0].results || []).map((show) => ({
-            ...show,
-            type: 'tv',
-          }));
-          const movies = (data[1].results || []).map((movie) => ({
-            ...movie,
-            type: 'movie',
-          }));
-          const people = (data[2].results || []).map((movie) => ({
-            ...movie,
-            type: 'person',
-          }));
-          return tv.concat(movies).concat(people);
+        switchMap((query) => {
+          return from(this.tmdb.search.multi({ query }));
         })
       )
       .subscribe((data) => {
-        this.loaderService.setLoading(false);
-        this.searchResults = data;
-        console.log(this.searchResults);
+        console.log(data);
+        this.stateService.setLoading(false);
+        this.searchResults = data.results;
       });
   }
   ngOnDestroy(): void {
@@ -110,7 +95,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           {
             label: 'Popular',
             routerLink: '/list/movie',
-            queryParams: { sort_by: 'popularity.desc' },
+            queryParams: { sort_by: 'popularity.desc', page: 1 },
             routerLinkActiveOptions: { exact: true },
           },
           {
@@ -120,6 +105,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
               'primary_release_date.gte': this.getSpecificISODate(-30),
               'primary_release_date.lte': this.getSpecificISODate(+7),
               sort_by: 'popularity.desc',
+              page: 1,
             },
           },
           {
@@ -129,6 +115,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
               'primary_release_date.gte': this.getSpecificISODate(-3),
               'primary_release_date.lte': this.getSpecificISODate(+7),
               sort_by: 'popularity.desc',
+              page: 1,
             },
           },
           {
@@ -137,6 +124,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             queryParams: {
               sort_by: 'vote_average.desc',
               'vote_count.gte': 300,
+              page: 1,
             },
           },
         ],
@@ -148,16 +136,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
           {
             label: 'Popular',
             routerLink: '/list/tv',
-            queryParams: { sort_by: 'popularity.desc' },
+            queryParams: { sort_by: 'popularity.desc', page: 1 },
             routerLinkActiveOptions: { exact: true },
           },
           {
             label: 'Airing Today',
-            routerLink: '/list/movie/',
+            routerLink: '/list/tv/',
             queryParams: {
-              'primary_release_date.gte': this.getSpecificISODate(+0),
-              'primary_release_date.lte': this.getSpecificISODate(+0),
+              'first_air_date.gte': this.getSpecificISODate(+0),
+              'first_air_date.lte': this.getSpecificISODate(+0),
               sort_by: 'popularity.desc',
+              page: 1,
             },
           },
           {
@@ -166,6 +155,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             queryParams: {
               sort_by: 'vote_average.desc',
               'vote_count.gte': 300,
+              page: 1,
             },
           },
         ],

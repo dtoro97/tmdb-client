@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
-import { LoaderService, TmdbService } from '../../services';
-import { ActivatedRoute, Router } from '@angular/router';
+import { cloneDeep, get, set, toNumber } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -13,12 +6,23 @@ import {
   Subscription,
   switchMap,
 } from 'rxjs';
-import { SessionQuery } from '../../state/session.query';
-import { get, set, toNumber, cloneDeep } from 'lodash';
-import { movieSortOptions, tvSortOptions } from './sort-options';
-import { IGenre } from '../../interfaces';
+import { Genre } from 'tmdb-ts';
+
 import { ViewportScroller } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { MediaListFilters } from '../../interfaces';
+import { TmdbService } from '../../services';
+import { StateQuery } from '../../state/state.query';
+import { StateService } from '../../state/state.service';
+import { movieSortOptions, tvSortOptions } from './sort-options';
 
 @Component({
   selector: 'app-media-list',
@@ -31,17 +35,16 @@ export class MediaListComponent implements OnInit, OnDestroy {
   isMobile$: Observable<boolean>;
   type: string;
   sortOptions: any[] = [];
-  filters: any = {};
+  filters: MediaListFilters;
   total: number = 0;
   skip: number = 0;
   rows: number = 20;
-  genres$: Observable<IGenre[]>;
+  genres$: Observable<Genre[]>;
   data$: Observable<any[]>;
   title: string;
-  private _data = new BehaviorSubject([]);
-  private defaultFilters: any = {
-    fromDate: null,
-    toDate: null,
+  filterPanelState = true;
+  private _data = new BehaviorSubject<any[]>([]);
+  private defaultFilters: MediaListFilters = {
     page: 1,
     sortBy: 'popularity.desc',
     genres: [],
@@ -50,13 +53,13 @@ export class MediaListComponent implements OnInit, OnDestroy {
 
   private subs: Subscription[] = [];
   constructor(
-    private loader: LoaderService,
-    private tmdbService: TmdbService,
+    private tmdb: TmdbService,
     private router: Router,
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
-    private sessionQuery: SessionQuery,
-    private titleService: Title
+    private sessionQuery: StateQuery,
+    private titleService: Title,
+    private stateService: StateService
   ) {}
   ngOnInit(): void {
     this.isMobile$ = this.sessionQuery.isMobile$;
@@ -78,14 +81,20 @@ export class MediaListComponent implements OnInit, OnDestroy {
 
             this.filters = this.toFilters(queryParams);
 
-            this.loader.setLoading(true);
-            return this.tmdbService.discover(this.type, queryParams);
+            this.stateService.setLoading(true);
+
+            if (this.type === 'tv') {
+              return this.tmdb.discover.tvShow(queryParams);
+            } else if (this.type === 'movie') {
+              return this.tmdb.discover.movie(queryParams);
+            }
+            return this.tmdb.people.popular(queryParams);
           })
         )
         .subscribe((data) => {
           this.total = data.total_results;
           this._data.next(data.results);
-          this.loader.setLoading(false);
+          this.stateService.setLoading(false);
         })
     );
   }
@@ -96,6 +105,9 @@ export class MediaListComponent implements OnInit, OnDestroy {
   search(): void {
     const queryParams = this.toQueryParams();
     this.router.navigate([`list/${this.type}`], { queryParams });
+    if (this.sessionQuery.isMobile) {
+      this.filterPanelState = false;
+    }
   }
 
   onPageChange(change: any): void {
@@ -106,7 +118,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
     this.scroller.scrollToPosition([0, 0]);
   }
 
-  toggleGenreSelection(genre: IGenre) {
+  toggleGenreSelection(genre: Genre) {
     if (this.filters.genres.includes(genre.id.toString())) {
       this.filters.genres = this.filters.genres.filter(
         (g: string) => g !== genre.id.toString()
@@ -116,7 +128,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
     }
   }
 
-  isGenreSelected(genre: IGenre) {
+  isGenreSelected(genre: Genre) {
     return this.filters.genres.includes(genre.id.toString());
   }
 
@@ -137,11 +149,11 @@ export class MediaListComponent implements OnInit, OnDestroy {
     if (this.filters.genres.length > 0) {
       queryParams['with_genres'] = this.filters.genres.join('|');
     }
-    if (this.filters.voteAverage[0]) {
-      queryParams['vote_average.gte'] = this.filters.voteAverage[0];
+    if (get(this.filters, 'voteAverage.0')) {
+      queryParams['vote_average.gte'] = get(this.filters, 'voteAverage.0');
     }
-    if (this.filters.voteAverage[1]) {
-      queryParams['vote_average.lte'] = this.filters.voteAverage[1];
+    if (get(this.filters, 'voteAverage.1')) {
+      queryParams['vote_average.lte'] = get(this.filters, 'voteAverage.1');
     }
     if (this.filters.minVoteCount) {
       queryParams['vote_count.gte'] = this.filters.minVoteCount;
@@ -199,7 +211,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
 
     set(filters, 'fromDate', fromDate);
     set(filters, 'toDate', toDate);
-    set(filters, 'page', toNumber(queryParams.page));
+    set(filters, 'page', toNumber(queryParams.page) || 1);
     this.skip = this.rows * filters.page - 1;
     return filters;
   }
@@ -211,7 +223,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
   private getTitle(queryParams: any, routeParams: any): string {
     switch (true) {
       case routeParams.type === 'person':
-        return 'Popular Person';
+        return 'Popular People';
       case routeParams.type === 'tv':
         return 'Browse TV Shows';
       case routeParams.type === 'movie':

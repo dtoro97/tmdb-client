@@ -1,69 +1,80 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { SessionQuery } from '../../state/session.query';
+import { get } from 'lodash';
+import { combineLatest, map, Observable } from 'rxjs';
 import {
-  combineLatest,
-  map,
-  Observable,
-  shareReplay,
-  Subscription,
-} from 'rxjs';
-import {
-  CAROUSEL_BREAKPOINTS,
-  CAROUSEL_SM_BREAKPOINTS,
-  CAROUSEL_YT_BREAKPOINTS,
-} from '../../carousel-breakpoints';
+  Cast,
+  ExternalIds,
+  Images,
+  MovieDetails,
+  Recommendation,
+  TvShowDetails,
+  Video,
+} from 'tmdb-ts';
+
 import { ViewportScroller } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { LoaderService } from '../../services';
+import { ActivatedRoute } from '@angular/router';
+
+import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { StateQuery } from '../../state/state.query';
+import { StateService } from '../../state/state.service';
 
 @Component({
   selector: 'app-media-details',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 
   templateUrl: './media-details.component.html',
   styleUrl: './media-details.component.scss',
 })
-export class MediaDetailsComponent implements OnInit, OnDestroy {
-  item: any;
-  cast: any[];
-  videos: any[];
-  recommendations: any[];
-  mediaType: string;
+export class MediaDetailsComponent implements OnInit {
+  item$: Observable<any>;
+  backdrop$: Observable<string>;
+  cast$: Observable<Cast[]>;
+  videos$: Observable<Video[]>;
+  images$: Observable<Images>;
+  recommendations$: Observable<Recommendation[]>;
+  externalIds$: Observable<ExternalIds>;
+  mediaType$: Observable<string>;
   isDarkMode$: Observable<boolean>;
   languages$: Observable<string>;
   isMobile$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
-  breakpointsSmall = CAROUSEL_SM_BREAKPOINTS;
-  breakpointsYoutube = CAROUSEL_YT_BREAKPOINTS;
   hasPoster = false;
-  externalIds: any;
-  private routeSubscription: Subscription;
+  hasBackdrop$: Observable<boolean>;
   constructor(
     private route: ActivatedRoute,
-    private sessionQuery: SessionQuery,
+    private sessionQuery: StateQuery,
     private scroller: ViewportScroller,
     private titleService: Title,
-    private loaderService: LoaderService
+    private stateService: StateService
   ) {}
 
   ngOnInit(): void {
-    this.routeSubscription = this.route.data.subscribe((data) => {
-      this.item = data['item'];
-      this.externalIds = data['externalIds'];
-      this.cast = data['credits']['cast'];
-      this.videos = data['videos']
-        .filter((video: any) => video.site === 'YouTube')
-        .slice(0, 5);
-      console.log(this.item);
-      this.recommendations = data['recommendations'];
-      this.scroller.scrollToPosition([0, 0]);
-      this.hasPoster = this.hasMediaPoster();
-      this.loaderService.setLoading(false);
-    });
-    this.route.params.subscribe((params) => {
-      this.mediaType = params['type'];
-    });
+    this.externalIds$ = this.route.data.pipe(
+      map((data) => get(data, 'externalIds'))
+    );
+    this.cast$ = this.route.data.pipe(map((data) => get(data, 'credits.cast')));
+    this.item$ = this.route.data.pipe(map((data) => get(data, 'item')));
+    this.backdrop$ = this.item$.pipe(map((item) => get(item, 'backdrop_path')));
+    this.videos$ = this.route.data.pipe(
+      map((data) =>
+        get(data, 'videos')
+          .filter((video: Video) => video.site === 'Youtube')
+          .slice(0, 5)
+      )
+    );
+    this.images$ = this.route.data.pipe(map((data) => get(data, 'images')));
+    this.recommendations$ = this.route.data.pipe(
+      map((data) => get(data, 'recommendations'))
+    );
+    this.hasBackdrop$ = this.images$.pipe(
+      map((images: Images) => images.backdrops.length > 0)
+    );
+    this.mediaType$ = this.route.params.pipe(
+      map((params) => get(params, 'type'))
+    );
+
     this.isMobile$ = this.sessionQuery.isMobile$;
     this.isDarkMode$ = this.sessionQuery.isDarkMode$;
     this.languages$ = combineLatest([
@@ -72,8 +83,9 @@ export class MediaDetailsComponent implements OnInit, OnDestroy {
       this.route.data,
     ]).pipe(
       map(([languages, params, data]) => {
-        this.titleService.setTitle(this.getTitle(params));
-
+        this.titleService.setTitle(this.getTitle(params, data));
+        this.stateService.setLoading(false);
+        this.scroller.scrollToPosition([0, 0]);
         const langCodes =
           params['type'] === 'tv'
             ? data['item'].languages
@@ -86,20 +98,9 @@ export class MediaDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy(): void {
-    this.routeSubscription.unsubscribe();
-  }
-
-  private getTitle(params: any): string {
-    const name = this.item.title || this.item.name;
+  private getTitle(params: any, data: any): string {
+    const name = get(data, 'item.title', get(data, 'item.name'));
     const type = params['type'];
     return `${name} | ${type === 'tv' ? 'TV Show' : 'Movie'}`;
-  }
-
-  private hasMediaPoster(): boolean {
-    return ![
-      '/yZec5FxjcNmyKvMsb7Vr3NsWz5r.jpg',
-      '/6Adg8Zw4RkuWVvqMEH3CK5EhCDl.jpg',
-    ].includes(this.item.poster_path);
   }
 }
