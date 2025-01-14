@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoaderService } from './services';
-import { SessionService } from './state/session.service';
+import { StateService } from './state/state.service';
+import { StateQuery } from './state/state.query';
 
 @Component({
   selector: 'app-root',
@@ -13,12 +13,12 @@ import { SessionService } from './state/session.service';
 export class AppComponent implements OnInit {
   isLoading$: Observable<boolean>;
   constructor(
-    private loader: LoaderService,
-    private sessionService: SessionService
+    private stateQuery: StateQuery,
+    private stateService: StateService
   ) {}
   ngOnInit(): void {
-    this.isLoading$ = this.loader.isLoading$;
+    this.isLoading$ = this.stateQuery.loading$;
 
-    this.sessionService.loadSession();
+    this.stateService.loadSession();
   }
 }

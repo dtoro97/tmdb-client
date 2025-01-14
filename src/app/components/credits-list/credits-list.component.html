@@ -1,0 +1,30 @@
+<div class="flex flex-column py-4 md:mx-8">
+  <div class="flex flex-row">
+    <div>
+      <label for="department" class="mr-2">Department</label>
+      <p-select
+        [id]="'department'"
+        [options]="departmentOptions"
+        [ngModel]="department$ | async"
+        (ngModelChange)="changeDepartment($event)"
+        optionLabel="label"
+        optionValue="value"
+      ></p-select>
+    </div>
+    <div>
+      <label for="media" class="mr-2 ml-4">Media</label>
+      <p-select
+        [id]="'media'"
+        [options]="mediaOptions"
+        [ngModel]="media$ | async"
+        (ngModelChange)="changeMedia($event)"
+        optionLabel="label"
+        optionValue="value"
+      ></p-select>
+    </div>
+  </div>
+  <h2>{{ departmentLabel$ | async }}</h2>
+  <div class="flex flex-row" *ngFor="let item of data$ | async">
+    <div>{{ item.release_date || item.first_air_date | date : "yyyy" }}</div>
+  </div>
+</div>

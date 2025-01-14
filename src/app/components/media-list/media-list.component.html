@@ -1,8 +1,10 @@
 <div
-  class="h-full details-container px-4 pt-4"
+  class="h-full details-container md:px-4 md:pt-4"
   [ngClass]="{ mobile: isMobile$ | async }"
 >
-  <h2 class="{{ type === 'person' ? 'ml-6' : 'ml-2' }}">{{ title }}</h2>
+  <h2 class="{{ type === 'person' ? 'ml-4 md:ml-2' : 'ml-4 md:ml-2' }}">
+    {{ title }}
+  </h2>
   <div class="m-0 grid">
     <div
       class="col col-12 md:col-2 flex flex-column gap-2"
@@ -11,13 +13,13 @@
       <div class="w-full">
         <p-button
           class="p-button-primary"
-          styleClass="w-full"
+          styleClass="w-full search-button"
           (click)="search()"
           >Search</p-button
         >
       </div>
-      <p-accordion [value]="1">
-        <p-accordion-panel [value]="0">
+      <p-accordion [value]="true">
+        <p-accordion-panel [value]="false">
           <p-accordion-header>Sort</p-accordion-header>
           <p-accordion-content>
             <div class="w-full">
@@ -33,8 +35,8 @@
             </div>
           </p-accordion-content>
         </p-accordion-panel> </p-accordion
-      ><p-accordion value="1">
-        <p-accordion-panel value="1">
+      ><p-accordion [value]="true">
+        <p-accordion-panel [value]="filterPanelState">
           <p-accordion-header>Filters</p-accordion-header>
           <p-accordion-content>
             <div class="w-full flex flex-column">

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Movie, PopularTvShowResult } from 'tmdb-ts';
 
 @Component({
   selector: 'app-card',
@@ -8,7 +9,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './card.component.scss',
 })
 export class CardComponent {
-  @Input() public item?: any;
+  @Input() public item: Movie | PopularTvShowResult;
   @Input() public type: string;
   constructor() {}
 }

@@ -1,0 +1,108 @@
+<div
+  class="h-full details-container py-4"
+  [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
+>
+  <div
+    class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0 inner-container px-3"
+  >
+    <div
+      class="ml-auto mr-auto md:mx-2 md:mx-6 image-container"
+      [style.maxWidth.px]="350"
+    >
+      <img
+        src="{{ person.profile_path | imgSrc : 'w500' }}"
+        class="person-image border-round-xl"
+      />
+      <h1 class="m-0" *ngIf="(isMobile$ | async) === true">
+        {{ person.name }}
+      </h1>
+      <div class="mt-4 mb-3">
+        <app-social-links [links]="links" [item]="person"></app-social-links>
+      </div>
+      <h2 class="m-0" *ngIf="(isMobile$ | async) === false">Personal Info</h2>
+      <ul class="list-none line-height-4 pl-0">
+        <li class="flex">
+          <div class="person-info-label">Known For</div>
+          <div class="flex-1">{{ person.known_for_department }}</div>
+        </li>
+        <li class="flex" *ngIf="person.birthday">
+          <div class="person-info-label">Born</div>
+          <div class="flex-1">
+            <span>{{ person.birthday | date }}</span
+            ><span *ngIf="!person.deathday"> (age {{ personAge }})</span>
+          </div>
+        </li>
+        <li class="flex" *ngIf="person.deathday">
+          <div class="person-info-label">Died</div>
+          <div class="flex-1">
+            <span>{{ person.deathday | date }}</span
+            ><span> (age {{ personAge }})</span>
+          </div>
+        </li>
+        <li class="flex" *ngIf="person.place_of_birth">
+          <div class="person-info-label">Place of Birth</div>
+          <div class="flex-1">{{ person.place_of_birth }}</div>
+        </li>
+      </ul>
+    </div>
+    <div class="flex-1">
+      <h1 class="m-0 mb-4" *ngIf="(isMobile$ | async) === false">
+        {{ person.name }}
+      </h1>
+      <h2 class="m-0 mb-2" *ngIf="person.biography">Biography</h2>
+      <p class="m-0 line-height-4">
+        {{ person.biography }}
+      </p>
+    </div>
+  </div>
+  <div class="mt-2">
+    <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
+      <p-tablist>
+        <ng-container *ngFor="let tabHeader of tabs">
+          <p-tab *ngIf="tabHeader.visible" [value]="tabHeader.value">{{
+            tabHeader.title
+          }}</p-tab>
+        </ng-container>
+      </p-tablist>
+    </p-tabs>
+    <ng-container *ngIf="activeTab === 'knownFor' && knownFor.length">
+      <!-- <p-carousel
+        [value]="knownFor | sort : 'vote_average'"
+        [numVisible]="8"
+        [numScroll]="8"
+        [showIndicators]="false"
+        [responsiveOptions]="breakpoints"
+        [styleClass]="'pt-4'"
+      >
+        <ng-template let-media pTemplate="item">
+          <app-card [item]="media"></app-card>
+        </ng-template>
+      </p-carousel> -->
+      <div class="flex flex-wrap gap-3 justify-content-center mt-3">
+        <ng-container *ngFor="let item of knownFor | sort : 'vote_average'">
+          <app-card [item]="item" [type]="item.media_type"></app-card>
+        </ng-container>
+      </div>
+    </ng-container>
+    <!-- <app-credits-list
+      *ngIf="activeTab === 'credits' && knownFor.length"
+      [credits]="credits"
+    ></app-credits-list> -->
+  </div>
+  <!-- <div *ngIf="credits.length">
+    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8">
+      Known For
+    </p>
+    <p-carousel
+      [value]="credits | sort : 'vote_average'"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-media pTemplate="item">
+        <app-card [item]="media"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div> -->
+</div>

@@ -17,3 +17,10 @@ html {
   margin: auto;
   width: 100%;
 }
+
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    font-size: 15px;
+  }
+}

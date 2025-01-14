@@ -4,29 +4,31 @@
 >
   <div class="relative">
     <img
-      *ngIf="hasPoster"
-      src="{{ item.backdrop_path | imgSrc : 'w1920_and_h800_multi_faces' }}"
-      alt=""
+      *ngIf="hasBackdrop$ | async"
+      [src]="backdrop$ | async | imgSrc : 'w1920_and_h800_multi_faces'"
       class="backdrop-image"
     />
     <div class="gradient-cover"></div>
   </div>
   <div
     class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
-    [ngClass]="{ 'mt-0': !hasPoster, 'pt-4': !hasPoster }"
+    [ngClass]="{
+      'mt-0': (hasBackdrop$ | async) === false,
+      'pt-4': (hasBackdrop$ | async) === false
+    }"
     [style.maxWidth.px]="1400"
   >
-    <div class="flex md:flex-row flex-column">
+    <div class="flex md:flex-row flex-column" *ngIf="item$ | async as item">
       <div class="">
         <img
           src="{{ item.poster_path | imgSrc : 'w500' }}"
           class="poster-image border-round-lg"
         />
         <div class="mt-4 mb-3">
-          <app-external-ids
-            [ids]="externalIds"
+          <app-social-links
+            [links]="externalIds$ | async"
             [item]="item"
-          ></app-external-ids>
+          ></app-social-links>
         </div>
       </div>
       <div class="flex flex-column mt-2 md:mt-8 gap-2 md:ml-6">
@@ -43,7 +45,13 @@
         </div>
         <div class="flex flex-row mt-2 gap-2">
           <ng-container *ngFor="let genre of item.genres">
-            <p-chip [label]="genre.name"></p-chip>
+            <p-chip styleClass="cursor-pointer genre">
+              <a
+                [routerLink]="'/list/' + (mediaType$ | async)"
+                [queryParams]="{ with_genres: genre.id }"
+                >{{ genre.name }}</a
+              ></p-chip
+            >
           </ng-container>
         </div>
         <p class="mt-2 mb-0 line-height-4" [style.maxWidth.px]="550">
@@ -125,32 +133,32 @@
       </div>
     </div>
   </div>
-  <div class="mt-4 md:mt-8" *ngIf="cast.length">
+  <div class="mt-4 md:mt-8" *ngIf="(cast$ | async).length">
     <div class="flex justify-content-center flex-column">
       <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
         Full Cast
       </p>
       <p-carousel
-        [value]="cast"
+        [value]="cast$ | async"
         [numVisible]="8"
         [numScroll]="8"
         [showIndicators]="false"
-        [responsiveOptions]="breakpointsSmall"
+        [responsiveOptions]="breakpoints"
       >
-        <ng-template let-actor pTemplate="item">
-          <app-actor-card [actor]="actor"></app-actor-card>
+        <ng-template let-person pTemplate="item">
+          <app-person-card [person]="person"></app-person-card>
         </ng-template>
       </p-carousel>
     </div>
   </div>
-  <div *ngIf="videos?.length">
+  <div *ngIf="(videos$ | async).length">
     <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
       Videos
     </p>
     <div
       class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
     >
-      <div class="video-frame" *ngFor="let video of videos">
+      <div class="video-frame" *ngFor="let video of videos$ | async">
         <iframe
           [src]="video | yt"
           title="{{ video.name }}"
@@ -161,12 +169,12 @@
       </div>
     </div>
   </div>
-  <div *ngIf="recommendations?.length">
+  <div *ngIf="(recommendations$ | async).length">
     <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
       Recommendations
     </p>
     <p-carousel
-      [value]="recommendations | sort : 'vote_average'"
+      [value]="recommendations$ | async | sort : 'vote_average'"
       [numVisible]="8"
       [numScroll]="8"
       [showIndicators]="false"

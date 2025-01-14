@@ -1,8 +1,19 @@
+import {
+  BehaviorSubject,
+  first,
+  from,
+  map,
+  Observable,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { Movie, PopularTvShowResult, TimeWindow } from 'tmdb-ts';
+
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { TmdbService } from '../../services/tmdb.service';
+
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
-import { BehaviorSubject, first, map, Observable, switchMap, tap } from 'rxjs';
-import { LoaderService } from '../../services';
+import { TmdbService } from '../../services/tmdb.service';
+import { StateService } from '../../state/state.service';
 
 @Component({
   selector: 'app-home',
@@ -12,9 +23,9 @@ import { LoaderService } from '../../services';
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
-  trending$: Observable<any>;
-  popular$: Observable<any>;
-  upcomingMovies$: Observable<any>;
+  trending$: Observable<any[]>;
+  popular$: Observable<Movie[] | PopularTvShowResult[]>;
+  upcomingMovies$: Observable<Movie[]>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   trendingOptions = [
     { label: 'Today', value: 'day' },
@@ -36,43 +47,45 @@ export class HomeComponent implements OnInit {
     'day'
   );
   private _selectedPopular: BehaviorSubject<string> = new BehaviorSubject('tv');
-  constructor(
-    private tmdbService: TmdbService,
-    private loader: LoaderService
-  ) {}
+  constructor(private tmdb: TmdbService, private stateService: StateService) {}
   ngOnInit(): void {
     this.selectedTrending$ = this._selectedTrending.asObservable();
     this.selectedPopular$ = this._selectedPopular.asObservable();
     this.trending$ = this.selectedTrending$.pipe(
       switchMap((timeWindow) => {
-        return this.tmdbService.getTrending('all', timeWindow);
+        return from(
+          this.tmdb.trending.trending('all', timeWindow as TimeWindow)
+        );
       }),
-      map((data) => data?.results || []),
-      tap(() => this.loader.setLoading(false))
+      map((data) => data.results),
+      tap(() => this.stateService.setLoading(false))
     );
-    this.upcomingMovies$ = this.tmdbService.getUpcomingMovies().pipe(
+    this.upcomingMovies$ = from(this.tmdb.movies.upcoming()).pipe(
       first(),
-      map((data) => data?.results || [])
+      map((data) => data.results || [])
     );
 
     this.popular$ = this.selectedPopular$.pipe(
       switchMap((mediaType) => {
-        return this.tmdbService.getPopular(mediaType);
+        if (mediaType === 'tv') {
+          return from(this.tmdb.tvShows.popular());
+        }
+        return this.tmdb.movies.popular();
       }),
-      map((data) => data?.results || []),
-      tap(() => this.loader.setLoading(false))
+      map((data) => data.results),
+      tap(() => this.stateService.setLoading(false))
     );
   }
 
   changeTrending(timeWindow: string) {
     if (timeWindow && this._selectedTrending.value !== timeWindow) {
-      this.loader.setLoading(true);
+      this.stateService.setLoading(true);
       this._selectedTrending.next(timeWindow);
     }
   }
   changePopular(mediaType: string) {
     if (mediaType && this._selectedPopular.value !== mediaType) {
-      this.loader.setLoading(true);
+      this.stateService.setLoading(true);
       this._selectedPopular.next(mediaType);
     }
   }
