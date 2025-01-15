@@ -1,0 +1,29 @@
+.credit-item {
+  background-color: var(--p-surface-100);
+
+  .year {
+    width: 8rem;
+  }
+  a {
+    text-decoration: none;
+    color: var(--p-text-color);
+
+    .muted {
+      color: var(--p-text-color-secondary);
+    }
+  }
+}
+
+.dark {
+  .credit-item {
+    background-color: var(--p-surface-800);
+  }
+}
+
+.mobile {
+  .credit-item {
+    .year {
+      width: 4rem;
+    }
+  }
+}

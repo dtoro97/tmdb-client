@@ -1,6 +1,13 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { BehaviorSubject, combineLatest, map, Observable, of } from 'rxjs';
-import { Cast, Crew, PersonCombinedCredits } from 'tmdb-ts';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+} from '@angular/core';
+import {} from 'lodash';
+import { Observable } from 'rxjs';
+import { PersonCombinedCredits } from 'tmdb-ts';
+import { StateQuery } from '../../state/state.query';
 
 @Component({
   selector: 'app-credits-list',
@@ -9,40 +16,24 @@ import { Cast, Crew, PersonCombinedCredits } from 'tmdb-ts';
   templateUrl: './credits-list.component.html',
   styleUrl: './credits-list.component.scss',
 })
-export class CreditsListComponent {
+export class CreditsListComponent implements OnInit {
   @Input() set credits(credits: PersonCombinedCredits) {
-    console.log(credits);
     this._credits = credits;
-    this.department$ = this._department.asObservable();
-    this.media$ = this._media.asObservable();
-    this.data$ = combineLatest([
-      this.department$,
-      this.media$,
-      of(credits),
-    ]).pipe(
-      map(([department, media, credits]) => {
-        console.log(credits);
-        /* if (department === 'acting') {
-          return credits.cast.filter((c) =>
-            media === 'all' ? true : c.media_type === media
-          );
-        } else if (department === 'production') {
-          return credits.crew.filter((c) =>
-            media === 'all' ? true : c.media_type === media
-          );
-        } */
-        return [...credits.cast, ...credits.crew];
-      })
-    );
-    this.departmentLabel$ = this.department$.pipe(
-      map(
-        (department) =>
-          this.departmentOptions.find((o) => o.value === department)!.label
-      )
-    );
-    this.data$.subscribe((v) => {
-      console.log(v);
-    });
+    this._credits = {
+      ...credits,
+      cast: credits.cast.map((r) => ({
+        ...r,
+        date:
+          r.first_air_date ||
+          (r.release_date && new Date(r.first_air_date || r.release_date)),
+      })),
+      crew: credits.crew.map((r) => ({
+        ...r,
+        date:
+          r.first_air_date ||
+          (r.release_date && new Date(r.first_air_date || r.release_date)),
+      })),
+    };
   }
 
   get credits(): PersonCombinedCredits {
@@ -50,11 +41,11 @@ export class CreditsListComponent {
   }
 
   private _credits: PersonCombinedCredits;
-  department$: Observable<string>;
-  media$: Observable<string>;
+  isDarkMode$: Observable<boolean>;
+  isMobile$: Observable<boolean>;
+  department: string = 'all';
+  media: string = 'all';
   data$: Observable<any[]>;
-  private _department: BehaviorSubject<string> = new BehaviorSubject('all');
-  private _media: BehaviorSubject<string> = new BehaviorSubject('all');
   departmentOptions = [
     { label: 'All', value: 'all' },
     { label: 'Acting', value: 'acting' },
@@ -65,17 +56,11 @@ export class CreditsListComponent {
     { label: 'Movies', value: 'movie' },
     { label: 'TV Shows', value: 'tv' },
   ];
-  departmentEnabled = false;
-  mediaEnabled = false;
-  departmentLabel$: Observable<string>;
 
-  changeDepartment(value: any): void {
-    console.log(value);
-    this._department.next(value);
-  }
+  constructor(private stateQuery: StateQuery) {}
 
-  changeMedia(value: any): void {
-    console.log(value);
-    this._media.next(value);
+  ngOnInit(): void {
+    this.isDarkMode$ = this.stateQuery.isDarkMode$;
+    this.isMobile$ = this.stateQuery.isMobile$;
   }
 }

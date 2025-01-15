@@ -3,6 +3,7 @@
   [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
 >
   <div
+    *ngIf="person$ | async as person"
     class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0 inner-container px-3"
   >
     <div
@@ -17,7 +18,10 @@
         {{ person.name }}
       </h1>
       <div class="mt-4 mb-3">
-        <app-social-links [links]="links" [item]="person"></app-social-links>
+        <app-social-links
+          [links]="links$ | async"
+          [item]="person"
+        ></app-social-links>
       </div>
       <h2 class="m-0" *ngIf="(isMobile$ | async) === false">Personal Info</h2>
       <ul class="list-none line-height-4 pl-0">
@@ -58,14 +62,14 @@
   <div class="mt-2">
     <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
       <p-tablist>
-        <ng-container *ngFor="let tabHeader of tabs">
+        <ng-container *ngFor="let tabHeader of tabs$ | async">
           <p-tab *ngIf="tabHeader.visible" [value]="tabHeader.value">{{
             tabHeader.title
           }}</p-tab>
         </ng-container>
       </p-tablist>
     </p-tabs>
-    <ng-container *ngIf="activeTab === 'knownFor' && knownFor.length">
+    <ng-container *ngIf="activeTab === 'knownFor' && hasCredits$ | async">
       <!-- <p-carousel
         [value]="knownFor | sort : 'vote_average'"
         [numVisible]="8"
@@ -78,31 +82,27 @@
           <app-card [item]="media"></app-card>
         </ng-template>
       </p-carousel> -->
+      <p-select
+        *ngIf="visibleCredits$ | async as visibleCredits"
+        styleClass="mt-3 ml-5"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="visibleCredits"
+        [options]="creditsOptions"
+        [disabled]="creditsOptions.length === 1"
+        (ngModelChange)="changeVisibleCredits($event)"
+      ></p-select>
       <div class="flex flex-wrap gap-3 justify-content-center mt-3">
-        <ng-container *ngFor="let item of knownFor | sort : 'vote_average'">
+        <ng-container
+          *ngFor="let item of knownFor$ | async | sort : 'vote_average'"
+        >
           <app-card [item]="item" [type]="item.media_type"></app-card>
         </ng-container>
       </div>
     </ng-container>
-    <!-- <app-credits-list
-      *ngIf="activeTab === 'credits' && knownFor.length"
-      [credits]="credits"
-    ></app-credits-list> -->
+    <app-credits-list
+      *ngIf="activeTab === 'credits' && hasCredits$ | async"
+      [credits]="credits$ | async"
+    ></app-credits-list>
   </div>
-  <!-- <div *ngIf="credits.length">
-    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8">
-      Known For
-    </p>
-    <p-carousel
-      [value]="credits | sort : 'vote_average'"
-      [numVisible]="8"
-      [numScroll]="8"
-      [showIndicators]="false"
-      [responsiveOptions]="breakpoints"
-    >
-      <ng-template let-media pTemplate="item">
-        <app-card [item]="media"></app-card>
-      </ng-template>
-    </p-carousel>
-  </div> -->
 </div>

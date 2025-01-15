@@ -1,12 +1,14 @@
-<div class="flex flex-column py-4 md:mx-8">
+<div
+  class="flex flex-column py-4 md:mx-8 mx-2"
+  [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
+>
   <div class="flex flex-row">
     <div>
       <label for="department" class="mr-2">Department</label>
       <p-select
         [id]="'department'"
         [options]="departmentOptions"
-        [ngModel]="department$ | async"
-        (ngModelChange)="changeDepartment($event)"
+        [(ngModel)]="department"
         optionLabel="label"
         optionValue="value"
       ></p-select>
@@ -16,15 +18,103 @@
       <p-select
         [id]="'media'"
         [options]="mediaOptions"
-        [ngModel]="media$ | async"
-        (ngModelChange)="changeMedia($event)"
+        [(ngModel)]="media"
         optionLabel="label"
         optionValue="value"
       ></p-select>
     </div>
   </div>
-  <h2>{{ departmentLabel$ | async }}</h2>
-  <div class="flex flex-row" *ngFor="let item of data$ | async">
-    <div>{{ item.release_date || item.first_air_date | date : "yyyy" }}</div>
-  </div>
+  <ng-container *ngIf="department === 'all' || department === 'acting'">
+    <h2>Acting</h2>
+    <div class="flex flex-column gap-1">
+      <div
+        class="flex flex-row align-items-center mb-1 credit-item"
+        *ngFor="let item of credits.cast | sort : 'date'"
+      >
+        <span class="py-2 px-4 year">
+          {{ item.date ? (item.date | date : "yyyy") : "-" }}
+        </span>
+        <a
+          class="cursor-pointer py-2 px-4"
+          routerLink="/details/{{ item.media_type }}/{{ item.id }}"
+          ><strong>{{ item.title || item.name }}</strong>
+          <span class="muted"
+            >&nbsp;as {{ item.character || item.job }}</span
+          ></a
+        >
+      </div>
+    </div></ng-container
+  >
+  <ng-container *ngIf="department === 'all' || department === 'production'">
+    <h2>Production</h2>
+    <div class="flex flex-column gap-1">
+      <div
+        class="flex flex-row align-items-center mb-1 credit-item"
+        *ngFor="let item of credits.crew | sort : 'date'"
+      >
+        <span class="py-2 px-4 year">
+          {{ item.date ? (item.date | date : "yyyy") : "-" }}
+        </span>
+        <a
+          class="cursor-pointer py-2 px-4"
+          routerLink="/details/{{ item.media_type }}/{{ item.id }}"
+          ><strong>{{ item.title || item.name }}</strong>
+          <span class="muted"
+            >&nbsp;as {{ item.character || item.job }}</span
+          ></a
+        >
+      </div>
+    </div></ng-container
+  >
+
+  <ng-container *ngIf="department === 'all' || department === 'acting'">
+    <h2>Movies</h2>
+    <div class="flex flex-column gap-1">
+      <div
+        class="flex flex-row align-items-center mb-1 credit-item"
+        *ngFor="
+          let item of credits.crew
+            | filter : { media_type: 'tv' }
+            | sort : 'date'
+        "
+      >
+        <span class="py-2 px-4 year">
+          {{ item.date ? (item.date | date : "yyyy") : "-" }}
+        </span>
+        <a
+          class="cursor-pointer py-2 px-4"
+          routerLink="/details/{{ item.media_type }}/{{ item.id }}"
+          ><strong>{{ item.title || item.name }}</strong>
+          <span class="muted"
+            >&nbsp;as {{ item.character || item.job }}</span
+          ></a
+        >
+      </div>
+    </div></ng-container
+  >
+  <ng-container *ngIf="department === 'all' || department === 'production'">
+    <h2>TV Shows</h2>
+    <div class="flex flex-column gap-1">
+      <div
+        class="flex flex-row align-items-center mb-1 credit-item"
+        *ngFor="
+          let item of credits.crew
+            | filter : { media_type: 'movie' }
+            | sort : 'date'
+        "
+      >
+        <span class="py-2 px-4 year">
+          {{ item.date ? (item.date | date : "yyyy") : "-" }}
+        </span>
+        <a
+          class="cursor-pointer py-2 px-4"
+          routerLink="/details/{{ item.media_type }}/{{ item.id }}"
+          ><strong>{{ item.title || item.name }}</strong>
+          <span class="muted"
+            >&nbsp;as {{ item.character || item.job }}</span
+          ></a
+        >
+      </div>
+    </div></ng-container
+  >
 </div>
