@@ -1,4 +1,12 @@
-import { Observable, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  map,
+  Observable,
+  Subject,
+  Subscription,
+  tap,
+} from 'rxjs';
 import {
   ExternalIds,
   PeopleImages,
@@ -7,18 +15,14 @@ import {
 } from 'tmdb-ts';
 
 import { ViewportScroller } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
 import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
+import { get, uniqBy } from 'lodash';
 
 @Component({
   selector: 'app-person-details',
@@ -27,19 +31,25 @@ import { StateService } from '../../state/state.service';
   templateUrl: './person-details.component.html',
   styleUrl: './person-details.component.scss',
 })
-export class PersonDetailsComponent implements OnInit, OnDestroy {
-  person: PersonDetails;
-  images: PeopleImages;
-  knownFor: any[];
-  credits: PersonCombinedCredits;
-  personAge: number;
+export class PersonDetailsComponent implements OnInit {
+  person$: Observable<PersonDetails>;
+  images$: Observable<PeopleImages>;
+  knownFor$: Observable<any[]>;
+  credits$: Observable<PersonCombinedCredits>;
+  personAge$: Observable<number>;
+  links$: Observable<ExternalIds>;
   isMobile$: Observable<boolean>;
   isDarkMode$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   links: ExternalIds;
-  tabs: { title: string; value: string; visible: boolean }[] = [];
+  tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab: string = 'knownFor';
-  private sub: Subscription;
+  hasCredits$: Observable<boolean>;
+  creditsOptions: any[];
+  visibleCredits$: Observable<string | undefined>;
+  private _visbileCredits: BehaviorSubject<any> = new BehaviorSubject(
+    undefined
+  );
   constructor(
     private sessionQuery: StateQuery,
     private route: ActivatedRoute,
@@ -49,62 +59,86 @@ export class PersonDetailsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sub = this.route.data.subscribe((data) => {
-      this.scroller.scrollToPosition([0, 0]);
-      this.images = data['images'];
-      this.person = data['item'];
-      this.links = data['socialLinks'];
-      this.credits = data['credits'];
-      this.knownFor = this.getKnownFor();
-      this.titleService.setTitle(this.getTitle());
-      this.personAge = this.getPersonAge();
-      this.tabs = this.getTabs();
-      this.stateService.setLoading(false);
-    });
+    this.visibleCredits$ = this._visbileCredits.asObservable();
+    this.person$ = this.route.data.pipe(
+      map((data) => get(data, 'item')),
+      tap((person) => {
+        this.titleService.setTitle(`${person.name} | People`);
+        this.stateService.setLoading(false);
+        this.scroller.scrollToPosition([0, 0]);
+      })
+    );
+    this.images$ = this.route.data.pipe(map((data) => get(data, 'images')));
+    this.links$ = this.route.data.pipe(map((data) => get(data, 'socialLinks')));
+    this.credits$ = this.route.data.pipe(
+      map((data) => {
+        const credits = get(data, 'credits');
+        this.setVisibleCredits(credits);
+        this.setCreditsOptions(credits);
+        return {
+          ...credits,
+          cast: uniqBy(credits.cast, 'id'),
+          crew: uniqBy(credits.crew, 'id'),
+        };
+      })
+    );
+    this.personAge$ = this.person$.pipe(
+      map((person) => this.getPersonAge(person))
+    );
+    this.tabs$ = this.credits$.pipe(map((credits) => this.getTabs(credits)));
+    this.hasCredits$ = this.credits$.pipe(
+      map((credits) => credits.cast.length > 0 || credits.crew.length > 0)
+    );
+    this.knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
+      map(([visible, credits]) => {
+        if (visible) {
+          return get(credits, visible);
+        }
+      })
+    );
     this.isMobile$ = this.sessionQuery.isMobile$;
     this.isDarkMode$ = this.sessionQuery.isDarkMode$;
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+  changeVisibleCredits(value: string) {
+    this._visbileCredits.next(value);
   }
 
-  private getTitle(): string {
-    return `${this.person.name} | People`;
+  private setVisibleCredits(credits: PersonCombinedCredits): void {
+    if (credits.cast.length) {
+      this._visbileCredits.next('cast');
+    } else if (credits.crew.length) {
+      this._visbileCredits.next('crew');
+    }
   }
 
-  private getPersonAge(): number {
+  private setCreditsOptions(credits: PersonCombinedCredits): void {
+    const options = [];
+    if (credits.cast.length) {
+      options.push({ label: 'Cast', value: 'cast' });
+    }
+    if (credits.crew.length) {
+      options.push({ label: 'Production', value: 'crew' });
+    }
+    this.creditsOptions = options;
+  }
+
+  private getPersonAge(person: PersonDetails): number {
     const difference =
-      ((this.person.deathday
-        ? new Date(this.person.deathday)
-        : new Date()
-      ).getTime() -
-        new Date(this.person.birthday).getTime()) /
+      ((person.deathday ? new Date(person.deathday) : new Date()).getTime() -
+        new Date(person.birthday).getTime()) /
       1000 /
       (60 * 60 * 24);
     return Math.abs(Math.round(difference / 365.25));
   }
 
-  private getKnownFor(): any[] {
-    const isActor = this.person.known_for_department === 'Acting';
-    let credits = [];
-    if (isActor) {
-      credits = this.credits.cast;
-    } else {
-      credits = this.credits.crew.filter((v: any, i: number, s: any): any => {
-        return i === s.findIndex((t: any) => t.id === v.id);
-      });
-    }
-    return credits;
-  }
-
-  private getTabs() {
+  private getTabs(credits: PersonCombinedCredits) {
     return [
       { title: 'Known For', value: 'knownFor', visible: true },
       {
         title: 'Credits',
         value: 'credits',
-        visible: this.knownFor.length > 0,
+        visible: credits.cast.length > 0 || credits.crew.length > 0,
       },
       { title: 'Photos', value: 'photos', visible: true },
     ];

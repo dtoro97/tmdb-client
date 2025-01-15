@@ -1,9 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { orderBy } from 'lodash';
 @Pipe({
   name: 'sort',
 })
 export class sortPipe implements PipeTransform {
   transform(value: any[], sortBy: string): any[] {
-    return value.sort((a: any, b: any) => b[sortBy] - a[sortBy]);
+    return orderBy(value, sortBy, 'desc');
   }
 }
