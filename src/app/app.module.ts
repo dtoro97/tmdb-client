@@ -40,6 +40,7 @@ import { YoutubeLinkPipe } from './pipes/youtube-link.pipe';
 import { tmdbPreset } from './tmdb-preset';
 import { SocialLinksComponent } from './components/social-links/social-links.component';
 import { CreditsListComponent } from './components/credits-list/credits-list.component';
+import { filterPipe } from './pipes/filter.pipe';
 
 const components = [
   HeaderComponent,
@@ -53,7 +54,13 @@ const components = [
   SocialLinksComponent,
   CreditsListComponent,
 ];
-const pipes = [ImagePipe, MinutesToHours, YoutubeLinkPipe, sortPipe];
+const pipes = [
+  ImagePipe,
+  MinutesToHours,
+  YoutubeLinkPipe,
+  sortPipe,
+  filterPipe,
+];
 
 @NgModule({
   declarations: [AppComponent, ...components],

@@ -4,7 +4,7 @@ import {
   Input,
   OnInit,
 } from '@angular/core';
-import {} from 'lodash';
+import { get } from 'lodash';
 import { Observable } from 'rxjs';
 import { PersonCombinedCredits } from 'tmdb-ts';
 import { StateQuery } from '../../state/state.query';
@@ -18,7 +18,6 @@ import { StateQuery } from '../../state/state.query';
 })
 export class CreditsListComponent implements OnInit {
   @Input() set credits(credits: PersonCombinedCredits) {
-    this._credits = credits;
     this._credits = {
       ...credits,
       cast: credits.cast.map((r) => ({
@@ -34,6 +33,29 @@ export class CreditsListComponent implements OnInit {
           (r.release_date && new Date(r.first_air_date || r.release_date)),
       })),
     };
+    const departmentOptions = [{ label: 'All', value: 'all' }];
+    if (this._credits.cast.length) {
+      departmentOptions.push({ label: 'Acting', value: 'acting' });
+    }
+    if (this._credits.crew.length) {
+      departmentOptions.push({ label: 'Production', value: 'production' });
+    }
+    this.departmentOptions = departmentOptions;
+
+    const mediaOptions = [{ label: 'All', value: 'all' }];
+    if (
+      this._credits.cast.some((c) => get(c, 'media_type') === 'movie') ||
+      this._credits.crew.some((c) => get(c, 'media_type') === 'movie')
+    ) {
+      mediaOptions.push({ label: 'Movies', value: 'movie' });
+    }
+    if (
+      this._credits.cast.some((c) => get(c, 'media_type') === 'tv') ||
+      this._credits.crew.some((c) => get(c, 'media_type') === 'tv')
+    ) {
+      mediaOptions.push({ label: 'TV Shows', value: 'tv' });
+    }
+    this.mediaOptions = mediaOptions;
   }
 
   get credits(): PersonCombinedCredits {
@@ -46,16 +68,8 @@ export class CreditsListComponent implements OnInit {
   department: string = 'all';
   media: string = 'all';
   data$: Observable<any[]>;
-  departmentOptions = [
-    { label: 'All', value: 'all' },
-    { label: 'Acting', value: 'acting' },
-    { label: 'Production', value: 'production' },
-  ];
-  mediaOptions = [
-    { label: 'All', value: 'all' },
-    { label: 'Movies', value: 'movie' },
-    { label: 'TV Shows', value: 'tv' },
-  ];
+  departmentOptions: any[];
+  mediaOptions: any[];
 
   constructor(private stateQuery: StateQuery) {}
 
