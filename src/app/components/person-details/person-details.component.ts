@@ -68,7 +68,10 @@ export class PersonDetailsComponent implements OnInit {
         this.scroller.scrollToPosition([0, 0]);
       })
     );
-    this.images$ = this.route.data.pipe(map((data) => get(data, 'images')));
+    this.images$ = this.route.data.pipe(
+      map((data) => get(data, 'images.profiles', []))
+    );
+    this.images$.subscribe((v) => console.log(v));
     this.links$ = this.route.data.pipe(map((data) => get(data, 'socialLinks')));
     this.credits$ = this.route.data.pipe(
       map((data) => {
