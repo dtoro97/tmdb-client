@@ -1,6 +1,13 @@
 :host ::ng-deep {
   .details-container {
     &.mobile {
+      .photos-item {
+        width: 150px;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+      }
       .image-container {
         max-width: unset !important;
         width: 100%;
@@ -30,6 +37,14 @@
     .person-image {
       width: 350px;
       height: 525px;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+
+    .photos-item {
+      width: 250px;
+      height: auto;
       max-width: 100%;
       max-height: 100%;
       object-fit: cover;

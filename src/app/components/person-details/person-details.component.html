@@ -70,18 +70,6 @@
       </p-tablist>
     </p-tabs>
     <ng-container *ngIf="activeTab === 'knownFor' && hasCredits$ | async">
-      <!-- <p-carousel
-        [value]="knownFor | sort : 'vote_average'"
-        [numVisible]="8"
-        [numScroll]="8"
-        [showIndicators]="false"
-        [responsiveOptions]="breakpoints"
-        [styleClass]="'pt-4'"
-      >
-        <ng-template let-media pTemplate="item">
-          <app-card [item]="media"></app-card>
-        </ng-template>
-      </p-carousel> -->
       <p-select
         *ngIf="visibleCredits$ | async as visibleCredits"
         styleClass="mt-3 ml-5"
@@ -92,7 +80,7 @@
         [disabled]="creditsOptions.length === 1"
         (ngModelChange)="changeVisibleCredits($event)"
       ></p-select>
-      <div class="flex flex-wrap gap-3 justify-content-center mt-3">
+      <div class="flex flex-wrap gap-3 justify-content-start mt-3">
         <ng-container
           *ngFor="let item of knownFor$ | async | sort : 'vote_average'"
         >
@@ -104,5 +92,16 @@
       *ngIf="activeTab === 'credits' && hasCredits$ | async"
       [credits]="credits$ | async"
     ></app-credits-list>
+    <ng-container *ngIf="activeTab === 'photos'">
+      <div class="flex flex-wrap gap-3 mt-4 justify-content-start">
+        <a
+          href="{{ image.file_path | imgSrc }}"
+          target="_blank"
+          *ngFor="let image of images$ | async"
+        >
+          <img class="photos-item" src="{{ image.file_path | imgSrc }}" />
+        </a>
+      </div>
+    </ng-container>
   </div>
 </div>
