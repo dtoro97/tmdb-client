@@ -1,9 +1,21 @@
 :host ::ng-deep {
   .details-container {
+    .muted {
+      color: var(--p-text-muted-color);
+    }
+    .backdrop-photo {
+      width: 250px;
+    }
+    .p-tablist-tab-list {
+      justify-content: center;
+    }
     .media-info-label {
       width: 120px;
     }
     &.mobile {
+      .backdrop-photo {
+        width: 180px;
+      }
       .video-frame {
         width: 360px !important;
         height: 200px !important;

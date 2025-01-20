@@ -3,10 +3,10 @@ import { combineLatest, map, Observable } from 'rxjs';
 import {
   Cast,
   ExternalIds,
+  Image,
   Images,
-  MovieDetails,
+  MediaType,
   Recommendation,
-  TvShowDetails,
   Video,
 } from 'tmdb-ts';
 
@@ -33,15 +33,19 @@ export class MediaDetailsComponent implements OnInit {
   cast$: Observable<Cast[]>;
   videos$: Observable<Video[]>;
   images$: Observable<Images>;
+  backdrops$: Observable<Image[]>;
+  posters$: Observable<Image[]>;
   recommendations$: Observable<Recommendation[]>;
   externalIds$: Observable<ExternalIds>;
-  mediaType$: Observable<string>;
+  mediaType$: Observable<MediaType>;
   isDarkMode$: Observable<boolean>;
   languages$: Observable<string>;
   isMobile$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   hasPoster = false;
   hasBackdrop$: Observable<boolean>;
+  tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
+  activeTab: string = 'overview';
   constructor(
     private route: ActivatedRoute,
     private sessionQuery: StateQuery,
@@ -60,11 +64,15 @@ export class MediaDetailsComponent implements OnInit {
     this.videos$ = this.route.data.pipe(
       map((data) =>
         get(data, 'videos')
-          .filter((video: Video) => video.site === 'Youtube')
+          .filter((video: Video) => video.site === 'YouTube')
           .slice(0, 5)
       )
     );
     this.images$ = this.route.data.pipe(map((data) => get(data, 'images')));
+    this.backdrops$ = this.images$.pipe(
+      map((images) => images.backdrops.slice(0, 20))
+    );
+    this.posters$ = this.images$.pipe(map((images) => images.posters));
     this.recommendations$ = this.route.data.pipe(
       map((data) => get(data, 'recommendations'))
     );
@@ -73,6 +81,14 @@ export class MediaDetailsComponent implements OnInit {
     );
     this.mediaType$ = this.route.params.pipe(
       map((params) => get(params, 'type'))
+    );
+
+    this.tabs$ = combineLatest([
+      this.mediaType$,
+      this.videos$,
+      this.images$,
+    ]).pipe(
+      map(([type, videos, photos]) => this.getTabs(type, videos, photos))
     );
 
     this.isMobile$ = this.sessionQuery.isMobile$;
@@ -102,5 +118,20 @@ export class MediaDetailsComponent implements OnInit {
     const name = get(data, 'item.title', get(data, 'item.name'));
     const type = params['type'];
     return `${name} | ${type === 'tv' ? 'TV Show' : 'Movie'}`;
+  }
+
+  private getTabs(type: MediaType, videos: Video[], photos: Images) {
+    return [
+      { title: 'Overview', value: 'overview', visible: true },
+      { title: 'Episodes', value: 'episodes', visible: false },
+      { title: 'Videos', value: 'videos', visible: videos.length > 0 },
+      {
+        title: 'Photos',
+        value: 'photos',
+        visible: Object.values(photos).some(
+          (v) => v !== Array.isArray(v) && v.length > 0
+        ),
+      },
+    ];
   }
 }

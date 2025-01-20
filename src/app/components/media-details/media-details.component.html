@@ -133,56 +133,101 @@
       </div>
     </div>
   </div>
-  <div class="mt-4 md:mt-8" *ngIf="(cast$ | async).length">
-    <div class="flex justify-content-center flex-column">
-      <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
-        Full Cast
-      </p>
+  <div class="mt-2 mx-2 md:mx-4">
+    <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
+      <p-tablist>
+        <ng-container *ngFor="let tabHeader of tabs$ | async">
+          <p-tab *ngIf="tabHeader.visible" [value]="tabHeader.value">{{
+            tabHeader.title
+          }}</p-tab>
+        </ng-container>
+      </p-tablist>
+    </p-tabs>
+    <ng-container *ngIf="activeTab === 'overview'">
+      <div *ngIf="(cast$ | async).length">
+        <div class="flex justify-content-center flex-column">
+          <h2 class="md:px-4 px-2">Full Cast</h2>
+          <p-carousel
+            [value]="cast$ | async"
+            [numVisible]="8"
+            [numScroll]="8"
+            [showIndicators]="false"
+            [responsiveOptions]="breakpoints"
+          >
+            <ng-template let-person pTemplate="item">
+              <app-person-card [person]="person"></app-person-card>
+            </ng-template>
+          </p-carousel>
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="activeTab === 'videos'">
+      <div *ngIf="(videos$ | async).length">
+        <h2 class="md:px-4 px-2">Videos</h2>
+        <div
+          class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
+        >
+          <div class="video-frame" *ngFor="let video of videos$ | async">
+            <iframe
+              [src]="video | yt"
+              title="{{ video.name }}"
+              frameborder="0"
+              allowedfullscreen
+              class="iframe"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="activeTab === 'photos'">
+      <div *ngIf="(backdrops$ | async)?.length">
+        <h2 class="md:px-4 px-2 mb-0">Backdrops</h2>
+        <strong class="muted md:px-4 px-2"
+          >{{ (backdrops$ | async)?.length }} Images</strong
+        >
+        <div
+          class="flex flex-wrap gap-3 mt-4 justify-content-start mx-2 md:mx-6"
+        >
+          <a
+            href="{{ image.file_path | imgSrc }}"
+            target="_blank"
+            *ngFor="let image of backdrops$ | async"
+          >
+            <img class="backdrop-photo" src="{{ image.file_path | imgSrc }}" />
+          </a>
+        </div>
+      </div>
+      <div *ngIf="(posters$ | async)?.length">
+        <h2 class="md:px-4 px-2 mb-0">Posters</h2>
+        <strong class="muted md:px-4 px-2"
+          >{{ (posters$ | async)?.length }} Images</strong
+        >
+        <div
+          class="flex flex-wrap gap-3 mt-4 justify-content-start mx-2 md:mx-6"
+        >
+          <a
+            href="{{ image.file_path | imgSrc }}"
+            target="_blank"
+            *ngFor="let image of posters$ | async"
+          >
+            <img class="backdrop-photo" src="{{ image.file_path | imgSrc }}" />
+          </a>
+        </div>
+      </div>
+    </ng-container>
+    <div *ngIf="(recommendations$ | async).length">
+      <h2 class="md:px-4 px-2">More Like This</h2>
       <p-carousel
-        [value]="cast$ | async"
+        [value]="recommendations$ | async | sort : 'vote_average'"
         [numVisible]="8"
         [numScroll]="8"
         [showIndicators]="false"
         [responsiveOptions]="breakpoints"
       >
-        <ng-template let-person pTemplate="item">
-          <app-person-card [person]="person"></app-person-card>
+        <ng-template let-media pTemplate="item">
+          <app-card [item]="media"></app-card>
         </ng-template>
       </p-carousel>
     </div>
-  </div>
-  <div *ngIf="(videos$ | async).length">
-    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
-      Videos
-    </p>
-    <div
-      class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
-    >
-      <div class="video-frame" *ngFor="let video of videos$ | async">
-        <iframe
-          [src]="video | yt"
-          title="{{ video.name }}"
-          frameborder="0"
-          allowedfullscreen
-          class="iframe"
-        ></iframe>
-      </div>
-    </div>
-  </div>
-  <div *ngIf="(recommendations$ | async).length">
-    <p class="font-bold xl:text-2xl md:text-xl text-lg my-3 md:px-8 px-4">
-      Recommendations
-    </p>
-    <p-carousel
-      [value]="recommendations$ | async | sort : 'vote_average'"
-      [numVisible]="8"
-      [numScroll]="8"
-      [showIndicators]="false"
-      [responsiveOptions]="breakpoints"
-    >
-      <ng-template let-media pTemplate="item">
-        <app-card [item]="media"></app-card>
-      </ng-template>
-    </p-carousel>
   </div>
 </div>

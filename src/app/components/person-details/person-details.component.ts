@@ -1,12 +1,4 @@
-import {
-  BehaviorSubject,
-  combineLatest,
-  map,
-  Observable,
-  Subject,
-  Subscription,
-  tap,
-} from 'rxjs';
+import { combineLatest, map, Observable, Subject, tap } from 'rxjs';
 import {
   ExternalIds,
   PeopleImages,
@@ -47,9 +39,7 @@ export class PersonDetailsComponent implements OnInit {
   hasCredits$: Observable<boolean>;
   creditsOptions: any[];
   visibleCredits$: Observable<string | undefined>;
-  private _visbileCredits: BehaviorSubject<any> = new BehaviorSubject(
-    undefined
-  );
+  private _visbileCredits: Subject<any> = new Subject();
   constructor(
     private sessionQuery: StateQuery,
     private route: ActivatedRoute,
@@ -71,7 +61,6 @@ export class PersonDetailsComponent implements OnInit {
     this.images$ = this.route.data.pipe(
       map((data) => get(data, 'images.profiles', []))
     );
-    this.images$.subscribe((v) => console.log(v));
     this.links$ = this.route.data.pipe(map((data) => get(data, 'socialLinks')));
     this.credits$ = this.route.data.pipe(
       map((data) => {
