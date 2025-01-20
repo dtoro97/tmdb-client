@@ -33,14 +33,16 @@
           <div class="person-info-label">Born</div>
           <div class="flex-1">
             <span>{{ person.birthday | date }}</span
-            ><span *ngIf="!person.deathday"> (age {{ personAge }})</span>
+            ><span *ngIf="!person.deathday">
+              (age {{ personAge$ | async }})</span
+            >
           </div>
         </li>
         <li class="flex" *ngIf="person.deathday">
           <div class="person-info-label">Died</div>
           <div class="flex-1">
             <span>{{ person.deathday | date }}</span
-            ><span> (age {{ personAge }})</span>
+            ><span> (age {{ personAge$ | async }})</span>
           </div>
         </li>
         <li class="flex" *ngIf="person.place_of_birth">
@@ -59,7 +61,7 @@
       </p>
     </div>
   </div>
-  <div class="mt-2">
+  <div class="mt-2 mx-0 md:mx-4">
     <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
       <p-tablist>
         <ng-container *ngFor="let tabHeader of tabs$ | async">
@@ -80,7 +82,9 @@
         [disabled]="creditsOptions.length === 1"
         (ngModelChange)="changeVisibleCredits($event)"
       ></p-select>
-      <div class="flex flex-wrap gap-3 justify-content-start mt-3">
+      <div
+        class="flex flex-wrap gap-3 justify-content-center md:justify-content-start mt-3"
+      >
         <ng-container
           *ngFor="let item of knownFor$ | async | sort : 'vote_average'"
         >
@@ -93,7 +97,9 @@
       [credits]="credits$ | async"
     ></app-credits-list>
     <ng-container *ngIf="activeTab === 'photos'">
-      <div class="flex flex-wrap gap-3 mt-4 justify-content-start">
+      <div
+        class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start"
+      >
         <a
           href="{{ image.file_path | imgSrc }}"
           target="_blank"
