@@ -14,6 +14,7 @@ import {
   styleUrl: './social-links.component.scss',
 })
 export class SocialLinksComponent {
+  @Input() isPerson: boolean;
   @Input() links: ExternalIds;
   @Input() item: TvShowDetails | MovieDetails | PersonDetails;
 }

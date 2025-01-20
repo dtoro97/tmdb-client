@@ -5,7 +5,12 @@
     ></a>
   </ng-container>
   <ng-container *ngIf="links.imdb_id">
-    <a href="{{ 'https://imdb.com/name/' + links.imdb_id }}" target="_blank">
+    <a
+      href="{{
+        'https://imdb.com/' + (isPerson ? 'name/' : 'title/') + links.imdb_id
+      }}"
+      target="_blank"
+    >
       <i class="fa-brands fa-imdb"></i>
     </a>
   </ng-container>
