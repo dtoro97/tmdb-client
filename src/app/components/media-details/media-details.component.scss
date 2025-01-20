@@ -6,6 +6,9 @@
     .backdrop-photo {
       width: 250px;
     }
+    .poster-photo {
+      width: 200px;
+    }
     .p-tablist-tab-list {
       justify-content: center;
     }
@@ -14,7 +17,10 @@
     }
     &.mobile {
       .backdrop-photo {
-        width: 180px;
+        width: 160px;
+      }
+      .poster-photo {
+        width: 120px;
       }
       .video-frame {
         width: 360px !important;

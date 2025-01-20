@@ -186,7 +186,7 @@
           >{{ (backdrops$ | async)?.length }} Images</strong
         >
         <div
-          class="flex flex-wrap gap-3 mt-4 justify-content-start mx-2 md:mx-6"
+          class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
         >
           <a
             href="{{ image.file_path | imgSrc }}"
@@ -203,14 +203,14 @@
           >{{ (posters$ | async)?.length }} Images</strong
         >
         <div
-          class="flex flex-wrap gap-3 mt-4 justify-content-start mx-2 md:mx-6"
+          class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
         >
           <a
             href="{{ image.file_path | imgSrc }}"
             target="_blank"
             *ngFor="let image of posters$ | async"
           >
-            <img class="backdrop-photo" src="{{ image.file_path | imgSrc }}" />
+            <img class="poster-photo" src="{{ image.file_path | imgSrc }}" />
           </a>
         </div>
       </div>

@@ -72,7 +72,9 @@ export class MediaDetailsComponent implements OnInit {
     this.backdrops$ = this.images$.pipe(
       map((images) => images.backdrops.slice(0, 20))
     );
-    this.posters$ = this.images$.pipe(map((images) => images.posters));
+    this.posters$ = this.images$.pipe(
+      map((images) => images.posters.slice(0, 20))
+    );
     this.recommendations$ = this.route.data.pipe(
       map((data) => get(data, 'recommendations'))
     );
