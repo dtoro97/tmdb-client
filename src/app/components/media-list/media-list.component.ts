@@ -42,7 +42,8 @@ export class MediaListComponent implements OnInit, OnDestroy {
   genres$: Observable<Genre[]>;
   data$: Observable<any[]>;
   title: string;
-  filterPanelState = true;
+  filterPanelState$: Observable<boolean>;
+  private filterPanelState: BehaviorSubject<boolean>;
   private _data = new BehaviorSubject<any[]>([]);
   private defaultFilters: MediaListFilters = {
     page: 1,
@@ -63,6 +64,8 @@ export class MediaListComponent implements OnInit, OnDestroy {
   ) {}
   ngOnInit(): void {
     this.isMobile$ = this.sessionQuery.isMobile$;
+    this.filterPanelState = new BehaviorSubject(!this.sessionQuery.isMobile);
+    this.filterPanelState$ = this.filterPanelState.asObservable();
     this.data$ = this._data.asObservable();
     this.filters = cloneDeep(this.defaultFilters);
     this.subs.push(
@@ -97,6 +100,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
           this.stateService.setLoading(false);
         })
     );
+    this.filterPanelState$.subscribe((v) => console.log(v));
   }
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
@@ -106,12 +110,11 @@ export class MediaListComponent implements OnInit, OnDestroy {
     const queryParams = this.toQueryParams();
     this.router.navigate([`list/${this.type}`], { queryParams });
     if (this.sessionQuery.isMobile) {
-      this.filterPanelState = false;
+      this.filterPanelState.next(false);
     }
   }
 
   onPageChange(change: any): void {
-    console.log(change);
     this.filters.page = change.page + 1;
     this.skip = change.skip;
     this.search();

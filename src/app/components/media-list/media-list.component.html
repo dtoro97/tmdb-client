@@ -36,7 +36,7 @@
           </p-accordion-content>
         </p-accordion-panel> </p-accordion
       ><p-accordion [value]="true">
-        <p-accordion-panel [value]="filterPanelState">
+        <p-accordion-panel [value]="filterPanelState$ | async">
           <p-accordion-header>Filters</p-accordion-header>
           <p-accordion-content>
             <div class="w-full flex flex-column">

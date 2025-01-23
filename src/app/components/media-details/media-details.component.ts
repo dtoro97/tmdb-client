@@ -1,12 +1,22 @@
 import { get } from 'lodash';
-import { combineLatest, map, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  map,
+  Observable,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 import {
   Cast,
+  Episode,
   ExternalIds,
   Image,
   Images,
   MediaType,
   Recommendation,
+  Season,
   Video,
 } from 'tmdb-ts';
 
@@ -16,6 +26,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { TmdbService } from '../../services';
 import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
 
@@ -46,15 +57,25 @@ export class MediaDetailsComponent implements OnInit {
   hasBackdrop$: Observable<boolean>;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab: string = 'overview';
+  episodeCount$: Observable<number>;
+  selectedSeason$: Observable<number>;
+  private _selectedSeason: BehaviorSubject<number> = new BehaviorSubject(1);
+  seasons$: Observable<any>;
+  private _seasons = new BehaviorSubject<any>([]);
+  seasonEpisodes$: Observable<any>;
+  episodes$: Observable<Episode[]>;
   constructor(
     private route: ActivatedRoute,
     private sessionQuery: StateQuery,
     private scroller: ViewportScroller,
     private titleService: Title,
-    private stateService: StateService
+    private stateService: StateService,
+    private tmdb: TmdbService
   ) {}
 
   ngOnInit(): void {
+    this.selectedSeason$ = this._selectedSeason.asObservable();
+    this.seasons$ = this._seasons.asObservable();
     this.externalIds$ = this.route.data.pipe(
       map((data) => get(data, 'externalIds'))
     );
@@ -68,6 +89,43 @@ export class MediaDetailsComponent implements OnInit {
           .slice(0, 5)
       )
     );
+
+    this.item$
+      .pipe(
+        switchMap((item) => {
+          return combineLatest(
+            item.seasons.map((s: any) =>
+              from(
+                this.tmdb.tvSeasons.details({
+                  tvShowID: item.id,
+                  seasonNumber: s.season_number,
+                })
+              ).pipe(shareReplay(1))
+            )
+          );
+        })
+      )
+      .subscribe((seasons: any) => {
+        this._seasons.next(seasons);
+      });
+
+    this.episodeCount$ = combineLatest([
+      this.selectedSeason$,
+      this.seasons$,
+    ]).pipe(
+      map(
+        ([season, seasons]) =>
+          seasons.find((s: any) => s.season_number === season)?.episodes.length
+      )
+    );
+    this.episodes$ = combineLatest([this.selectedSeason$, this.seasons$]).pipe(
+      map(
+        ([selected, seasons]) =>
+          seasons.find((s: Season) => s.season_number === selected)?.episodes ||
+          []
+      )
+    );
+
     this.images$ = this.route.data.pipe(map((data) => get(data, 'images')));
     this.backdrops$ = this.images$.pipe(
       map((images) => images.backdrops.slice(0, 20))
@@ -89,8 +147,11 @@ export class MediaDetailsComponent implements OnInit {
       this.mediaType$,
       this.videos$,
       this.images$,
+      this.item$,
     ]).pipe(
-      map(([type, videos, photos]) => this.getTabs(type, videos, photos))
+      map(([type, videos, photos, item]) =>
+        this.getTabs(type, videos, photos, item)
+      )
     );
 
     this.isMobile$ = this.sessionQuery.isMobile$;
@@ -116,16 +177,24 @@ export class MediaDetailsComponent implements OnInit {
     );
   }
 
+  changeSeason(season: number): void {
+    this._selectedSeason.next(season);
+  }
+
   private getTitle(params: any, data: any): string {
     const name = get(data, 'item.title', get(data, 'item.name'));
     const type = params['type'];
     return `${name} | ${type === 'tv' ? 'TV Show' : 'Movie'}`;
   }
 
-  private getTabs(type: MediaType, videos: Video[], photos: Images) {
+  private getTabs(type: MediaType, videos: Video[], photos: Images, item: any) {
     return [
       { title: 'Overview', value: 'overview', visible: true },
-      { title: 'Episodes', value: 'episodes', visible: false },
+      {
+        title: 'Episodes',
+        value: 'episodes',
+        visible: type === 'tv' && item.seasons.length > 0,
+      },
       { title: 'Videos', value: 'videos', visible: videos.length > 0 },
       {
         title: 'Photos',

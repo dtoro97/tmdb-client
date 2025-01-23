@@ -161,6 +161,50 @@
         </div>
       </div>
     </ng-container>
+    <ng-container *ngIf="activeTab === 'episodes'">
+      <div class="flex flex-row py-4 mx-2">
+        <div>
+          <label for="seasons" class="mr-2">Seasons</label>
+          <p-select
+            optionLabel="name"
+            optionValue="season_number"
+            id="seasons"
+            [ngModel]="selectedSeason$ | async"
+            [options]="seasons$ | async"
+            [disabled]="(seasons$ | async)?.length === 1"
+            (ngModelChange)="changeSeason($event)"
+          ></p-select>
+          <strong
+            class="muted md:px-4 px-2"
+            *ngIf="episodeCount$ | async as episodeCount"
+            >{{ episodeCount }} Episodes</strong
+          >
+        </div>
+      </div>
+
+      <div class="grid m-0">
+        <div
+          class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item"
+          *ngFor="let episode of episodes$ | async"
+        >
+          <div>
+            <img
+              src="{{ episode.still_path | imgSrc }}"
+              *ngIf="episode.still_path; else empty"
+            />
+            <ng-template #empty>
+              <img src="assets/empty_still.svg" />
+            </ng-template>
+          </div>
+          <h2 class="name">
+            <strong class="mr-2">E{{ episode.episode_number }}</strong
+            >{{ episode.name }}
+          </h2>
+          <div class="mb-3">{{ episode.overview }}</div>
+          <div class="muted">{{ episode.air_date | date }}</div>
+        </div>
+      </div>
+    </ng-container>
     <ng-container *ngIf="activeTab === 'videos'">
       <div *ngIf="(videos$ | async).length">
         <h2 class="md:px-4 px-2">Videos</h2>
