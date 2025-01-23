@@ -15,6 +15,23 @@
     .media-info-label {
       width: 120px;
     }
+    .episode-item {
+      .muted {
+        color: var(--p-text-muted-color);
+      }
+      .name {
+        strong {
+          color: var(--p-primary-color);
+        }
+      }
+      img {
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+      }
+    }
+
     &.mobile {
       .backdrop-photo {
         width: 160px;
