@@ -17,6 +17,7 @@ import {
   PersonExternalIdsResolver,
   PersonImagesResolver,
 } from './resolvers';
+import { NotFoundComponent } from './components/not-found/not-found.component';
 
 const routes: Routes = [
   {
@@ -54,7 +55,7 @@ const routes: Routes = [
     pathMatch: 'full',
     title: 'Browse Movies, TV Shows and People',
   },
-  { path: '**', component: HomeComponent },
+  { path: '**', component: NotFoundComponent },
 ];
 
 @NgModule({

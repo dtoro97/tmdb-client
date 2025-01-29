@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
+  filter,
   from,
   map,
   Observable,
@@ -92,6 +93,7 @@ export class MediaDetailsComponent implements OnInit {
 
     this.item$
       .pipe(
+        filter((item) => item.seasons),
         switchMap((item) => {
           return combineLatest(
             item.seasons.map((s: any) =>
