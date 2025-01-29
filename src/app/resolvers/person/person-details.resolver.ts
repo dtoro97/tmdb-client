@@ -21,7 +21,7 @@ export class PersonDetailsResolver implements Resolve<PersonDetails> {
     const id = route.params['id'];
     return from(this.tmdb.people.details(id)).pipe(
       catchError((e) => {
-        this.router.navigate(['/not-found']);
+        this.router.navigateByUrl('not-found');
         return throwError(e);
       })
     );

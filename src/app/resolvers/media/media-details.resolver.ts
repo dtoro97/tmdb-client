@@ -27,14 +27,14 @@ export class MediaDetailsResolver
     if (type === 'tv') {
       return from(this.tmdb.tvShows.details(id)).pipe(
         catchError((e) => {
-          this.router.navigate(['/not-found']);
+          this.router.navigateByUrl('not-found');
           return throwError(e);
         })
       );
     }
     return from(this.tmdb.movies.details(id)).pipe(
       catchError((e) => {
-        this.router.navigate(['/not-found']);
+        this.router.navigateByUrl('not-found');
         return throwError(e);
       })
     );
