@@ -13,10 +13,8 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
-import { FilterPipe } from '../../pipes/filter.pipe';
-import { SortPipe } from '../../pipes/sort.pipe';
-import { StateQuery } from '../../state/state.query';
+import { FilterPipe, SortPipe } from '../../shared';
+import { StateQuery } from '../../core';
 
 @Component({
   selector: 'app-credits-list',

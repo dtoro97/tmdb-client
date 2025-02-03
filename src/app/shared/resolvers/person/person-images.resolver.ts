@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 
 import { TmdbService } from '../../services';
-import { StateService } from '../../state/state.service';
+import { StateService } from '../../../core';
 
 @Injectable({
   providedIn: 'root',

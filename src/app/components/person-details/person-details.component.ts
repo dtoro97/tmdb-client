@@ -9,7 +9,7 @@ import {
   PersonDetails,
 } from 'tmdb-ts';
 
-import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
+import { CommonModule, ViewportScroller } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,10 +20,9 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
-import { ImagePipe } from '../../pipes/image.pipe';
-import { SortPipe } from '../../pipes/sort.pipe';
-import { StateQuery } from '../../state/state.query';
-import { StateService } from '../../state/state.service';
+import { StateQuery, StateService } from '../../core';
+import { ImagePipe } from '../../shared/pipes/image.pipe';
+import { SortPipe } from '../../shared/pipes/sort.pipe';
 import { CardComponent } from '../card/card.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
 

@@ -11,12 +11,12 @@ import {
   PersonImagesResolver,
   RecommendationsResolver,
   VideosResolver,
-} from './resolvers';
+} from './shared/resolvers';
 import { MediaDetailsComponent } from './components/media-details/media-details.component';
 import { MediaListComponent } from './components/media-list/media-list.component';
 import { HomeComponent } from './components/home/home.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
-import { mediaListGuard } from './guards/media-list.guard';
+import { mediaListGuard } from './core/guards/media-list.guard';
 
 export const routes: Routes = [
   {

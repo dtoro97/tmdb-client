@@ -20,10 +20,9 @@ import {
 } from '@angular/core';
 
 import { TmdbService } from '../../services';
-import { StateQuery } from '../../state/state.query';
-import { StateService } from '../../state/state.service';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
+import { StateQuery, StateService } from '../../../core';
 
 @Component({
   selector: 'app-header',

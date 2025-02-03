@@ -27,12 +27,11 @@ import {
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { MediaListFilters } from '../../interfaces';
-import { TmdbService } from '../../services';
-import { StateQuery } from '../../state/state.query';
-import { StateService } from '../../state/state.service';
+import { MediaListFilters } from '../../shared/interfaces';
 import { movieSortOptions, tvSortOptions } from './sort-options';
 import { CardComponent } from '../card/card.component';
+import { TmdbService } from '../../shared';
+import { StateQuery, StateService } from '../../core';
 
 @Component({
   selector: 'app-media-list',
