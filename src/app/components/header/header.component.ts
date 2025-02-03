@@ -24,11 +24,10 @@ import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-header',
-  imports: [MenubarModule, AutoCompleteModule, ButtonModule, AsyncPipe],
+  imports: [MenubarModule, AutoCompleteModule, ButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
