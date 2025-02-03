@@ -1,3 +1,5 @@
+import { CarouselModule } from 'primeng/carousel';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import {
   BehaviorSubject,
   first,
@@ -9,15 +11,24 @@ import {
 } from 'rxjs';
 import { Movie, PopularTvShowResult, TimeWindow } from 'tmdb-ts';
 
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
 import { TmdbService } from '../../services/tmdb.service';
 import { StateService } from '../../state/state.service';
+import { CardComponent } from '../card/card.component';
 
 @Component({
   selector: 'app-home',
-  standalone: false,
+  imports: [
+    SelectButtonModule,
+    CarouselModule,
+    AsyncPipe,
+    FormsModule,
+    CardComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

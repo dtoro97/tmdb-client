@@ -1,17 +1,34 @@
+import { get } from 'lodash';
+import { SelectModule } from 'primeng/select';
+import { Observable } from 'rxjs';
+import { PersonCombinedCredits } from 'tmdb-ts';
+
+import { AsyncPipe, DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   Input,
   OnInit,
+  Signal,
 } from '@angular/core';
-import { get } from 'lodash';
-import { Observable } from 'rxjs';
-import { PersonCombinedCredits } from 'tmdb-ts';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
+import { FilterPipe } from '../../pipes/filter.pipe';
+import { SortPipe } from '../../pipes/sort.pipe';
 import { StateQuery } from '../../state/state.query';
 
 @Component({
   selector: 'app-credits-list',
-  standalone: false,
+  imports: [
+    SelectModule,
+    FormsModule,
+    AsyncPipe,
+    SortPipe,
+    FilterPipe,
+    DatePipe,
+    RouterLink,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './credits-list.component.html',
   styleUrl: './credits-list.component.scss',
@@ -64,7 +81,7 @@ export class CreditsListComponent implements OnInit {
 
   private _credits: PersonCombinedCredits;
   isDarkMode$: Observable<boolean>;
-  isMobile$: Observable<boolean>;
+  isMobile: Signal<boolean>;
   department: string = 'all';
   media: string = 'all';
   data$: Observable<any[]>;
@@ -75,6 +92,6 @@ export class CreditsListComponent implements OnInit {
 
   ngOnInit(): void {
     this.isDarkMode$ = this.stateQuery.isDarkMode$;
-    this.isMobile$ = this.stateQuery.isMobile$;
+    this.isMobile = this.stateQuery.isMobile;
   }
 }

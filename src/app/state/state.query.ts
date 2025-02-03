@@ -1,11 +1,12 @@
 import { map, Observable } from 'rxjs';
 
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Injectable } from '@angular/core';
+import { inject, Injectable, Signal } from '@angular/core';
 import { Query } from '@datorama/akita';
 
 import { State, StateStore } from './state.store';
 import { Genre, LanguageConfiguration, WatchProvider } from 'tmdb-ts';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class StateQuery extends Query<State> {
@@ -19,24 +20,19 @@ export class StateQuery extends Query<State> {
     (state) => state.languages
   );
   loading$: Observable<boolean> = this.select((state) => state.loading);
-  constructor(
-    store: StateStore,
-    private breakpointObserver: BreakpointObserver
-  ) {
+  isMobile: Signal<boolean>;
+  private breakpointObserver = inject(BreakpointObserver);
+  constructor(store: StateStore) {
     super(store);
+    this.isMobile = toSignal(
+      this.breakpointObserver
+        .observe('(max-width: 768px)')
+        .pipe(map((state) => state.matches)),
+      { initialValue: false }
+    );
   }
 
   get providerIds() {
     return this.getValue().providers.map((provider) => provider.id);
-  }
-
-  get isMobile$() {
-    return this.breakpointObserver
-      .observe('(max-width: 768px)')
-      .pipe(map((state) => state.matches));
-  }
-
-  get isMobile() {
-    return this.breakpointObserver.isMatched('(max-width: 768px)');
   }
 }

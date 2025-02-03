@@ -1,6 +1,7 @@
 <div
   class="h-full details-container pb-4"
-  [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
+  [class.mobile]="isMobile()"
+  [class.dark]="isDarkMode$ | async"
 >
   <div class="relative">
     <img
@@ -12,10 +13,8 @@
   </div>
   <div
     class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
-    [ngClass]="{
-      'mt-0': (hasBackdrop$ | async) === false,
-      'pt-4': (hasBackdrop$ | async) === false
-    }"
+    [class.mt-0]="(hasBackdrop$ | async) === false"
+    [class.pt-4]="(hasBackdrop$ | async) === false"
     [style.maxWidth.px]="1400"
   >
     <div class="flex md:flex-row flex-column" *ngIf="item$ | async as item">

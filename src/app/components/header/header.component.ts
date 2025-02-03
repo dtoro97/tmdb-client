@@ -1,10 +1,8 @@
 import { MenuItem } from 'primeng/api';
-import { AutoComplete } from 'primeng/autocomplete';
+import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
 import {
-  combineLatest,
   debounceTime,
   from,
-  map,
   Observable,
   Subject,
   Subscription,
@@ -13,16 +11,25 @@ import {
 } from 'rxjs';
 import { MultiSearchResult } from 'tmdb-ts';
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  Signal,
+} from '@angular/core';
 
 import { TmdbService } from '../../services';
 import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
+import { MenubarModule } from 'primeng/menubar';
+import { ButtonModule } from 'primeng/button';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-header',
-  standalone: false,
-
+  imports: [MenubarModule, AutoCompleteModule, ButtonModule, AsyncPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
@@ -31,7 +38,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   items: MenuItem[];
   autoCompleteValue: string;
   searchResults: MultiSearchResult[];
-  isMobile$: Observable<boolean>;
+  isMobile: Signal<boolean>;
   search$: Observable<string>;
   private _search: Subject<string> = new Subject();
   private _sub: Subscription;
@@ -45,7 +52,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.items = this.getMenuItems();
-    this.isMobile$ = this.stateQuery.isMobile$;
+    this.isMobile = this.stateQuery.isMobile;
     this.search$ = this._search.asObservable();
     this.isDarkMode$ = this.stateQuery.isDarkMode$;
     this._sub = this.search$
