@@ -60,7 +60,7 @@ export class PersonDetailsComponent implements OnInit {
   visibleCredits$: Observable<string | undefined>;
   private _visbileCredits: Subject<any> = new Subject();
   constructor(
-    private sessionQuery: StateQuery,
+    private stateQuery: StateQuery,
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
     private titleService: Title,
@@ -107,8 +107,8 @@ export class PersonDetailsComponent implements OnInit {
         }
       })
     );
-    this.isMobile = this.sessionQuery.isMobile;
-    this.isDarkMode$ = this.sessionQuery.isDarkMode$;
+    this.isMobile = this.stateQuery.isMobile;
+    this.isDarkMode$ = this.stateQuery.isDarkMode$;
   }
 
   changeVisibleCredits(value: string) {
