@@ -3,7 +3,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { from, map } from 'rxjs';
 import { Movie, PopularTvShowResult, TimeWindow } from 'tmdb-ts';
 
-import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,13 +18,7 @@ import { CardComponent } from '../card/card.component';
 
 @Component({
   selector: 'app-home',
-  imports: [
-    SelectButtonModule,
-    CarouselModule,
-    AsyncPipe,
-    FormsModule,
-    CardComponent,
-  ],
+  imports: [SelectButtonModule, CarouselModule, FormsModule, CardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

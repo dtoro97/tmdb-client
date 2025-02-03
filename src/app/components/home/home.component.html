@@ -39,7 +39,7 @@
       [responsiveOptions]="breakpoints"
     >
       <ng-template let-movie pTemplate="item">
-        <app-card [item]="movie" [type]="selectedPopular$ | async"></app-card>
+        <app-card [item]="movie" [type]="selectedPopular()"></app-card>
       </ng-template>
     </p-carousel>
   </div>
