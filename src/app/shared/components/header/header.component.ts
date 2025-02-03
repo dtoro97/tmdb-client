@@ -23,10 +23,20 @@ import { TmdbService } from '../../services';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
 import { StateQuery, StateService } from '../../../core';
+import { ImagePipe } from '../../pipes';
+import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
-  imports: [MenubarModule, AutoCompleteModule, ButtonModule],
+  imports: [
+    MenubarModule,
+    AutoCompleteModule,
+    ButtonModule,
+    ImagePipe,
+    DatePipe,
+    RouterLink,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',

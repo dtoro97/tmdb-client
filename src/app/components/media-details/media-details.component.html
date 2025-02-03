@@ -43,15 +43,15 @@
           <span>{{ item.vote_average | number : "1.1-1" }}/10</span>
         </div>
         <div class="flex flex-row mt-2 gap-2">
-          <ng-container *ngFor="let genre of item.genres">
-            <p-chip styleClass="cursor-pointer genre">
-              <a
-                [routerLink]="'/list/' + (mediaType$ | async)"
-                [queryParams]="{ with_genres: genre.id }"
-                >{{ genre.name }}</a
-              ></p-chip
-            >
-          </ng-container>
+          @for (genre of item.genres;track genre.id) {
+          <p-chip styleClass="cursor-pointer genre">
+            <a
+              [routerLink]="'/list/' + (mediaType$ | async)"
+              [queryParams]="{ with_genres: genre.id }"
+              >{{ genre.name }}</a
+            ></p-chip
+          >
+          }
         </div>
         <p class="mt-2 mb-0 line-height-4" [style.maxWidth.px]="550">
           {{ item.overview }}
@@ -84,14 +84,15 @@
           <li class="flex" *ngIf="item.created_by?.length">
             <div class="media-info-label">Creator</div>
             <div class="flex-1">
-              <ng-container *ngFor="let creator of item.created_by; index as i">
-                <span
-                  class="cursor-pointer"
-                  routerLink="/details/person/{{ creator.id }}"
-                  >{{ creator.name }}</span
-                >
-                <span *ngIf="i !== item.created_by.length - 1">, </span>
-              </ng-container>
+              @for (creator of item.created_by; track creator.id; let i =
+              $index) {
+              <span
+                class="cursor-pointer"
+                routerLink="/details/person/{{ creator.id }}"
+                >{{ creator.name }}</span
+              >
+              <span *ngIf="i !== item.created_by.length - 1">, </span>
+              }
             </div>
           </li>
           <li class="flex" *ngIf="item.number_of_seasons">
@@ -113,19 +114,19 @@
           >
             <div class="media-info-label">Languages</div>
             <div class="flex-1">
-              <ng-container *ngFor="let lang of languages$ | async; index as i">
-                <span>{{ lang }}</span>
-                <span *ngIf="i !== (languages$ | async).length - 1">, </span>
-              </ng-container>
+              @for(lang of languages$|async; track lang.id; let i = $index) {
+              <span>{{ lang.english_name }}</span>
+              <span *ngIf="i !== item.languages.length - 1">, </span>
+              }
             </div>
           </li>
           <li class="flex" *ngIf="item.networks?.length">
             <div class="media-info-label">Networks</div>
             <div class="flex-1">
-              <ng-container *ngFor="let network of item.networks; index as i">
-                <span>{{ network.name }}</span>
-                <span *ngIf="i !== item.networks.length - 1">, </span>
-              </ng-container>
+              @for(network of item.networks; track network.id; let i = $index) {
+              <span>{{ network.name }}</span>
+              <span *ngIf="i !== item.networks.length - 1">, </span>
+              }
             </div>
           </li>
         </ul>
@@ -135,11 +136,10 @@
   <div class="mt-2 mx-2 md:mx-4">
     <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
       <p-tablist>
-        <ng-container *ngFor="let tabHeader of tabs$ | async">
-          <p-tab *ngIf="tabHeader.visible" [value]="tabHeader.value">{{
-            tabHeader.title
-          }}</p-tab>
-        </ng-container>
+        @for(tabHeader of tabs$ | async | filter: {visible: true}; track
+        tabHeader.value) {
+        <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
+        }
       </p-tablist>
     </p-tabs>
     <ng-container *ngIf="activeTab === 'overview'">
@@ -182,18 +182,14 @@
       </div>
 
       <div class="grid m-0">
-        <div
-          class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item"
-          *ngFor="let episode of episodes$ | async"
-        >
+        @for(episode of episodes$ | async; track episode.id) {
+        <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item">
           <div>
-            <img
-              src="{{ episode.still_path | imgSrc }}"
-              *ngIf="episode.still_path; else empty"
-            />
-            <ng-template #empty>
-              <img src="assets/empty_still.svg" />
-            </ng-template>
+            @if(episode.still_path) {
+            <img src="{{ episode.still_path | imgSrc }}" />
+            }@else {
+            <img src="assets/empty_still.svg" />
+            }
           </div>
           <h2 class="name">
             <strong class="mr-2">E{{ episode.episode_number }}</strong
@@ -202,6 +198,7 @@
           <div class="mb-3">{{ episode.overview }}</div>
           <div class="muted">{{ episode.air_date | date }}</div>
         </div>
+        }
       </div>
     </ng-container>
     <ng-container *ngIf="activeTab === 'videos'">
@@ -210,7 +207,8 @@
         <div
           class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
         >
-          <div class="video-frame" *ngFor="let video of videos$ | async">
+          @for(video of videos$ | async;track video.id) {
+          <div class="video-frame">
             <iframe
               [src]="video | yt"
               title="{{ video.name }}"
@@ -219,6 +217,7 @@
               class="iframe"
             ></iframe>
           </div>
+          }
         </div>
       </div>
     </ng-container>
@@ -231,13 +230,11 @@
         <div
           class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
         >
-          <a
-            href="{{ image.file_path | imgSrc }}"
-            target="_blank"
-            *ngFor="let image of backdrops$ | async"
-          >
+          @for(image of backdrops$|async; track image.file_path) {
+          <a href="{{ image.file_path | imgSrc }}" target="_blank">
             <img class="backdrop-photo" src="{{ image.file_path | imgSrc }}" />
           </a>
+          }
         </div>
       </div>
       <div *ngIf="(posters$ | async)?.length">
@@ -248,13 +245,11 @@
         <div
           class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
         >
-          <a
-            href="{{ image.file_path | imgSrc }}"
-            target="_blank"
-            *ngFor="let image of posters$ | async"
-          >
+          @for(image of posters$ | async; track image.file_path) {
+          <a href="{{ image.file_path | imgSrc }}" target="_blank">
             <img class="poster-photo" src="{{ image.file_path | imgSrc }}" />
           </a>
+          }
         </div>
       </div>
     </ng-container>

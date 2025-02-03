@@ -25,6 +25,7 @@ import { ImagePipe } from '../../shared/pipes/image.pipe';
 import { SortPipe } from '../../shared/pipes/sort.pipe';
 import { CardComponent } from '../card/card.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
+import { FilterPipe } from '../../shared';
 
 @Component({
   selector: 'app-person-details',
@@ -36,6 +37,7 @@ import { CreditsListComponent } from '../credits-list/credits-list.component';
     CardComponent,
     SortPipe,
     CreditsListComponent,
+    FilterPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './person-details.component.html',

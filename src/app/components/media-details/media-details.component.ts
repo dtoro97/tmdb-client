@@ -34,7 +34,7 @@ import {
   Signal,
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
 import { ImagePipe } from '../../shared/pipes/image.pipe';
@@ -46,6 +46,7 @@ import { YoutubeLinkPipe } from '../../shared/pipes/youtube-link.pipe';
 import { FormsModule } from '@angular/forms';
 import { StateQuery, StateService } from '../../core';
 import { TmdbService } from '../../shared/services';
+import { FilterPipe } from '../../shared';
 
 @Component({
   selector: 'app-media-details',
@@ -64,6 +65,8 @@ import { TmdbService } from '../../shared/services';
     PersonCardComponent,
     YoutubeLinkPipe,
     FormsModule,
+    RouterLink,
+    FilterPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './media-details.component.html',
@@ -201,10 +204,11 @@ export class MediaDetailsComponent implements OnInit {
           params['type'] === 'tv'
             ? data['item'].languages
             : [data['item'].original_language];
-        return langCodes.map(
-          (code: any) =>
-            languages.find((l) => l['iso_639_1'] === code)?.english_name
-        );
+        return languages.length
+          ? langCodes.map((code: string) =>
+              languages.find((l) => l['iso_639_1'] === code)
+            )
+          : langCodes;
       })
     );
   }

@@ -65,11 +65,10 @@
   <div class="mt-2 mx-0 md:mx-4">
     <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
       <p-tablist>
-        <ng-container *ngFor="let tabHeader of tabs$ | async">
-          <p-tab *ngIf="tabHeader.visible" [value]="tabHeader.value">{{
-            tabHeader.title
-          }}</p-tab>
-        </ng-container>
+        @for(tabHeader of tabs$ | async | filter: {visible: true}; track
+        tabHeader.value) {
+        <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
+        }
       </p-tablist>
     </p-tabs>
     <ng-container *ngIf="activeTab === 'knownFor' && hasCredits$ | async">
@@ -86,11 +85,10 @@
       <div
         class="flex flex-wrap gap-3 justify-content-center md:justify-content-start mt-3"
       >
-        <ng-container
-          *ngFor="let item of knownFor$ | async | sort : 'vote_average'"
-        >
-          <app-card [item]="item" [type]="item.media_type"></app-card>
-        </ng-container>
+        @for (item of knownFor$ | async | sort : 'vote_average'; track item.id)
+        {
+        <app-card [item]="item" [type]="item.media_type"></app-card>
+        }
       </div>
     </ng-container>
     <app-credits-list
@@ -101,13 +99,11 @@
       <div
         class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start"
       >
-        <a
-          href="{{ image.file_path | imgSrc }}"
-          target="_blank"
-          *ngFor="let image of images$ | async"
-        >
+        @for(image of images$ | async;track image.file_path) {
+        <a href="{{ image.file_path | imgSrc }}" target="_blank">
           <img class="photos-item" src="{{ image.file_path | imgSrc }}" />
         </a>
+        }
       </div>
     </ng-container>
   </div>
