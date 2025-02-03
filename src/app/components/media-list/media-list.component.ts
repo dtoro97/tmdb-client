@@ -78,13 +78,13 @@ export class MediaListComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
-    private sessionQuery: StateQuery,
+    private stateQuery: StateQuery,
     private titleService: Title,
     private stateService: StateService
   ) {}
   ngOnInit(): void {
-    this.isMobile = this.sessionQuery.isMobile;
-    this.filterPanelState = new BehaviorSubject(!this.sessionQuery.isMobile());
+    this.isMobile = this.stateQuery.isMobile;
+    this.filterPanelState = new BehaviorSubject(!this.stateQuery.isMobile());
     this.filterPanelState$ = this.filterPanelState.asObservable();
     this.data$ = this._data.asObservable();
     this.filters = cloneDeep(this.defaultFilters);
@@ -95,8 +95,8 @@ export class MediaListComponent implements OnInit, OnDestroy {
             this.type = params['type'];
             this.genres$ =
               this.type === 'tv'
-                ? this.sessionQuery.tvGenres$
-                : this.sessionQuery.movieGenres$;
+                ? this.stateQuery.tvGenres$
+                : this.stateQuery.movieGenres$;
             this.title = this.getTitle(queryParams, params);
             this.titleService.setTitle(this.title);
             this.sortOptions =
@@ -128,7 +128,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
   search(): void {
     const queryParams = this.toQueryParams();
     this.router.navigate([`list/${this.type}`], { queryParams });
-    if (this.sessionQuery.isMobile()) {
+    if (this.stateQuery.isMobile()) {
       this.filterPanelState.next(false);
     }
   }

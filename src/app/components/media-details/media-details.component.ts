@@ -97,7 +97,7 @@ export class MediaDetailsComponent implements OnInit {
   episodes$: Observable<Episode[]>;
   constructor(
     private route: ActivatedRoute,
-    private sessionQuery: StateQuery,
+    private stateQuery: StateQuery,
     private scroller: ViewportScroller,
     private titleService: Title,
     private stateService: StateService,
@@ -186,10 +186,10 @@ export class MediaDetailsComponent implements OnInit {
       )
     );
 
-    this.isMobile = this.sessionQuery.isMobile;
-    this.isDarkMode$ = this.sessionQuery.isDarkMode$;
+    this.isMobile = this.stateQuery.isMobile;
+    this.isDarkMode$ = this.stateQuery.isDarkMode$;
     this.languages$ = combineLatest([
-      this.sessionQuery.languages$,
+      this.stateQuery.languages$,
       this.route.params,
       this.route.data,
     ]).pipe(
