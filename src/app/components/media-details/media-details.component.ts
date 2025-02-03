@@ -1,4 +1,9 @@
 import { get } from 'lodash';
+import { CarouselModule } from 'primeng/carousel';
+import { ChipModule } from 'primeng/chip';
+import { RatingModule } from 'primeng/rating';
+import { SelectModule } from 'primeng/select';
+import { TabsModule } from 'primeng/tabs';
 import {
   BehaviorSubject,
   combineLatest,
@@ -21,21 +26,47 @@ import {
   Video,
 } from 'tmdb-ts';
 
-import { ViewportScroller } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  Signal,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { ImagePipe } from '../../pipes/image.pipe';
+import { MinutesToHours } from '../../pipes/time.pipe';
 import { TmdbService } from '../../services';
 import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
+import { SortPipe } from '../../pipes/sort.pipe';
+import { CardComponent } from '../card/card.component';
+import { PersonCardComponent } from '../person-card/person-card.component';
+import { YoutubeLinkPipe } from '../../pipes/youtube-link.pipe';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-media-details',
-  standalone: false,
+  imports: [
+    RatingModule,
+    ChipModule,
+    TabsModule,
+    CarouselModule,
+    SelectModule,
+    ImagePipe,
+    MinutesToHours,
+    AsyncPipe,
+    CommonModule,
+    SortPipe,
+    CardComponent,
+    PersonCardComponent,
+    YoutubeLinkPipe,
+    FormsModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-
   templateUrl: './media-details.component.html',
   styleUrl: './media-details.component.scss',
 })
@@ -52,7 +83,7 @@ export class MediaDetailsComponent implements OnInit {
   mediaType$: Observable<MediaType>;
   isDarkMode$: Observable<boolean>;
   languages$: Observable<string>;
-  isMobile$: Observable<boolean>;
+  isMobile: Signal<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   hasPoster = false;
   hasBackdrop$: Observable<boolean>;
@@ -156,7 +187,7 @@ export class MediaDetailsComponent implements OnInit {
       )
     );
 
-    this.isMobile$ = this.sessionQuery.isMobile$;
+    this.isMobile = this.sessionQuery.isMobile;
     this.isDarkMode$ = this.sessionQuery.isDarkMode$;
     this.languages$ = combineLatest([
       this.sessionQuery.languages$,

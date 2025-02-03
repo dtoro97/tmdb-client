@@ -1,4 +1,4 @@
-<div class="w-full header" [ngClass]="{ mobile: isMobile$ | async }">
+<div class="w-full header" [class.mobile]="isMobile()">
   <p-menubar [model]="items">
     <ng-template #end>
       <div class="flex flex-row align-items-center gap-1">
@@ -12,7 +12,7 @@
           <ng-template let-item #item>
             <div
               class="flex flex-row w-full autocomplete-item"
-              [ngClass]="{ mobile: isMobile$ | async }"
+              [class.mobile]="isMobile()"
               [routerLink]="'/details' + '/' + item.media_type + '/' + item.id"
             >
               <img

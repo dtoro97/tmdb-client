@@ -1,12 +1,5 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './components/home/home.component';
-import { MediaDetailsComponent } from './components/media-details/media-details.component';
-import { VideosResolver } from './resolvers/media/videos.resolver';
-import { RecommendationsResolver } from './resolvers/media/recommendations.resolver';
+import { Routes } from '@angular/router';
 import { PersonDetailsComponent } from './components/person-details/person-details.component';
-import { MediaListComponent } from './components/media-list/media-list.component';
-import { MediaListGuard } from './guards/media-list.guard';
 import {
   MediaCreditsResolver,
   MediaDetailsResolver,
@@ -16,10 +9,16 @@ import {
   PersonDetailsResolver,
   PersonExternalIdsResolver,
   PersonImagesResolver,
+  RecommendationsResolver,
+  VideosResolver,
 } from './resolvers';
+import { MediaDetailsComponent } from './components/media-details/media-details.component';
+import { MediaListComponent } from './components/media-list/media-list.component';
+import { HomeComponent } from './components/home/home.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
+import { mediaListGuard } from './guards/media-list.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: 'details/person/:id',
     component: PersonDetailsComponent,
@@ -29,7 +28,6 @@ const routes: Routes = [
       socialLinks: PersonExternalIdsResolver,
       images: PersonImagesResolver,
     },
-    title: 'Popular Person',
     pathMatch: 'full',
   },
   {
@@ -47,7 +45,7 @@ const routes: Routes = [
   {
     path: 'list/:type',
     component: MediaListComponent,
-    canActivate: [MediaListGuard],
+    canActivate: [mediaListGuard],
   },
   {
     path: '',
@@ -57,9 +55,3 @@ const routes: Routes = [
   },
   { path: '**', component: NotFoundComponent },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import {
   ExternalIds,
   MovieDetails,
@@ -8,8 +8,7 @@ import {
 
 @Component({
   selector: 'app-social-links',
-  standalone: false,
-
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './social-links.component.html',
   styleUrl: './social-links.component.scss',
 })

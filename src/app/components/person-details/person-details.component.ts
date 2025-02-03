@@ -1,3 +1,6 @@
+import { get, uniqBy } from 'lodash';
+import { SelectModule } from 'primeng/select';
+import { TabsModule } from 'primeng/tabs';
 import { combineLatest, map, Observable, Subject, tap } from 'rxjs';
 import {
   ExternalIds,
@@ -6,19 +9,35 @@ import {
   PersonDetails,
 } from 'tmdb-ts';
 
-import { ViewportScroller } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  Signal,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { ImagePipe } from '../../pipes/image.pipe';
+import { SortPipe } from '../../pipes/sort.pipe';
 import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
-import { get, uniqBy } from 'lodash';
+import { CardComponent } from '../card/card.component';
+import { CreditsListComponent } from '../credits-list/credits-list.component';
 
 @Component({
   selector: 'app-person-details',
-  standalone: false,
+  imports: [
+    ImagePipe,
+    TabsModule,
+    SelectModule,
+    CommonModule,
+    CardComponent,
+    SortPipe,
+    CreditsListComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './person-details.component.html',
   styleUrl: './person-details.component.scss',
@@ -30,7 +49,8 @@ export class PersonDetailsComponent implements OnInit {
   credits$: Observable<PersonCombinedCredits>;
   personAge$: Observable<number>;
   links$: Observable<ExternalIds>;
-  isMobile$: Observable<boolean>;
+  isMobile: Signal<boolean>;
+
   isDarkMode$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   links: ExternalIds;
@@ -88,7 +108,7 @@ export class PersonDetailsComponent implements OnInit {
         }
       })
     );
-    this.isMobile$ = this.sessionQuery.isMobile$;
+    this.isMobile = this.sessionQuery.isMobile;
     this.isDarkMode$ = this.sessionQuery.isDarkMode$;
   }
 

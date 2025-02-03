@@ -1,4 +1,12 @@
 import { cloneDeep, get, set, toNumber } from 'lodash';
+import { AccordionModule } from 'primeng/accordion';
+import { ButtonModule } from 'primeng/button';
+import { ChipModule } from 'primeng/chip';
+import { DatePickerModule } from 'primeng/datepicker';
+import { DividerModule } from 'primeng/divider';
+import { PaginatorModule } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
+import { SliderModule } from 'primeng/slider';
 import {
   BehaviorSubject,
   combineLatest,
@@ -8,12 +16,13 @@ import {
 } from 'rxjs';
 import { Genre } from 'tmdb-ts';
 
-import { ViewportScroller } from '@angular/common';
+import { AsyncPipe, ViewportScroller } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
   OnInit,
+  Signal,
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -23,16 +32,28 @@ import { TmdbService } from '../../services';
 import { StateQuery } from '../../state/state.query';
 import { StateService } from '../../state/state.service';
 import { movieSortOptions, tvSortOptions } from './sort-options';
+import { CardComponent } from '../card/card.component';
 
 @Component({
   selector: 'app-media-list',
-  standalone: false,
+  imports: [
+    ButtonModule,
+    AccordionModule,
+    SelectModule,
+    DatePickerModule,
+    DividerModule,
+    ChipModule,
+    SliderModule,
+    PaginatorModule,
+    AsyncPipe,
+    CardComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './media-list.component.html',
   styleUrl: './media-list.component.scss',
 })
 export class MediaListComponent implements OnInit, OnDestroy {
-  isMobile$: Observable<boolean>;
+  isMobile: Signal<boolean>;
   type: string;
   sortOptions: any[] = [];
   filters: MediaListFilters;
@@ -63,8 +84,8 @@ export class MediaListComponent implements OnInit, OnDestroy {
     private stateService: StateService
   ) {}
   ngOnInit(): void {
-    this.isMobile$ = this.sessionQuery.isMobile$;
-    this.filterPanelState = new BehaviorSubject(!this.sessionQuery.isMobile);
+    this.isMobile = this.sessionQuery.isMobile;
+    this.filterPanelState = new BehaviorSubject(!this.sessionQuery.isMobile());
     this.filterPanelState$ = this.filterPanelState.asObservable();
     this.data$ = this._data.asObservable();
     this.filters = cloneDeep(this.defaultFilters);
@@ -100,7 +121,6 @@ export class MediaListComponent implements OnInit, OnDestroy {
           this.stateService.setLoading(false);
         })
     );
-    this.filterPanelState$.subscribe((v) => console.log(v));
   }
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
@@ -109,7 +129,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
   search(): void {
     const queryParams = this.toQueryParams();
     this.router.navigate([`list/${this.type}`], { queryParams });
-    if (this.sessionQuery.isMobile) {
+    if (this.sessionQuery.isMobile()) {
       this.filterPanelState.next(false);
     }
   }

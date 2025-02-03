@@ -1,11 +1,11 @@
 <div class="main-layout">
   <app-header></app-header>
+  @if (isLoading()) {
   <p-progress-bar
     mode="indeterminate"
     [style]="{ height: '4px' }"
-    *ngIf="isLoading$ | async"
   ></p-progress-bar>
+  }
   <router-outlet></router-outlet>
-
   <app-footer></app-footer>
 </div>

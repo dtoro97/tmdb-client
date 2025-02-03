@@ -1,6 +1,7 @@
 <div
   class="h-full details-container py-4"
-  [ngClass]="{ dark: isDarkMode$ | async, mobile: isMobile$ | async }"
+  [class.mobile]="isMobile()"
+  [class.dark]="isDarkMode$ | async"
 >
   <div
     *ngIf="person$ | async as person"
@@ -14,7 +15,7 @@
         src="{{ person.profile_path | imgSrc : 'w500' }}"
         class="person-image border-round-xl"
       />
-      <h1 class="m-0" *ngIf="(isMobile$ | async) === true">
+      <h1 class="m-0" *ngIf="isMobile() === true">
         {{ person.name }}
       </h1>
       <div class="mt-4 mb-3">
@@ -23,7 +24,7 @@
           [item]="person"
         ></app-social-links>
       </div>
-      <h2 class="m-0" *ngIf="(isMobile$ | async) === false">Personal Info</h2>
+      <h2 class="m-0" *ngIf="isMobile() === false">Personal Info</h2>
       <ul class="list-none line-height-4 pl-0">
         <li class="flex">
           <div class="person-info-label">Known For</div>
@@ -52,7 +53,7 @@
       </ul>
     </div>
     <div class="flex-1">
-      <h1 class="m-0 mb-4" *ngIf="(isMobile$ | async) === false">
+      <h1 class="m-0 mb-4" *ngIf="isMobile() === false">
         {{ person.name }}
       </h1>
       <h2 class="m-0 mb-2" *ngIf="person.biography">Biography</h2>
