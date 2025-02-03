@@ -4,13 +4,13 @@
       <h2>Trending</h2>
       <p-select-button
         [options]="trendingOptions"
-        [ngModel]="selectedTrending$ | async"
+        [ngModel]="selectedTrending()"
         (ngModelChange)="changeTrending($event)"
         optionValue="value"
       ></p-select-button>
     </div>
     <p-carousel
-      [value]="trending$ | async"
+      [value]="trending()"
       [numVisible]="8"
       [numScroll]="8"
       [showIndicators]="false"
@@ -26,13 +26,13 @@
       <h2>What's Popular</h2>
       <p-select-button
         [options]="popularOptions"
-        [ngModel]="selectedPopular$ | async"
+        [ngModel]="selectedPopular()"
         (ngModelChange)="changePopular($event)"
         optionValue="value"
       ></p-select-button>
     </div>
     <p-carousel
-      [value]="popular$ | async"
+      [value]="popular()"
       [numVisible]="8"
       [numScroll]="8"
       [showIndicators]="false"
@@ -48,7 +48,7 @@
       <h2>Upcoming Movies</h2>
     </div>
     <p-carousel
-      [value]="upcomingMovies$ | async"
+      [value]="upcomingMovies()"
       [numVisible]="8"
       [numScroll]="8"
       [showIndicators]="false"
