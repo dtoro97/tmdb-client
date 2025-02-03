@@ -3,8 +3,8 @@ import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { from, map, Observable } from 'rxjs';
 
 import { TmdbService } from '../../services';
-import { StateService } from '../../state/state.service';
 import { Recommendation } from 'tmdb-ts';
+import { StateService } from '../../../core';
 
 @Injectable({
   providedIn: 'root',

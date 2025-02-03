@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Movie, PopularTvShowResult } from 'tmdb-ts';
-import { ImagePipe } from '../../pipes/image.pipe';
+
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+
+import { ImagePipe } from '../../shared/pipes/image.pipe';
 
 @Component({
   selector: 'app-card',

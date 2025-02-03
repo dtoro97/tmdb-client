@@ -4,10 +4,9 @@ import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
 
-import { FooterComponent } from './components/footer/footer.component';
-import { HeaderComponent } from './components/header/header.component';
-import { StateQuery } from './state/state.query';
-import { StateService } from './state/state.service';
+import { FooterComponent } from './shared/components';
+import { HeaderComponent } from './shared/components';
+import { StateQuery, StateService } from './core';
 
 @Component({
   selector: 'app-root',

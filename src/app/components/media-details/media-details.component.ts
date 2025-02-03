@@ -37,16 +37,15 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
-import { ImagePipe } from '../../pipes/image.pipe';
-import { MinutesToHours } from '../../pipes/time.pipe';
-import { TmdbService } from '../../services';
-import { StateQuery } from '../../state/state.query';
-import { StateService } from '../../state/state.service';
-import { SortPipe } from '../../pipes/sort.pipe';
+import { ImagePipe } from '../../shared/pipes/image.pipe';
+import { MinutesToHours } from '../../shared/pipes/time.pipe';
+import { SortPipe } from '../../shared/pipes/sort.pipe';
 import { CardComponent } from '../card/card.component';
 import { PersonCardComponent } from '../person-card/person-card.component';
-import { YoutubeLinkPipe } from '../../pipes/youtube-link.pipe';
+import { YoutubeLinkPipe } from '../../shared/pipes/youtube-link.pipe';
 import { FormsModule } from '@angular/forms';
+import { StateQuery, StateService } from '../../core';
+import { TmdbService } from '../../shared/services';
 
 @Component({
   selector: 'app-media-details',

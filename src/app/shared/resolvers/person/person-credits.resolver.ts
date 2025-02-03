@@ -3,21 +3,17 @@ import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { from, Observable } from 'rxjs';
 
 import { TmdbService } from '../../services';
-import { StateService } from '../../state/state.service';
-import { Images } from 'tmdb-ts';
+import { PersonCombinedCredits } from 'tmdb-ts';
+import { StateService } from '../../../core';
 
 @Injectable({
   providedIn: 'root',
 })
-export class MediaImagesResolver implements Resolve<Images> {
+export class PersonCreditsResolver implements Resolve<PersonCombinedCredits> {
   constructor(private tmdb: TmdbService, private stateService: StateService) {}
-  resolve(route: ActivatedRouteSnapshot): Observable<Images> {
+  resolve(route: ActivatedRouteSnapshot): Observable<PersonCombinedCredits> {
     this.stateService.setLoading(true);
-    const type = route.params['type'] || 'person';
     const id = route.params['id'];
-    if (type === 'tv') {
-      return from(this.tmdb.tvShows.images(id));
-    }
-    return from(this.tmdb.movies.images(id));
+    return from(this.tmdb.people.combinedCredits(id));
   }
 }

@@ -1,4 +1,4 @@
-import { TmdbService } from '../services';
+import { TmdbService } from '../../shared';
 import { StateStore } from './state.store';
 import { Injectable } from '@angular/core';
 

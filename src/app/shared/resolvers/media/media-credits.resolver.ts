@@ -1,20 +1,24 @@
 import { from, Observable } from 'rxjs';
+import { Credits } from 'tmdb-ts';
 
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 
 import { TmdbService } from '../../services';
-import { ExternalIds } from 'tmdb-ts';
-import { StateService } from '../../state/state.service';
+import { StateService } from '../../../core';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PersonExternalIdsResolver implements Resolve<ExternalIds> {
+export class MediaCreditsResolver implements Resolve<Credits> {
   constructor(private tmdb: TmdbService, private stateService: StateService) {}
-  resolve(route: ActivatedRouteSnapshot): Observable<ExternalIds> {
+  resolve(route: ActivatedRouteSnapshot): Observable<Credits> {
     this.stateService.setLoading(true);
+    const type = route.params['type'];
     const id = route.params['id'];
-    return from(this.tmdb.people.externalId(id));
+    if (type === 'tv') {
+      return from(this.tmdb.tvShows.credits(id));
+    }
+    return from(this.tmdb.movies.credits(id));
   }
 }

@@ -16,9 +16,9 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
-import { TmdbService } from '../../services/tmdb.service';
-import { StateService } from '../../state/state.service';
 import { CardComponent } from '../card/card.component';
+import { TmdbService } from '../../shared';
+import { StateService } from '../../core';
 
 @Component({
   selector: 'app-home',

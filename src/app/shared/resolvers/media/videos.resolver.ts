@@ -4,8 +4,8 @@ import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { TmdbService } from '../../services';
-import { StateService } from '../../state/state.service';
 import { Video } from 'tmdb-ts';
+import { StateService } from '../../../core';
 
 @Injectable({
   providedIn: 'root',

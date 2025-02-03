@@ -2,9 +2,9 @@ import { Cast } from 'tmdb-ts';
 
 import { Component, Input, OnInit, Signal } from '@angular/core';
 
-import { StateQuery } from '../../state/state.query';
-import { ImagePipe } from '../../pipes/image.pipe';
+import { ImagePipe } from '../../shared/pipes/image.pipe';
 import { RouterLink } from '@angular/router';
+import { StateQuery } from '../../core';
 
 @Component({
   selector: 'app-person-card',
