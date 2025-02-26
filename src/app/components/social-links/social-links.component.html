@@ -1,37 +1,32 @@
+@if (links) {
 <div class="flex flex-row justify-content-center gap-3">
-  <ng-container *ngIf="links.facebook_id">
-    <a href="{{ 'https://facebook.com/' + links.facebook_id }}" target="_blank">
-      <i class="fa-brands fa-facebook"></i
-    ></a>
-  </ng-container>
-  <ng-container *ngIf="links.imdb_id">
-    <a
-      href="{{
-        'https://imdb.com/' + (isPerson ? 'name/' : 'title/') + links.imdb_id
-      }}"
-      target="_blank"
-    >
-      <i class="fa-brands fa-imdb"></i>
-    </a>
-  </ng-container>
-
-  <ng-container *ngIf="links.instagram_id">
-    <a
-      href="{{ 'https://instagram.com/' + links.instagram_id }}"
-      target="_blank"
-    >
-      <i class="fa-brands fa-instagram"></i
-    ></a>
-  </ng-container>
-  <ng-container *ngIf="links.twitter_id">
-    <a href="{{ 'https://twitter.com/' + links.twitter_id }}" target="_blank"
-      ><i class="fa-brands fa-twitter"></i
-    ></a>
-  </ng-container>
-  <p-divider layout="vertical" *ngIf="item.homepage"></p-divider>
-  <ng-container *ngIf="item.homepage">
-    <a href="{{ item.homepage }}" target="_blank"
-      ><i class="fa-solid fa-link"></i
-    ></a>
-  </ng-container>
+  @if (links.facebook_id) {
+  <a href="{{ 'https://facebook.com/' + links.facebook_id }}" target="_blank">
+    <i class="fa-brands fa-facebook"></i
+  ></a>
+  } @if (links.imdb_id) {
+  <a
+    href="{{
+      'https://imdb.com/' + (isPerson ? 'name/' : 'title/') + links.imdb_id
+    }}"
+    target="_blank"
+  >
+    <i class="fa-brands fa-imdb"></i>
+  </a>
+  } @if (links.instagram_id) {
+  <a href="{{ 'https://instagram.com/' + links.instagram_id }}" target="_blank">
+    <i class="fa-brands fa-instagram"></i
+  ></a>
+  } @if (links.twitter_id) {
+  <a href="{{ 'https://twitter.com/' + links.twitter_id }}" target="_blank"
+    ><i class="fa-brands fa-twitter"></i
+  ></a>
+  } @if (item.homepage) {
+  <p-divider layout="vertical"></p-divider>
+  <a href="{{ item.homepage }}" target="_blank"
+    ><i class="fa-solid fa-link"></i
+  ></a>
+  }
 </div>
+
+}

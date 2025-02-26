@@ -5,7 +5,7 @@
         <p-autocomplete
           #searchBar
           (onSelect)="onSearchSelect($event.value, searchBar)"
-          [suggestions]="searchResults"
+          [suggestions]="searchResults$ | async"
           (completeMethod)="search($event.query)"
           placeholder="Search..."
         >

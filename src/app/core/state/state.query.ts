@@ -19,7 +19,7 @@ export class StateQuery extends Query<State> {
   languages$: Observable<LanguageConfiguration[]> = this.select(
     (state) => state.languages
   );
-  loading$: Observable<boolean> = this.select((state) => state.loading);
+  loading$: Observable<boolean> = this.selectLoading();
   isMobile: Signal<boolean>;
   private breakpointObserver = inject(BreakpointObserver);
   constructor(store: StateStore) {

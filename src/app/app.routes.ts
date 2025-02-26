@@ -5,10 +5,6 @@ import {
   MediaDetailsResolver,
   MediaExternalIdsResolver,
   MediaImagesResolver,
-  PersonCreditsResolver,
-  PersonDetailsResolver,
-  PersonExternalIdsResolver,
-  PersonImagesResolver,
   RecommendationsResolver,
   VideosResolver,
 } from './shared/resolvers';
@@ -17,17 +13,13 @@ import { MediaListComponent } from './components/media-list/media-list.component
 import { HomeComponent } from './components/home/home.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
 import { mediaListGuard } from './core/guards/media-list.guard';
+import { PersonResolver } from './shared/resolvers/peron.resolver';
 
 export const routes: Routes = [
   {
     path: 'details/person/:id',
     component: PersonDetailsComponent,
-    resolve: {
-      item: PersonDetailsResolver,
-      credits: PersonCreditsResolver,
-      socialLinks: PersonExternalIdsResolver,
-      images: PersonImagesResolver,
-    },
+    resolve: { data: PersonResolver },
     pathMatch: 'full',
   },
   {

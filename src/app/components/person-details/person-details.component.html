@@ -22,6 +22,7 @@
         <app-social-links
           [links]="links$ | async"
           [item]="person"
+          [isPerson]="true"
         ></app-social-links>
       </div>
       <h2 class="m-0" *ngIf="isMobile() === false">Personal Info</h2>
@@ -34,9 +35,7 @@
           <div class="person-info-label">Born</div>
           <div class="flex-1">
             <span>{{ person.birthday | date }}</span
-            ><span *ngIf="!person.deathday">
-              (age {{ personAge$ | async }})</span
-            >
+            ><span *ngIf="!person.deathday"> (age {{ person | age }})</span>
           </div>
         </li>
         <li class="flex" *ngIf="person.deathday">
@@ -73,15 +72,15 @@
     </p-tabs>
     <ng-container *ngIf="activeTab === 'knownFor' && hasCredits$ | async">
       <p-select
-        *ngIf="visibleCredits$ | async as visibleCredits"
         styleClass="mt-3 ml-5"
         optionLabel="label"
         optionValue="value"
-        [ngModel]="visibleCredits"
+        [ngModel]="visibleCredits$ | async"
         [options]="creditsOptions"
         [disabled]="creditsOptions.length === 1"
         (ngModelChange)="changeVisibleCredits($event)"
       ></p-select>
+
       <div
         class="flex flex-wrap gap-3 justify-content-center md:justify-content-start mt-3"
       >

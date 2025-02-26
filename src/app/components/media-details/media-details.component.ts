@@ -87,7 +87,6 @@ export class MediaDetailsComponent implements OnInit {
   languages$: Observable<string>;
   isMobile: Signal<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
-  hasPoster = false;
   hasBackdrop$: Observable<boolean>;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab: string = 'overview';
