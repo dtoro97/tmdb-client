@@ -1,6 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { get, set } from 'lodash';
+
+import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 
 export const mediaListGuard = (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
@@ -33,7 +34,7 @@ export const mediaListGuard = (route: ActivatedRouteSnapshot) => {
   }
 
   if (changed) {
-    router.navigate([`/list/${type}`], {
+    router.navigate(['list', type], {
       queryParams: newParams,
     });
     return false;

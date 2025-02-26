@@ -32,6 +32,6 @@ export class StateService {
   }
 
   setLoading(loading: boolean): void {
-    this.store.update({ loading });
+    this.store.setLoading(loading);
   }
 }

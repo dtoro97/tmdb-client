@@ -39,7 +39,7 @@
       </span>
       <a
         class="cursor-pointer py-2 px-4"
-        routerLink="/details/{{ item.media_type }}/{{ item.id }}"
+        [routerLink]="['/details', item.media_type, item.id]"
         ><strong>{{ item.title || item.name }}</strong>
         <span class="muted">&nbsp;as {{ item.character || item.job }}</span></a
       >
@@ -58,7 +58,7 @@
       </span>
       <a
         class="cursor-pointer py-2 px-4"
-        routerLink="/details/{{ item.media_type }}/{{ item.id }}"
+        [routerLink]="['/details', item.media_type, item.id]"
         ><strong>{{ item.title || item.name }}</strong>
         <span class="muted">&nbsp;as {{ item.character || item.job }}</span></a
       >

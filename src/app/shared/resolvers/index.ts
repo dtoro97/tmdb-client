@@ -1,2 +1,2 @@
 export * from './media';
-export * from './person';
+export * from './peron.resolver';

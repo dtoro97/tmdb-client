@@ -27,11 +27,12 @@ import {
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { MediaListFilters } from '../../shared/interfaces';
-import { movieSortOptions, tvSortOptions } from './sort-options';
-import { CardComponent } from '../card/card.component';
-import { TmdbService } from '../../shared';
 import { StateQuery, StateService } from '../../core';
+import { TmdbService } from '../../shared';
+import { MediaListFilters } from '../../shared/interfaces';
+import { CardComponent } from '../card/card.component';
+import { movieSortOptions, tvSortOptions } from './sort-options';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-media-list',
@@ -46,6 +47,7 @@ import { StateQuery, StateService } from '../../core';
     PaginatorModule,
     AsyncPipe,
     CardComponent,
+    FormsModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './media-list.component.html',
@@ -127,7 +129,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
 
   search(): void {
     const queryParams = this.toQueryParams();
-    this.router.navigate([`list/${this.type}`], { queryParams });
+    this.router.navigate(['list', this.type], { queryParams });
     if (this.stateQuery.isMobile()) {
       this.filterPanelState.next(false);
     }
@@ -243,7 +245,8 @@ export class MediaListComponent implements OnInit, OnDestroy {
   }
 
   private getTitle(queryParams: any, routeParams: any): string {
-    switch (true) {
+    return 'asd';
+    /*  switch (true) {
       case routeParams.type === 'person':
         return 'Popular People';
       case routeParams.type === 'tv':
@@ -252,6 +255,6 @@ export class MediaListComponent implements OnInit, OnDestroy {
         return 'Browse Movies';
       default:
         return '';
-    }
+    } */
   }
 }

@@ -10,7 +10,6 @@ export interface State {
   tvGenres: Genre[];
   isDarkMode: boolean;
   languages: LanguageConfiguration[];
-  loading: boolean;
 }
 
 export function createInitialState(): State {
@@ -21,7 +20,6 @@ export function createInitialState(): State {
     tvGenres: [],
     isDarkMode: true,
     languages: [],
-    loading: true,
   };
 }
 @Injectable({ providedIn: 'root' })

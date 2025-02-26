@@ -1,10 +1,10 @@
-import { get, uniqBy } from 'lodash';
+import { get } from 'lodash';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { combineLatest, map, Observable, Subject, tap } from 'rxjs';
 import {
   ExternalIds,
-  PeopleImages,
+  Image,
   PersonCombinedCredits,
   PersonDetails,
 } from 'tmdb-ts';
@@ -17,15 +17,16 @@ import {
   Signal,
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
-import { StateQuery, StateService } from '../../core';
+import { PersonQuery, StateQuery } from '../../core';
+import { AgePipe, FilterPipe } from '../../shared';
 import { ImagePipe } from '../../shared/pipes/image.pipe';
 import { SortPipe } from '../../shared/pipes/sort.pipe';
 import { CardComponent } from '../card/card.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
-import { FilterPipe } from '../../shared';
+import { SocialLinksComponent } from '../social-links/social-links.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-person-details',
@@ -38,6 +39,9 @@ import { FilterPipe } from '../../shared';
     SortPipe,
     CreditsListComponent,
     FilterPipe,
+    AgePipe,
+    SocialLinksComponent,
+    FormsModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './person-details.component.html',
@@ -45,16 +49,13 @@ import { FilterPipe } from '../../shared';
 })
 export class PersonDetailsComponent implements OnInit {
   person$: Observable<PersonDetails>;
-  images$: Observable<PeopleImages>;
+  images$: Observable<Image[]>;
   knownFor$: Observable<any[]>;
   credits$: Observable<PersonCombinedCredits>;
-  personAge$: Observable<number>;
   links$: Observable<ExternalIds>;
   isMobile: Signal<boolean>;
-
   isDarkMode$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
-  links: ExternalIds;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab: string = 'knownFor';
   hasCredits$: Observable<boolean>;
@@ -63,44 +64,32 @@ export class PersonDetailsComponent implements OnInit {
   private _visbileCredits: Subject<any> = new Subject();
   constructor(
     private stateQuery: StateQuery,
-    private route: ActivatedRoute,
     private scroller: ViewportScroller,
     private titleService: Title,
-    private stateService: StateService
+    private personQuery: PersonQuery
   ) {}
 
   ngOnInit(): void {
     this.visibleCredits$ = this._visbileCredits.asObservable();
-    this.person$ = this.route.data.pipe(
-      map((data) => get(data, 'item')),
+    this.isMobile = this.stateQuery.isMobile;
+    this.isDarkMode$ = this.stateQuery.isDarkMode$;
+    this.images$ = this.personQuery.images$;
+    this.links$ = this.personQuery.socialLinks$;
+    this.hasCredits$ = this.personQuery.hasCredits$;
+    this.tabs$ = this.personQuery.combinedCredits$.pipe(
+      map((credits) => this.getTabs(credits))
+    );
+    this.person$ = this.personQuery.person$.pipe(
       tap((person) => {
         this.titleService.setTitle(`${person.name} | People`);
-        this.stateService.setLoading(false);
         this.scroller.scrollToPosition([0, 0]);
       })
     );
-    this.images$ = this.route.data.pipe(
-      map((data) => get(data, 'images.profiles', []))
-    );
-    this.links$ = this.route.data.pipe(map((data) => get(data, 'socialLinks')));
-    this.credits$ = this.route.data.pipe(
-      map((data) => {
-        const credits = get(data, 'credits');
+    this.credits$ = this.personQuery.combinedCredits$.pipe(
+      tap((credits: PersonCombinedCredits) => {
         this.setVisibleCredits(credits);
         this.setCreditsOptions(credits);
-        return {
-          ...credits,
-          cast: uniqBy(credits.cast, 'id'),
-          crew: uniqBy(credits.crew, 'id'),
-        };
       })
-    );
-    this.personAge$ = this.person$.pipe(
-      map((person) => this.getPersonAge(person))
-    );
-    this.tabs$ = this.credits$.pipe(map((credits) => this.getTabs(credits)));
-    this.hasCredits$ = this.credits$.pipe(
-      map((credits) => credits.cast.length > 0 || credits.crew.length > 0)
     );
     this.knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
       map(([visible, credits]) => {
@@ -109,8 +98,6 @@ export class PersonDetailsComponent implements OnInit {
         }
       })
     );
-    this.isMobile = this.stateQuery.isMobile;
-    this.isDarkMode$ = this.stateQuery.isDarkMode$;
   }
 
   changeVisibleCredits(value: string) {
@@ -135,16 +122,6 @@ export class PersonDetailsComponent implements OnInit {
     }
     this.creditsOptions = options;
   }
-
-  private getPersonAge(person: PersonDetails): number {
-    const difference =
-      ((person.deathday ? new Date(person.deathday) : new Date()).getTime() -
-        new Date(person.birthday).getTime()) /
-      1000 /
-      (60 * 60 * 24);
-    return Math.abs(Math.round(difference / 365.25));
-  }
-
   private getTabs(credits: PersonCombinedCredits) {
     return [
       { title: 'Known For', value: 'knownFor', visible: true },

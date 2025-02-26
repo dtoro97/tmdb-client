@@ -1,6 +1,7 @@
 import { MenuItem } from 'primeng/api';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
 import {
+  BehaviorSubject,
   debounceTime,
   from,
   Observable,
@@ -24,7 +25,7 @@ import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
 import { StateQuery, StateService } from '../../../core';
 import { ImagePipe } from '../../pipes';
-import { DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -36,6 +37,7 @@ import { RouterLink } from '@angular/router';
     ImagePipe,
     DatePipe,
     RouterLink,
+    AsyncPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
@@ -45,9 +47,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isDarkMode$: Observable<boolean>;
   items: MenuItem[];
   autoCompleteValue: string;
-  searchResults: MultiSearchResult[];
   isMobile: Signal<boolean>;
   search$: Observable<string>;
+  searchResults$: Observable<MultiSearchResult[]>;
+  private _searchResults: Subject<MultiSearchResult[]> = new Subject();
   private _search: Subject<string> = new Subject();
   private _sub: Subscription;
 
@@ -62,6 +65,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.items = this.getMenuItems();
     this.isMobile = this.stateQuery.isMobile;
     this.search$ = this._search.asObservable();
+    this.searchResults$ = this._searchResults.asObservable();
     this.isDarkMode$ = this.stateQuery.isDarkMode$;
     this._sub = this.search$
       .pipe(
@@ -72,9 +76,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe((data) => {
-        console.log(data);
         this.stateService.setLoading(false);
-        this.searchResults = data.results;
+        this._searchResults.next(data.results);
       });
   }
   ngOnDestroy(): void {

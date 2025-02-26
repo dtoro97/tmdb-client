@@ -4,11 +4,12 @@
   [class.dark]="isDarkMode$ | async"
 >
   <div class="relative">
+    @if (hasBackdrop$ | async) {
     <img
-      *ngIf="hasBackdrop$ | async"
       [src]="backdrop$ | async | imgSrc : 'w1920_and_h800_multi_faces'"
       class="backdrop-image"
     />
+    }
     <div class="gradient-cover"></div>
   </div>
   <div
@@ -88,7 +89,7 @@
               $index) {
               <span
                 class="cursor-pointer"
-                routerLink="/details/person/{{ creator.id }}"
+                [routerLink]="['/details', person, creator.id]"
                 >{{ creator.name }}</span
               >
               <span *ngIf="i !== item.created_by.length - 1">, </span>
@@ -116,7 +117,7 @@
             <div class="flex-1">
               @for(lang of languages$|async; track lang.id; let i = $index) {
               <span>{{ lang.english_name }}</span>
-              <span *ngIf="i !== item.languages.length - 1">, </span>
+              <span *ngIf="i !== item.languages?.length - 1">, </span>
               }
             </div>
           </li>
