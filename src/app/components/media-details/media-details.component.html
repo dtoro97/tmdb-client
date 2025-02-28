@@ -1,12 +1,14 @@
 <div
   class="h-full details-container pb-4"
-  [class.mobile]="isMobile()"
-  [class.dark]="isDarkMode$ | async"
+  [class.mobile]="stateQuery.isMobile()"
+  [class.dark]="stateQuery.isDarkMode$ | async"
 >
   <div class="relative">
-    @if (hasBackdrop$ | async) {
+    @if (mediaQuery.hasBackdrop$ | async) {
     <img
-      [src]="backdrop$ | async | imgSrc : 'w1920_and_h800_multi_faces'"
+      [src]="
+        mediaQuery.backdrop$ | async | imgSrc : 'w1920_and_h800_multi_faces'
+      "
       class="backdrop-image"
     />
     }
@@ -14,11 +16,14 @@
   </div>
   <div
     class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
-    [class.mt-0]="(hasBackdrop$ | async) === false"
-    [class.pt-4]="(hasBackdrop$ | async) === false"
+    [class.mt-0]="(mediaQuery.hasBackdrop$ | async) === false"
+    [class.pt-4]="(mediaQuery.hasBackdrop$ | async) === false"
     [style.maxWidth.px]="1400"
   >
-    <div class="flex md:flex-row flex-column" *ngIf="item$ | async as item">
+    <div
+      class="flex md:flex-row flex-column"
+      *ngIf="mediaItem$ | async as item"
+    >
       <div class="">
         <img
           src="{{ item.poster_path | imgSrc : 'w500' }}"
@@ -26,7 +31,7 @@
         />
         <div class="mt-4 mb-3">
           <app-social-links
-            [links]="externalIds$ | async"
+            [links]="mediaQuery.socialLinks$ | async"
             [item]="item"
           ></app-social-links>
         </div>
@@ -47,7 +52,7 @@
           @for (genre of item.genres;track genre.id) {
           <p-chip styleClass="cursor-pointer genre">
             <a
-              [routerLink]="'/list/' + (mediaType$ | async)"
+              [routerLink]="['/list', mediaType$ | async]"
               [queryParams]="{ with_genres: genre.id }"
               >{{ genre.name }}</a
             ></p-chip
@@ -89,7 +94,7 @@
               $index) {
               <span
                 class="cursor-pointer"
-                [routerLink]="['/details', person, creator.id]"
+                [routerLink]="['/details/person', creator.id, 'overview']"
                 >{{ creator.name }}</span
               >
               <span *ngIf="i !== item.created_by.length - 1">, </span>
@@ -109,15 +114,12 @@
             <div class="media-info-label">Status</div>
             <div class="flex-1">{{ item.status }}</div>
           </li>
-          <li
-            class="flex"
-            *ngIf="item.languages?.length || item.original_language"
-          >
+          <li class="flex" *ngIf="(languages$ | async).length > 0">
             <div class="media-info-label">Languages</div>
             <div class="flex-1">
-              @for(lang of languages$|async; track lang.id; let i = $index) {
+              @for(lang of languages$|async; track lang.name; let i = $index) {
               <span>{{ lang.english_name }}</span>
-              <span *ngIf="i !== item.languages?.length - 1">, </span>
+              <span *ngIf="i !== (languages$ | async).length - 1">, </span>
               }
             </div>
           </li>
@@ -135,7 +137,7 @@
     </div>
   </div>
   <div class="mt-2 mx-2 md:mx-4">
-    <p-tabs [value]="activeTab" (valueChange)="activeTab = $event">
+    <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
       <p-tablist>
         @for(tabHeader of tabs$ | async | filter: {visible: true}; track
         tabHeader.value) {
@@ -143,12 +145,13 @@
         }
       </p-tablist>
     </p-tabs>
-    <ng-container *ngIf="activeTab === 'overview'">
-      <div *ngIf="(cast$ | async).length">
+    <ng-container *ngIf="(activeTab$ | async) === 'overview'">
+      @if ((mediaQuery.cast$ |async).length;) {
+      <div>
         <div class="flex justify-content-center flex-column">
           <h2 class="md:px-4 px-2">Full Cast</h2>
           <p-carousel
-            [value]="cast$ | async"
+            [value]="mediaQuery.cast$ | async"
             [numVisible]="8"
             [numScroll]="8"
             [showIndicators]="false"
@@ -160,49 +163,50 @@
           </p-carousel>
         </div>
       </div>
+      }
     </ng-container>
-    <ng-container *ngIf="activeTab === 'episodes'">
-      <div class="flex flex-row py-4 mx-2">
-        <div>
-          <label for="seasons" class="mr-2">Seasons</label>
-          <p-select
-            optionLabel="name"
-            optionValue="season_number"
-            id="seasons"
-            [ngModel]="selectedSeason$ | async"
-            [options]="seasons$ | async"
-            [disabled]="(seasons$ | async)?.length === 1"
-            (ngModelChange)="changeSeason($event)"
-          ></p-select>
-          <strong
-            class="muted md:px-4 px-2"
-            *ngIf="episodeCount$ | async as episodeCount"
-            >{{ episodeCount }} Episodes</strong
-          >
-        </div>
-      </div>
+    @if ((activeTab$|async) === 'episodes') {
 
-      <div class="grid m-0">
-        @for(episode of episodes$ | async; track episode.id) {
-        <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item">
-          <div>
-            @if(episode.still_path) {
-            <img src="{{ episode.still_path | imgSrc }}" />
-            }@else {
-            <img src="assets/empty_still.svg" />
-            }
-          </div>
-          <h2 class="name">
-            <strong class="mr-2">E{{ episode.episode_number }}</strong
-            >{{ episode.name }}
-          </h2>
-          <div class="mb-3">{{ episode.overview }}</div>
-          <div class="muted">{{ episode.air_date | date }}</div>
-        </div>
+    <div class="flex flex-row py-4 mx-2">
+      <div>
+        <label for="seasons" class="mr-2">Seasons</label>
+        <p-select
+          optionLabel="name"
+          optionValue="season_number"
+          id="seasons"
+          [auto]
+          [ngModel]="mediaQuery.selectedSeason$ | async"
+          [options]="mediaQuery.seasons$ | async"
+          [disabled]="(mediaQuery.seasons$ | async)?.length === 1"
+          (ngModelChange)="changeSeason($event)"
+        ></p-select>
+        @if (mediaQuery.seasonEpisodesCount$ | async; as episodeCount) {
+        <strong class="muted md:px-4 px-2">{{ episodeCount }} Episodes</strong>
         }
       </div>
-    </ng-container>
-    <ng-container *ngIf="activeTab === 'videos'">
+    </div>
+
+    <div class="grid m-0">
+      @for(episode of mediaQuery.seasonEpisodes$ | async; track episode.id) {
+      <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item">
+        <div>
+          @if(episode.still_path) {
+          <img src="{{ episode.still_path | imgSrc }}" />
+          }@else {
+          <img src="assets/empty_still.svg" />
+          }
+        </div>
+        <h2 class="name">
+          <strong class="mr-2">E{{ episode.episode_number }}</strong
+          >{{ episode.name }}
+        </h2>
+        <div class="mb-3">{{ episode.overview }}</div>
+        <div class="muted">{{ episode.air_date | date }}</div>
+      </div>
+      }
+    </div>
+    }
+    <ng-container *ngIf="(activeTab$ | async) === 'videos'">
       <div *ngIf="(videos$ | async).length">
         <h2 class="md:px-4 px-2">Videos</h2>
         <div
@@ -222,7 +226,7 @@
         </div>
       </div>
     </ng-container>
-    <ng-container *ngIf="activeTab === 'photos'">
+    <ng-container *ngIf="(activeTab$ | async) === 'photos'">
       <div *ngIf="(backdrops$ | async)?.length">
         <h2 class="md:px-4 px-2 mb-0">Backdrops</h2>
         <strong class="muted md:px-4 px-2"
@@ -238,26 +242,28 @@
           }
         </div>
       </div>
-      <div *ngIf="(posters$ | async)?.length">
+      @if ((mediaQuery.posters$ | async).length;) {
+      <div>
         <h2 class="md:px-4 px-2 mb-0">Posters</h2>
         <strong class="muted md:px-4 px-2"
-          >{{ (posters$ | async)?.length }} Images</strong
+          >{{ (mediaQuery.posters$ | async).length }} Images</strong
         >
         <div
           class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
         >
-          @for(image of posters$ | async; track image.file_path) {
+          @for(image of mediaQuery.posters$ | async; track image.file_path) {
           <a href="{{ image.file_path | imgSrc }}" target="_blank">
             <img class="poster-photo" src="{{ image.file_path | imgSrc }}" />
           </a>
           }
         </div>
       </div>
+      }
     </ng-container>
-    <div *ngIf="(recommendations$ | async).length">
+    <div *ngIf="(mediaQuery.recommendations$ | async).length">
       <h2 class="md:px-4 px-2">More Like This</h2>
       <p-carousel
-        [value]="recommendations$ | async | sort : 'vote_average'"
+        [value]="mediaQuery.recommendations$ | async | sort : 'vote_average'"
         [numVisible]="8"
         [numScroll]="8"
         [showIndicators]="false"

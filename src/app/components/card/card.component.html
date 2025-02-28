@@ -1,5 +1,8 @@
 @if(item) {
-<div class="card" [routerLink]="['/details', type || item.media_type, item.id]">
+<div
+  class="card"
+  [routerLink]="['/details', type || item.media_type, item.id, 'overview']"
+>
   <img src="{{ item.poster_path || item.profile_path | imgSrc }}" />
   <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
     <div class="flex justify-content-between flex-column">

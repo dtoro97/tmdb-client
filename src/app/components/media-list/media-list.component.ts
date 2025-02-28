@@ -245,8 +245,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
   }
 
   private getTitle(queryParams: any, routeParams: any): string {
-    return 'asd';
-    /*  switch (true) {
+    switch (true) {
       case routeParams.type === 'person':
         return 'Popular People';
       case routeParams.type === 'tv':
@@ -255,6 +254,6 @@ export class MediaListComponent implements OnInit, OnDestroy {
         return 'Browse Movies';
       default:
         return '';
-    } */
+    }
   }
 }
