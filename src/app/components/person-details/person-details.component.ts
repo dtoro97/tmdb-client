@@ -22,9 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
 import { PersonQuery, StateQuery } from '../../core';
-import { AgePipe, FilterPipe } from '../../shared';
-import { ImagePipe } from '../../shared/pipes/image.pipe';
-import { SortPipe } from '../../shared/pipes/sort.pipe';
+import { AgePipe, FilterPipe, ImagePipe, SortPipe } from '../../shared';
 import { CardComponent } from '../card/card.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
 import { SocialLinksComponent } from '../social-links/social-links.component';
