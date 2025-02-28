@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
-import { combineLatest, map, Observable, Subject, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, tap } from 'rxjs';
 import {
   ExternalIds,
   Image,
@@ -9,14 +9,16 @@ import {
   PersonDetails,
 } from 'tmdb-ts';
 
-import { CommonModule, ViewportScroller } from '@angular/common';
+import { AsyncPipe, ViewportScroller } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
   Signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
 import { PersonQuery, StateQuery } from '../../core';
@@ -26,7 +28,6 @@ import { SortPipe } from '../../shared/pipes/sort.pipe';
 import { CardComponent } from '../card/card.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
 import { SocialLinksComponent } from '../social-links/social-links.component';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-person-details',
@@ -34,7 +35,7 @@ import { FormsModule } from '@angular/forms';
     ImagePipe,
     TabsModule,
     SelectModule,
-    CommonModule,
+    AsyncPipe,
     CardComponent,
     SortPipe,
     CreditsListComponent,
@@ -57,20 +58,20 @@ export class PersonDetailsComponent implements OnInit {
   isDarkMode$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
-  activeTab: string = 'knownFor';
+  activeTab$: Observable<string>;
   hasCredits$: Observable<boolean>;
-  creditsOptions: any[];
-  visibleCredits$: Observable<string | undefined>;
-  private _visbileCredits: Subject<any> = new Subject();
+  creditsOptions$: Observable<{ label: string; value: string }[]>;
+  visibleCredits$: BehaviorSubject<string>;
   constructor(
     private stateQuery: StateQuery,
     private scroller: ViewportScroller,
     private titleService: Title,
-    private personQuery: PersonQuery
+    private personQuery: PersonQuery,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.visibleCredits$ = this._visbileCredits.asObservable();
     this.isMobile = this.stateQuery.isMobile;
     this.isDarkMode$ = this.stateQuery.isDarkMode$;
     this.images$ = this.personQuery.images$;
@@ -79,17 +80,21 @@ export class PersonDetailsComponent implements OnInit {
     this.tabs$ = this.personQuery.combinedCredits$.pipe(
       map((credits) => this.getTabs(credits))
     );
+    this.activeTab$ = this.route.params.pipe(
+      map((params) => get(params, 'tab'))
+    );
     this.person$ = this.personQuery.person$.pipe(
       tap((person) => {
         this.titleService.setTitle(`${person.name} | People`);
         this.scroller.scrollToPosition([0, 0]);
       })
     );
-    this.credits$ = this.personQuery.combinedCredits$.pipe(
-      tap((credits: PersonCombinedCredits) => {
-        this.setVisibleCredits(credits);
-        this.setCreditsOptions(credits);
-      })
+    this.credits$ = this.personQuery.combinedCredits$;
+    this.creditsOptions$ = this.personQuery.combinedCredits$.pipe(
+      map((credits) => this.getCreditOptions(credits))
+    );
+    this.visibleCredits$ = new BehaviorSubject(
+      this.getVisibleCredits(this.personQuery.getCredits())
     );
     this.knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
       map(([visible, credits]) => {
@@ -100,19 +105,26 @@ export class PersonDetailsComponent implements OnInit {
     );
   }
 
+  changeTab(tab: string): void {
+    this.router.navigate([`../${tab}`], { relativeTo: this.route });
+  }
+
   changeVisibleCredits(value: string) {
-    this._visbileCredits.next(value);
+    this.visibleCredits$.next(value);
   }
 
-  private setVisibleCredits(credits: PersonCombinedCredits): void {
+  private getVisibleCredits(credits: PersonCombinedCredits): string {
     if (credits.cast.length) {
-      this._visbileCredits.next('cast');
+      return 'cast';
     } else if (credits.crew.length) {
-      this._visbileCredits.next('crew');
+      return 'crew';
     }
+    return '';
   }
 
-  private setCreditsOptions(credits: PersonCombinedCredits): void {
+  private getCreditOptions(
+    credits: PersonCombinedCredits
+  ): { value: string; label: string }[] {
     const options = [];
     if (credits.cast.length) {
       options.push({ label: 'Cast', value: 'cast' });
@@ -120,11 +132,11 @@ export class PersonDetailsComponent implements OnInit {
     if (credits.crew.length) {
       options.push({ label: 'Production', value: 'crew' });
     }
-    this.creditsOptions = options;
+    return options;
   }
   private getTabs(credits: PersonCombinedCredits) {
     return [
-      { title: 'Known For', value: 'knownFor', visible: true },
+      { title: 'Known For', value: 'overview', visible: true },
       {
         title: 'Credits',
         value: 'credits',

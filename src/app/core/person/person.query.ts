@@ -29,4 +29,8 @@ export class PersonQuery extends Query<PersonState> {
   constructor(store: PersonStore) {
     super(store);
   }
+
+  getCredits(): PersonCombinedCredits {
+    return this.store.getValue().combinedCredits;
+  }
 }
