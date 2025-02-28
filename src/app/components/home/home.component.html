@@ -4,13 +4,13 @@
       <h2>Trending</h2>
       <p-select-button
         [options]="trendingOptions"
-        [ngModel]="selectedTrending()"
+        [ngModel]="homeQuery.trendingTime$ | async"
         (ngModelChange)="changeTrending($event)"
         optionValue="value"
       ></p-select-button>
     </div>
     <p-carousel
-      [value]="trending()"
+      [value]="homeQuery.trending$ | async"
       [numVisible]="8"
       [numScroll]="8"
       [showIndicators]="false"
@@ -26,36 +26,23 @@
       <h2>What's Popular</h2>
       <p-select-button
         [options]="popularOptions"
-        [ngModel]="selectedPopular()"
+        [ngModel]="homeQuery.popularType$ | async"
         (ngModelChange)="changePopular($event)"
         optionValue="value"
       ></p-select-button>
     </div>
     <p-carousel
-      [value]="popular()"
+      [value]="homeQuery.popular$ | async"
       [numVisible]="8"
       [numScroll]="8"
       [showIndicators]="false"
       [responsiveOptions]="breakpoints"
     >
       <ng-template let-movie pTemplate="item">
-        <app-card [item]="movie" [type]="selectedPopular()"></app-card>
-      </ng-template>
-    </p-carousel>
-  </div>
-  <div class="flex flex-column">
-    <div class="column-header ml-4 md:ml-6">
-      <h2>Upcoming Movies</h2>
-    </div>
-    <p-carousel
-      [value]="upcomingMovies()"
-      [numVisible]="8"
-      [numScroll]="8"
-      [showIndicators]="false"
-      [responsiveOptions]="breakpoints"
-    >
-      <ng-template let-movie pTemplate="item">
-        <app-card [item]="movie" [type]="'movie'"></app-card>
+        <app-card
+          [item]="movie"
+          [type]="homeQuery.popularType$ | async"
+        ></app-card>
       </ng-template>
     </p-carousel>
   </div>
