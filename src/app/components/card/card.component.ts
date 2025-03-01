@@ -1,4 +1,9 @@
-import { Movie, PopularTvShowResult } from 'tmdb-ts';
+import {
+  Movie,
+  MovieDetails,
+  PopularTvShowResult,
+  TvShowDetails,
+} from 'tmdb-ts';
 
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
@@ -14,7 +19,7 @@ import { ImagePipe } from '../../shared/pipes/image.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @Input() public item: Movie | PopularTvShowResult;
+  @Input() public item: MovieDetails | TvShowDetails;
   @Input() public type: string;
   constructor() {}
 }

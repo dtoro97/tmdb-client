@@ -1,12 +1,19 @@
 @if(item) {
 <div
   class="card"
-  [routerLink]="['/details', type || item.media_type, item.id, 'overview']"
+  [routerLink]="[
+    '/details',
+    type || $any(item).media_type,
+    item.id,
+    'overview'
+  ]"
 >
-  <img src="{{ item.poster_path || item.profile_path | imgSrc }}" />
+  <img src="{{ item.poster_path || $any(item).profile_path | imgSrc }}" />
   <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
     <div class="flex justify-content-between flex-column">
-      <span class="font-bold pb-3">{{ item.title || item.name }}</span>
+      <span class="font-bold pb-3">{{
+        $any(item).title || $any(item).name
+      }}</span>
       <div class="w-full flex justify-content-between">
         @if(item.vote_count > 0) {
         <span class="pb-3"
@@ -17,7 +24,7 @@
         }
 
         <span class="font-light">{{
-          item.release_date || item.first_air_date | date : "yyyy"
+          $any(item).release_date || $any(item).first_air_date | date : "yyyy"
         }}</span>
       </div>
     </div>

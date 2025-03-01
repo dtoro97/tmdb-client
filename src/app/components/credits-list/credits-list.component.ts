@@ -83,8 +83,8 @@ export class CreditsListComponent implements OnInit {
   department: string = 'all';
   media: string = 'all';
   data$: Observable<any[]>;
-  departmentOptions: any[];
-  mediaOptions: any[];
+  departmentOptions: { label: string; value: string }[];
+  mediaOptions: { label: string; value: string }[];
 
   constructor(private stateQuery: StateQuery) {}
 
