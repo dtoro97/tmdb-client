@@ -53,7 +53,7 @@
           <div class="person-info-label">Died</div>
           <div class="flex-1">
             <span>{{ person.deathday | date }}</span
-            ><span> (age {{ personAge$ | async }})</span>
+            ><span> (age {{ person | age }})</span>
           </div>
         </li>
         } @if (person.place_of_birth) {
@@ -82,31 +82,32 @@
   <div class="mt-2 mx-0 md:mx-4">
     <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
       <p-tablist>
-        @for(tabHeader of tabs$ | async | filter: {visible: true}; track
+        @for(tabHeader of (tabs$ | async)! | filter: {visible: true}; track
         tabHeader.value) {
         <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
         }
       </p-tablist>
     </p-tabs>
-    @if ((activeTab$ | async) === 'overview' && hasCredits$ | async) {
+    @if ((activeTab$ | async) === 'overview' && (hasCredits$ | async)) {
     <p-select
       styleClass="mt-3 ml-5"
       optionLabel="label"
       optionValue="value"
       [ngModel]="visibleCredits$ | async"
       [options]="creditsOptions$ | async"
-      [disabled]="(creditsOptions$ | async).length === 1"
+      [disabled]="(creditsOptions$ | async)?.length === 1"
       (ngModelChange)="changeVisibleCredits($event)"
     ></p-select>
 
     <div
       class="flex flex-wrap gap-3 justify-content-center md:justify-content-start mt-3"
     >
-      @for (item of knownFor$ | async | sort : 'vote_average'; track item.id) {
+      @for (item of (knownFor$ | async)! | sort : 'vote_average'; track item.id)
+      {
       <app-card [item]="item" [type]="item.media_type"></app-card>
       }
     </div>
-    } @if ((activeTab$ | async) === 'credits' && hasCredits$ | async){
+    } @if ((activeTab$ | async) === 'credits' && (hasCredits$ | async)){
     <app-credits-list [credits]="credits$ | async"></app-credits-list>
     } @if ((activeTab$ | async) === 'photos') {
     <div

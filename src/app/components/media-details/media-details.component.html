@@ -7,7 +7,8 @@
     @if (mediaQuery.hasBackdrop$ | async) {
     <img
       [src]="
-        mediaQuery.backdrop$ | async | imgSrc : 'w1920_and_h800_multi_faces'
+        (mediaQuery.backdrop$ | async) || ''
+          | imgSrc : 'w1920_and_h800_multi_faces'
       "
       class="backdrop-image"
     />
@@ -114,12 +115,12 @@
             <div class="media-info-label">Status</div>
             <div class="flex-1">{{ item.status }}</div>
           </li>
-          <li class="flex" *ngIf="(languages$ | async).length > 0">
+          <li class="flex" *ngIf="(languages$ | async)?.length > 0">
             <div class="media-info-label">Languages</div>
             <div class="flex-1">
               @for(lang of languages$|async; track lang.name; let i = $index) {
               <span>{{ lang.english_name }}</span>
-              <span *ngIf="i !== (languages$ | async).length - 1">, </span>
+              <span *ngIf="i !== (languages$ | async)?.length - 1">, </span>
               }
             </div>
           </li>
@@ -139,14 +140,14 @@
   <div class="mt-2 mx-2 md:mx-4">
     <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
       <p-tablist>
-        @for(tabHeader of tabs$ | async | filter: {visible: true}; track
+        @for(tabHeader of (tabs$ | async)! | filter: {visible: true}; track
         tabHeader.value) {
         <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
         }
       </p-tablist>
     </p-tabs>
     <ng-container *ngIf="(activeTab$ | async) === 'overview'">
-      @if ((mediaQuery.cast$ |async).length;) {
+      @if ((mediaQuery.cast$ |async)?.length) {
       <div>
         <div class="flex justify-content-center flex-column">
           <h2 class="md:px-4 px-2">Full Cast</h2>
@@ -174,7 +175,6 @@
           optionLabel="name"
           optionValue="season_number"
           id="seasons"
-          [auto]
           [ngModel]="mediaQuery.selectedSeason$ | async"
           [options]="mediaQuery.seasons$ | async"
           [disabled]="(mediaQuery.seasons$ | async)?.length === 1"
@@ -207,7 +207,7 @@
     </div>
     }
     <ng-container *ngIf="(activeTab$ | async) === 'videos'">
-      <div *ngIf="(videos$ | async).length">
+      <div *ngIf="(videos$ | async)?.length">
         <h2 class="md:px-4 px-2">Videos</h2>
         <div
           class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
@@ -227,26 +227,26 @@
       </div>
     </ng-container>
     <ng-container *ngIf="(activeTab$ | async) === 'photos'">
-      <div *ngIf="(backdrops$ | async)?.length">
+      <div *ngIf="(mediaQuery.backdrops$ | async)?.length">
         <h2 class="md:px-4 px-2 mb-0">Backdrops</h2>
         <strong class="muted md:px-4 px-2"
-          >{{ (backdrops$ | async)?.length }} Images</strong
+          >{{ (mediaQuery.backdrops$ | async)?.length }} Images</strong
         >
         <div
           class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
         >
-          @for(image of backdrops$|async; track image.file_path) {
+          @for(image of mediaQuery.backdrops$|async; track image.file_path) {
           <a href="{{ image.file_path | imgSrc }}" target="_blank">
             <img class="backdrop-photo" src="{{ image.file_path | imgSrc }}" />
           </a>
           }
         </div>
       </div>
-      @if ((mediaQuery.posters$ | async).length;) {
+      @if ((mediaQuery.posters$ | async)?.length) {
       <div>
         <h2 class="md:px-4 px-2 mb-0">Posters</h2>
         <strong class="muted md:px-4 px-2"
-          >{{ (mediaQuery.posters$ | async).length }} Images</strong
+          >{{ (mediaQuery.posters$ | async)?.length }} Images</strong
         >
         <div
           class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
@@ -260,10 +260,10 @@
       </div>
       }
     </ng-container>
-    <div *ngIf="(mediaQuery.recommendations$ | async).length">
+    <div *ngIf="(mediaQuery.recommendations$ | async)?.length">
       <h2 class="md:px-4 px-2">More Like This</h2>
       <p-carousel
-        [value]="mediaQuery.recommendations$ | async | sort : 'vote_average'"
+        [value]="(mediaQuery.recommendations$ | async)! | sort : 'vote_average'"
         [numVisible]="8"
         [numScroll]="8"
         [showIndicators]="false"

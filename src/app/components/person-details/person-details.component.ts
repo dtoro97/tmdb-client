@@ -9,7 +9,7 @@ import {
   PersonDetails,
 } from 'tmdb-ts';
 
-import { AsyncPipe, ViewportScroller } from '@angular/common';
+import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -41,6 +41,7 @@ import { SocialLinksComponent } from '../social-links/social-links.component';
     AgePipe,
     SocialLinksComponent,
     FormsModule,
+    DatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './person-details.component.html',

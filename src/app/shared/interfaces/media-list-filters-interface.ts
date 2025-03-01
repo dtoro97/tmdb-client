@@ -5,5 +5,5 @@ export interface MediaListFilters {
   sortBy: string;
   genres: string[];
   minVoteCount: number;
-  voteAverage?: number[];
+  voteAverage: number[];
 }

@@ -19,10 +19,7 @@
                 class="border-round-md"
                 src="{{ item.poster_path || item.profile_path | imgSrc }}"
               />
-              <div
-                class="flex flex-column pl-3 pr-3 overflow-hidden"
-                [ngStyle]="{ 'text-wrap': 'wrap' }"
-              >
+              <div class="flex flex-column pl-3 pr-3 overflow-hidden text-wrap">
                 <span class="font-bold pb-1 result-title">
                   {{ item.title || item.name }}
                 </span>
@@ -34,7 +31,9 @@
           </ng-template>
         </p-autocomplete>
         <p-button
-          icon="{{ isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon' }}"
+          icon="{{
+            (isDarkMode$ | async) ? 'fa-solid fa-sun' : 'fa-solid fa-moon'
+          }}"
           [text]="true"
           severity="secondary"
           (click)="toggleDarkMode()"
