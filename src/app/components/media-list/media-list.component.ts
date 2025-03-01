@@ -71,6 +71,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
     page: 1,
     sortBy: 'popularity.desc',
     genres: [],
+    voteAverage: [0, 10],
     minVoteCount: 0,
   };
 

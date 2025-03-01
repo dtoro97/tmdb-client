@@ -60,8 +60,10 @@
               >
                 @for(genre of genres$ | async;track genre.id) {
                 <p-chip
-                  styleClass="cursor-pointer text-sm"
-                  [ngClass]="{ selected: isGenreSelected(genre) }"
+                  styleClass="cursor-pointer text-sm {{
+                    isGenreSelected(genre) ? 'selected' : ''
+                  }}"
+                  [
                   [label]="genre.name"
                   (click)="toggleGenreSelection(genre)"
                 >

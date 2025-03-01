@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { DividerModule } from 'primeng/divider';
 import {
   ExternalIds,
   MovieDetails,
@@ -6,9 +6,12 @@ import {
   TvShowDetails,
 } from 'tmdb-ts';
 
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+
 @Component({
   selector: 'app-social-links',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DividerModule],
   templateUrl: './social-links.component.html',
   styleUrl: './social-links.component.scss',
 })

@@ -5,7 +5,14 @@ import { RatingModule } from 'primeng/rating';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { combineLatest, map, Observable } from 'rxjs';
-import { Images, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
+import {
+  Images,
+  LanguageConfiguration,
+  MediaType,
+  MovieDetails,
+  TvShowDetails,
+  Video,
+} from 'tmdb-ts';
 
 import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
@@ -22,6 +29,7 @@ import { MinutesToHours } from '../../shared/pipes/time.pipe';
 import { YoutubeLinkPipe } from '../../shared/pipes/youtube-link.pipe';
 import { CardComponent } from '../card/card.component';
 import { PersonCardComponent } from '../person-card/person-card.component';
+import { SocialLinksComponent } from '../social-links/social-links.component';
 
 @Component({
   selector: 'app-media-details',
@@ -42,6 +50,7 @@ import { PersonCardComponent } from '../person-card/person-card.component';
     FormsModule,
     RouterLink,
     FilterPipe,
+    SocialLinksComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './media-details.component.html',
@@ -52,7 +61,7 @@ export class MediaDetailsComponent implements OnInit {
   videos$: Observable<Video[]>;
   images$: Observable<Images>;
   mediaType$: Observable<MediaType>;
-  languages$: Observable<string>;
+  languages$: Observable<LanguageConfiguration[]>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab$: Observable<string>;
