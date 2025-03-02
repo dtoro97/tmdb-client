@@ -32,8 +32,9 @@ export class ListService {
       dataSource$ = from(this.tmdbService.discover.tvShow(queryParams));
     } else if (type === 'movie') {
       dataSource$ = from(this.tmdbService.discover.movie(queryParams));
+    } else {
+      dataSource$ = from(this.tmdbService.people.popular(queryParams));
     }
-    dataSource$ = from(this.tmdbService.people.popular(queryParams));
     return dataSource$.pipe(
       tap((data) => {
         this.updateData(data);
