@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { FilterPipe, SortPipe } from '../../shared';
+import { FilterPipe, IOption, SortPipe } from '../../shared';
 import { StateQuery } from '../../core';
 
 @Component({
@@ -83,8 +83,8 @@ export class CreditsListComponent implements OnInit {
   department: string = 'all';
   media: string = 'all';
   data$: Observable<any[]>;
-  departmentOptions: { label: string; value: string }[];
-  mediaOptions: { label: string; value: string }[];
+  departmentOptions: IOption[];
+  mediaOptions: IOption[];
 
   constructor(private stateQuery: StateQuery) {}
 

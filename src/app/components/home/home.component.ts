@@ -2,13 +2,13 @@ import { CarouselModule } from 'primeng/carousel';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TimeWindow } from 'tmdb-ts';
 
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { CAROUSEL_BREAKPOINTS } from '../../constants';
 import { HomeQuery, HomeService } from '../../core';
 import { CardComponent } from '../card/card.component';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -39,9 +39,7 @@ export class HomeComponent {
       value: 'movie',
     },
   ];
-  constructor(public homeQuery: HomeQuery, public homeService: HomeService) {
-    this.homeService.init();
-  }
+  constructor(public homeQuery: HomeQuery, public homeService: HomeService) {}
 
   changeTrending(timeWindow: TimeWindow) {
     this.homeService.updateTrendingTime(timeWindow);

@@ -20,9 +20,15 @@ import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { CAROUSEL_BREAKPOINTS } from '../../constants';
 import { PersonQuery, StateQuery } from '../../core';
-import { AgePipe, FilterPipe, ImagePipe, SortPipe } from '../../shared';
+import {
+  AgePipe,
+  FilterPipe,
+  ImagePipe,
+  IOption,
+  SortPipe,
+} from '../../shared';
 import { CardComponent } from '../card/card.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
 import { SocialLinksComponent } from '../social-links/social-links.component';
@@ -59,7 +65,7 @@ export class PersonDetailsComponent implements OnInit {
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab$: Observable<string>;
   hasCredits$: Observable<boolean>;
-  creditsOptions$: Observable<{ label: string; value: string }[]>;
+  creditsOptions$: Observable<IOption[]>;
   visibleCredits$: BehaviorSubject<string>;
   constructor(
     private stateQuery: StateQuery,
@@ -121,9 +127,7 @@ export class PersonDetailsComponent implements OnInit {
     return '';
   }
 
-  private getCreditOptions(
-    credits: PersonCombinedCredits
-  ): { value: string; label: string }[] {
+  private getCreditOptions(credits: PersonCombinedCredits): IOption[] {
     const options = [];
     if (credits.cast.length) {
       options.push({ label: 'Cast', value: 'cast' });

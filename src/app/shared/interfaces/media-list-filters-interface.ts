@@ -1,7 +1,7 @@
 export interface MediaListFilters {
   fromDate?: Date;
   toDate?: Date;
-  page: 1;
+  page: number;
   sortBy: string;
   genres: string[];
   minVoteCount: number;
