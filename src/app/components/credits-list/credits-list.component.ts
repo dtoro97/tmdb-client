@@ -82,7 +82,6 @@ export class CreditsListComponent implements OnInit {
   isMobile: Signal<boolean>;
   department: string = 'all';
   media: string = 'all';
-  data$: Observable<any[]>;
   departmentOptions: IOption[];
   mediaOptions: IOption[];
 

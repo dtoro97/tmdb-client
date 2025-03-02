@@ -1,10 +1,10 @@
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { Injectable } from '@angular/core';
 import { Query } from '@datorama/akita';
 
-import { MediaListFilters } from '../../shared';
 import { ListState, ListStore } from './list.store';
+import { Movie, Person, TV } from 'tmdb-ts';
 
 @Injectable({ providedIn: 'root' })
 export class ListQuery extends Query<ListState> {
@@ -26,7 +26,9 @@ export class ListQuery extends Query<ListState> {
     (state) => state.fromDate
   );
   toDate$: Observable<Date | undefined> = this.select((state) => state.toDate);
-  data$: Observable<any[]> = this.select((state) => state.data);
+  data$: Observable<(TV | Movie | Person)[]> = this.select(
+    (state) => state.data
+  );
   constructor(store: ListStore) {
     super(store);
   }

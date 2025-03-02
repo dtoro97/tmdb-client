@@ -31,8 +31,4 @@ export class StateQuery extends Query<State> {
       { initialValue: false }
     );
   }
-
-  get providerIds() {
-    return this.getValue().providers.map((provider) => provider.id);
-  }
 }
