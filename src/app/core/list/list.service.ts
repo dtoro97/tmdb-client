@@ -44,7 +44,7 @@ export class ListService {
 
   toQueryParams(type: string): any {
     const store = this.store.getValue();
-    const queryParams: Record<string, unknown> = {};
+    const queryParams: Record<string, any> = {};
     queryParams['page'] = store.page;
     queryParams['sort_by'] = store.sortBy;
 

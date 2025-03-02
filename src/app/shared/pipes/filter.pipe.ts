@@ -4,7 +4,7 @@ import { filter } from 'lodash';
   name: 'filter',
 })
 export class FilterPipe implements PipeTransform {
-  transform(value: unknown[], filterBy: Record<string, unknown>): any[] {
+  transform(value: any[], filterBy: Record<string, any>): any[] {
     return filter(value, filterBy);
   }
 }
