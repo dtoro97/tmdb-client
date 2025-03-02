@@ -6,7 +6,7 @@ import { RouterOutlet } from '@angular/router';
 
 import { FooterComponent } from './shared/components';
 import { HeaderComponent } from './shared/components';
-import { StateQuery, StateService } from './core';
+import { HomeService, StateQuery, StateService } from './core';
 
 @Component({
   selector: 'app-root',
@@ -19,9 +19,11 @@ export class AppComponent {
   isLoading: Signal<boolean>;
   constructor(
     private stateQuery: StateQuery,
-    private stateService: StateService
+    private stateService: StateService,
+    private homeService: HomeService
   ) {
     this.isLoading = toSignal(this.stateQuery.loading$, { initialValue: true });
     this.stateService.loadSession();
+    this.homeService.init();
   }
 }

@@ -20,7 +20,7 @@ import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { CAROUSEL_BREAKPOINTS } from '../../carousel-breakpoints';
+import { CAROUSEL_BREAKPOINTS } from '../../constants';
 import { MediaQuery, MediaService, StateQuery, StateService } from '../../core';
 import { FilterPipe } from '../../shared';
 import { ImagePipe } from '../../shared/pipes/image.pipe';

@@ -10,6 +10,7 @@ import { mediaListGuard } from './core/guards/media-list.guard';
 import { MediaResolver } from './shared/resolvers/media.resolver';
 import { PersonResolver } from './shared/resolvers/peron.resolver';
 import { mediaTabGuard, personTabGuard } from './core';
+import { ListResolver } from './shared';
 
 export const routes: Routes = [
   {
@@ -34,6 +35,8 @@ export const routes: Routes = [
   {
     path: 'list/:type',
     component: MediaListComponent,
+    resolve: { data: ListResolver },
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
     canActivate: [mediaListGuard],
   },
   {

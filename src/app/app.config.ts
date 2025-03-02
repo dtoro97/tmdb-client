@@ -1,11 +1,12 @@
+import { providePrimeNG } from 'primeng/config';
+
+import { provideHttpClient } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import { providePrimeNG } from 'primeng/config';
-import { tmdbPreset } from './tmdb-preset';
-import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { MATERIAL } from './constants';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: tmdbPreset,
+        preset: MATERIAL,
         options: {
           darkModeSelector: '.dark',
         },
