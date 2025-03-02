@@ -4,7 +4,7 @@
       <div class="flex flex-row align-items-center gap-1">
         <p-autocomplete
           #searchBar
-          (onSelect)="onSearchSelect($event.value, searchBar)"
+          (onSelect)="onSearchSelect(searchBar)"
           [suggestions]="searchResults$ | async"
           (completeMethod)="search($event.query)"
           placeholder="Search..."

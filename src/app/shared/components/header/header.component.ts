@@ -94,7 +94,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this._search.next(term);
   }
 
-  onSearchSelect(value: any, searchBar: AutoComplete) {
+  onSearchSelect(searchBar: AutoComplete) {
     searchBar.clear();
   }
 

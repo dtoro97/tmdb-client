@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
-import { Store, StoreConfig } from '@datorama/akita';
-import { Genre, LanguageConfiguration } from 'tmdb-ts';
+import { Genre, LanguageConfiguration, WatchProvider } from 'tmdb-ts';
 import { Region } from 'tmdb-ts/dist/types/regions';
 
+import { Injectable } from '@angular/core';
+import { Store, StoreConfig } from '@datorama/akita';
+
 export interface State {
-  providers: any[];
+  providers: WatchProvider[];
   regions: Region[];
   movieGenres: Genre[];
   tvGenres: Genre[];

@@ -73,8 +73,8 @@ export class ListService {
     return queryParams;
   }
 
-  toFilters(queryParams: Params, type: string): any {
-    const filters: any = {};
+  toFilters(queryParams: Params, type: string): MediaListFilters {
+    const filters = {};
     let fromDate;
     let toDate;
 
@@ -125,7 +125,7 @@ export class ListService {
     set(filters, 'toDate', toDate);
     set(filters, 'page', toNumber(queryParams['page']) || 1);
 
-    return filters;
+    return filters as MediaListFilters;
   }
 
   updateFilters(filters: MediaListFilters) {
