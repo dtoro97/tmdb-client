@@ -8,7 +8,7 @@ import { PersonDetailsComponent } from './components/person-details/person-detai
 import { mediaListGuard } from './core/guards/media-list.guard';
 
 import { MediaResolver } from './shared/resolvers/media.resolver';
-import { PersonResolver } from './shared/resolvers/peron.resolver';
+import { PersonResolver } from './shared/resolvers/person.resolver';
 import { mediaTabGuard, personTabGuard } from './core';
 import { ListResolver } from './shared';
 

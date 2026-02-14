@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { FilterPipe, IOption, SortPipe } from '../../shared';
+import { FilterPipe, Option, SortPipe } from '../../shared';
 import { StateQuery } from '../../core';
 
 @Component({
@@ -82,8 +82,8 @@ export class CreditsListComponent implements OnInit {
   isMobile: Signal<boolean>;
   department: string = 'all';
   media: string = 'all';
-  departmentOptions: IOption[];
-  mediaOptions: IOption[];
+  departmentOptions: Option[];
+  mediaOptions: Option[];
 
   constructor(private stateQuery: StateQuery) {}
 

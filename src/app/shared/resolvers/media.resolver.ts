@@ -1,9 +1,11 @@
-import { combineLatest, Observable, tap } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 
-import { MediaService, StateService } from '../../core';
+import { MediaService } from '../../core';
+import { spinner } from '../helpers/spinner';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Injectable({
   providedIn: 'root',
@@ -11,13 +13,12 @@ import { MediaService, StateService } from '../../core';
 export class MediaResolver implements Resolve<any> {
   constructor(
     private mediaService: MediaService,
-    private stateService: StateService
+    private ngxUiLoaderService: NgxUiLoaderService,
   ) {}
   resolve(route: ActivatedRouteSnapshot): Observable<any> {
     const id = route.params['id'];
     const type = route.params['type'];
     this.mediaService.updateSeasons([]);
-    this.stateService.setLoading(true);
     return combineLatest([
       this.mediaService.fetchMediaDetails(id, type),
       this.mediaService.fetchCredits(id, type),
@@ -25,6 +26,6 @@ export class MediaResolver implements Resolve<any> {
       this.mediaService.fetchRecommendations(id, type),
       this.mediaService.fetchSocialLinks(id, type),
       this.mediaService.fetchImages(id, type),
-    ]).pipe(tap(() => this.stateService.setLoading(false)));
+    ]).pipe(spinner(this.ngxUiLoaderService, 'master'));
   }
 }

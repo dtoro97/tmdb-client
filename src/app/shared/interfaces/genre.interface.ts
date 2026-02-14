@@ -1,5 +1,5 @@
 import { Genre } from 'tmdb-ts';
 
-export interface IGenre extends Genre {
+export interface SelectableGenre extends Genre {
   selected: boolean;
 }

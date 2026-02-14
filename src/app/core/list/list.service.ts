@@ -1,4 +1,3 @@
-import { get, set, toNumber } from 'lodash';
 import { from, Observable, tap } from 'rxjs';
 import {
   MovieDiscoverResult,
@@ -9,8 +8,8 @@ import {
 import { Injectable } from '@angular/core';
 import { Params, Router } from '@angular/router';
 
-import { isValidDate, MediaListFilters, TmdbService } from '../../shared';
-import { StateService } from '../state';
+import { MediaListFilters, MediaType, TmdbService } from '../../shared';
+import { FilterQueryConverter } from '../../shared/helpers/filter-query-converter';
 import { ListStore } from './list.store';
 import { MAX_LIST_PAGE_SIZE, MAX_PAGES } from '../../constants';
 
@@ -19,18 +18,17 @@ export class ListService {
   constructor(
     private store: ListStore,
     private tmdbService: TmdbService,
-    private router: Router,
-    private state: StateService
+    private router: Router
   ) {}
 
   fetchData(
     type: string,
     queryParams: Params
   ): Observable<TvShowDiscoverResult | MovieDiscoverResult | PopularPeople> {
-    let dataSource$: Observable<any>;
-    if (type === 'tv') {
+    let dataSource$: Observable<TvShowDiscoverResult | MovieDiscoverResult | PopularPeople>;
+    if (type === MediaType.TV) {
       dataSource$ = from(this.tmdbService.discover.tvShow(queryParams));
-    } else if (type === 'movie') {
+    } else if (type === MediaType.MOVIE) {
       dataSource$ = from(this.tmdbService.discover.movie(queryParams));
     } else {
       dataSource$ = from(this.tmdbService.people.popular(queryParams));
@@ -38,95 +36,17 @@ export class ListService {
     return dataSource$.pipe(
       tap((data) => {
         this.updateData(data);
-        this.state.setLoading(false);
       })
     );
   }
 
   toQueryParams(type: string): any {
-    const store = this.store.getValue();
-    const queryParams: Record<string, any> = {};
-    queryParams['page'] = store.page;
-    queryParams['sort_by'] = store.sortBy;
-
-    if (store.fromDate) {
-      queryParams[
-        `${type === 'tv' ? 'first_air_date' : 'primary_release_date'}.gte`
-      ] = store.fromDate.toISOString().split('T')[0];
-    }
-    if (store.toDate) {
-      queryParams[
-        `${type === 'tv' ? 'first_air_date' : 'primary_release_date'}.lte`
-      ] = store.toDate.toISOString().split('T')[0];
-    }
-    if (store.genres.length > 0) {
-      queryParams['with_genres'] = store.genres.join('|');
-    }
-    if (get(store, 'voteAverage.0')) {
-      queryParams['vote_average.gte'] = get(store, 'voteAverage.0');
-    }
-    if (get(store, 'voteAverage.1')) {
-      queryParams['vote_average.lte'] = get(store, 'voteAverage.1');
-    }
-    if (store.minVoteCount) {
-      queryParams['vote_count.gte'] = store.minVoteCount;
-    }
-    return queryParams;
+    const filters = this.store.getValue();
+    return FilterQueryConverter.toQueryParams(filters, type);
   }
 
   toFilters(queryParams: Params, type: string): MediaListFilters {
-    const filters = {};
-    let fromDate;
-    let toDate;
-
-    if (queryParams['sort_by']) {
-      set(filters, 'sortBy', queryParams['sort_by']);
-    }
-
-    if (type === 'tv') {
-      const from: any = get(queryParams, 'first_air_date.gte');
-      const to: any = get(queryParams, 'first_air_date.lte');
-      if (isValidDate(from)) {
-        fromDate = new Date(from);
-      }
-      if (isValidDate(to)) {
-        toDate = new Date(to);
-      }
-    } else if (type === 'movie') {
-      const from: any = get(queryParams, 'primary_release_date.gte');
-      const to: any = get(queryParams, 'primary_release_date.lte');
-      if (isValidDate(from)) {
-        fromDate = new Date(from);
-      }
-      if (isValidDate(to)) {
-        toDate = new Date(to);
-      }
-    }
-    if (queryParams['with_genres']) {
-      set(filters, 'genres', queryParams['with_genres'].split('|'));
-    } else {
-      set(filters, 'genres', []);
-    }
-
-    if (get(queryParams, 'vote_average.gte')) {
-      set(filters, 'voteAverage.0', toNumber(queryParams['vote_average.gte']));
-    } else {
-      set(filters, 'voteAverage.0', 0);
-    }
-    if (get(queryParams, 'vote_average.lte')) {
-      set(filters, 'voteAverage.1', toNumber(queryParams['vote_average.lte']));
-    } else {
-      set(filters, 'voteAverage.1', 10);
-    }
-    if (get(queryParams, 'vote_count.gte')) {
-      set(filters, 'minVoteCount', toNumber(queryParams['vote_count.gte']));
-    }
-
-    set(filters, 'fromDate', fromDate);
-    set(filters, 'toDate', toDate);
-    set(filters, 'page', toNumber(queryParams['page']) || 1);
-
-    return filters as MediaListFilters;
+    return FilterQueryConverter.toFilters(queryParams, type);
   }
 
   updateFilters(filters: MediaListFilters) {

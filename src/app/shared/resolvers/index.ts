@@ -1,3 +1,3 @@
-export * from './peron.resolver';
-export * from './peron.resolver';
+export * from './person.resolver';
+export * from './media.resolver';
 export * from './list.resolver';

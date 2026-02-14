@@ -1,9 +1,9 @@
-import { combineLatest, Observable, tap } from 'rxjs';
-
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-
-import { ListService, MediaService, StateService } from '../../core';
+import { Observable } from 'rxjs';
+import { ListService } from '../../core';
+import { spinner } from '../helpers/spinner';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Injectable({
   providedIn: 'root',
@@ -11,15 +11,15 @@ import { ListService, MediaService, StateService } from '../../core';
 export class ListResolver implements Resolve<any> {
   constructor(
     private listService: ListService,
-    private stateService: StateService
+    private ngxUiLoaderService: NgxUiLoaderService,
   ) {}
   resolve(route: ActivatedRouteSnapshot): Observable<any> {
     const type = route.params['type'];
-
-    this.stateService.setLoading(true);
     const queryParams = route.queryParams;
     const filters = this.listService.toFilters(queryParams, type);
     this.listService.updateFilters(filters);
-    return this.listService.fetchData(type, queryParams);
+    return this.listService
+      .fetchData(type, queryParams)
+      .pipe(spinner(this.ngxUiLoaderService, 'master'));
   }
 }

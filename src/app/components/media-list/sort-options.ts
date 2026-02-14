@@ -1,4 +1,6 @@
-export const movieSortOptions = [
+import { Option } from '../../shared';
+
+const commonSortOptions: Option[] = [
   {
     label: 'Popularity Descending',
     value: 'popularity.desc',
@@ -15,6 +17,9 @@ export const movieSortOptions = [
     label: 'Rating Ascending',
     value: 'vote_average.asc',
   },
+];
+
+const movieSpecificOptions: Option[] = [
   {
     label: 'Release Date Descending',
     value: 'primary_release_date.desc',
@@ -33,23 +38,7 @@ export const movieSortOptions = [
   },
 ];
 
-export const tvSortOptions = [
-  {
-    label: 'Popularity Descending',
-    value: 'popularity.desc',
-  },
-  {
-    label: 'Popularity Ascending',
-    value: 'popularity.asc',
-  },
-  {
-    label: 'Rating Descending',
-    value: 'vote_average.desc',
-  },
-  {
-    label: 'Rating Ascending',
-    value: 'vote_average.asc',
-  },
+const tvSpecificOptions: Option[] = [
   {
     label: 'First Aired Descending',
     value: 'first_air_date.desc',
@@ -67,3 +56,7 @@ export const tvSortOptions = [
     value: 'name.desc',
   },
 ];
+
+export const movieSortOptions: Option[] = [...commonSortOptions, ...movieSpecificOptions];
+
+export const tvSortOptions: Option[] = [...commonSortOptions, ...tvSpecificOptions];

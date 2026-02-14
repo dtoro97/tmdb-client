@@ -1,9 +1,10 @@
 import { providePrimeNG } from 'primeng/config';
 
 import { provideHttpClient } from '@angular/common/http';
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
 
 import { routes } from './app.routes';
 import { MATERIAL } from './constants';

@@ -25,6 +25,7 @@
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@primeng/themes": "^19.0.2",
     "lodash": "^4.17.21",
+    "ngx-ui-loader": "^19.0.0",
     "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",
     "primeng": "^19.0.2",

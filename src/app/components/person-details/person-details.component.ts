@@ -26,7 +26,7 @@ import {
   AgePipe,
   FilterPipe,
   ImagePipe,
-  IOption,
+  Option,
   SortPipe,
 } from '../../shared';
 import { CardComponent } from '../card/card.component';
@@ -56,7 +56,7 @@ import { SocialLinksComponent } from '../social-links/social-links.component';
 export class PersonDetailsComponent implements OnInit {
   person$: Observable<PersonDetails>;
   images$: Observable<Image[]>;
-  knownFor$: Observable<any[]>;
+  knownFor$: Observable<any[] | undefined>;
   credits$: Observable<PersonCombinedCredits>;
   links$: Observable<ExternalIds>;
   isMobile: Signal<boolean>;
@@ -65,7 +65,7 @@ export class PersonDetailsComponent implements OnInit {
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab$: Observable<string>;
   hasCredits$: Observable<boolean>;
-  creditsOptions$: Observable<IOption[]>;
+  creditsOptions$: Observable<Option[]>;
   visibleCredits$: BehaviorSubject<string>;
   constructor(
     private stateQuery: StateQuery,
@@ -127,7 +127,7 @@ export class PersonDetailsComponent implements OnInit {
     return '';
   }
 
-  private getCreditOptions(credits: PersonCombinedCredits): IOption[] {
+  private getCreditOptions(credits: PersonCombinedCredits): Option[] {
     const options = [];
     if (credits.cast.length) {
       options.push({ label: 'Cast', value: 'cast' });

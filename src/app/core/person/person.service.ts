@@ -1,5 +1,5 @@
 import { uniqBy } from 'lodash';
-import { catchError, EMPTY, from, Observable, tap } from 'rxjs';
+import { from, Observable, tap } from 'rxjs';
 import {
   ExternalIds,
   PeopleImages,
@@ -11,6 +11,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { TmdbService } from '../../shared';
+import { handleMediaError } from '../../shared/operators/error-handler.operator';
 import { PersonStore } from './person.store';
 
 @Injectable({ providedIn: 'root' })
@@ -42,10 +43,7 @@ export class PersonService {
 
   fetchPersonDetails(id: number): Observable<PersonDetails> {
     return from(this.tmdbService.people.details(id)).pipe(
-      catchError((e) => {
-        this.router.navigate(['not-found']);
-        return EMPTY;
-      }),
+      handleMediaError(this.router),
       tap((data) => this.store.update({ person: data }))
     );
   }

@@ -20,7 +20,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ListQuery, ListService, StateQuery } from '../../core';
-import { IGenre, IOption } from '../../shared';
+import { SelectableGenre, Option, MediaType } from '../../shared';
 import { CardComponent } from '../card/card.component';
 import { movieSortOptions, tvSortOptions } from './sort-options';
 
@@ -46,8 +46,8 @@ import { movieSortOptions, tvSortOptions } from './sort-options';
 export class MediaListComponent implements OnInit {
   isMobile: Signal<boolean>;
   type$: Observable<string>;
-  sortOptions$: Observable<IOption[]>;
-  genres$: Observable<IGenre[]>;
+  sortOptions$: Observable<Option[]>;
+  genres$: Observable<SelectableGenre[]>;
   filterPanelState: boolean;
   title: string;
   constructor(
@@ -68,7 +68,7 @@ export class MediaListComponent implements OnInit {
     this.genres$ = combineLatest([
       this.type$.pipe(
         switchMap((type) =>
-          type === 'tv'
+          type === MediaType.TV
             ? this.stateQuery.tvGenres$
             : this.stateQuery.movieGenres$
         )
@@ -83,7 +83,7 @@ export class MediaListComponent implements OnInit {
       })
     );
     this.sortOptions$ = this.type$.pipe(
-      map((type) => (type === 'tv' ? tvSortOptions : movieSortOptions))
+      map((type) => (type === MediaType.TV ? tvSortOptions : movieSortOptions))
     );
     this.filterPanelState = !this.isMobile();
   }
@@ -103,7 +103,7 @@ export class MediaListComponent implements OnInit {
     this.scroller.scrollToPosition([0, 0]);
   }
 
-  toggleGenreSelection(genre: IGenre) {
+  toggleGenreSelection(genre: SelectableGenre) {
     this.listService.updateGenreSelection(genre.id);
   }
 
@@ -112,10 +112,10 @@ export class MediaListComponent implements OnInit {
       case type === 'person':
         this.title = 'Popular People';
         break;
-      case type === 'tv':
+      case type === MediaType.TV:
         this.title = 'Browse TV Shows';
         break;
-      case type === 'movie':
+      case type === MediaType.MOVIE:
         this.title = 'Browse Movies';
         break;
       default:

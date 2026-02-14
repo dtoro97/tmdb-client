@@ -24,9 +24,12 @@ import { TmdbService } from '../../services';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
 import { StateQuery, StateService } from '../../../core';
+import { spinner } from '../../helpers/spinner';
 import { ImagePipe } from '../../pipes';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { DateHelper } from '../../helpers/date.helper';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-header',
@@ -55,10 +58,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private _sub: Subscription;
 
   constructor(
-    private tmdb: TmdbService,
-    private stateService: StateService,
     private stateQuery: StateQuery,
-    private sessionService: StateService
+    private tmdb: TmdbService,
+    private sessionService: StateService,
+    private ngxUiLoaderService: NgxUiLoaderService,
   ) {}
 
   ngOnInit(): void {
@@ -69,14 +72,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isDarkMode$ = this.stateQuery.isDarkMode$;
     this._sub = this.search$
       .pipe(
-        tap(() => this.stateService.setLoading(true)),
         debounceTime(500),
         switchMap((query) => {
-          return from(this.tmdb.search.multi({ query }));
-        })
+          return from(this.tmdb.search.multi({ query })).pipe(
+            spinner(this.ngxUiLoaderService, 'master'),
+          );
+        }),
       )
       .subscribe((data) => {
-        this.stateService.setLoading(false);
         this._searchResults.next(data.results);
       });
   }
@@ -190,6 +193,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private getSpecificISODate(daysToAdd: number): string {
     const currentDate = new Date();
     currentDate.setDate(currentDate.getDate() + daysToAdd);
-    return currentDate.toISOString().split('T')[0];
+    return DateHelper.formatToISO(currentDate);
   }
 }

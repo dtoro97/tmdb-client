@@ -1,5 +1,3 @@
-import { get, set } from 'lodash';
-
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 
@@ -24,12 +22,12 @@ export const mediaListGuard = (route: ActivatedRouteSnapshot) => {
 
   let changed = false;
 
-  if (!get(queryParams, 'page')) {
-    set(newParams, 'page', defaultParams.page);
+  if (!queryParams['page']) {
+    newParams['page'] = defaultParams.page;
     changed = true;
   }
-  if (!get(queryParams, 'sort_by')) {
-    set(newParams, 'sort_by', defaultParams.sort_by);
+  if (!queryParams['sort_by']) {
+    newParams['sort_by'] = defaultParams.sort_by;
     changed = true;
   }
 
