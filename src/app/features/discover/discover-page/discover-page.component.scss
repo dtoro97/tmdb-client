@@ -1,0 +1,24 @@
+:host ::ng-deep {
+  .search-button {
+    color: var(--p-text-color);
+  }
+  .mobile {
+    app-card {
+      .card {
+        width: 150px;
+      }
+    }
+  }
+  app-card {
+    .card {
+      margin: 0;
+      width: 200px;
+      max-height: 450px;
+    }
+  }
+  .p-chip {
+    &.selected {
+      background: var(--p-primary-color);
+    }
+  }
+}

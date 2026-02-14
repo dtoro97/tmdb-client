@@ -1,17 +1,17 @@
-export enum MediaType {
+export enum MediaTypeEnum {
   TV = 'tv',
-  MOVIE = 'movie'
+  MOVIE = 'movie',
 }
 
 export const MEDIA_TYPE_CONFIG = {
-  [MediaType.TV]: {
+  [MediaTypeEnum.TV]: {
     label: 'TV Shows',
     releaseDateField: 'first_air_date',
-    titleField: 'name'
+    titleField: 'name',
   },
-  [MediaType.MOVIE]: {
+  [MediaTypeEnum.MOVIE]: {
     label: 'Movies',
     releaseDateField: 'primary_release_date',
-    titleField: 'title'
-  }
+    titleField: 'title',
+  },
 } as const;

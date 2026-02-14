@@ -1,0 +1,16 @@
+:host ::ng-deep {
+  .mobile {
+    app-card {
+      .card {
+        width: 150px;
+      }
+    }
+  }
+  app-card {
+    .card {
+      margin: 0;
+      width: 200px;
+      max-height: 450px;
+    }
+  }
+}

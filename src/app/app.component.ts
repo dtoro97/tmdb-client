@@ -3,9 +3,9 @@ import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { FooterComponent } from './shared/components';
-import { HeaderComponent } from './shared/components';
-import { HomeService, StateService } from './core';
+import { FooterComponent } from './shared/ui/footer/footer.component';
+import { HeaderComponent } from './shared/ui/header/header.component';
+import { AppStoreService } from './core/app-store.service';
 
 @Component({
   selector: 'app-root',
@@ -15,11 +15,7 @@ import { HomeService, StateService } from './core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  constructor(
-    private stateService: StateService,
-    private homeService: HomeService,
-  ) {
-    this.stateService.loadSession();
-    this.homeService.init();
+  constructor(private appStore: AppStoreService) {
+    this.appStore.loadSession();
   }
 }

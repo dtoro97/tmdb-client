@@ -1,0 +1,31 @@
+<div class="h-full flex flex-column pb-4 md:pt-4">
+  <div class="flex flex-column">
+    <div class="column-header ml-4 md:ml-6 mb-4">
+      <h2>Trending</h2>
+      <p-select-button
+        [options]="trendingOptions"
+        [ngModel]="homeStore.trendingTime$ | async"
+        (ngModelChange)="changeTrending($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <app-media-carousel
+      [items]="(homeStore.trending$ | async) || []"
+    ></app-media-carousel>
+  </div>
+  <div class="flex flex-column">
+    <div class="column-header ml-4 md:ml-6 mb-4">
+      <h2>What's Popular</h2>
+      <p-select-button
+        [options]="popularOptions"
+        [ngModel]="homeStore.popularType$ | async"
+        (ngModelChange)="changePopular($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <app-media-carousel
+      [items]="(homeStore.popular$ | async) || []"
+      [type]="(homeStore.popularType$ | async)!"
+    ></app-media-carousel>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="header" [class.mobile]="isMobile()">
+  <p-menubar [model]="items">
+    <ng-template #start>
+      <a routerLink="/" class="brand-link">
+        <i class="fa-solid fa-film"></i>
+        <span class="brand-text">TMDB Client</span>
+      </a>
+    </ng-template>
+    <ng-template #end>
+      <div class="flex align-items-center gap-2">
+        <p-autocomplete
+          #searchBar
+          (onSelect)="onSearchSelect(searchBar)"
+          [suggestions]="searchResults$ | async"
+          (completeMethod)="search($event.query)"
+          placeholder="Search movies, TV shows, people..."
+          styleClass="custom-search"
+        >
+          <ng-template let-item #item>
+            <div
+              class="search-result-item"
+              [class.mobile]="isMobile()"
+              [routerLink]="item.media_type === 'person'
+                ? ['/people', item.id, 'overview']
+                : ['/details', item.media_type, item.id, 'overview']"
+            >
+              <img
+                class="result-poster"
+                [src]="item.poster_path || item.profile_path | imgSrc"
+                alt="{{ item.title || item.name }}"
+              />
+              <div class="result-info">
+                <span class="result-title">
+                  {{ item.title || item.name }}
+                </span>
+                <span class="result-year">
+                  {{ item.release_date || item.first_air_date | date : "yyyy" }}
+                </span>
+                <span class="result-type">
+                  {{ item.media_type }}
+                </span>
+              </div>
+            </div>
+          </ng-template>
+        </p-autocomplete>
+        <p-button
+          icon="{{
+            (isDarkMode$ | async) ? 'fa-regular fa-sun' : 'fa-solid fa-moon'
+          }}"
+          [text]="true"
+          severity="secondary"
+          (click)="toggleDarkMode()"
+        ></p-button>
+      </div>
+    </ng-template>
+  </p-menubar>
+</div>
