@@ -23,8 +23,8 @@
               <p-select
                 appendTo="body"
                 [options]="sortOptions$ | async"
-                [ngModel]="discoverStore.sortBy$ | async"
-                (ngModelChange)="discoverStore.updateSortBy($event)"
+                [ngModel]="discoverStoreService.sortBy$ | async"
+                (ngModelChange)="discoverStoreService.updateSortBy($event)"
                 [showClear]="true"
                 optionLabel="label"
                 optionValue="value"
@@ -45,16 +45,16 @@
                 <span [style.width.px]="100">from</span>
                 <p-date-picker
                   appendTo="body"
-                  [ngModel]="discoverStore.fromDate$ | async"
-                  (ngModelChange)="discoverStore.updateFromDate($event)"
+                  [ngModel]="discoverStoreService.fromDate$ | async"
+                  (ngModelChange)="discoverStoreService.updateFromDate($event)"
                 ></p-date-picker>
               </div>
               <div class="flex justify-content-between align-items-center mt-2">
                 <span [style.width.px]="100">to</span>
                 <p-date-picker
                   appendTo="body"
-                  [ngModel]="discoverStore.toDate$ | async"
-                  (ngModelChange)="discoverStore.updateToDate($event)"
+                  [ngModel]="discoverStoreService.toDate$ | async"
+                  (ngModelChange)="discoverStoreService.updateToDate($event)"
                 ></p-date-picker>
               </div>
               <p-divider></p-divider>
@@ -62,23 +62,23 @@
               <div
                 class="flex justify-content-start align-items-center mt-2 flex-wrap gap-2"
               >
-                @for(genre of (genres$ | async);track genre.id) {
-                <p-chip
-                  #chip
-                  styleClass="cursor-pointer text-sm {{
-                    genre.selected ? 'selected' : ''
-                  }}"
-                  [label]="genre.name"
-                  (click)="toggleGenreSelection(genre)"
-                >
-                </p-chip>
+                @for (genre of genres$ | async; track genre.id) {
+                  <p-chip
+                    #chip
+                    styleClass="cursor-pointer text-sm {{
+                      genre.selected ? 'selected' : ''
+                    }}"
+                    [label]="genre.name"
+                    (click)="toggleGenreSelection(genre)"
+                  >
+                  </p-chip>
                 }
               </div>
               <p-divider></p-divider>
               <h3>User Score</h3>
               <p-slider
-                [ngModel]="discoverStore.voteAverage$ | async"
-                (ngModelChange)="discoverStore.updateVoteAverage($event)"
+                [ngModel]="discoverStoreService.voteAverage$ | async"
+                (ngModelChange)="discoverStoreService.updateVoteAverage($event)"
                 [step]="1"
                 [min]="0"
                 [max]="10"
@@ -86,21 +86,28 @@
                 styleClass="w-full"
               />
               <div class="flex justify-content-center flex-row mt-2">
-                <span>{{ (discoverStore.voteAverage$ | async)![0] }}</span> -
-                <span>{{ (discoverStore.voteAverage$ | async)![1] }}</span>
+                <span>{{
+                  (discoverStoreService.voteAverage$ | async)![0]
+                }}</span>
+                -
+                <span>{{
+                  (discoverStoreService.voteAverage$ | async)![1]
+                }}</span>
               </div>
               <p-divider></p-divider>
               <h3>Minimum User Votes</h3>
               <p-slider
-                [ngModel]="discoverStore.minVoteCount$ | async"
-                (ngModelChange)="discoverStore.updateMinVoteCount($event)"
+                [ngModel]="discoverStoreService.minVoteCount$ | async"
+                (ngModelChange)="
+                  discoverStoreService.updateMinVoteCount($event)
+                "
                 [step]="10"
                 [min]="0"
                 [max]="500"
                 styleClass="w-full"
               />
               <div class="flex justify-content-center flex-row mt-2">
-                <span>{{ discoverStore.minVoteCount$ | async }}</span>
+                <span>{{ discoverStoreService.minVoteCount$ | async }}</span>
               </div>
             </div>
           </p-accordion-content>
@@ -108,14 +115,14 @@
       </p-accordion>
     </div>
     <div class="col col-12 lg:col flex flex-wrap gap-2 justify-content-center">
-      @for(item of discoverStore.data$| async;track item.id) {
-      <app-card [item]="item" [type]="type$ | async"></app-card>
+      @for (item of discoverStoreService.data$ | async; track item.id) {
+        <app-card [item]="item" [type]="type$ | async"></app-card>
       }
       <div class="w-full flex justify-content-center m4-t">
         <p-paginator
-          [first]="discoverStore.skip$ | async"
+          [first]="discoverStoreService.skip$ | async"
           [rows]="20"
-          [totalRecords]="discoverStore.total$ | async"
+          [totalRecords]="discoverStoreService.total$ | async"
           [alwaysShow]="false"
           [styleClass]="'paginator'"
           (onPageChange)="onPageChange($event)"

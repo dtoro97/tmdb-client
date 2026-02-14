@@ -1,5 +1,11 @@
-import { from, Observable, tap } from 'rxjs';
-import { Movie, MovieDiscoverResult, TV, TvShowDiscoverResult } from 'tmdb-ts';
+import { forkJoin, from, Observable, tap } from 'rxjs';
+import {
+  Genre,
+  Movie,
+  MovieDiscoverResult,
+  TV,
+  TvShowDiscoverResult,
+} from 'tmdb-ts';
 
 import { Injectable } from '@angular/core';
 import { Params } from '@angular/router';
@@ -24,6 +30,8 @@ export interface DiscoverState {
   rows: number;
   total: number;
   data: (TV | Movie)[];
+  tvGenres: Genre[];
+  movieGenres: Genre[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -47,6 +55,12 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
   readonly data$: Observable<(TV | Movie)[]> = this.select(
     (state) => state.data,
   );
+  readonly tvGenres$: Observable<Genre[]> = this.select(
+    (state) => state.tvGenres,
+  );
+  readonly movieGenres$: Observable<Genre[]> = this.select(
+    (state) => state.movieGenres,
+  );
 
   constructor(
     private tmdbService: TmdbService,
@@ -61,6 +75,18 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
       rows: MAX_LIST_PAGE_SIZE,
       total: 0,
       data: [],
+      tvGenres: [],
+      movieGenres: [],
+    });
+
+    forkJoin({
+      tvGenres: from(this.tmdbService.genres.tvShows()),
+      movieGenres: from(this.tmdbService.genres.movies()),
+    }).subscribe(({ tvGenres, movieGenres }) => {
+      this.patchState({
+        tvGenres: tvGenres.genres,
+        movieGenres: movieGenres.genres,
+      });
     });
   }
 

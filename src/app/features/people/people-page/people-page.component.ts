@@ -4,13 +4,12 @@ import { AsyncPipe, ViewportScroller } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   Signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
-import { AppStoreService } from '../../../core/app-store.service';
+import { GlobalStore } from '../../../core/global.store';
 import { PeopleListStoreService } from '../people-store.service';
 import { CardComponent } from '../../../shared/ui/card/card.component';
 
@@ -21,22 +20,22 @@ import { CardComponent } from '../../../shared/ui/card/card.component';
   templateUrl: './people-page.component.html',
   styleUrl: './people-page.component.scss',
 })
-export class PeoplePageComponent implements OnInit {
+export class PeoplePageComponent{
   isMobile: Signal<boolean>;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
-    private appStore: AppStoreService,
+    private globalStore: GlobalStore,
     private titleService: Title,
     public peopleStore: PeopleListStoreService,
-  ) {}
-
-  ngOnInit(): void {
-    this.isMobile = this.appStore.isMobile;
+  ) {
+    
+    this.isMobile = this.globalStore.isMobile;
     this.titleService.setTitle('Popular People');
   }
+
 
   onPageChange(change: PaginatorState): void {
     this.peopleStore.updatePage(change.page! + 1);

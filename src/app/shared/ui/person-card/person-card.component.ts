@@ -4,7 +4,7 @@ import { Component, Input, Signal, inject } from '@angular/core';
 
 import { ImagePipe } from '../../pipes/image.pipe';
 import { RouterLink } from '@angular/router';
-import { AppStoreService } from '../../../core/app-store.service';
+import { GlobalStore } from '../../../core/global.store';
 
 @Component({
   selector: 'app-person-card',
@@ -16,9 +16,7 @@ export class PersonCardComponent {
   @Input() person: Cast;
   isMobile: Signal<boolean>;
 
-  private appStore = inject(AppStoreService);
-
-  constructor() {
-    this.isMobile = this.appStore.isMobile;
+  constructor(private globalStore: GlobalStore) {
+    this.isMobile = this.globalStore.isMobile;
   }
 }

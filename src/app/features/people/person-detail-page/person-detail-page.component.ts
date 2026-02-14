@@ -10,18 +10,13 @@ import {
 } from 'tmdb-ts';
 
 import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../../constants';
-import { AppStoreService } from '../../../core/app-store.service';
+import { GlobalStore } from '../../../core/global.store';
 import { PersonDetailStore } from '../person-store.service';
 import { AgePipe } from '../../../shared/pipes/age.pipe';
 import { FilterPipe } from '../../../shared/pipes/filter.pipe';
@@ -52,7 +47,7 @@ import { CreditsListComponent } from '../credits-list/credits-list.component';
   templateUrl: './person-detail-page.component.html',
   styleUrl: './person-details.component.scss',
 })
-export class PersonDetailPageComponent implements OnInit {
+export class PersonDetailPageComponent {
   person$: Observable<PersonDetails>;
   images$: Observable<Image[]>;
   knownFor$: Observable<any[] | undefined>;
@@ -68,17 +63,15 @@ export class PersonDetailPageComponent implements OnInit {
   visibleCredits$: BehaviorSubject<string>;
 
   constructor(
-    private appStore: AppStoreService,
+    private globalStore: GlobalStore,
     private scroller: ViewportScroller,
     private titleService: Title,
     private personDetailStore: PersonDetailStore,
     private router: Router,
     private route: ActivatedRoute,
-  ) {}
-
-  ngOnInit(): void {
-    this.isMobile = this.appStore.isMobile;
-    this.isDarkMode$ = this.appStore.isDarkMode$;
+  ) {
+    this.isMobile = this.globalStore.isMobile;
+    this.isDarkMode$ = this.globalStore.isDarkMode$;
     this.images$ = this.personDetailStore.images$;
     this.links$ = this.personDetailStore.socialLinks$;
     this.hasCredits$ = this.personDetailStore.hasCredits$;

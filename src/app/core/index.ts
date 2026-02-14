@@ -1,1 +1,1 @@
-export * from './app-store.service';
+export * from './global.store';

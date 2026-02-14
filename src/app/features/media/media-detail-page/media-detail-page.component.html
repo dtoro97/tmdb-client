@@ -1,7 +1,7 @@
 <div
   class="h-full details-container pb-4"
-  [class.mobile]="appStore.isMobile()"
-  [class.dark]="appStore.isDarkMode$ | async"
+  [class.mobile]="globalStore.isMobile()"
+  [class.dark]="globalStore.isDarkMode$ | async"
 >
   <div class="relative">
     @if (mediaStoreService.hasBackdrop$ | async) {

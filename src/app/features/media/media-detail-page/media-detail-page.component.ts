@@ -4,11 +4,11 @@ import { ChipModule } from 'primeng/chip';
 import { RatingModule } from 'primeng/rating';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, tap } from 'rxjs';
 import { Images, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
 
 import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -25,7 +25,7 @@ import {
 } from '../../../shared';
 import { CAROUSEL_BREAKPOINTS } from '../../../constants';
 import { MediaStoreService } from '../media-store.service';
-import { AppStoreService } from '../../../core';
+import { GlobalStore } from '../../../core';
 
 @Component({
   selector: 'app-media-detail-page',
@@ -52,7 +52,7 @@ import { AppStoreService } from '../../../core';
   templateUrl: './media-detail-page.component.html',
   styleUrl: './media-details.component.scss',
 })
-export class MediaDetailPageComponent implements OnInit {
+export class MediaDetailPageComponent {
   mediaItem$: Observable<MovieDetails | TvShowDetails>;
   videos$: Observable<Video[]>;
   images$: Observable<Images>;
@@ -68,11 +68,11 @@ export class MediaDetailPageComponent implements OnInit {
     private scroller: ViewportScroller,
     private titleService: Title,
     public mediaStoreService: MediaStoreService,
-    public appStore: AppStoreService,
-  ) {}
-
-  ngOnInit(): void {
-    this.mediaItem$ = this.mediaStoreService.media$;
+    public globalStore: GlobalStore,
+  ) {
+    this.mediaItem$ = this.mediaStoreService.media$.pipe(
+      tap(() => this.scroller.scrollToPosition([0, 0])),
+    );
     this.videos$ = this.mediaStoreService.youtubeVideos$;
     this.images$ = this.mediaStoreService.images$;
     this.mediaType$ = this.route.params.pipe(
@@ -95,7 +95,7 @@ export class MediaDetailPageComponent implements OnInit {
     );
 
     this.languages$ = combineLatest([
-      this.appStore.languages$,
+      this.mediaStoreService.languages$,
       this.mediaType$,
       this.mediaItem$,
     ]).pipe(

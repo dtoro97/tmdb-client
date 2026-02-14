@@ -8,7 +8,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
-  OnInit,
   Signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +16,7 @@ import { RouterLink } from '@angular/router';
 import { FilterPipe } from '../../../shared/pipes/filter.pipe';
 import { SortPipe } from '../../../shared/pipes/sort.pipe';
 import { Option } from '../../../shared/interfaces/option.interface';
-import { AppStoreService } from '../../../core/app-store.service';
+import { GlobalStore } from '../../../core/global.store';
 
 @Component({
   selector: 'app-credits-list',
@@ -34,7 +33,7 @@ import { AppStoreService } from '../../../core/app-store.service';
   templateUrl: './credits-list.component.html',
   styleUrl: './credits-list.component.scss',
 })
-export class CreditsListComponent implements OnInit {
+export class CreditsListComponent {
   @Input() set credits(credits: PersonCombinedCredits) {
     this._credits = {
       ...credits,
@@ -88,10 +87,8 @@ export class CreditsListComponent implements OnInit {
   departmentOptions: Option[];
   mediaOptions: Option[];
 
-  constructor(private appStore: AppStoreService) {}
-
-  ngOnInit(): void {
-    this.isDarkMode$ = this.appStore.isDarkMode$;
-    this.isMobile = this.appStore.isMobile;
+  constructor(private globalStore: GlobalStore) {
+    this.isDarkMode$ = this.globalStore.isDarkMode$;
+    this.isMobile = this.globalStore.isMobile;
   }
 }

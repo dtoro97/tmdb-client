@@ -1,33 +1,21 @@
 import { MenuItem } from 'primeng/api';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
-import {
-  debounceTime,
-  from,
-  Observable,
-  Subject,
-  Subscription,
-  switchMap,
-} from 'rxjs';
+import { debounceTime, from, Observable, Subject, switchMap, tap } from 'rxjs';
 import { MultiSearchResult } from 'tmdb-ts';
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 
 import { TmdbService } from '../../services';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
-import { AppStoreService } from '../../../core/app-store.service';
+import { GlobalStore } from '../../../core/global.store';
 import { loader } from '../../utils/loader';
 import { ImagePipe } from '../../pipes';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DateHelper } from '../../utils/date.helper';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-header',
@@ -44,7 +32,7 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent {
   isDarkMode$: Observable<boolean>;
   items: MenuItem[];
   autoCompleteValue: string;
@@ -53,41 +41,35 @@ export class HeaderComponent implements OnInit, OnDestroy {
   searchResults$: Observable<MultiSearchResult[]>;
   private _searchResults: Subject<MultiSearchResult[]> = new Subject();
   private _search: Subject<string> = new Subject();
-  private _sub: Subscription;
 
   constructor(
-    private appStore: AppStoreService,
+    private globalStore: GlobalStore,
     private tmdb: TmdbService,
     private ngxUiLoaderService: NgxUiLoaderService,
-  ) {}
-
-  ngOnInit(): void {
+  ) {
     this.items = this.getMenuItems();
-    this.isMobile = this.appStore.isMobile;
+    this.isMobile = this.globalStore.isMobile;
     this.search$ = this._search.asObservable();
     this.searchResults$ = this._searchResults.asObservable();
-    this.isDarkMode$ = this.appStore.isDarkMode$;
-    this._sub = this.search$
+    this.isDarkMode$ = this.globalStore.isDarkMode$;
+    this.search$
       .pipe(
+        takeUntilDestroyed(),
         debounceTime(500),
-        switchMap((query) => {
-          return from(this.tmdb.search.multi({ query })).pipe(
+        switchMap((query) =>
+          from(this.tmdb.search.multi({ query })).pipe(
             loader(this.ngxUiLoaderService, 'master'),
-          );
-        }),
+          ),
+        ),
+        tap((data) => this._searchResults.next(data.results)),
       )
-      .subscribe((data) => {
-        this._searchResults.next(data.results);
-      });
-  }
-  ngOnDestroy(): void {
-    this._sub.unsubscribe();
+      .subscribe();
   }
 
   toggleDarkMode() {
     const element = document.querySelector('html');
     element!.classList.toggle('dark');
-    this.appStore.toggleDarkMode();
+    this.globalStore.toggleDarkMode();
   }
 
   search(term: string) {

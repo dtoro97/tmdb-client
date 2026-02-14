@@ -9,17 +9,12 @@ import { SliderModule } from 'primeng/slider';
 import { combineLatest, map, Observable, switchMap, tap } from 'rxjs';
 
 import { AsyncPipe, ViewportScroller } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { AppStoreService } from '../../../core/app-store.service';
+import { GlobalStore } from '../../../core/global.store';
 import { DiscoverStoreService } from '../discover-store.service';
 import { DiscoverFilterService } from '../discover-filter.service';
 import { SelectableGenre } from '../../../shared/interfaces/genre.interface';
@@ -46,7 +41,7 @@ import { CardComponent } from '../../../shared/ui/card/card.component';
   templateUrl: './discover-page.component.html',
   styleUrl: './discover-page.component.scss',
 })
-export class DiscoverPageComponent implements OnInit {
+export class DiscoverPageComponent {
   isMobile: Signal<boolean>;
   type$: Observable<string>;
   sortOptions$: Observable<Option[]>;
@@ -58,14 +53,12 @@ export class DiscoverPageComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
-    private appStore: AppStoreService,
+    private globalStore: GlobalStore,
     private titleService: Title,
     private discoverFilterService: DiscoverFilterService,
-    public discoverStore: DiscoverStoreService,
-  ) {}
-
-  ngOnInit(): void {
-    this.isMobile = this.appStore.isMobile;
+    public discoverStoreService: DiscoverStoreService,
+  ) {
+    this.isMobile = this.globalStore.isMobile;
     this.type$ = this.route.params.pipe(
       map((params) => params['type']),
       tap((type) => this.setTitle(type)),
@@ -74,11 +67,11 @@ export class DiscoverPageComponent implements OnInit {
       this.type$.pipe(
         switchMap((type) =>
           type === MediaTypeEnum.TV
-            ? this.appStore.tvGenres$
-            : this.appStore.movieGenres$,
+            ? this.discoverStoreService.tvGenres$
+            : this.discoverStoreService.movieGenres$,
         ),
       ),
-      this.discoverStore.genres$,
+      this.discoverStoreService.genres$,
     ]).pipe(
       map(([allGenres, selected]) => {
         return allGenres.map((genre) => ({
@@ -95,21 +88,21 @@ export class DiscoverPageComponent implements OnInit {
 
   search(): void {
     const type = this.route.snapshot.params['type'];
-    const queryParams = this.discoverStore.toQueryParams(type);
+    const queryParams = this.discoverStoreService.toQueryParams(type);
     this.router.navigate(['discover', type], { queryParams });
-    if (this.appStore.isMobile()) {
+    if (this.globalStore.isMobile()) {
       this.filterPanelState = false;
     }
   }
 
   onPageChange(change: PaginatorState): void {
-    this.discoverStore.updatePage(change.page! + 1);
+    this.discoverStoreService.updatePage(change.page! + 1);
     this.search();
     this.scroller.scrollToPosition([0, 0]);
   }
 
   toggleGenreSelection(genre: SelectableGenre) {
-    this.discoverStore.updateGenreSelection(genre.id);
+    this.discoverStoreService.updateGenreSelection(genre.id);
   }
 
   private setTitle(type: string): void {

@@ -5,7 +5,6 @@ import { RouterOutlet } from '@angular/router';
 
 import { FooterComponent } from './shared/ui/footer/footer.component';
 import { HeaderComponent } from './shared/ui/header/header.component';
-import { AppStoreService } from './core/app-store.service';
 
 @Component({
   selector: 'app-root',
@@ -14,8 +13,4 @@ import { AppStoreService } from './core/app-store.service';
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  constructor(private appStore: AppStoreService) {
-    this.appStore.loadSession();
-  }
-}
+export class AppComponent {}

@@ -6,15 +6,26 @@ import {
   ExternalIds,
   Image,
   Images,
+  LanguageConfiguration,
   MovieDetails,
   Recommendation,
   Season,
   SeasonDetails,
   TvShowDetails,
   Video,
+  WatchProvider,
 } from 'tmdb-ts';
+import { Region } from 'tmdb-ts/dist/types/regions';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest, filter, from, map, Observable, tap } from 'rxjs';
+import {
+  combineLatest,
+  filter,
+  forkJoin,
+  from,
+  map,
+  Observable,
+  tap,
+} from 'rxjs';
 import { MediaTypeEnum } from '../../shared/constants/media-type.constants';
 import { loader } from '../../shared/utils/loader';
 import { TmdbService } from '../../shared/services/tmdb.service';
@@ -32,6 +43,9 @@ export interface MediaState {
   images: Images | undefined;
   seasons: SeasonDetails[];
   selectedSeason: number;
+  providers: WatchProvider[];
+  regions: Region[];
+  languages: LanguageConfiguration[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -92,9 +106,12 @@ export class MediaStoreService extends ComponentStore<MediaState> {
       );
     }),
   );
-
   seasonEpisodesCount$: Observable<number> = this.seasonEpisodes$.pipe(
     map((episodes) => episodes.length),
+  );
+
+  languages$: Observable<LanguageConfiguration[]> = this.select(
+    (state) => state.languages,
   );
 
   constructor(
@@ -111,6 +128,20 @@ export class MediaStoreService extends ComponentStore<MediaState> {
       images: undefined,
       seasons: [],
       selectedSeason: 1,
+      providers: [],
+      regions: [],
+      languages: [],
+    });
+    forkJoin({
+      providers: from(this.tmdbService.watchProviders.getTvProviders()),
+      regions: from(this.tmdbService.watchProviders.getRegions()),
+      languages: from(this.tmdbService.configuration.getLanguages()),
+    }).subscribe(({ providers, regions, languages }) => {
+      this.patchState({
+        providers: providers.results,
+        regions: regions.results,
+        languages,
+      });
     });
   }
 
