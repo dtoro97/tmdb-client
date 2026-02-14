@@ -27,7 +27,7 @@ import { StateQuery, StateService } from '../../../core';
 import { spinner } from '../../helpers/spinner';
 import { ImagePipe } from '../../pipes';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { DateHelper } from '../../helpers/date.helper';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
@@ -40,6 +40,7 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
     ImagePipe,
     DatePipe,
     RouterLink,
+    RouterLinkActive,
     AsyncPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

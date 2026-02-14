@@ -1,31 +1,42 @@
-<div class="w-full header" [class.mobile]="isMobile()">
+<div class="header" [class.mobile]="isMobile()">
   <p-menubar [model]="items">
+    <ng-template #start>
+      <a routerLink="/" class="brand-link">
+        <i class="fa-solid fa-film"></i>
+        <span class="brand-text">TMDB Client</span>
+      </a>
+    </ng-template>
     <ng-template #end>
-      <div class="flex flex-row align-items-center gap-1">
+      <div class="flex align-items-center gap-2">
         <p-autocomplete
           #searchBar
           (onSelect)="onSearchSelect(searchBar)"
           [suggestions]="searchResults$ | async"
           (completeMethod)="search($event.query)"
-          placeholder="Search..."
+          placeholder="Search movies, TV shows, people..."
+          styleClass="custom-search"
         >
           <ng-template let-item #item>
             <div
-              class="flex flex-row w-full autocomplete-item"
+              class="search-result-item"
               [class.mobile]="isMobile()"
               [routerLink]="['details', item.media_type, item.id, 'overview']"
             >
               <img
-                class="border-round-md"
-                src="{{ item.poster_path || item.profile_path | imgSrc }}"
+                class="result-poster"
+                [src]="item.poster_path || item.profile_path | imgSrc"
+                alt="{{ item.title || item.name }}"
               />
-              <div class="flex flex-column pl-3 pr-3 overflow-hidden text-wrap">
-                <span class="font-bold pb-1 result-title">
+              <div class="result-info">
+                <span class="result-title">
                   {{ item.title || item.name }}
                 </span>
-                <span class="text-sm pb-3">{{
-                  item.release_date || item.first_air_date | date : "yyyy"
-                }}</span>
+                <span class="result-year">
+                  {{ item.release_date || item.first_air_date | date : "yyyy" }}
+                </span>
+                <span class="result-type">
+                  {{ item.media_type }}
+                </span>
               </div>
             </div>
           </ng-template>
