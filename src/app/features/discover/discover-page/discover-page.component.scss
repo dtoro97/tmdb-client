@@ -1,24 +1,208 @@
-:host ::ng-deep {
-  .search-button {
+.discover-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 3rem;
+}
+
+.discover-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.section-header {
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
     color: var(--p-text-color);
+    margin: 0;
+    padding-left: 0.75rem;
+    border-left: 4px solid var(--p-primary-color);
   }
-  .mobile {
-    app-card {
-      .card {
-        width: 150px;
-      }
-    }
+}
+
+.filter-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep .sort-select {
+  min-width: 200px;
+}
+
+.genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.genre-chip {
+  background: none;
+  border: 1px solid var(--p-menubar-border-color);
+  color: var(--p-text-muted-color);
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: var(--p-primary-color);
+    color: var(--p-primary-color);
   }
+
+  &.active {
+    background-color: var(--p-primary-color);
+    border-color: var(--p-primary-color);
+    color: white;
+  }
+}
+
+.filter-toggle-btn {
+  background: none;
+  border: 1px solid var(--p-menubar-border-color);
+  color: var(--p-text-muted-color);
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &:hover {
+    border-color: var(--p-primary-color);
+    color: var(--p-primary-color);
+  }
+
+  &.active {
+    background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
+    border-color: color-mix(in srgb, var(--p-primary-color) 40%, transparent);
+    color: var(--p-primary-color);
+  }
+}
+
+.advanced-filters {
+  display: flex;
+  gap: 2rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  background: color-mix(
+    in srgb,
+    var(--p-menubar-border-color) 15%,
+    transparent
+  );
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-range {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.date-label {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .compact-date {
+  width: 100%;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
   app-card {
     .card {
       margin: 0;
-      width: 200px;
-      max-height: 450px;
+      width: 100%;
+      max-height: none;
     }
   }
-  .p-chip {
-    &.selected {
-      background: var(--p-primary-color);
-    }
+}
+
+.paginator-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 2rem;
+}
+
+@media screen and (max-width: 768px) {
+  .discover-page {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .discover-header {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.15rem;
+    padding-left: 0.6rem;
+    border-left-width: 3px;
+  }
+
+  .filter-bar {
+    gap: 0.5rem;
+  }
+
+  :host ::ng-deep .sort-select {
+    min-width: 100%;
+  }
+
+  .advanced-filters {
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1rem;
+  }
+
+  .date-range {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
   }
 }

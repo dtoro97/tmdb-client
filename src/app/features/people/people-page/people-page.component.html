@@ -1,24 +1,23 @@
-<div
-  class="h-full details-container md:px-4 md:pt-4"
-  [class.mobile]="isMobile()"
->
-  <h2 class="ml-4 md:ml-2">Popular People</h2>
-  <div class="m-0 grid">
-    <div class="col col-12 flex flex-wrap gap-2 justify-content-center">
-      @for (item of peopleStore.data$ | async; track item.id) {
-        <app-card [item]="item" type="person"></app-card>
-      }
-      <div class="w-full flex justify-content-center m4-t">
-        <p-paginator
-          [first]="peopleStore.skip$ | async"
-          [rows]="20"
-          [totalRecords]="peopleStore.total$ | async"
-          [alwaysShow]="false"
-          [styleClass]="'paginator'"
-          (onPageChange)="onPageChange($event)"
-        >
-        </p-paginator>
-      </div>
-    </div>
+<div class="people-page">
+  <div class="section-header">
+    <h2>Popular People</h2>
   </div>
+
+  <div class="results-grid">
+    @for (item of peopleStore.data$ | async; track item.id) {
+      <app-card [item]="item" type="person"></app-card>
+    }
+  </div>
+
+  @if ((peopleStore.total$ | async)! > 20) {
+    <div class="paginator-wrapper">
+      <p-paginator
+        [first]="peopleStore.skip$ | async"
+        [rows]="20"
+        [totalRecords]="peopleStore.total$ | async"
+        [alwaysShow]="false"
+        (onPageChange)="onPageChange($event)"
+      ></p-paginator>
+    </div>
+  }
 </div>

@@ -1,16 +1,60 @@
-:host ::ng-deep {
-  .mobile {
-    app-card {
-      .card {
-        width: 150px;
-      }
-    }
+.people-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 3rem;
+}
+
+.section-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--p-text-color);
+    margin: 0;
+    padding-left: 0.75rem;
+    border-left: 4px solid var(--p-primary-color);
   }
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
   app-card {
     .card {
       margin: 0;
-      width: 200px;
-      max-height: 450px;
+      width: 100%;
+      max-height: none;
     }
+  }
+}
+
+.paginator-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 2rem;
+}
+
+@media screen and (max-width: 768px) {
+  .people-page {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .section-header {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-size: 1.15rem;
+      padding-left: 0.6rem;
+      border-left-width: 3px;
+    }
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
   }
 }

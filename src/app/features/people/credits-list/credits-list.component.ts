@@ -43,7 +43,6 @@ export class CreditsListComponent {
   @Input() set credits(credits: PersonCombinedCredits) {
     this._credits = credits;
 
-    // Build department options
     const deptOpts: Option[] = [];
     if (credits.cast.length) {
       deptOpts.push({ label: 'Acting', value: 'acting' });
@@ -54,7 +53,6 @@ export class CreditsListComponent {
     this.departmentOptions = deptOpts;
     this.department = deptOpts[0]?.value || 'acting';
 
-    // Build media options
     const allItems = [...credits.cast, ...credits.crew];
     const hasMovies = allItems.some((c) => get(c, 'media_type') === 'movie');
     const hasTv = allItems.some((c) => get(c, 'media_type') === 'tv');
@@ -77,18 +75,54 @@ export class CreditsListComponent {
   departmentOptions: Option[] = [];
   mediaOptions: Option[] = [];
   yearGroups: YearGroup[] = [];
+  visibleCount = 10;
+  readonly PAGE_SIZE = 10;
 
   constructor(private globalStore: GlobalStore) {
     this.isMobile = this.globalStore.isMobile;
   }
 
+  get visibleYearGroups(): YearGroup[] {
+    let count = 0;
+    const result: YearGroup[] = [];
+    for (const group of this.yearGroups) {
+      if (count >= this.visibleCount) break;
+      const remaining = this.visibleCount - count;
+      if (group.items.length <= remaining) {
+        result.push(group);
+        count += group.items.length;
+      } else {
+        result.push({
+          year: group.year,
+          items: group.items.slice(0, remaining),
+        });
+        count += remaining;
+      }
+    }
+    return result;
+  }
+
+  get totalItems(): number {
+    return this.yearGroups.reduce((sum, g) => sum + g.items.length, 0);
+  }
+
+  get hasMore(): boolean {
+    return this.visibleCount < this.totalItems;
+  }
+
+  loadMore(): void {
+    this.visibleCount += this.PAGE_SIZE;
+  }
+
   setDepartment(value: string): void {
     this.department = value;
+    this.visibleCount = this.PAGE_SIZE;
     this.rebuildGroups();
   }
 
   setMedia(value: string): void {
     this.media = value;
+    this.visibleCount = this.PAGE_SIZE;
     this.rebuildGroups();
   }
 
@@ -101,8 +135,6 @@ export class CreditsListComponent {
     } else if (this.department === 'production') {
       items = this._credits.crew;
     }
-
-    // Map to CreditItem with year
     let mapped: CreditItem[] = items.map((r) => {
       const dateStr = r.first_air_date || r.release_date || null;
       return {
@@ -112,12 +144,10 @@ export class CreditsListComponent {
       };
     });
 
-    // Apply media filter
     if (this.media !== 'all') {
       mapped = mapped.filter((item) => item.media_type === this.media);
     }
 
-    // Sort by year descending
     mapped.sort((a, b) => {
       if (a.year === '—') return 1;
       if (b.year === '—') return -1;

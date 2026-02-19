@@ -7,11 +7,10 @@ import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 
 import { TmdbService } from '../../services';
 import { MenubarModule } from 'primeng/menubar';
-import { ButtonModule } from 'primeng/button';
 import { GlobalStore } from '../../../core/global.store';
 import { loader } from '../../utils/loader';
 import { ImagePipe } from '../../pipes';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DateHelper } from '../../utils/date.helper';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
@@ -22,9 +21,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   imports: [
     MenubarModule,
     AutoCompleteModule,
-    ButtonModule,
     ImagePipe,
     DatePipe,
+    DecimalPipe,
     RouterLink,
     AsyncPipe,
   ],

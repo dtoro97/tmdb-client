@@ -1,0 +1,206 @@
+.p-select {
+  background: transparent;
+  border: 1px solid var(--p-menubar-border-color);
+  border-radius: 20px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--p-primary-color);
+  }
+
+  &.p-focus,
+  &:focus-within {
+    border-color: color-mix(in srgb, var(--p-primary-color) 60%, transparent);
+    box-shadow: 0 0 0 2px
+      color-mix(in srgb, var(--p-primary-color) 10%, transparent);
+  }
+
+  .p-select-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--p-text-muted-color);
+    padding: 0.35rem 0.5rem;
+  }
+
+  .p-select-dropdown {
+    color: var(--p-text-muted-color);
+    width: 2rem;
+  }
+}
+
+.p-select-overlay {
+  border-radius: 10px;
+  border: 1px solid
+    color-mix(in srgb, var(--p-menubar-border-color) 40%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  margin-top: 0.25rem;
+
+  .p-select-list {
+    padding: 0.25rem;
+  }
+
+  .p-select-option {
+    border-radius: 6px;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    transition: background 0.15s ease;
+    margin: 1px 0;
+
+    &.p-select-option-selected {
+      background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
+      color: var(--p-primary-color);
+      font-weight: 600;
+    }
+
+    &:not(.p-select-option-selected):hover {
+      background: color-mix(
+        in srgb,
+        var(--p-menubar-border-color) 15%,
+        transparent
+      );
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+.p-datepicker {
+  .p-inputtext {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--p-menubar-border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: var(--p-text-muted-color);
+    }
+
+    &:focus {
+      border-color: color-mix(in srgb, var(--p-primary-color) 60%, transparent);
+      box-shadow: 0 0 0 2px
+        color-mix(in srgb, var(--p-primary-color) 10%, transparent);
+    }
+  }
+}
+
+.p-datepicker-overlay {
+  border-radius: 10px;
+  border: 1px solid
+    color-mix(in srgb, var(--p-menubar-border-color) 40%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  .p-datepicker-calendar {
+    font-size: 0.8rem;
+  }
+
+  .p-datepicker-day-cell.p-datepicker-today > .p-datepicker-day {
+    border-color: var(--p-primary-color);
+  }
+
+  .p-datepicker-day.p-datepicker-day-selected {
+    background: var(--p-primary-color);
+    color: white;
+  }
+}
+
+.p-slider {
+  .p-slider-range {
+    background: var(--p-primary-color);
+  }
+
+  .p-slider-handle {
+    border-color: var(--p-primary-color);
+    background: var(--p-primary-color);
+    width: 0.9rem;
+    height: 0.9rem;
+    transition: transform 0.15s ease;
+
+    &:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 0 4px
+        color-mix(in srgb, var(--p-primary-color) 15%, transparent);
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 4px
+        color-mix(in srgb, var(--p-primary-color) 20%, transparent);
+    }
+  }
+}
+
+.p-paginator {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+  gap: 0.25rem;
+
+  .p-paginator-page,
+  .p-paginator-first,
+  .p-paginator-prev,
+  .p-paginator-next,
+  .p-paginator-last {
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--p-text-muted-color);
+    border: none;
+    transition: all 0.15s ease;
+
+    &:hover:not(.p-disabled) {
+      background: color-mix(
+        in srgb,
+        var(--p-menubar-border-color) 20%,
+        transparent
+      );
+      color: var(--p-text-color);
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .p-paginator-page.p-paginator-page-selected {
+    background: var(--p-primary-color);
+    color: white;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--p-primary-color);
+      color: white;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 2px
+        color-mix(in srgb, var(--p-primary-color) 20%, transparent);
+    }
+  }
+}
+.p-autocomplete-overlay {
+  border-radius: 12px;
+  border: 1px solid
+    color-mix(in srgb, var(--p-menubar-border-color) 40%, transparent);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+
+  .p-autocomplete-list {
+    padding: 0;
+
+    .p-autocomplete-option {
+      padding: 0;
+      margin: 0;
+      border-radius: 0;
+
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+}

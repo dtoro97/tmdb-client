@@ -103,7 +103,7 @@
     }
 
     .backdrop-photo {
-      width: 250px;
+      width: 280px;
       border-radius: 6px;
       transition: opacity 0.2s ease;
 
@@ -113,7 +113,7 @@
     }
 
     .poster-photo {
-      width: 200px;
+      width: 230px;
       border-radius: 6px;
       transition: opacity 0.2s ease;
 
@@ -166,15 +166,15 @@
     }
 
     .video-frame {
-      width: 500px !important;
-      height: 300px !important;
+      width: 560px !important;
+      height: 340px !important;
       border-radius: 8px;
       overflow: hidden;
       flex-shrink: 0;
 
       .iframe {
-        width: 500px !important;
-        height: 300px !important;
+        width: 560px !important;
+        height: 340px !important;
       }
     }
 

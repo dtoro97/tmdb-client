@@ -15,7 +15,7 @@
 
     <div
       class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
-      [style.maxWidth.px]="1400"
+      [style.maxWidth.px]="1600"
     >
       <div class="flex md:flex-row flex-column">
         <div>
@@ -76,32 +76,21 @@
 
     <div
       class="tab-content md:ml-auto md:mr-auto md:px-8 px-4 mt-4"
-      [style.maxWidth.px]="1400"
+      [style.maxWidth.px]="1600"
     >
-      @if (hasCredits$ | async) {
-        <div class="detail-section">
-          <div class="section-header mb-3">
-            <h2 class="section-title">Known For</h2>
-          </div>
-          <div class="pill-toggle mb-4">
-            <app-pill-toggle
-              [options]="creditsOptions$ | async"
-              [selectedValue]="visibleCredits$ | async"
-              (selected)="changeVisibleCredits($event)"
-            ></app-pill-toggle>
-          </div>
-
-          @for (group of knownForGroups$ | async; track group.year) {
-            <div class="known-for-year-group">
-              <div class="known-for-year-label">{{ group.year }}</div>
-              <div class="known-for-year-items">
-                @for (item of group.items; track item.id) {
-                  <app-card [item]="item" [type]="item.media_type"></app-card>
-                }
-              </div>
+      @if (knownFor$ | async; as knownFor) {
+        @if (knownFor.length) {
+          <div class="detail-section">
+            <div class="section-header mb-3">
+              <h2 class="section-title">Known For</h2>
             </div>
-          }
-        </div>
+            <div class="known-for-row">
+              @for (item of knownFor; track item.id) {
+                <app-card [item]="item" [type]="item.media_type"></app-card>
+              }
+            </div>
+          </div>
+        }
       }
 
       @if (hasCredits$ | async) {

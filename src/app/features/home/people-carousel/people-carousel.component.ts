@@ -30,7 +30,7 @@ const PEOPLE_BREAKPOINTS = [
       <ng-template let-person pTemplate="item">
         <div
           class="person-item"
-          [routerLink]="['/people', person.id, 'overview']"
+          [routerLink]="['/people', person.id]"
         >
           <img
             class="person-avatar"
@@ -58,8 +58,8 @@ const PEOPLE_BREAKPOINTS = [
     }
 
     .person-avatar {
-      width: 150px;
-      height: 150px;
+      width: 170px;
+      height: 170px;
       border-radius: 50%;
       object-fit: cover;
       border: 3px solid var(--p-menubar-border-color);
@@ -75,7 +75,7 @@ const PEOPLE_BREAKPOINTS = [
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 160px;
+      max-width: 180px;
     }
 
     .person-dept {
@@ -86,8 +86,8 @@ const PEOPLE_BREAKPOINTS = [
 
     @media screen and (max-width: 768px) {
       .person-avatar {
-        width: 110px;
-        height: 110px;
+        width: 125px;
+        height: 125px;
       }
 
       .person-name {

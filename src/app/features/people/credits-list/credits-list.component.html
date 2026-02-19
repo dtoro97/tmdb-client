@@ -15,7 +15,7 @@
     }
   </div>
 
-  @for (group of yearGroups; track group.year) {
+  @for (group of visibleYearGroups; track group.year) {
     <div class="year-group">
       <div class="year-label">{{ group.year }}</div>
       <div class="year-items">
@@ -46,6 +46,14 @@
           </a>
         }
       </div>
+    </div>
+  }
+
+  @if (hasMore) {
+    <div class="load-more-container">
+      <button class="load-more-btn" (click)="loadMore()">
+        Load More
+      </button>
     </div>
   }
 </div>

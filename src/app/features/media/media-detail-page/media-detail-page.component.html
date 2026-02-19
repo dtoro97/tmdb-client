@@ -18,7 +18,7 @@
     class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
     [class.mt-0]="(mediaStoreService.hasBackdrop$ | async) === false"
     [class.pt-4]="(mediaStoreService.hasBackdrop$ | async) === false"
-    [style.maxWidth.px]="1400"
+    [style.maxWidth.px]="1600"
   >
     <div
       class="flex md:flex-row flex-column"
@@ -149,7 +149,7 @@
 
   <div
     class="tab-content md:ml-auto md:mr-auto md:px-8 px-4 mt-4"
-    [style.maxWidth.px]="1400"
+    [style.maxWidth.px]="1600"
   >
     @if ((mediaStoreService.cast$ | async)?.length) {
       <div class="detail-section">
