@@ -3,12 +3,15 @@ import { CarouselModule } from 'primeng/carousel';
 import { ChipModule } from 'primeng/chip';
 import { GalleriaModule } from 'primeng/galleria';
 import { RatingModule } from 'primeng/rating';
-import { SelectModule } from 'primeng/select';
 import { combineLatest, map, Observable, tap } from 'rxjs';
 import { Image, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
 
 import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -18,6 +21,7 @@ import {
   MediaTypeEnum,
   MinutesToHours,
   PersonCardComponent,
+  PillToggleComponent,
   SocialLinksComponent,
   SortPipe,
   YoutubeLinkPipe,
@@ -33,7 +37,6 @@ import { GlobalStore } from '../../../core';
     ChipModule,
     GalleriaModule,
     CarouselModule,
-    SelectModule,
     ImagePipe,
     MinutesToHours,
     AsyncPipe,
@@ -45,6 +48,7 @@ import { GlobalStore } from '../../../core';
     FormsModule,
     RouterLink,
     SocialLinksComponent,
+    PillToggleComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './media-detail-page.component.html',
@@ -56,14 +60,12 @@ export class MediaDetailPageComponent {
   mediaType$: Observable<MediaType>;
   languages$: Observable<any>;
   breakpoints = CAROUSEL_BREAKPOINTS;
-
-  // Image viewer state
   galleriaVisible = false;
   galleriaImages: { source: string; thumbnail: string }[] = [];
   galleriaActiveIndex = 0;
   allBackdrops: Image[] = [];
   allPosters: Image[] = [];
-
+  seasons$: Observable<{ label: string; value: number }[]>;
   constructor(
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
@@ -74,6 +76,11 @@ export class MediaDetailPageComponent {
   ) {
     this.mediaType$ = this.route.params.pipe(
       map((params) => get(params, 'type')),
+    );
+    this.seasons$ = this.mediaStoreService.seasons$.pipe(
+      map((season) =>
+        season.map((s) => ({ label: s.name, value: s.season_number })),
+      ),
     );
 
     this.mediaItem$ = combineLatest([
@@ -89,12 +96,14 @@ export class MediaDetailPageComponent {
 
     this.videos$ = this.mediaStoreService.youtubeVideos$;
 
-    this.mediaStoreService.images$.pipe(
-      tap((images) => {
-        this.allBackdrops = images.backdrops;
-        this.allPosters = images.posters;
-      }),
-    ).subscribe();
+    this.mediaStoreService.images$
+      .pipe(
+        tap((images) => {
+          this.allBackdrops = images.backdrops;
+          this.allPosters = images.posters;
+        }),
+      )
+      .subscribe();
 
     this.languages$ = combineLatest([
       this.mediaStoreService.languages$,

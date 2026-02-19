@@ -174,28 +174,16 @@
     ) {
       <div class="detail-section">
         <h2 class="section-title mb-3">Episodes</h2>
-        <div class="flex flex-row py-4 mx-2 align-items-center">
-          <div>
-            <label for="seasons" class="mr-2">Seasons</label>
-            <p-select
-              optionLabel="name"
-              optionValue="season_number"
-              id="seasons"
-              [ngModel]="mediaStoreService.selectedSeason$ | async"
-              [options]="mediaStoreService.seasons$ | async"
-              [disabled]="(mediaStoreService.seasons$ | async)?.length === 1"
-              (ngModelChange)="changeSeason($event)"
-            ></p-select>
-            @if (
-              mediaStoreService.seasonEpisodesCount$ | async;
-              as episodeCount
-            ) {
-              <strong class="muted md:px-4 px-2"
-                >{{ episodeCount }} Episodes</strong
-              >
-            }
-          </div>
+        <div class="mb-3">
+          <app-pill-toggle
+            [options]="seasons$ | async"
+            [selectedValue]="mediaStoreService.selectedSeason$ | async"
+            (selected)="changeSeason($event)"
+          ></app-pill-toggle>
         </div>
+        @if (mediaStoreService.seasonEpisodesCount$ | async; as episodeCount) {
+          <strong class="muted">{{ episodeCount }} Episodes</strong>
+        }
 
         <div class="grid m-0">
           @for (
