@@ -81,10 +81,22 @@ export class MediaStoreService extends ComponentStore<MediaState> {
     map((images) => images.backdrops.length > 0),
   );
   backdrops$: Observable<Image[]> = this.images$.pipe(
-    map((images) => images.backdrops.slice(0, 20)),
+    map((images) => images.backdrops),
   );
   posters$: Observable<Image[]> = this.images$.pipe(
-    map((images) => images.posters.slice(0, 20)),
+    map((images) => images.posters),
+  );
+  backdropPreviews$: Observable<Image[]> = this.images$.pipe(
+    map((images) => images.backdrops.slice(0, 5)),
+  );
+  posterPreviews$: Observable<Image[]> = this.images$.pipe(
+    map((images) => images.posters.slice(0, 5)),
+  );
+  backdropCount$: Observable<number> = this.images$.pipe(
+    map((images) => images.backdrops.length),
+  );
+  posterCount$: Observable<number> = this.images$.pipe(
+    map((images) => images.posters.length),
   );
   seasons$: Observable<Season[]> = this.select((state) =>
     get(state.media, 'seasons', []),

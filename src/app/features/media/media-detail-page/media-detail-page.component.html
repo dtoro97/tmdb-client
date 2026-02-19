@@ -1,7 +1,6 @@
 <div
   class="h-full details-container pb-4"
   [class.mobile]="globalStore.isMobile()"
-  [class.dark]="globalStore.isDarkMode$ | async"
 >
   <div class="relative">
     @if (mediaStoreService.hasBackdrop$ | async) {
@@ -49,7 +48,7 @@
           ></p-rating>
           <span>{{ item.vote_average | number: "1.1-1" }}/10</span>
         </div>
-        <div class="flex flex-row mt-2 gap-2">
+        <div class="flex flex-row mt-2 gap-2 flex-wrap">
           @for (genre of item.genres; track genre.id) {
             <p-chip styleClass="cursor-pointer genre">
               <a
@@ -63,32 +62,32 @@
         <p class="mt-2 mb-0 line-height-4" [style.maxWidth.px]="550">
           {{ item.overview }}
         </p>
-        <ul class="list-none line-height-4 pl-0">
-          <li class="flex" *ngIf="item.first_air_date">
+        <ul class="media-info-list">
+          <li *ngIf="item.first_air_date">
             <div class="media-info-label">First Aired</div>
             <div class="flex-1">{{ item.first_air_date | date }}</div>
           </li>
-          <li class="flex" *ngIf="item.last_air_date">
+          <li *ngIf="item.last_air_date">
             <div class="media-info-label">Last Aired</div>
             <div class="flex-1">{{ item.last_air_date | date }}</div>
           </li>
-          <li class="flex" *ngIf="item.release_date">
+          <li *ngIf="item.release_date">
             <div class="media-info-label">Released</div>
             <div class="flex-1">{{ item.release_date | date }}</div>
           </li>
-          <li class="flex" *ngIf="item.runtime">
+          <li *ngIf="item.runtime">
             <div class="media-info-label">Runtime</div>
             <div class="flex-1">{{ item.runtime | m2h }}</div>
           </li>
-          <li class="flex" *ngIf="item.budget">
+          <li *ngIf="item.budget">
             <div class="media-info-label">Budget</div>
             <div class="flex-1">${{ item.budget | number }}</div>
           </li>
-          <li class="flex" *ngIf="item.revenue">
+          <li *ngIf="item.revenue">
             <div class="media-info-label">Revenue</div>
             <div class="flex-1">${{ item.revenue | number }}</div>
           </li>
-          <li class="flex" *ngIf="item.created_by?.length">
+          <li *ngIf="item.created_by?.length">
             <div class="media-info-label">Creator</div>
             <div class="flex-1">
               @for (
@@ -98,27 +97,26 @@
               ) {
                 <span
                   class="cursor-pointer"
-                  [routerLink]="['/people', creator.id, 'overview']"
+                  [routerLink]="['/people', creator.id]"
                   >{{ creator.name }}</span
                 >
                 <span *ngIf="i !== item.created_by.length - 1">, </span>
               }
             </div>
           </li>
-          <li class="flex" *ngIf="item.number_of_seasons">
+          <li *ngIf="item.number_of_seasons">
             <div class="media-info-label">Seasons</div>
             <div class="flex-1">{{ item.number_of_seasons }}</div>
           </li>
-          <li class="flex" *ngIf="item.number_of_episodes">
+          <li *ngIf="item.number_of_episodes">
             <div class="media-info-label">Episodes</div>
             <div class="flex-1">{{ item.number_of_episodes }}</div>
           </li>
-
-          <li class="flex" *ngIf="item.status">
+          <li *ngIf="item.status">
             <div class="media-info-label">Status</div>
             <div class="flex-1">{{ item.status }}</div>
           </li>
-          <li class="flex" *ngIf="(languages$ | async)?.length > 0">
+          <li *ngIf="(languages$ | async)?.length > 0">
             <div class="media-info-label">Languages</div>
             <div class="flex-1">
               @for (
@@ -131,7 +129,7 @@
               }
             </div>
           </li>
-          <li class="flex" *ngIf="item.networks?.length">
+          <li *ngIf="item.networks?.length">
             <div class="media-info-label">Networks</div>
             <div class="flex-1">
               @for (
@@ -148,90 +146,93 @@
       </div>
     </div>
   </div>
-  <div class="mt-2 mx-2 md:mx-4">
-    <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
-      <p-tablist>
-        @for (
-          tabHeader of (tabs$ | async)! | filter: { visible: true };
-          track tabHeader.value
-        ) {
-          <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
-        }
-      </p-tablist>
-    </p-tabs>
-    <ng-container *ngIf="(activeTab$ | async) === 'overview'">
-      @if ((mediaStoreService.cast$ | async)?.length) {
-        <div>
-          <div class="flex justify-content-center flex-column">
-            <h2 class="md:px-4 px-2">Full Cast</h2>
-            <p-carousel
-              [value]="mediaStoreService.cast$ | async"
-              [numVisible]="8"
-              [numScroll]="8"
-              [showIndicators]="false"
-              [responsiveOptions]="breakpoints"
-            >
-              <ng-template let-person pTemplate="item">
-                <app-person-card [person]="person"></app-person-card>
-              </ng-template>
-            </p-carousel>
+
+  <div
+    class="tab-content md:ml-auto md:mr-auto md:px-8 px-4 mt-4"
+    [style.maxWidth.px]="1400"
+  >
+    <!-- Cast Section -->
+    @if ((mediaStoreService.cast$ | async)?.length) {
+      <div class="detail-section">
+        <h2 class="section-title mb-3">Cast</h2>
+        <p-carousel
+          [value]="mediaStoreService.cast$ | async"
+          [numVisible]="6"
+          [numScroll]="6"
+          [showIndicators]="false"
+          [responsiveOptions]="breakpoints"
+        >
+          <ng-template let-person pTemplate="item">
+            <app-person-card [person]="person"></app-person-card>
+          </ng-template>
+        </p-carousel>
+      </div>
+    }
+
+    <!-- Episodes Section (TV only) -->
+    @if (
+      (mediaType$ | async) === "tv" &&
+      (mediaStoreService.seasons$ | async)?.length
+    ) {
+      <div class="detail-section">
+        <h2 class="section-title mb-3">Episodes</h2>
+        <div class="flex flex-row py-4 mx-2 align-items-center">
+          <div>
+            <label for="seasons" class="mr-2">Seasons</label>
+            <p-select
+              optionLabel="name"
+              optionValue="season_number"
+              id="seasons"
+              [ngModel]="mediaStoreService.selectedSeason$ | async"
+              [options]="mediaStoreService.seasons$ | async"
+              [disabled]="(mediaStoreService.seasons$ | async)?.length === 1"
+              (ngModelChange)="changeSeason($event)"
+            ></p-select>
+            @if (
+              mediaStoreService.seasonEpisodesCount$ | async;
+              as episodeCount
+            ) {
+              <strong class="muted md:px-4 px-2"
+                >{{ episodeCount }} Episodes</strong
+              >
+            }
           </div>
         </div>
-      }
-    </ng-container>
-    @if ((activeTab$ | async) === "episodes") {
-      <div class="flex flex-row py-4 mx-2">
-        <div>
-          <label for="seasons" class="mr-2">Seasons</label>
-          <p-select
-            optionLabel="name"
-            optionValue="season_number"
-            id="seasons"
-            [ngModel]="mediaStoreService.selectedSeason$ | async"
-            [options]="mediaStoreService.seasons$ | async"
-            [disabled]="(mediaStoreService.seasons$ | async)?.length === 1"
-            (ngModelChange)="changeSeason($event)"
-          ></p-select>
-          @if (
-            mediaStoreService.seasonEpisodesCount$ | async;
-            as episodeCount
+
+        <div class="grid m-0">
+          @for (
+            episode of mediaStoreService.seasonEpisodes$ | async;
+            track episode.id
           ) {
-            <strong class="muted md:px-4 px-2"
-              >{{ episodeCount }} Episodes</strong
-            >
+            <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-0">
+              <div class="episode-item">
+                @if (episode.still_path) {
+                  <img src="{{ episode.still_path | imgSrc }}" />
+                } @else {
+                  <img src="assets/empty_still.svg" />
+                }
+                <div class="episode-content">
+                  <h2 class="name mb-2">
+                    <strong class="mr-2">E{{ episode.episode_number }}</strong
+                    >{{ episode.name }}
+                  </h2>
+                  <div class="episode-overview mb-2">
+                    {{ episode.overview }}
+                  </div>
+                  <div class="muted">{{ episode.air_date | date }}</div>
+                </div>
+              </div>
+            </div>
           }
         </div>
       </div>
-
-      <div class="grid m-0">
-        @for (
-          episode of mediaStoreService.seasonEpisodes$ | async;
-          track episode.id
-        ) {
-          <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item">
-            <div>
-              @if (episode.still_path) {
-                <img src="{{ episode.still_path | imgSrc }}" />
-              } @else {
-                <img src="assets/empty_still.svg" />
-              }
-            </div>
-            <h2 class="name">
-              <strong class="mr-2">E{{ episode.episode_number }}</strong
-              >{{ episode.name }}
-            </h2>
-            <div class="mb-3">{{ episode.overview }}</div>
-            <div class="muted">{{ episode.air_date | date }}</div>
-          </div>
-        }
-      </div>
     }
-    <ng-container *ngIf="(activeTab$ | async) === 'videos'">
-      <div *ngIf="(videos$ | async)?.length">
-        <h2 class="md:px-4 px-2">Videos</h2>
-        <div
-          class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
-        >
+
+    <!-- Videos Section -->
+    @if ((videos$ | async)?.length) {
+      <div class="detail-section">
+        <h2 class="section-title mb-3">Videos</h2>
+        <div class="flex flex-row gap-3 overflow-y-hidden overflow-x-auto pb-2">
           @for (video of videos$ | async; track video.id) {
             <div class="video-frame">
               <iframe
@@ -245,61 +246,81 @@
           }
         </div>
       </div>
-    </ng-container>
-    <ng-container *ngIf="(activeTab$ | async) === 'photos'">
-      <div *ngIf="(mediaStoreService.backdrops$ | async)?.length">
-        <h2 class="md:px-4 px-2 mb-0">Backdrops</h2>
-        <strong class="muted md:px-4 px-2"
-          >{{ (mediaStoreService.backdrops$ | async)?.length }} Images</strong
-        >
+    }
+
+    <!-- Backdrops Section -->
+    @if (mediaStoreService.backdropCount$ | async; as count) {
+      <div class="detail-section">
+        <div class="section-header mb-3">
+          <h2 class="section-title">Backdrops</h2>
+          <span
+            class="view-all-btn"
+            (click)="openGalleria(allBackdrops)"
+          >
+            View All ({{ count }})
+            <i class="fa-solid fa-images"></i>
+          </span>
+        </div>
         <div
-          class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
+          class="flex flex-wrap gap-3 justify-content-center md:justify-content-start"
         >
           @for (
-            image of mediaStoreService.backdrops$ | async;
-            track image.file_path
+            image of mediaStoreService.backdropPreviews$ | async;
+            track image.file_path;
+            let i = $index
           ) {
-            <a href="{{ image.file_path | imgSrc }}" target="_blank">
-              <img
-                class="backdrop-photo"
-                src="{{ image.file_path | imgSrc }}"
-              />
-            </a>
+            <img
+              class="backdrop-photo cursor-pointer"
+              src="{{ image.file_path | imgSrc }}"
+              (click)="openGalleria(allBackdrops, i)"
+            />
           }
         </div>
       </div>
-      @if ((mediaStoreService.posters$ | async)?.length) {
-        <div>
-          <h2 class="md:px-4 px-2 mb-0">Posters</h2>
-          <strong class="muted md:px-4 px-2"
-            >{{ (mediaStoreService.posters$ | async)?.length }} Images</strong
+    }
+
+    <!-- Posters Section -->
+    @if (mediaStoreService.posterCount$ | async; as count) {
+      <div class="detail-section">
+        <div class="section-header mb-3">
+          <h2 class="section-title">Posters</h2>
+          <span
+            class="view-all-btn"
+            (click)="openGalleria(allPosters)"
           >
-          <div
-            class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
-          >
-            @for (
-              image of mediaStoreService.posters$ | async;
-              track image.file_path
-            ) {
-              <a href="{{ image.file_path | imgSrc }}" target="_blank">
-                <img
-                  class="poster-photo"
-                  src="{{ image.file_path | imgSrc }}"
-                />
-              </a>
-            }
-          </div>
+            View All ({{ count }})
+            <i class="fa-solid fa-images"></i>
+          </span>
         </div>
-      }
-    </ng-container>
-    <div *ngIf="(mediaStoreService.recommendations$ | async)?.length">
-      <h2 class="md:px-4 px-2">More Like This</h2>
+        <div
+          class="flex flex-wrap gap-3 justify-content-center md:justify-content-start"
+        >
+          @for (
+            image of mediaStoreService.posterPreviews$ | async;
+            track image.file_path;
+            let i = $index
+          ) {
+            <img
+              class="poster-photo cursor-pointer"
+              src="{{ image.file_path | imgSrc }}"
+              (click)="openGalleria(allPosters, i)"
+            />
+          }
+        </div>
+      </div>
+    }
+
+    <div
+      *ngIf="(mediaStoreService.recommendations$ | async)?.length"
+      class="detail-section"
+    >
+      <h2 class="section-title mb-3">More Like This</h2>
       <p-carousel
         [value]="
           (mediaStoreService.recommendations$ | async)! | sort: 'vote_average'
         "
-        [numVisible]="8"
-        [numScroll]="8"
+        [numVisible]="6"
+        [numScroll]="6"
         [showIndicators]="false"
         [responsiveOptions]="breakpoints"
       >
@@ -310,3 +331,29 @@
     </div>
   </div>
 </div>
+
+<p-galleria
+  [(value)]="galleriaImages"
+  [visible]="galleriaVisible"
+  (visibleChange)="onGalleriaClose()"
+  [(activeIndex)]="galleriaActiveIndex"
+  [fullScreen]="true"
+  [showThumbnails]="!globalStore.isMobile()"
+  [showItemNavigators]="true"
+  [circular]="true"
+  [numVisible]="7"
+  [responsiveOptions]="[
+    { breakpoint: '768px', numVisible: 5 },
+    { breakpoint: '480px', numVisible: 3 }
+  ]"
+>
+  <ng-template pTemplate="item" let-item>
+    <img
+      [src]="item.source"
+      class="galleria-main-image"
+    />
+  </ng-template>
+  <ng-template pTemplate="thumbnail" let-item>
+    <img [src]="item.thumbnail" class="galleria-thumbnail" />
+  </ng-template>
+</p-galleria>

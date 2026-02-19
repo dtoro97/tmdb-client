@@ -1,30 +1,61 @@
-@if(item) {
-<div
-  class="card"
-  [routerLink]="(type || $any(item).media_type) === 'person'
-    ? ['/people', item.id, 'overview']
-    : ['/details', type || $any(item).media_type, item.id, 'overview']"
->
-  <img src="{{ item.poster_path || $any(item).profile_path | imgSrc }}" />
-  <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
-    <div class="flex justify-content-between flex-column">
-      <span class="font-bold pb-3">{{
+@if (item) {
+  <div
+    class="card"
+    [routerLink]="
+      (type || $any(item).media_type) === 'person'
+        ? ['/people', item.id]
+        : ['/details', type || $any(item).media_type, item.id]
+    "
+  >
+    <img
+      class="card-poster"
+      src="{{ item.poster_path || $any(item).profile_path | imgSrc }}"
+      alt="{{ $any(item).title || $any(item).name }}"
+    />
+
+    @if (item.vote_count > 0) {
+      <div class="card-rating">
+        <i class="fa-solid fa-star"></i>
+        {{ item.vote_average | number: '1.1-1' }}
+      </div>
+    }
+
+    <div class="card-gradient">
+      <span class="card-title">{{
         $any(item).title || $any(item).name
       }}</span>
-      <div class="w-full flex justify-content-between">
-        @if(item.vote_count > 0) {
-        <span class="pb-3"
-          ><i class="fa-solid fa-star"></i>&nbsp;{{
-            item.vote_average | number : "1.1-1"
-          }}</span
-        >
-        }
+    </div>
 
-        <span class="font-light">{{
-          $any(item).release_date || $any(item).first_air_date | date : "yyyy"
+    <div class="card-overlay">
+      <div class="card-overlay-content">
+        <span class="overlay-title">{{
+          $any(item).title || $any(item).name
         }}</span>
+        <div class="overlay-meta">
+          @if (
+            $any(item).release_date || $any(item).first_air_date
+          ) {
+            <span class="overlay-year">{{
+              $any(item).release_date || $any(item).first_air_date
+                | date: 'yyyy'
+            }}</span>
+          }
+          @if (type || $any(item).media_type) {
+            <span class="overlay-type">{{
+              (type || $any(item).media_type) === 'movie' ? 'Movie' : 'TV'
+            }}</span>
+          }
+        </div>
+        @if (item.vote_count > 0) {
+          <div class="overlay-rating">
+            <i class="fa-solid fa-star"></i>
+            {{ item.vote_average | number: '1.1-1' }}
+          </div>
+        }
+        @if ($any(item).overview) {
+          <p class="overlay-overview">{{ $any(item).overview }}</p>
+        }
       </div>
     </div>
   </div>
-</div>
 }

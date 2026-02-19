@@ -1,6 +1,5 @@
 import { get } from 'lodash';
-import { SelectModule } from 'primeng/select';
-import { TabsModule } from 'primeng/tabs';
+import { GalleriaModule } from 'primeng/galleria';
 import { BehaviorSubject, combineLatest, map, Observable, tap } from 'rxjs';
 import {
   ExternalIds,
@@ -10,37 +9,38 @@ import {
 } from 'tmdb-ts';
 
 import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Signal,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
 
-import { CAROUSEL_BREAKPOINTS } from '../../../constants';
 import { GlobalStore } from '../../../core/global.store';
 import { PersonDetailStore } from '../person-store.service';
 import { AgePipe } from '../../../shared/pipes/age.pipe';
-import { FilterPipe } from '../../../shared/pipes/filter.pipe';
 import { ImagePipe } from '../../../shared/pipes/image.pipe';
-import { SortPipe } from '../../../shared/pipes/sort.pipe';
 import { Option } from '../../../shared/interfaces/option.interface';
 import { CardComponent } from '../../../shared/ui/card/card.component';
 import { SocialLinksComponent } from '../../../shared/ui/social-links/social-links.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
 
+interface KnownForYearGroup {
+  year: string;
+  items: any[];
+}
+
 @Component({
   selector: 'app-person-detail-page',
   imports: [
     ImagePipe,
-    TabsModule,
-    SelectModule,
+    GalleriaModule,
     AsyncPipe,
     CardComponent,
-    SortPipe,
     CreditsListComponent,
-    FilterPipe,
     AgePipe,
     SocialLinksComponent,
-    FormsModule,
     DatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,44 +49,43 @@ import { CreditsListComponent } from '../credits-list/credits-list.component';
 })
 export class PersonDetailPageComponent {
   person$: Observable<PersonDetails>;
-  images$: Observable<Image[]>;
-  knownFor$: Observable<any[] | undefined>;
+  knownForGroups$: Observable<KnownForYearGroup[]>;
   credits$: Observable<PersonCombinedCredits>;
   links$: Observable<ExternalIds>;
   isMobile: Signal<boolean>;
-  isDarkMode$: Observable<boolean>;
-  breakpoints = CAROUSEL_BREAKPOINTS;
-  tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
-  activeTab$: Observable<string>;
   hasCredits$: Observable<boolean>;
   creditsOptions$: Observable<Option[]>;
   visibleCredits$: BehaviorSubject<string>;
+  bioExpanded = false;
+
+  // Galleria state
+  galleriaVisible = false;
+  galleriaImages: { source: string; thumbnail: string }[] = [];
+  galleriaActiveIndex = 0;
+  allPhotos: Image[] = [];
 
   constructor(
-    private globalStore: GlobalStore,
     private scroller: ViewportScroller,
     private titleService: Title,
-    private personDetailStore: PersonDetailStore,
-    private router: Router,
-    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    public personDetailStore: PersonDetailStore,
+    public globalStore: GlobalStore,
   ) {
     this.isMobile = this.globalStore.isMobile;
-    this.isDarkMode$ = this.globalStore.isDarkMode$;
-    this.images$ = this.personDetailStore.images$;
     this.links$ = this.personDetailStore.socialLinks$;
     this.hasCredits$ = this.personDetailStore.hasCredits$;
-    this.tabs$ = this.personDetailStore.combinedCredits$.pipe(
-      map((credits) => this.getTabs(credits)),
-    );
-    this.activeTab$ = this.route.params.pipe(
-      map((params) => get(params, 'tab')),
-    );
+
     this.person$ = this.personDetailStore.person$.pipe(
       tap((person) => {
         this.titleService.setTitle(`${person.name} | People`);
         this.scroller.scrollToPosition([0, 0]);
       }),
     );
+
+    this.personDetailStore.images$
+      .pipe(tap((images) => (this.allPhotos = images)))
+      .subscribe();
+
     this.credits$ = this.personDetailStore.combinedCredits$;
     this.creditsOptions$ = this.personDetailStore.combinedCredits$.pipe(
       map((credits) => this.getCreditOptions(credits)),
@@ -94,21 +93,69 @@ export class PersonDetailPageComponent {
     this.visibleCredits$ = new BehaviorSubject(
       this.getVisibleCredits(this.personDetailStore.getCredits()),
     );
-    this.knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
+    this.knownForGroups$ = combineLatest([
+      this.visibleCredits$,
+      this.credits$,
+    ]).pipe(
       map(([visible, credits]) => {
-        if (visible) {
-          return get(credits, visible);
-        }
+        const items: any[] = visible ? get(credits, visible) || [] : [];
+        return this.groupByYear(items);
       }),
     );
   }
 
-  changeTab(tab: string): void {
-    this.router.navigate([`../${tab}`], { relativeTo: this.route });
-  }
-
   changeVisibleCredits(value: string) {
     this.visibleCredits$.next(value);
+  }
+
+  toggleBio(): void {
+    this.bioExpanded = !this.bioExpanded;
+    this.cdr.markForCheck();
+  }
+
+  openGalleria(images: Image[], startIndex = 0): void {
+    this.galleriaImages = images.map((img) => ({
+      source: `https://image.tmdb.org/t/p/original${img.file_path}`,
+      thumbnail: `https://image.tmdb.org/t/p/w300${img.file_path}`,
+    }));
+    this.galleriaActiveIndex = startIndex;
+    this.galleriaVisible = true;
+    this.cdr.markForCheck();
+  }
+
+  onGalleriaClose(): void {
+    this.galleriaVisible = false;
+    this.cdr.markForCheck();
+  }
+
+  private groupByYear(items: any[]): KnownForYearGroup[] {
+    // Sort by date descending, then by vote_average within each year
+    const sorted = [...items].sort((a, b) => {
+      const dateA = a.first_air_date || a.release_date || '';
+      const dateB = b.first_air_date || b.release_date || '';
+      if (!dateA && !dateB) return (b.vote_average || 0) - (a.vote_average || 0);
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      const yearDiff = new Date(dateB).getFullYear() - new Date(dateA).getFullYear();
+      return yearDiff !== 0 ? yearDiff : (b.vote_average || 0) - (a.vote_average || 0);
+    });
+
+    const groupMap = new Map<string, any[]>();
+    for (const item of sorted) {
+      const dateStr = item.first_air_date || item.release_date || null;
+      const year = dateStr ? new Date(dateStr).getFullYear().toString() : '—';
+      const existing = groupMap.get(year);
+      if (existing) {
+        existing.push(item);
+      } else {
+        groupMap.set(year, [item]);
+      }
+    }
+
+    return Array.from(groupMap.entries()).map(([year, items]) => ({
+      year,
+      items,
+    }));
   }
 
   private getVisibleCredits(credits: PersonCombinedCredits): string {
@@ -129,17 +176,5 @@ export class PersonDetailPageComponent {
       options.push({ label: 'Production', value: 'crew' });
     }
     return options;
-  }
-
-  private getTabs(credits: PersonCombinedCredits) {
-    return [
-      { title: 'Known For', value: 'overview', visible: true },
-      {
-        title: 'Credits',
-        value: 'credits',
-        visible: credits.cast.length > 0 || credits.crew.length > 0,
-      },
-      { title: 'Photos', value: 'photos', visible: true },
-    ];
   }
 }

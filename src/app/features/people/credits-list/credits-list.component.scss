@@ -1,29 +1,149 @@
-.credit-item {
-  background-color: var(--p-surface-100);
+.credits-container {
+  padding: 0.5rem 0;
+}
 
-  .year {
-    width: 8rem;
-  }
-  a {
-    text-decoration: none;
-    color: var(--p-text-color);
+// Pill toggle buttons
+.pill-toggle {
+  display: flex;
+  gap: 0.5rem;
 
-    .muted {
-      color: var(--p-text-color-secondary);
+  .pill-btn {
+    background: none;
+    border: 1px solid var(--p-menubar-border-color);
+    color: var(--p-text-muted-color);
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--p-primary-color);
+      color: var(--p-primary-color);
+    }
+
+    &.active {
+      background-color: var(--p-primary-color);
+      border-color: var(--p-primary-color);
+      color: white;
     }
   }
 }
 
-.dark {
-  .credit-item {
-    background-color: var(--p-surface-800);
+// Year groups
+.year-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.25rem;
+
+  &:first-of-type {
+    .year-label {
+      padding-top: 0;
+    }
   }
 }
 
+.year-label {
+  width: 3.5rem;
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+  padding-top: 0.75rem;
+  text-align: right;
+}
+
+.year-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  border-left: 2px solid var(--p-menubar-border-color);
+  padding-left: 1.25rem;
+  padding-bottom: 0.75rem;
+}
+
+.credit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--p-text-color);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--p-content-background) 85%, var(--p-primary-color));
+  }
+
+  .credit-poster {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: var(--p-surface-100);
+    flex-shrink: 0;
+  }
+
+  .credit-info {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .credit-role {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--p-text-muted-color);
+      margin-top: 0.1rem;
+    }
+  }
+
+  .credit-type {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--p-text-muted-color);
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--p-menubar-border-color);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+}
+
+// Mobile overrides
 .mobile {
+  .year-group {
+    gap: 0.75rem;
+  }
+
+  .year-label {
+    width: 2.5rem;
+    font-size: 0.85rem;
+  }
+
+  .year-items {
+    padding-left: 0.75rem;
+  }
+
   .credit-item {
-    .year {
-      width: 4rem;
+    .credit-poster {
+      width: 32px;
+      height: 48px;
+    }
+
+    .credit-info strong {
+      font-size: 0.85rem;
+    }
+
+    .credit-type {
+      display: none;
     }
   }
 }

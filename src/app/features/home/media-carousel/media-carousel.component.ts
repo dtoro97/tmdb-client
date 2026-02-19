@@ -11,8 +11,8 @@ import { CAROUSEL_BREAKPOINTS } from '../../../constants';
   template: `
     <p-carousel
       [value]="items"
-      [numVisible]="8"
-      [numScroll]="8"
+      [numVisible]="6"
+      [numScroll]="6"
       [showIndicators]="false"
       [responsiveOptions]="breakpoints"
     >

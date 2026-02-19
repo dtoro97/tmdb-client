@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 
 import { PeoplePageComponent } from './people-page/people-page.component';
 import { PersonDetailPageComponent } from './person-detail-page/person-detail-page.component';
-import { personTabGuard } from './person-tab.guard';
 import { personResolver } from './person.resolver';
 import { peopleListResolver } from './people.resolver';
 
@@ -14,11 +13,11 @@ export const PEOPLE_ROUTES: Routes = [
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   {
-    path: ':id/:tab',
+    path: ':id',
     component: PersonDetailPageComponent,
     resolve: { data: personResolver },
-    canActivate: [personTabGuard],
     runGuardsAndResolvers: (from, to) =>
       from.paramMap.get('id') !== to.paramMap.get('id'),
   },
+  { path: ':id/:tab', redirectTo: ':id' },
 ];

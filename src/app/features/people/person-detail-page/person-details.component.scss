@@ -1,69 +1,322 @@
 :host ::ng-deep {
   .details-container {
-    &.mobile {
-      .photos-item {
-        width: 150px;
-        height: auto;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: cover;
-      }
-      .image-container {
-        max-width: unset !important;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
+    background-color: var(--p-content-background);
 
-        .person-image {
-          width: 150px;
-          height: auto;
+    .muted {
+      color: var(--p-text-muted-color);
+    }
+
+    // Section title with red accent pipe
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--p-text-color);
+      padding-left: 0.75rem;
+      border-left: 4px solid var(--p-primary-color);
+      margin: 0;
+      margin-top: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .view-all-btn {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--p-text-muted-color);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 2rem;
+
+      &:hover {
+        color: var(--p-primary-color);
+      }
+
+      i {
+        font-size: 0.8rem;
+      }
+    }
+
+    // Backdrop wrapper clips the scaled/blurred image
+    .backdrop-wrapper {
+      overflow: hidden;
+    }
+
+    // Blurred profile backdrop
+    .person-backdrop {
+      width: 100%;
+      max-height: 350px;
+      object-fit: cover;
+      object-position: top;
+      filter: blur(20px) brightness(0.5);
+      transform: scale(1.1);
+      color: transparent;
+      display: block;
+    }
+
+    // Gradient overlay
+    .gradient-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(
+        to top,
+        var(--p-content-background) 0%,
+        color-mix(in srgb, var(--p-content-background) 40%, transparent) 50%,
+        color-mix(in srgb, var(--p-content-background) 10%, transparent) 100%
+      );
+    }
+
+    // Pill toggle buttons
+    .pill-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 2rem;
+
+      .pill-btn {
+        background: none;
+        border: 1px solid var(--p-menubar-border-color);
+        color: var(--p-text-muted-color);
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: var(--p-primary-color);
+          color: var(--p-primary-color);
         }
+
+        &.active {
+          background-color: var(--p-primary-color);
+          border-color: var(--p-primary-color);
+          color: white;
+        }
+      }
+    }
+
+    // Info container with overlap
+    .info-container {
+      margin-top: -10rem;
+
+      .profile-image {
+        max-width: 250px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    // Meta info
+    .person-meta {
+      font-size: 0.95rem;
+      color: var(--p-text-color);
+    }
+
+    .meta-badge {
+      background-color: var(--p-primary-color);
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    // Biography
+    .biography-container {
+      .biography-text {
+        font-size: 0.95rem;
+        color: var(--p-text-color);
+
+        &.clamped {
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      }
+
+      .read-more-btn {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--p-primary-color);
+        cursor: pointer;
+        margin-top: 0.25rem;
+        display: inline-block;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    // Known For year groups
+    .known-for-year-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .known-for-year-label {
+      width: 3.5rem;
+      flex-shrink: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--p-text-color);
+      padding-top: 0.5rem;
+      text-align: right;
+    }
+
+    .known-for-year-items {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      min-width: 0;
+      border-left: 2px solid var(--p-menubar-border-color);
+      padding-left: 1.25rem;
+      padding-bottom: 1rem;
+    }
+
+    app-card {
+      .card {
+        margin: 0;
+        width: 150px;
+      }
+    }
+
+    // Photo previews
+    .person-photo {
+      width: 200px;
+      height: auto;
+      border-radius: 6px;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    // Section spacing
+    .detail-section {
+      margin-bottom: 2.5rem;
+    }
+
+    // Mobile overrides
+    &.mobile {
+      .person-backdrop {
+        max-height: 200px;
+      }
+
+      .info-container {
+        margin-top: -5rem;
+
+        .profile-image {
+          max-width: 120px;
+        }
+      }
+
+      .section-title {
+        font-size: 1.15rem;
+        padding-left: 0.6rem;
+        border-left-width: 3px;
+      }
+
+      .person-photo {
+        width: 120px;
+
+        &:nth-child(n + 4) {
+          display: none;
+        }
+      }
+
+      .known-for-year-group {
+        gap: 0.75rem;
+      }
+
+      .known-for-year-label {
+        width: 2.5rem;
+        font-size: 0.85rem;
+      }
+
+      .known-for-year-items {
+        padding-left: 0.75rem;
       }
 
       app-card {
         .card {
-          width: 150px;
+          width: 120px;
         }
       }
     }
-    app-card {
-      .card {
-        margin: 0;
-        width: 250px;
-      }
-    }
-    .person-image {
-      width: 350px;
-      height: 525px;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
+  }
+
+  // Galleria fullscreen overrides
+  .p-galleria-mask {
+    z-index: 9999 !important;
+
+    .p-galleria {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
     }
 
-    .photos-item {
-      width: 250px;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
+    .p-galleria-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
     }
 
-    .person-info-label {
-      width: 120px;
+    .p-galleria-items-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
     }
 
-    .inner-container {
-      max-width: 1400px;
+    .p-galleria-footer {
+      flex-shrink: 0;
+    }
+
+    .p-galleria-close-button {
+      z-index: 10000 !important;
+      position: absolute !important;
+      top: 1rem;
+      right: 1rem;
     }
   }
 
-  .card {
-    max-width: 300px;
+  .galleria-main-image {
+    max-width: 90vw;
+    max-height: 75vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+      max-height: 85vh;
+      max-width: 95vw;
+    }
   }
 
-  .p-tablist-tab-list {
-    justify-content: center;
+  .galleria-thumbnail {
+    width: 80px;
+    height: auto;
+    object-fit: cover;
+    display: block;
   }
 }

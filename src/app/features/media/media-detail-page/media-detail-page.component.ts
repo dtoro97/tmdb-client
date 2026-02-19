@@ -1,20 +1,19 @@
 import { get } from 'lodash';
 import { CarouselModule } from 'primeng/carousel';
 import { ChipModule } from 'primeng/chip';
+import { GalleriaModule } from 'primeng/galleria';
 import { RatingModule } from 'primeng/rating';
 import { SelectModule } from 'primeng/select';
-import { TabsModule } from 'primeng/tabs';
 import { combineLatest, map, Observable, tap } from 'rxjs';
-import { Images, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
+import { Image, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
 
 import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import {
   CardComponent,
-  FilterPipe,
   ImagePipe,
   MediaTypeEnum,
   MinutesToHours,
@@ -32,7 +31,7 @@ import { GlobalStore } from '../../../core';
   imports: [
     RatingModule,
     ChipModule,
-    TabsModule,
+    GalleriaModule,
     CarouselModule,
     SelectModule,
     ImagePipe,
@@ -45,7 +44,6 @@ import { GlobalStore } from '../../../core';
     YoutubeLinkPipe,
     FormsModule,
     RouterLink,
-    FilterPipe,
     SocialLinksComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,44 +53,48 @@ import { GlobalStore } from '../../../core';
 export class MediaDetailPageComponent {
   mediaItem$: Observable<MovieDetails | TvShowDetails>;
   videos$: Observable<Video[]>;
-  images$: Observable<Images>;
   mediaType$: Observable<MediaType>;
   languages$: Observable<any>;
   breakpoints = CAROUSEL_BREAKPOINTS;
-  tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
-  activeTab$: Observable<string>;
+
+  // Image viewer state
+  galleriaVisible = false;
+  galleriaImages: { source: string; thumbnail: string }[] = [];
+  galleriaActiveIndex = 0;
+  allBackdrops: Image[] = [];
+  allPosters: Image[] = [];
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private scroller: ViewportScroller,
     private titleService: Title,
+    private cdr: ChangeDetectorRef,
     public mediaStoreService: MediaStoreService,
     public globalStore: GlobalStore,
   ) {
-    this.mediaItem$ = this.mediaStoreService.media$.pipe(
-      tap(() => this.scroller.scrollToPosition([0, 0])),
-    );
-    this.videos$ = this.mediaStoreService.youtubeVideos$;
-    this.images$ = this.mediaStoreService.images$;
     this.mediaType$ = this.route.params.pipe(
       map((params) => get(params, 'type')),
     );
-    this.activeTab$ = this.route.params.pipe(
-      map((params) => get(params, 'tab')),
+
+    this.mediaItem$ = combineLatest([
+      this.mediaStoreService.media$,
+      this.mediaType$,
+    ]).pipe(
+      tap(([item, type]) => {
+        this.scroller.scrollToPosition([0, 0]);
+        this.titleService.setTitle(this.getTitle(type, item));
+      }),
+      map(([item]) => item),
     );
 
-    this.tabs$ = combineLatest([
-      this.mediaType$,
-      this.videos$,
-      this.images$,
-      this.mediaItem$,
-    ]).pipe(
-      map(([type, videos, photos, item]) => {
-        this.titleService.setTitle(this.getTitle(type, item));
-        return this.getTabs(type, videos, photos, item);
+    this.videos$ = this.mediaStoreService.youtubeVideos$;
+
+    this.mediaStoreService.images$.pipe(
+      tap((images) => {
+        this.allBackdrops = images.backdrops;
+        this.allPosters = images.posters;
       }),
-    );
+    ).subscribe();
 
     this.languages$ = combineLatest([
       this.mediaStoreService.languages$,
@@ -113,42 +115,27 @@ export class MediaDetailPageComponent {
     );
   }
 
-  changeTab(tab: string): void {
-    this.router.navigate([`../${tab}`], { relativeTo: this.route });
-  }
-
   changeSeason(season: number): void {
     this.mediaStoreService.updateSelectedSeason(season);
+  }
+
+  onGalleriaClose(): void {
+    this.galleriaVisible = false;
+    this.cdr.markForCheck();
+  }
+
+  openGalleria(images: Image[], startIndex = 0): void {
+    this.galleriaImages = images.map((img) => ({
+      source: `https://image.tmdb.org/t/p/original${img.file_path}`,
+      thumbnail: `https://image.tmdb.org/t/p/w300${img.file_path}`,
+    }));
+    this.galleriaActiveIndex = startIndex;
+    this.galleriaVisible = true;
+    this.cdr.markForCheck();
   }
 
   private getTitle(type: string, item: TvShowDetails | MovieDetails): string {
     const name = get(item, 'title', get(item, 'name'));
     return `${name} | ${type === MediaTypeEnum.TV ? 'TV Show' : 'Movie'}`;
-  }
-
-  private getTabs(
-    type: MediaType,
-    videos: Video[],
-    photos: Images,
-    item: MovieDetails | TvShowDetails,
-  ) {
-    return [
-      { title: 'Overview', value: 'overview', visible: true },
-      {
-        title: 'Episodes',
-        value: 'episodes',
-        visible:
-          type === MediaTypeEnum.TV &&
-          (item as TvShowDetails).seasons.length > 0,
-      },
-      { title: 'Videos', value: 'videos', visible: videos.length > 0 },
-      {
-        title: 'Photos',
-        value: 'photos',
-        visible: Object.values(photos).some(
-          (v) => Array.isArray(v) && v.length > 0,
-        ),
-      },
-    ];
   }
 }

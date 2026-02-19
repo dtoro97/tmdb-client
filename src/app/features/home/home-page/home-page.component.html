@@ -1,6 +1,12 @@
-<div class="h-full flex flex-column pb-4 md:pt-4">
-  <div class="flex flex-column">
-    <div class="column-header ml-4 md:ml-6 mb-4">
+<!-- Hero Banner -->
+<app-hero-banner
+  [item]="(homeStore.trending$ | async)?.[0]"
+></app-hero-banner>
+
+<div class="home-sections">
+  <!-- Trending -->
+  <section class="home-section">
+    <div class="section-header">
       <h2>Trending</h2>
       <p-select-button
         [options]="trendingOptions"
@@ -12,9 +18,54 @@
     <app-media-carousel
       [items]="(homeStore.trending$ | async) || []"
     ></app-media-carousel>
-  </div>
-  <div class="flex flex-column">
-    <div class="column-header ml-4 md:ml-6 mb-4">
+  </section>
+
+  <!-- Popular People -->
+  <section class="home-section">
+    <div class="section-header">
+      <h2>Popular People</h2>
+    </div>
+    <app-people-carousel
+      [items]="(homeStore.popularPeople$ | async) || []"
+    ></app-people-carousel>
+  </section>
+
+  <!-- Now Playing in Theaters -->
+  <section class="home-section">
+    <div class="section-header">
+      <h2>Now Playing in Theaters</h2>
+    </div>
+    <app-media-carousel
+      [items]="(homeStore.nowPlaying$ | async) || []"
+      type="movie"
+    ></app-media-carousel>
+  </section>
+
+  <!-- Airing Today -->
+  <section class="home-section">
+    <div class="section-header">
+      <h2>Airing Today</h2>
+    </div>
+    <app-media-carousel
+      [items]="(homeStore.airingToday$ | async) || []"
+      type="tv"
+    ></app-media-carousel>
+  </section>
+
+  <!-- Upcoming Movies -->
+  <section class="home-section">
+    <div class="section-header">
+      <h2>Upcoming Movies</h2>
+    </div>
+    <app-media-carousel
+      [items]="(homeStore.upcoming$ | async) || []"
+      type="movie"
+    ></app-media-carousel>
+  </section>
+
+  <!-- What's Popular -->
+  <section class="home-section">
+    <div class="section-header">
       <h2>What's Popular</h2>
       <p-select-button
         [options]="popularOptions"
@@ -27,5 +78,22 @@
       [items]="(homeStore.popular$ | async) || []"
       [type]="(homeStore.popularType$ | async)!"
     ></app-media-carousel>
-  </div>
+  </section>
+
+  <!-- Top Rated -->
+  <section class="home-section">
+    <div class="section-header">
+      <h2>Top Rated</h2>
+      <p-select-button
+        [options]="topRatedOptions"
+        [ngModel]="homeStore.topRatedType$ | async"
+        (ngModelChange)="changeTopRated($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <app-media-carousel
+      [items]="(homeStore.topRated$ | async) || []"
+      [type]="(homeStore.topRatedType$ | async)!"
+    ></app-media-carousel>
+  </section>
 </div>

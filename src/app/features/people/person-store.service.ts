@@ -34,6 +34,12 @@ export class PersonDetailStore extends ComponentStore<PersonState> {
     (state) => state.person,
   ).pipe(filter(Boolean));
   readonly images$: Observable<Image[]> = this.select((state) => state.images);
+  readonly photoPreviews$: Observable<Image[]> = this.images$.pipe(
+    map((images) => images.slice(0, 5)),
+  );
+  readonly photoCount$: Observable<number> = this.images$.pipe(
+    map((images) => images.length),
+  );
   readonly hasCredits$: Observable<boolean> = this.combinedCredits$.pipe(
     map((credits) => credits.cast.length > 0 || credits.crew.length > 0),
   );

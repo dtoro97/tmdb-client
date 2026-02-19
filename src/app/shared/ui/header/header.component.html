@@ -21,8 +21,8 @@
               class="search-result-item"
               [class.mobile]="isMobile()"
               [routerLink]="item.media_type === 'person'
-                ? ['/people', item.id, 'overview']
-                : ['/details', item.media_type, item.id, 'overview']"
+                ? ['/people', item.id]
+                : ['/details', item.media_type, item.id]"
             >
               <img
                 class="result-poster"

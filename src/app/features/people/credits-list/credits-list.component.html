@@ -1,69 +1,61 @@
 <div
-  class="flex flex-column py-4 md:mx-8 mx-2"
-  [class.dark]="isDarkMode$ | async"
+  class="credits-container"
   [class.mobile]="isMobile()"
 >
-  <div class="flex flex-row">
-    <div>
-      <label for="department" class="mr-2">Department</label>
-      <p-select
-        [id]="'department'"
-        [disabled]="departmentOptions.length < 3"
-        [options]="departmentOptions"
-        [(ngModel)]="department"
-        optionLabel="label"
-        optionValue="value"
-      ></p-select>
+  <div class="flex flex-row gap-3 flex-wrap align-items-center mb-4">
+    <div class="pill-toggle">
+      @for (option of departmentOptions; track option.value) {
+        <button
+          class="pill-btn"
+          [class.active]="department === option.value"
+          (click)="setDepartment(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
     </div>
-    <div>
-      <label for="media" class="mr-2 ml-4">Media</label>
-      <p-select
-        [id]="'media'"
-        [options]="mediaOptions"
-        [disabled]="mediaOptions.length < 3"
-        [(ngModel)]="media"
-        optionLabel="label"
-        optionValue="value"
-      ></p-select>
-    </div>
-  </div>
-  @if ((department === 'all' && credits.cast.length) || department === 'acting')
-  {
-  <h2>Acting</h2>
-  <div class="flex flex-column gap-1">
-    @for (item of credits.cast | sort : 'date' | filter : (media === 'all' ? {}
-    : { media_type: media }); track item.id) {
-    <div class="flex flex-row align-items-center mb-1 credit-item">
-      <span class="py-2 px-4 year">
-        {{ item.date ? (item.date | date : "yyyy") : "-" }}
-      </span>
-      <a
-        class="cursor-pointer py-2 px-4"
-        [routerLink]="['/details', item.media_type, item.id]"
-        ><strong>{{ item.title || item.name }}</strong>
-        <span class="muted">&nbsp;as {{ item.character || item.job }}</span></a
-      >
-    </div>
+    @if (mediaOptions.length > 2) {
+      <div class="pill-toggle">
+        @for (option of mediaOptions; track option.value) {
+          <button
+            class="pill-btn"
+            [class.active]="media === option.value"
+            (click)="setMedia(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
     }
   </div>
-  } @if ( (department === 'all' && credits.crew.length) || department ===
-  'production') {
-  <h2>Production</h2>
-  <div class="flex flex-column gap-1">
-    @for (item of credits.crew | sort : 'date' | filter : (media === 'all' ? {}
-    : { media_type: media });track item.id) {
-    <div class="flex flex-row align-items-center mb-1 credit-item">
-      <span class="py-2 px-4 year">
-        {{ item.date ? (item.date | date : "yyyy") : "-" }}
-      </span>
-      <a
-        class="cursor-pointer py-2 px-4"
-        [routerLink]="['/details', item.media_type, item.id]"
-        ><strong>{{ item.title || item.name }}</strong>
-        <span class="muted">&nbsp;as {{ item.character || item.job }}</span></a
-      >
+
+  @for (group of yearGroups; track group.year) {
+    <div class="year-group">
+      <div class="year-label">{{ group.year }}</div>
+      <div class="year-items">
+        @for (item of group.items; track item.id) {
+          <a
+            class="credit-item"
+            [routerLink]="['/details', item.media_type, item.id]"
+          >
+            <img
+              class="credit-poster"
+              src="{{ (item.poster_path || item.backdrop_path || '') | imgSrc: 'w92' }}"
+              alt=""
+            />
+            <div class="credit-info">
+              <strong>{{ item.title || item.name }}</strong>
+              @if (item.character) {
+                <span class="credit-role">as {{ item.character }}</span>
+              }
+              @if (item.job) {
+                <span class="credit-role">{{ item.job }}</span>
+              }
+            </div>
+            <span class="credit-type">{{ item.media_type === 'movie' ? 'Movie' : 'TV' }}</span>
+          </a>
+        }
+      </div>
     </div>
-    }
-  </div>
   }
 </div>
