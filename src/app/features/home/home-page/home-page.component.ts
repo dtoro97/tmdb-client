@@ -1,4 +1,3 @@
-import { SelectButtonModule } from 'primeng/selectbutton';
 import { TimeWindow } from 'tmdb-ts';
 
 import { AsyncPipe } from '@angular/common';
@@ -9,16 +8,17 @@ import { HomeStoreService } from '../home-store.service';
 import { MediaCarouselComponent } from '../media-carousel/media-carousel.component';
 import { HeroBannerComponent } from '../hero-banner/hero-banner.component';
 import { PeopleCarouselComponent } from '../people-carousel/people-carousel.component';
+import { PillToggleComponent } from '../../../shared';
 
 @Component({
   selector: 'app-home-page',
   imports: [
-    SelectButtonModule,
     FormsModule,
     AsyncPipe,
     MediaCarouselComponent,
     HeroBannerComponent,
     PeopleCarouselComponent,
+    PillToggleComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-page.component.html',
@@ -26,8 +26,8 @@ import { PeopleCarouselComponent } from '../people-carousel/people-carousel.comp
 })
 export class HomePageComponent {
   trendingOptions = [
-    { label: 'Today', value: 'day' },
-    { label: 'This Week', value: 'week' },
+    { label: 'Today', value: 'day' as TimeWindow },
+    { label: 'This Week', value: 'week' as TimeWindow },
   ];
   popularOptions = [
     { label: 'TV Shows', value: 'tv' },

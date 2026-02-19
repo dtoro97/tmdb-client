@@ -3,7 +3,6 @@
   [class.mobile]="globalStore.isMobile()"
 >
   @if (person$ | async; as person) {
-    <!-- Hero Section: Blurred Backdrop -->
     <div class="relative backdrop-wrapper">
       @if (person.profile_path) {
         <img
@@ -14,7 +13,6 @@
       <div class="gradient-cover"></div>
     </div>
 
-    <!-- Info Container -->
     <div
       class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
       [style.maxWidth.px]="1400"
@@ -28,7 +26,9 @@
         </div>
         <div class="flex flex-column mt-2 md:mt-8 gap-2 md:ml-6 flex-1">
           <h1 class="m-0">{{ person.name }}</h1>
-          <div class="flex flex-row gap-3 align-items-center flex-wrap person-meta">
+          <div
+            class="flex flex-row gap-3 align-items-center flex-wrap person-meta"
+          >
             @if (person.known_for_department) {
               <span class="meta-badge">{{ person.known_for_department }}</span>
             }
@@ -66,7 +66,7 @@
                 {{ person.biography }}
               </p>
               <span class="read-more-btn" (click)="toggleBio()">
-                {{ bioExpanded ? 'Show less' : 'Read more' }}
+                {{ bioExpanded ? "Show less" : "Read more" }}
               </span>
             </div>
           }
@@ -74,28 +74,23 @@
       </div>
     </div>
 
-    <!-- Scrollable Sections -->
     <div
       class="tab-content md:ml-auto md:mr-auto md:px-8 px-4 mt-4"
       [style.maxWidth.px]="1400"
     >
-      <!-- Known For Section -->
       @if (hasCredits$ | async) {
         <div class="detail-section">
           <div class="section-header mb-3">
             <h2 class="section-title">Known For</h2>
-            <div class="pill-toggle">
-              @for (option of creditsOptions$ | async; track option.value) {
-                <button
-                  class="pill-btn"
-                  [class.active]="(visibleCredits$ | async) === option.value"
-                  (click)="changeVisibleCredits(option.value)"
-                >
-                  {{ option.label }}
-                </button>
-              }
-            </div>
           </div>
+          <div class="pill-toggle mb-4">
+            <app-pill-toggle
+              [options]="creditsOptions$ | async"
+              [selectedValue]="visibleCredits$ | async"
+              (selected)="changeVisibleCredits($event)"
+            ></app-pill-toggle>
+          </div>
+
           @for (group of knownForGroups$ | async; track group.year) {
             <div class="known-for-year-group">
               <div class="known-for-year-label">{{ group.year }}</div>
@@ -109,25 +104,18 @@
         </div>
       }
 
-      <!-- Credits Section -->
       @if (hasCredits$ | async) {
         <div class="detail-section">
           <h2 class="section-title mb-3">Credits</h2>
-          <app-credits-list
-            [credits]="credits$ | async"
-          ></app-credits-list>
+          <app-credits-list [credits]="credits$ | async"></app-credits-list>
         </div>
       }
 
-      <!-- Photos Section -->
       @if (personDetailStore.photoCount$ | async; as count) {
         <div class="detail-section">
           <div class="section-header mb-3">
             <h2 class="section-title">Photos</h2>
-            <span
-              class="view-all-btn"
-              (click)="openGalleria(allPhotos)"
-            >
+            <span class="view-all-btn" (click)="openGalleria(allPhotos)">
               View All ({{ count }})
               <i class="fa-solid fa-images"></i>
             </span>
@@ -165,14 +153,11 @@
   [numVisible]="7"
   [responsiveOptions]="[
     { breakpoint: '768px', numVisible: 5 },
-    { breakpoint: '480px', numVisible: 3 }
+    { breakpoint: '480px', numVisible: 3 },
   ]"
 >
   <ng-template pTemplate="item" let-item>
-    <img
-      [src]="item.source"
-      class="galleria-main-image"
-    />
+    <img [src]="item.source" class="galleria-main-image" />
   </ng-template>
   <ng-template pTemplate="thumbnail" let-item>
     <img [src]="item.thumbnail" class="galleria-thumbnail" />

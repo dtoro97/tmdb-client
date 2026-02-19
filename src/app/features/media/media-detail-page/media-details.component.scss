@@ -6,7 +6,6 @@
       color: var(--p-text-muted-color);
     }
 
-    // Section title with red accent pipe (matches home page)
     .section-title {
       font-size: 1.35rem;
       font-weight: 700;
@@ -14,14 +13,13 @@
       padding-left: 0.75rem;
       border-left: 4px solid var(--p-primary-color);
       margin: 0;
-      margin-top: 2rem;
     }
 
-    // Section header with title + "View All" action
     .section-header {
       display: flex;
       align-items: center;
       gap: 1rem;
+      margin-top: 2rem;
     }
 
     .view-all-btn {
@@ -44,7 +42,6 @@
       }
     }
 
-    // Backdrop image — constrained height
     .backdrop-image {
       width: 100%;
       max-height: 450px;
@@ -53,7 +50,6 @@
       display: block;
     }
 
-    // Gradient overlay — works for both light and dark via CSS vars
     .gradient-cover {
       position: absolute;
       top: 0;
@@ -68,7 +64,6 @@
       );
     }
 
-    // Info container with poster overlap
     .info-container {
       margin-top: -14rem;
 
@@ -84,7 +79,6 @@
       }
     }
 
-    // Media info list
     .media-info-list {
       list-style: none;
       padding-left: 0;
@@ -109,7 +103,6 @@
       }
     }
 
-    // Backdrop and poster photos
     .backdrop-photo {
       width: 250px;
       border-radius: 6px;
@@ -130,7 +123,6 @@
       }
     }
 
-    // Episode items
     .episode-item {
       border: 1px solid var(--p-menubar-border-color);
       border-radius: 8px;
@@ -174,7 +166,6 @@
       }
     }
 
-    // Video frames
     .video-frame {
       width: 500px !important;
       height: 300px !important;
@@ -188,12 +179,10 @@
       }
     }
 
-    // Section spacing
     .detail-section {
       margin-bottom: 2.5rem;
     }
 
-    // Mobile overrides
     &.mobile {
       .backdrop-image {
         max-height: 250px;
@@ -241,7 +230,6 @@
     }
   }
 
-  // Galleria fullscreen overrides
   .p-galleria-mask {
     z-index: 9999 !important;
 

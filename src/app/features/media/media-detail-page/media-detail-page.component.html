@@ -151,7 +151,6 @@
     class="tab-content md:ml-auto md:mr-auto md:px-8 px-4 mt-4"
     [style.maxWidth.px]="1400"
   >
-    <!-- Cast Section -->
     @if ((mediaStoreService.cast$ | async)?.length) {
       <div class="detail-section">
         <h2 class="section-title mb-3">Cast</h2>
@@ -169,7 +168,6 @@
       </div>
     }
 
-    <!-- Episodes Section (TV only) -->
     @if (
       (mediaType$ | async) === "tv" &&
       (mediaStoreService.seasons$ | async)?.length
@@ -228,7 +226,6 @@
       </div>
     }
 
-    <!-- Videos Section -->
     @if ((videos$ | async)?.length) {
       <div class="detail-section">
         <h2 class="section-title mb-3">Videos</h2>
@@ -248,15 +245,11 @@
       </div>
     }
 
-    <!-- Backdrops Section -->
     @if (mediaStoreService.backdropCount$ | async; as count) {
       <div class="detail-section">
         <div class="section-header mb-3">
           <h2 class="section-title">Backdrops</h2>
-          <span
-            class="view-all-btn"
-            (click)="openGalleria(allBackdrops)"
-          >
+          <span class="view-all-btn" (click)="openGalleria(allBackdrops)">
             View All ({{ count }})
             <i class="fa-solid fa-images"></i>
           </span>
@@ -278,16 +271,11 @@
         </div>
       </div>
     }
-
-    <!-- Posters Section -->
     @if (mediaStoreService.posterCount$ | async; as count) {
       <div class="detail-section">
         <div class="section-header mb-3">
           <h2 class="section-title">Posters</h2>
-          <span
-            class="view-all-btn"
-            (click)="openGalleria(allPosters)"
-          >
+          <span class="view-all-btn" (click)="openGalleria(allPosters)">
             View All ({{ count }})
             <i class="fa-solid fa-images"></i>
           </span>
@@ -344,14 +332,11 @@
   [numVisible]="7"
   [responsiveOptions]="[
     { breakpoint: '768px', numVisible: 5 },
-    { breakpoint: '480px', numVisible: 3 }
+    { breakpoint: '480px', numVisible: 3 },
   ]"
 >
   <ng-template pTemplate="item" let-item>
-    <img
-      [src]="item.source"
-      class="galleria-main-image"
-    />
+    <img [src]="item.source" class="galleria-main-image" />
   </ng-template>
   <ng-template pTemplate="thumbnail" let-item>
     <img [src]="item.thumbnail" class="galleria-thumbnail" />

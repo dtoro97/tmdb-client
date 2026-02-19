@@ -1,31 +1,17 @@
-<div
-  class="credits-container"
-  [class.mobile]="isMobile()"
->
+<div class="credits-container" [class.mobile]="isMobile()">
   <div class="flex flex-row gap-3 flex-wrap align-items-center mb-4">
-    <div class="pill-toggle">
-      @for (option of departmentOptions; track option.value) {
-        <button
-          class="pill-btn"
-          [class.active]="department === option.value"
-          (click)="setDepartment(option.value)"
-        >
-          {{ option.label }}
-        </button>
-      }
-    </div>
+    <app-pill-toggle
+      [options]="departmentOptions"
+      [selectedValue]="department"
+      (selected)="setDepartment($event)"
+    ></app-pill-toggle>
     @if (mediaOptions.length > 2) {
-      <div class="pill-toggle">
-        @for (option of mediaOptions; track option.value) {
-          <button
-            class="pill-btn"
-            [class.active]="media === option.value"
-            (click)="setMedia(option.value)"
-          >
-            {{ option.label }}
-          </button>
-        }
-      </div>
+      <app-pill-toggle
+        [options]="mediaOptions"
+        [selectedValue]="media"
+        (selected)="setMedia($event)"
+      >
+      </app-pill-toggle>
     }
   </div>
 
@@ -40,7 +26,9 @@
           >
             <img
               class="credit-poster"
-              src="{{ (item.poster_path || item.backdrop_path || '') | imgSrc: 'w92' }}"
+              src="{{
+                item.poster_path || item.backdrop_path || '' | imgSrc: 'w92'
+              }}"
               alt=""
             />
             <div class="credit-info">
@@ -52,7 +40,9 @@
                 <span class="credit-role">{{ item.job }}</span>
               }
             </div>
-            <span class="credit-type">{{ item.media_type === 'movie' ? 'Movie' : 'TV' }}</span>
+            <span class="credit-type">{{
+              item.media_type === "movie" ? "Movie" : "TV"
+            }}</span>
           </a>
         }
       </div>

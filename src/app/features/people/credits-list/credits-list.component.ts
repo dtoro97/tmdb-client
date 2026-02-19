@@ -1,12 +1,18 @@
 import { get } from 'lodash';
 import { PersonCombinedCredits } from 'tmdb-ts';
 
-import { ChangeDetectionStrategy, Component, Input, Signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ImagePipe } from '../../../shared/pipes/image.pipe';
 import { Option } from '../../../shared/interfaces/option.interface';
 import { GlobalStore } from '../../../core/global.store';
+import { PillToggleComponent } from '../../../shared';
 
 export interface CreditItem {
   id: number;
@@ -28,7 +34,7 @@ export interface YearGroup {
 
 @Component({
   selector: 'app-credits-list',
-  imports: [RouterLink, ImagePipe],
+  imports: [RouterLink, ImagePipe, PillToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './credits-list.component.html',
   styleUrl: './credits-list.component.scss',

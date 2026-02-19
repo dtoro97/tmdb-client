@@ -1,26 +1,23 @@
-<!-- Hero Banner -->
-<app-hero-banner
-  [item]="(homeStore.trending$ | async)?.[0]"
-></app-hero-banner>
+<app-hero-banner [item]="(homeStore.trending$ | async)?.[0]"></app-hero-banner>
 
 <div class="home-sections">
-  <!-- Trending -->
   <section class="home-section">
     <div class="section-header">
       <h2>Trending</h2>
-      <p-select-button
-        [options]="trendingOptions"
-        [ngModel]="homeStore.trendingTime$ | async"
-        (ngModelChange)="changeTrending($event)"
-        optionValue="value"
-      ></p-select-button>
     </div>
+    <div class="mb-4 ml-3">
+      <app-pill-toggle
+        [options]="trendingOptions"
+        (selected)="changeTrending($event)"
+        [selectedValue]="homeStore.trendingTime$ | async"
+      ></app-pill-toggle>
+    </div>
+
     <app-media-carousel
       [items]="(homeStore.trending$ | async) || []"
     ></app-media-carousel>
   </section>
 
-  <!-- Popular People -->
   <section class="home-section">
     <div class="section-header">
       <h2>Popular People</h2>
@@ -30,7 +27,6 @@
     ></app-people-carousel>
   </section>
 
-  <!-- Now Playing in Theaters -->
   <section class="home-section">
     <div class="section-header">
       <h2>Now Playing in Theaters</h2>
@@ -41,7 +37,6 @@
     ></app-media-carousel>
   </section>
 
-  <!-- Airing Today -->
   <section class="home-section">
     <div class="section-header">
       <h2>Airing Today</h2>
@@ -52,7 +47,6 @@
     ></app-media-carousel>
   </section>
 
-  <!-- Upcoming Movies -->
   <section class="home-section">
     <div class="section-header">
       <h2>Upcoming Movies</h2>
@@ -63,16 +57,17 @@
     ></app-media-carousel>
   </section>
 
-  <!-- What's Popular -->
   <section class="home-section">
     <div class="section-header">
       <h2>What's Popular</h2>
-      <p-select-button
+    </div>
+
+    <div class="mb-4 ml-3">
+      <app-pill-toggle
         [options]="popularOptions"
-        [ngModel]="homeStore.popularType$ | async"
-        (ngModelChange)="changePopular($event)"
-        optionValue="value"
-      ></p-select-button>
+        [selectedValue]="homeStore.popularType$ | async"
+        (selected)="changePopular($event)"
+      ></app-pill-toggle>
     </div>
     <app-media-carousel
       [items]="(homeStore.popular$ | async) || []"
@@ -80,17 +75,20 @@
     ></app-media-carousel>
   </section>
 
-  <!-- Top Rated -->
   <section class="home-section">
     <div class="section-header">
       <h2>Top Rated</h2>
-      <p-select-button
-        [options]="topRatedOptions"
-        [ngModel]="homeStore.topRatedType$ | async"
-        (ngModelChange)="changeTopRated($event)"
-        optionValue="value"
-      ></p-select-button>
     </div>
+
+    <div class="mb-4 ml-3">
+      <app-pill-toggle
+        class="mb-4 ml-3"
+        [options]="topRatedOptions"
+        [selectedValue]="homeStore.topRatedType$ | async"
+        (selected)="changeTopRated($event)"
+      ></app-pill-toggle>
+    </div>
+
     <app-media-carousel
       [items]="(homeStore.topRated$ | async) || []"
       [type]="(homeStore.topRatedType$ | async)!"

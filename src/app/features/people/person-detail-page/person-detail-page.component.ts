@@ -25,6 +25,7 @@ import { Option } from '../../../shared/interfaces/option.interface';
 import { CardComponent } from '../../../shared/ui/card/card.component';
 import { SocialLinksComponent } from '../../../shared/ui/social-links/social-links.component';
 import { CreditsListComponent } from '../credits-list/credits-list.component';
+import { PillToggleComponent } from '../../../shared';
 
 interface KnownForYearGroup {
   year: string;
@@ -42,6 +43,7 @@ interface KnownForYearGroup {
     AgePipe,
     SocialLinksComponent,
     DatePipe,
+    PillToggleComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './person-detail-page.component.html',
@@ -133,11 +135,15 @@ export class PersonDetailPageComponent {
     const sorted = [...items].sort((a, b) => {
       const dateA = a.first_air_date || a.release_date || '';
       const dateB = b.first_air_date || b.release_date || '';
-      if (!dateA && !dateB) return (b.vote_average || 0) - (a.vote_average || 0);
+      if (!dateA && !dateB)
+        return (b.vote_average || 0) - (a.vote_average || 0);
       if (!dateA) return 1;
       if (!dateB) return -1;
-      const yearDiff = new Date(dateB).getFullYear() - new Date(dateA).getFullYear();
-      return yearDiff !== 0 ? yearDiff : (b.vote_average || 0) - (a.vote_average || 0);
+      const yearDiff =
+        new Date(dateB).getFullYear() - new Date(dateA).getFullYear();
+      return yearDiff !== 0
+        ? yearDiff
+        : (b.vote_average || 0) - (a.vote_average || 0);
     });
 
     const groupMap = new Map<string, any[]>();

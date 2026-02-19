@@ -2,36 +2,6 @@
   padding: 0.5rem 0;
 }
 
-// Pill toggle buttons
-.pill-toggle {
-  display: flex;
-  gap: 0.5rem;
-
-  .pill-btn {
-    background: none;
-    border: 1px solid var(--p-menubar-border-color);
-    color: var(--p-text-muted-color);
-    padding: 0.35rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      border-color: var(--p-primary-color);
-      color: var(--p-primary-color);
-    }
-
-    &.active {
-      background-color: var(--p-primary-color);
-      border-color: var(--p-primary-color);
-      color: white;
-    }
-  }
-}
-
-// Year groups
 .year-group {
   display: flex;
   gap: 1.5rem;
@@ -76,7 +46,11 @@
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: color-mix(in srgb, var(--p-content-background) 85%, var(--p-primary-color));
+    background-color: color-mix(
+      in srgb,
+      var(--p-content-background) 85%,
+      var(--p-primary-color)
+    );
   }
 
   .credit-poster {
@@ -117,7 +91,6 @@
   }
 }
 
-// Mobile overrides
 .mobile {
   .year-group {
     gap: 0.75rem;
