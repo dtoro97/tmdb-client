@@ -1,0 +1,46 @@
+<div class="credits-page md:px-8 px-4 py-4">
+  <a
+    class="back-link mb-3"
+    [routerLink]="['/details', mediaType$ | async, mediaId$ | async]"
+  >
+    <i class="fa-solid fa-arrow-left"></i>
+    Back to details
+  </a>
+
+  <h1 class="page-title">Full Cast & Crew</h1>
+
+  @if (crewDepartments$ | async; as departments) {
+    @for (dept of departments; track dept) {
+      <div class="credits-section">
+        <h2 class="section-title">{{ dept }}</h2>
+        <div class="crew-list">
+          @for (person of (crewByDepartment$ | async)?.[dept]; track person.credit_id) {
+            <a class="crew-row" [routerLink]="['/people', person.id]">
+              <span class="crew-name">{{ person.name }}</span>
+              <span class="crew-job">{{ person.job }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if ((cast$ | async)?.length) {
+    <div class="credits-section">
+      <h2 class="section-title">Cast</h2>
+      <div class="cast-list">
+        @for (person of cast$ | async; track person.id) {
+          <a class="cast-row" [routerLink]="['/people', person.id]">
+            <img
+              class="cast-avatar"
+              [src]="person.profile_path | imgSrc"
+              alt="{{ person.name }}"
+            />
+            <span class="cast-name">{{ person.name }}</span>
+            <span class="cast-character">{{ person.character }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>

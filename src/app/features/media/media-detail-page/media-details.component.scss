@@ -22,6 +22,63 @@
       margin-top: 2rem;
     }
 
+    .cast-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cast-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.25rem;
+      border-bottom: 1px solid var(--p-menubar-border-color);
+      text-decoration: none;
+      color: inherit;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--p-content-background) 90%, var(--p-text-color));
+      }
+    }
+
+    .cast-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 9999px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background-color: var(--p-surface-100);
+    }
+
+    .cast-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .cast-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--p-text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cast-character {
+      font-size: 0.8rem;
+      color: var(--p-text-muted-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .view-all-btn {
       font-size: 0.85rem;
       font-weight: 500;

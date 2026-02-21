@@ -4,7 +4,7 @@ import { ChipModule } from 'primeng/chip';
 import { GalleriaModule } from 'primeng/galleria';
 import { RatingModule } from 'primeng/rating';
 import { combineLatest, map, Observable, tap } from 'rxjs';
-import { Image, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
+import { Cast, Image, MediaType, MovieDetails, TvShowDetails, Video } from 'tmdb-ts';
 
 import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
 import {
@@ -20,7 +20,6 @@ import {
   ImagePipe,
   MediaTypeEnum,
   MinutesToHours,
-  PersonCardComponent,
   PillToggleComponent,
   SocialLinksComponent,
   SortPipe,
@@ -43,7 +42,6 @@ import { GlobalStore } from '../../../core';
     CommonModule,
     SortPipe,
     CardComponent,
-    PersonCardComponent,
     YoutubeLinkPipe,
     FormsModule,
     RouterLink,
@@ -66,6 +64,7 @@ export class MediaDetailPageComponent {
   allBackdrops: Image[] = [];
   allPosters: Image[] = [];
   seasons$: Observable<{ label: string; value: number }[]>;
+  topCast$: Observable<Cast[]>;
   constructor(
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
@@ -121,6 +120,10 @@ export class MediaDetailPageComponent {
             )
           : langCodes;
       }),
+    );
+
+    this.topCast$ = this.mediaStoreService.cast$.pipe(
+      map((cast) => cast.slice(0, 10)),
     );
   }
 

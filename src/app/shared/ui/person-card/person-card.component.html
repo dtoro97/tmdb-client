@@ -2,10 +2,11 @@
   class="actor-card flex flex-column align-items-center cursor-pointer"
   [routerLink]="['/people', person.id]"
   [class.mobile]="isMobile()"
+  [class.crew-mode]="mode === 'crew'"
 >
   <img src="{{ person.profile_path | imgSrc }}" />
   <p class="font-medium text-lg text-center mb-0">{{ person.name }}</p>
   <p class="text-sm text-center mt-1 px-3 secondary">
-    {{ person.character }}
+    {{ subtitle }}
   </p>
 </div>

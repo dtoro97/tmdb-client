@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   Cast,
   Credits,
+  Crew,
   Episode,
   ExternalIds,
   Image,
@@ -56,6 +57,24 @@ export class MediaStoreService extends ComponentStore<MediaState> {
   credits$: Observable<Credits> = this.select((state) => state.credits);
   cast$: Observable<Cast[]> = this.credits$.pipe(
     map((credits) => credits.cast),
+  );
+  crewByDepartment$: Observable<Record<string, Crew[]>> = this.credits$.pipe(
+    map((credits) => {
+      const departments = ['Directing', 'Production', 'Writing'];
+      const grouped: Record<string, Crew[]> = {};
+      for (const dept of departments) {
+        const members = credits.crew.filter((c) => c.department === dept);
+        if (members.length) {
+          const seen = new Set<number>();
+          grouped[dept] = members.filter((m) => {
+            if (seen.has(m.id)) return false;
+            seen.add(m.id);
+            return true;
+          });
+        }
+      }
+      return grouped;
+    }),
   );
   videos$: Observable<Video[]> = this.select((state) => state.videos);
   youtubeVideos$: Observable<Video[]> = this.videos$.pipe(
