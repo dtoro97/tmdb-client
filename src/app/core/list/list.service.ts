@@ -1,45 +1,49 @@
 import { get, set, toNumber } from 'lodash';
-import { from, Observable, tap } from 'rxjs';
-import {
-  MovieDiscoverResult,
-  PopularPeople,
-  TvShowDiscoverResult,
-} from 'tmdb-ts';
+import { Observable, tap } from 'rxjs';
 
 import { Injectable } from '@angular/core';
-import { Params, Router } from '@angular/router';
+import { Params } from '@angular/router';
 
-import { isValidDate, MediaListFilters, TmdbService } from '../../shared';
+import { isValidDate, MediaListFilters } from '../../shared';
 import { StateService } from '../state';
 import { ListStore } from './list.store';
 import { MAX_LIST_PAGE_SIZE, MAX_PAGES } from '../../constants';
+import {
+  DiscoverMovie200Response,
+  DiscoverTv200Response,
+  PersonPopularList200Response,
+  TmdbRestControllerService,
+} from '../../api';
 
 @Injectable({ providedIn: 'root' })
 export class ListService {
   constructor(
     private store: ListStore,
-    private tmdbService: TmdbService,
-    private router: Router,
-    private state: StateService
+    private tmdbApi: TmdbRestControllerService,
+    private state: StateService,
   ) {}
 
   fetchData(
     type: string,
-    queryParams: Params
-  ): Observable<TvShowDiscoverResult | MovieDiscoverResult | PopularPeople> {
+    queryParams: Params,
+  ): Observable<
+    | DiscoverTv200Response
+    | DiscoverMovie200Response
+    | PersonPopularList200Response
+  > {
     let dataSource$: Observable<any>;
     if (type === 'tv') {
-      dataSource$ = from(this.tmdbService.discover.tvShow(queryParams));
+      dataSource$ = this.tmdbApi.discoverTv('queryParams');
     } else if (type === 'movie') {
-      dataSource$ = from(this.tmdbService.discover.movie(queryParams));
+      dataSource$ = this.tmdbApi.discoverMovie('queryParams');
     } else {
-      dataSource$ = from(this.tmdbService.people.popular(queryParams));
+      dataSource$ = this.tmdbApi.personPopularList('queryParams');
     }
     return dataSource$.pipe(
       tap((data) => {
         this.updateData(data);
         this.state.setLoading(false);
-      })
+      }),
     );
   }
 
@@ -133,10 +137,15 @@ export class ListService {
     this.store.update({ ...filters });
   }
 
-  updateData(data: PopularPeople | MovieDiscoverResult | TvShowDiscoverResult) {
+  updateData(
+    data:
+      | DiscoverTv200Response
+      | DiscoverMovie200Response
+      | PersonPopularList200Response,
+  ) {
     this.store.update({
       total:
-        data.total_results > MAX_LIST_PAGE_SIZE * MAX_PAGES
+        data.total_results! > MAX_LIST_PAGE_SIZE * MAX_PAGES
           ? MAX_PAGES * MAX_LIST_PAGE_SIZE
           : data.total_results,
       data: data.results,

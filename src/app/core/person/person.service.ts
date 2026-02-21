@@ -1,28 +1,26 @@
 import { uniqBy } from 'lodash';
-import { catchError, EMPTY, from, Observable, tap } from 'rxjs';
-import {
-  ExternalIds,
-  PeopleImages,
-  PersonCombinedCredits,
-  PersonDetails,
-} from 'tmdb-ts';
+import { catchError, EMPTY, Observable, tap } from 'rxjs';
+import { PersonCombinedCredits200Response } from '../../api/model/personCombinedCredits200Response';
+import { PersonDetails200Response } from '../../api/model/personDetails200Response';
+import { PersonExternalIds200Response } from '../../api/model/personExternalIds200Response';
+import { PersonImages200Response } from '../../api/model/personImages200Response';
 
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { TmdbService } from '../../shared';
+import { TmdbRestControllerService } from '../../api/api/tmdb.service';
 import { PersonStore } from './person.store';
 
 @Injectable({ providedIn: 'root' })
 export class PersonService {
   constructor(
     private store: PersonStore,
-    private tmdbService: TmdbService,
+    private tmdbApi: TmdbRestControllerService,
     private router: Router
   ) {}
 
-  fetchCombinedCredits(id: number): Observable<PersonCombinedCredits> {
-    return from(this.tmdbService.people.combinedCredits(id)).pipe(
+  fetchCombinedCredits(id: number): Observable<PersonCombinedCredits200Response> {
+    return this.tmdbApi.personCombinedCredits(id.toString()).pipe(
       tap((data) => {
         const combinedCredits = {
           ...data,
@@ -34,14 +32,14 @@ export class PersonService {
     );
   }
 
-  fetchSocialLinks(id: number): Observable<ExternalIds> {
-    return from(this.tmdbService.people.externalId(id)).pipe(
+  fetchSocialLinks(id: number): Observable<PersonExternalIds200Response> {
+    return this.tmdbApi.personExternalIds(id).pipe(
       tap((data) => this.store.update({ socialLinks: data }))
     );
   }
 
-  fetchPersonDetails(id: number): Observable<PersonDetails> {
-    return from(this.tmdbService.people.details(id)).pipe(
+  fetchPersonDetails(id: number): Observable<PersonDetails200Response> {
+    return this.tmdbApi.personDetails(id).pipe(
       catchError((e) => {
         this.router.navigate(['not-found']);
         return EMPTY;
@@ -50,9 +48,9 @@ export class PersonService {
     );
   }
 
-  fetchPersonImages(id: number): Observable<PeopleImages> {
-    return from(this.tmdbService.people.images(id)).pipe(
-      tap((data) => this.store.update({ images: data.profiles }))
+  fetchPersonImages(id: number): Observable<PersonImages200Response> {
+    return this.tmdbApi.personImages(id).pipe(
+      tap((data) => this.store.update({ images: data.profiles || [] }))
     );
   }
 }

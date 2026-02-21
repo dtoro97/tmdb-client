@@ -9,7 +9,6 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { MultiSearchResult } from 'tmdb-ts';
 
 import {
   ChangeDetectionStrategy,
@@ -19,13 +18,16 @@ import {
   Signal,
 } from '@angular/core';
 
-import { TmdbService } from '../../services';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
 import { StateQuery, StateService } from '../../../core';
 import { ImagePipe } from '../../pipes';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import {
+  SearchMulti200ResponseResultsInner,
+  TmdbRestControllerService,
+} from '../../../api';
 
 @Component({
   selector: 'app-header',
@@ -48,13 +50,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   autoCompleteValue: string;
   isMobile: Signal<boolean>;
   search$: Observable<string>;
-  searchResults$: Observable<MultiSearchResult[]>;
-  private _searchResults: Subject<MultiSearchResult[]> = new Subject();
+  searchResults$: Observable<SearchMulti200ResponseResultsInner[]>;
+  private _searchResults: Subject<SearchMulti200ResponseResultsInner[]> =
+    new Subject();
   private _search: Subject<string> = new Subject();
   private _sub: Subscription;
 
   constructor(
-    private tmdb: TmdbService,
+    private tmdbApi: TmdbRestControllerService,
     private stateService: StateService,
     private stateQuery: StateQuery,
   ) {}
@@ -70,12 +73,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
         tap(() => this.stateService.setLoading(true)),
         debounceTime(500),
         switchMap((query) => {
-          return from(this.tmdb.search.multi({ query }));
+          return from(this.tmdbApi.searchMulti(query));
         }),
       )
       .subscribe((data) => {
         this.stateService.setLoading(false);
-        this._searchResults.next(data.results);
+        this._searchResults.next(data.results!);
       });
   }
   ngOnDestroy(): void {

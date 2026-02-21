@@ -5,14 +5,10 @@ import { RatingModule } from 'primeng/rating';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { combineLatest, map, Observable } from 'rxjs';
-import {
-  Images,
-  LanguageConfiguration,
-  MediaType,
-  MovieDetails,
-  TvShowDetails,
-  Video,
-} from 'tmdb-ts';
+import { MovieDetails200Response } from '../../api/model/movieDetails200Response';
+import { MovieImages200Response } from '../../api/model/movieImages200Response';
+import { MovieVideos200ResponseResultsInner } from '../../api/model/movieVideos200ResponseResultsInner';
+import { TvSeriesDetails200Response } from '../../api/model/tvSeriesDetails200Response';
 
 import { AsyncPipe, CommonModule, ViewportScroller } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
@@ -58,10 +54,10 @@ import { SocialLinksComponent } from '../social-links/social-links.component';
 })
 export class MediaDetailsComponent implements OnInit {
   mediaItem$: Observable<any>;
-  videos$: Observable<Video[]>;
-  images$: Observable<Images>;
-  mediaType$: Observable<MediaType>;
-  languages$: Observable<LanguageConfiguration[]>;
+  videos$: Observable<MovieVideos200ResponseResultsInner[]>;
+  images$: Observable<MovieImages200Response>;
+  mediaType$: Observable<string>;
+  languages$: Observable<any[]>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab$: Observable<string>;
@@ -126,12 +122,12 @@ export class MediaDetailsComponent implements OnInit {
     this.mediaService.updateSelectedSeason(season);
   }
 
-  private getTitle(type: string, item: TvShowDetails | MovieDetails): string {
+  private getTitle(type: string, item: TvSeriesDetails200Response | MovieDetails200Response): string {
     const name = get(item, 'title', get(item, 'name'));
     return `${name} | ${type === 'tv' ? 'TV Show' : 'Movie'}`;
   }
 
-  private getTabs(type: MediaType, videos: Video[], photos: Images, item: any) {
+  private getTabs(type: string, videos: MovieVideos200ResponseResultsInner[], photos: MovieImages200Response, item: any) {
     return [
       { title: 'Overview', value: 'overview', visible: true },
       {

@@ -1,15 +1,9 @@
-import {
-  Movie,
-  MovieDetails,
-  PopularTvShowResult,
-  TvShowDetails,
-} from 'tmdb-ts';
-
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ImagePipe } from '../../shared/pipes/image.pipe';
+import { MovieDetails200Response, TvSeriesDetails200Response } from '../../api';
 
 @Component({
   selector: 'app-card',
@@ -19,7 +13,7 @@ import { ImagePipe } from '../../shared/pipes/image.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @Input() public item: MovieDetails | TvShowDetails;
+  @Input() public item: MovieDetails200Response | TvSeriesDetails200Response;
   @Input() public type: string;
   constructor() {}
 }

@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store, StoreConfig } from '@datorama/akita';
-import { Movie, PopularTvShowResult, TimeWindow } from 'tmdb-ts';
+import { MoviePopularList200ResponseResultsInner } from '../../api/model/moviePopularList200ResponseResultsInner';
+import { TvSeriesAiringTodayList200ResponseResultsInner } from '../../api/model/tvSeriesAiringTodayList200ResponseResultsInner';
 
 export interface HomeState {
   trending: any[];
-  popular: Movie[] | PopularTvShowResult[];
-  trendingTime: TimeWindow;
+  popular: MoviePopularList200ResponseResultsInner[] | TvSeriesAiringTodayList200ResponseResultsInner[];
+  trendingTime: 'day' | 'week';
   popularType: string;
 }
 
@@ -13,7 +14,7 @@ function createInitialState(): HomeState {
   return {
     trending: [],
     popular: [],
-    trendingTime: 'day' as TimeWindow,
+    trendingTime: 'day',
     popularType: 'tv',
   };
 }

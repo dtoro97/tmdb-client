@@ -1,10 +1,14 @@
-import { catchError, EMPTY, from, tap } from 'rxjs';
-import { SeasonDetails, TvShowDetails } from 'tmdb-ts';
+import { catchError, EMPTY, Observable, tap } from 'rxjs';
+import { TvSeriesDetails200Response } from '../../api/model/tvSeriesDetails200Response';
+import { TvSeasonDetails200Response } from '../../api/model/tvSeasonDetails200Response';
+import { MovieDetails200Response } from '../../api/model/movieDetails200Response';
+import { MovieCredits200Response } from '../../api/model/movieCredits200Response';
+import { MovieImages200Response } from '../../api/model/movieImages200Response';
 
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { TmdbService } from '../../shared';
+import { TmdbRestControllerService } from '../../api/api/tmdb.service';
 import { StateService } from '../state';
 import { MediaStore } from './media.store';
 
@@ -12,24 +16,25 @@ import { MediaStore } from './media.store';
 export class MediaService {
   constructor(
     private store: MediaStore,
-    private tmdbService: TmdbService,
+    private tmdbApi: TmdbRestControllerService,
     private router: Router,
     private state: StateService
   ) {}
 
   fetchMediaDetails(id: number, type: string) {
-    return from(
+    const request$: Observable<MovieDetails200Response | TvSeriesDetails200Response> =
       type === 'tv'
-        ? this.tmdbService.tvShows.details(id)
-        : this.tmdbService.movies.details(id)
-    ).pipe(
+        ? this.tmdbApi.tvSeriesDetails(id)
+        : this.tmdbApi.movieDetails(id);
+
+    return request$.pipe(
       catchError((e) => {
         this.router.navigate(['not-found']);
         return EMPTY;
       }),
       tap((data) => {
         this.store.update({ media: data });
-        if (type === 'tv' && (data as TvShowDetails).seasons.length) {
+        if (type === 'tv' && ((data as TvSeriesDetails200Response).seasons || []).length) {
           this.updateSelectedSeason(1);
         }
       })
@@ -37,51 +42,51 @@ export class MediaService {
   }
 
   fetchCredits(id: number, type: string) {
-    return from(
+    const request$: Observable<MovieCredits200Response> =
       type === 'tv'
-        ? this.tmdbService.tvShows.credits(id)
-        : this.tmdbService.movies.credits(id)
-    ).pipe(tap((data) => this.store.update({ credits: data })));
+        ? this.tmdbApi.tvSeriesCredits(id) as Observable<MovieCredits200Response>
+        : this.tmdbApi.movieCredits(id);
+
+    return request$.pipe(tap((data) => this.store.update({ credits: data })));
   }
 
   fetchVideos(id: number, type: string) {
-    return from(
+    return (
       type === 'tv'
-        ? this.tmdbService.tvShows.videos(id)
-        : this.tmdbService.movies.videos(id)
-    ).pipe(tap((data) => this.store.update({ videos: data.results })));
+        ? this.tmdbApi.tvSeriesVideos(id)
+        : this.tmdbApi.movieVideos(id)
+    ).pipe(tap((data) => this.store.update({ videos: data.results || [] })));
   }
 
   fetchRecommendations(id: number, type: string) {
-    return from(
+    return (
       type === 'tv'
-        ? this.tmdbService.tvShows.recommendations(id)
-        : this.tmdbService.movies.recommendations(id)
-    ).pipe(tap((data) => this.store.update({ recommendations: data.results })));
+        ? this.tmdbApi.tvSeriesRecommendations(id)
+        : this.tmdbApi.movieRecommendations(id)
+    ).pipe(tap((data: any) => this.store.update({ recommendations: data.results || [] })));
   }
 
   fetchSocialLinks(id: number, type: string) {
-    return from(
+    return (
       type === 'tv'
-        ? this.tmdbService.tvShows.externalIds(id)
-        : this.tmdbService.movies.externalIds(id)
+        ? this.tmdbApi.tvSeriesExternalIds(id)
+        : this.tmdbApi.movieExternalIds(id)
     ).pipe(tap((data) => this.store.update({ socialLinks: data })));
   }
 
   fetchImages(id: number, type: string) {
-    return from(
+    const request$: Observable<MovieImages200Response> =
       type === 'tv'
-        ? this.tmdbService.tvShows.images(id)
-        : this.tmdbService.movies.images(id)
-    ).pipe(tap((data) => this.store.update({ images: data })));
+        ? this.tmdbApi.tvSeriesImages(id)
+        : this.tmdbApi.movieImages(id);
+
+    return request$.pipe(tap((data) => this.store.update({ images: data })));
   }
 
   fetchSeason(tvShowID: number, seasonNumber: number) {
     this.state.setLoading(true);
     const seasons = this.store.getValue().seasons;
-    return from(
-      this.tmdbService.tvSeasons.details({ tvShowID, seasonNumber })
-    ).pipe(
+    return this.tmdbApi.tvSeasonDetails(tvShowID, seasonNumber).pipe(
       tap((data) => {
         this.state.setLoading(false);
         this.store.update({ seasons: [...seasons, data] });
@@ -93,14 +98,14 @@ export class MediaService {
     const seasons = this.store.getValue().seasons;
     if (!seasons.find((season) => season.season_number === selectedSeason)) {
       this.fetchSeason(
-        this.store.getValue().media!.id,
+        this.store.getValue().media!.id!,
         selectedSeason
       ).subscribe();
     }
     this.store.update({ selectedSeason });
   }
 
-  updateSeasons(seasons: SeasonDetails[]) {
+  updateSeasons(seasons: TvSeasonDetails200Response[]) {
     this.store.update({ seasons });
   }
 }
