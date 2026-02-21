@@ -1,85 +1,153 @@
 <div class="header" [class.mobile]="isMobile()">
-  <p-menubar [model]="items">
-    <ng-template #start>
-      <a routerLink="/" class="brand-link">
-        <i class="fa-solid fa-film"></i>
-        @if (!isMobile()) {
-          <span class="brand-text">TMDB</span>
-        }
-      </a>
-    </ng-template>
-    <ng-template #end>
-      <div class="header-end">
-        <div class="search-wrapper">
-          <i class="fa-solid fa-magnifying-glass search-icon"></i>
-          <p-autocomplete
-            #searchBar
-            (onSelect)="onSearchSelect(searchBar)"
-            [suggestions]="searchResults$ | async"
-            (completeMethod)="search($event.query)"
-            [placeholder]="isMobile() ? 'Search...' : 'Search movies, TV shows, people...'"
-            styleClass="custom-search"
-            panelStyleClass="custom-search-panel"
-          >
-            <ng-template let-item #item>
-              <div
-                class="search-result-item"
-                [class.mobile]="isMobile()"
-                [routerLink]="item.media_type === 'person'
-                  ? ['/people', item.id]
-                  : ['/details', item.media_type, item.id]"
+  <div class="header-inner">
+    <!-- Logo -->
+    <a routerLink="/" class="brand-link">
+      <i class="fa-solid fa-film"></i>
+      @if (!isMobile()) {
+        <span class="brand-text">TMDB</span>
+      }
+    </a>
+
+    <!-- Menu Button -->
+    <button class="menu-btn" (click)="toggleMenu()">
+      <i class="fa-solid fa-bars"></i>
+      @if (!isMobile()) {
+        <span>Menu</span>
+      }
+    </button>
+
+    <!-- Search Bar with Category Filter -->
+    <div class="search-bar">
+      <div class="category-dropdown" [class.open]="categoryDropdownOpen">
+        <button class="category-btn" (click)="toggleCategoryDropdown()">
+          <span>{{ isMobile() ? categoryLabels[searchCategory].charAt(0) + categoryLabels[searchCategory].slice(1, 3) : categoryLabels[searchCategory] }}</span>
+          <i class="fa-solid fa-caret-down"></i>
+        </button>
+        @if (categoryDropdownOpen) {
+          <div class="category-menu">
+            @for (cat of categories; track cat) {
+              <button
+                class="category-option"
+                [class.active]="searchCategory === cat"
+                (click)="selectCategory(cat)"
               >
-                <img
-                  class="result-poster"
-                  [src]="item.poster_path || item.profile_path | imgSrc"
-                  alt="{{ item.title || item.name }}"
-                />
-                <div class="result-info">
-                  <div class="result-header">
-                    <span class="result-title">
-                      {{ item.title || item.name }}
+                {{ categoryLabels[cat] }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <div class="search-input-wrapper">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <p-autocomplete
+          #searchBar
+          (onSelect)="onSearchSelect(searchBar)"
+          [suggestions]="searchResults$ | async"
+          (completeMethod)="search($event.query)"
+          [placeholder]="isMobile() ? 'Search...' : 'Search movies, TV shows, people...'"
+          styleClass="custom-search"
+          panelStyleClass="custom-search-panel"
+        >
+          <ng-template let-item #item>
+            <div
+              class="search-result-item"
+              [class.mobile]="isMobile()"
+              [routerLink]="item.media_type === 'person'
+                ? ['/people', item.id]
+                : ['/details', item.media_type, item.id]"
+            >
+              <img
+                class="result-poster"
+                [src]="item.poster_path || item.profile_path | imgSrc"
+                alt="{{ item.title || item.name }}"
+              />
+              <div class="result-info">
+                <div class="result-header">
+                  <span class="result-title">
+                    {{ item.title || item.name }}
+                  </span>
+                  <span class="result-type-badge">
+                    {{ item.media_type === 'movie' ? 'Movie' : item.media_type === 'tv' ? 'TV' : 'Person' }}
+                  </span>
+                </div>
+                <div class="result-meta">
+                  @if (item.release_date || item.first_air_date) {
+                    <span class="result-year">
+                      {{ item.release_date || item.first_air_date | date : "yyyy" }}
                     </span>
-                    <span class="result-type-badge">
-                      {{ item.media_type === 'movie' ? 'Movie' : item.media_type === 'tv' ? 'TV' : 'Person' }}
-                    </span>
-                  </div>
-                  <div class="result-meta">
-                    @if (item.release_date || item.first_air_date) {
-                      <span class="result-year">
-                        {{ item.release_date || item.first_air_date | date : "yyyy" }}
-                      </span>
-                    }
-                    @if (item.vote_average > 0) {
-                      <span class="result-rating">
-                        <i class="fa-solid fa-star"></i>
-                        {{ item.vote_average | number: '1.1-1' }}
-                      </span>
-                    }
-                    @if (item.known_for_department) {
-                      <span class="result-dept">{{ item.known_for_department }}</span>
-                    }
-                  </div>
-                  @if (item.overview) {
-                    <p class="result-overview">{{ item.overview }}</p>
                   }
-                  @if (item.known_for?.length) {
-                    <p class="result-known-for">
-                      Known for: {{ item.known_for[0].title || item.known_for[0].name }}@if (item.known_for[1]) {, {{ item.known_for[1].title || item.known_for[1].name }}}
-                    </p>
+                  @if (item.vote_average > 0) {
+                    <span class="result-rating">
+                      <i class="fa-solid fa-star"></i>
+                      {{ item.vote_average | number: '1.1-1' }}
+                    </span>
+                  }
+                  @if (item.known_for_department) {
+                    <span class="result-dept">{{ item.known_for_department }}</span>
                   }
                 </div>
+                @if (item.overview) {
+                  <p class="result-overview">{{ item.overview }}</p>
+                }
+                @if (item.known_for?.length) {
+                  <p class="result-known-for">
+                    Known for: {{ item.known_for[0].title || item.known_for[0].name }}@if (item.known_for[1]) {, {{ item.known_for[1].title || item.known_for[1].name }}}
+                  </p>
+                }
               </div>
-            </ng-template>
-          </p-autocomplete>
-        </div>
-        <button
-          class="theme-toggle"
-          (click)="toggleDarkMode()"
-          [attr.aria-label]="(isDarkMode$ | async) ? 'Switch to light mode' : 'Switch to dark mode'"
-        >
-          <i class="{{ (isDarkMode$ | async) ? 'fa-regular fa-sun' : 'fa-solid fa-moon' }}"></i>
-        </button>
+            </div>
+          </ng-template>
+        </p-autocomplete>
       </div>
-    </ng-template>
-  </p-menubar>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button
+      class="theme-toggle"
+      (click)="toggleDarkMode()"
+      [attr.aria-label]="(isDarkMode$ | async) ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+      <i class="fa-solid fa-circle-half-stroke"></i>
+    </button>
+  </div>
 </div>
+
+<!-- Mega Menu Overlay -->
+@if (menuOpen) {
+  <div class="mega-menu-backdrop" (click)="closeMenu()"></div>
+  <div class="mega-menu" [class.mobile]="isMobile()">
+    <div class="mega-menu-inner">
+      @for (section of menuItems; track section.label) {
+        <div class="mega-menu-section">
+          <h3 class="mega-menu-title">{{ section.label }}</h3>
+          @if (section.items) {
+            @for (item of section.items; track item.label) {
+              <a
+                class="mega-menu-link"
+                [routerLink]="item.routerLink"
+                [queryParams]="item.queryParams"
+                (click)="closeMenu()"
+              >
+                {{ item.label }}
+              </a>
+            }
+          } @else {
+            <a
+              class="mega-menu-link"
+              [routerLink]="section.routerLink"
+              (click)="closeMenu()"
+            >
+              Popular {{ section.label }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+    <div class="mega-menu-footer">
+      <a class="mega-menu-home" routerLink="/" (click)="closeMenu()">
+        <i class="fa-solid fa-house"></i>
+        Home
+      </a>
+    </div>
+  </div>
+}
