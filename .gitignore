@@ -28,7 +28,6 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 .claude
-/docs
 
 # Miscellaneous
 /.angular/cache
@@ -38,12 +37,6 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
-
-# Generated API client
-tmdb-api.json
-
-# Environment with secrets
-src/environments/environment.development.ts
 
 # System files
 .DS_Store

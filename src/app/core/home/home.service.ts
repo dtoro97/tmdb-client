@@ -1,8 +1,9 @@
-import { combineLatest, tap } from 'rxjs';
+import { combineLatest, from, tap } from 'rxjs';
+import { TimeWindow } from 'tmdb-ts';
 
 import { Injectable } from '@angular/core';
 
-import { TmdbRestControllerService } from '../../api/api/tmdb.service';
+import { TmdbService } from '../../shared';
 import { HomeStore } from './home.store';
 import { StateService } from '../state';
 
@@ -10,7 +11,7 @@ import { StateService } from '../state';
 export class HomeService {
   constructor(
     private store: HomeStore,
-    private tmdbApi: TmdbRestControllerService,
+    private tmdbService: TmdbService,
     private state: StateService
   ) {}
 
@@ -25,18 +26,16 @@ export class HomeService {
   }
 
   fetchPopular(type: string) {
-    const updatePopular = tap((data: { results?: any[] }) =>
-      this.store.update({ popular: data.results ?? [] })
-    );
-    if (type === 'tv') {
-      return this.tmdbApi.tvSeriesPopularList().pipe(updatePopular);
-    }
-    return this.tmdbApi.moviePopularList().pipe(updatePopular);
+    return from(
+      type === 'tv'
+        ? this.tmdbService.tvShows.popular()
+        : this.tmdbService.movies.popular()
+    ).pipe(tap((data) => this.store.update({ popular: data.results })));
   }
 
-  fetchTrending(time: 'day' | 'week') {
-    return this.tmdbApi.trendingAll(time).pipe(
-      tap((data) => this.store.update({ trending: data.results ?? [] }))
+  fetchTrending(time: TimeWindow) {
+    return from(this.tmdbService.trending.trending('all', time)).pipe(
+      tap((data) => this.store.update({ trending: data.results }))
     );
   }
 
@@ -48,7 +47,7 @@ export class HomeService {
     );
   }
 
-  updateTrendingTime(trendingTime: 'day' | 'week') {
+  updateTrendingTime(trendingTime: TimeWindow) {
     this.state.setLoading(true);
     this.store.update({ trendingTime });
     this.fetchTrending(trendingTime).subscribe(() =>

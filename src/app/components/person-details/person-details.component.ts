@@ -2,10 +2,12 @@ import { get } from 'lodash';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
 import { BehaviorSubject, combineLatest, map, Observable, tap } from 'rxjs';
-import { PersonCombinedCredits200Response } from '../../api/model/personCombinedCredits200Response';
-import { PersonDetails200Response } from '../../api/model/personDetails200Response';
-import { PersonExternalIds200Response } from '../../api/model/personExternalIds200Response';
-import { PersonImages200ResponseProfilesInner } from '../../api/model/personImages200ResponseProfilesInner';
+import {
+  ExternalIds,
+  Image,
+  PersonCombinedCredits,
+  PersonDetails,
+} from 'tmdb-ts';
 
 import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
 import {
@@ -52,11 +54,11 @@ import { SocialLinksComponent } from '../social-links/social-links.component';
   styleUrl: './person-details.component.scss',
 })
 export class PersonDetailsComponent implements OnInit {
-  person$: Observable<PersonDetails200Response>;
-  images$: Observable<PersonImages200ResponseProfilesInner[]>;
+  person$: Observable<PersonDetails>;
+  images$: Observable<Image[]>;
   knownFor$: Observable<any[]>;
-  credits$: Observable<PersonCombinedCredits200Response>;
-  links$: Observable<PersonExternalIds200Response>;
+  credits$: Observable<PersonCombinedCredits>;
+  links$: Observable<ExternalIds>;
   isMobile: Signal<boolean>;
   isDarkMode$: Observable<boolean>;
   breakpoints = CAROUSEL_BREAKPOINTS;
@@ -116,32 +118,32 @@ export class PersonDetailsComponent implements OnInit {
     this.visibleCredits$.next(value);
   }
 
-  private getVisibleCredits(credits: PersonCombinedCredits200Response): string {
-    if ((credits.cast || []).length) {
+  private getVisibleCredits(credits: PersonCombinedCredits): string {
+    if (credits.cast.length) {
       return 'cast';
-    } else if ((credits.crew || []).length) {
+    } else if (credits.crew.length) {
       return 'crew';
     }
     return '';
   }
 
-  private getCreditOptions(credits: PersonCombinedCredits200Response): IOption[] {
+  private getCreditOptions(credits: PersonCombinedCredits): IOption[] {
     const options = [];
-    if ((credits.cast || []).length) {
+    if (credits.cast.length) {
       options.push({ label: 'Cast', value: 'cast' });
     }
-    if ((credits.crew || []).length) {
+    if (credits.crew.length) {
       options.push({ label: 'Production', value: 'crew' });
     }
     return options;
   }
-  private getTabs(credits: PersonCombinedCredits200Response) {
+  private getTabs(credits: PersonCombinedCredits) {
     return [
       { title: 'Known For', value: 'overview', visible: true },
       {
         title: 'Credits',
         value: 'credits',
-        visible: (credits.cast || []).length > 0 || (credits.crew || []).length > 0,
+        visible: credits.cast.length > 0 || credits.crew.length > 0,
       },
       { title: 'Photos', value: 'photos', visible: true },
     ];

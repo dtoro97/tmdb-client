@@ -57,33 +57,33 @@ export class MediaListComponent implements OnInit {
     private stateQuery: StateQuery,
     private titleService: Title,
     public listQuery: ListQuery,
-    public listService: ListService,
+    public listService: ListService
   ) {}
   ngOnInit(): void {
     this.isMobile = this.stateQuery.isMobile;
     this.type$ = this.route.params.pipe(
       map((params) => params['type']),
-      tap((type) => this.setTitle(type)),
+      tap((type) => this.setTitle(type))
     );
     this.genres$ = combineLatest([
       this.type$.pipe(
         switchMap((type) =>
           type === 'tv'
             ? this.stateQuery.tvGenres$
-            : this.stateQuery.movieGenres$,
-        ),
+            : this.stateQuery.movieGenres$
+        )
       ),
       this.listQuery.genres$,
     ]).pipe(
       map(([allGenres, selected]) => {
         return allGenres.map((genre) => ({
           ...genre,
-          selected: selected.includes((genre.id || 0).toString()),
+          selected: selected.includes(genre.id.toString()),
         }));
-      }),
+      })
     );
     this.sortOptions$ = this.type$.pipe(
-      map((type) => (type === 'tv' ? tvSortOptions : movieSortOptions)),
+      map((type) => (type === 'tv' ? tvSortOptions : movieSortOptions))
     );
     this.filterPanelState = !this.isMobile();
   }
@@ -104,7 +104,7 @@ export class MediaListComponent implements OnInit {
   }
 
   toggleGenreSelection(genre: IGenre) {
-    this.listService.updateGenreSelection(genre.id!);
+    this.listService.updateGenreSelection(genre.id);
   }
 
   private setTitle(type: string): void {

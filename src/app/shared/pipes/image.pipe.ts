@@ -3,7 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'imgSrc',
 })
 export class ImagePipe implements PipeTransform {
-  transform(value: string | undefined, options = 'w500'): string {
+  transform(value: string, options = 'w500'): string {
     if (value) {
       return `https://image.tmdb.org/t/p/${options}${value}`;
     }

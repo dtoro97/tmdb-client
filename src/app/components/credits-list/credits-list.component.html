@@ -27,59 +27,43 @@
       ></p-select>
     </div>
   </div>
-  @if (
-    (department === "all" && credits.cast?.length) || department === "acting"
-  ) {
-    <h2>Acting</h2>
-    <div class="flex flex-column gap-1">
-      @for (
-        item of credits.cast || []
-          | sort: "date"
-          | filter: (media === "all" ? {} : { media_type: media });
-        track item.id
-      ) {
-        <div class="flex flex-row align-items-center mb-1 credit-item">
-          <span class="py-2 px-4 year">
-            {{ item.date ? (item.date | date: "yyyy") : "-" }}
-          </span>
-          <a
-            class="cursor-pointer py-2 px-4"
-            [routerLink]="['/details', item.media_type, item.id]"
-            ><strong>{{ item.title || item.name }}</strong>
-            <span class="muted"
-              >&nbsp;as {{ item.character || item.job }}</span
-            ></a
-          >
-        </div>
-      }
+  @if ((department === 'all' && credits.cast.length) || department === 'acting')
+  {
+  <h2>Acting</h2>
+  <div class="flex flex-column gap-1">
+    @for (item of credits.cast | sort : 'date' | filter : (media === 'all' ? {}
+    : { media_type: media }); track item.id) {
+    <div class="flex flex-row align-items-center mb-1 credit-item">
+      <span class="py-2 px-4 year">
+        {{ item.date ? (item.date | date : "yyyy") : "-" }}
+      </span>
+      <a
+        class="cursor-pointer py-2 px-4"
+        [routerLink]="['/details', item.media_type, item.id]"
+        ><strong>{{ item.title || item.name }}</strong>
+        <span class="muted">&nbsp;as {{ item.character || item.job }}</span></a
+      >
     </div>
-  }
-  @if (
-    (department === "all" && credits.crew?.length) ||
-    department === "production"
-  ) {
-    <h2>Production</h2>
-    <div class="flex flex-column gap-1">
-      @for (
-        item of credits.crew || []
-          | sort: "date"
-          | filter: (media === "all" ? {} : { media_type: media });
-        track item.id
-      ) {
-        <div class="flex flex-row align-items-center mb-1 credit-item">
-          <span class="py-2 px-4 year">
-            {{ item.date ? (item.date | date: "yyyy") : "-" }}
-          </span>
-          <a
-            class="cursor-pointer py-2 px-4"
-            [routerLink]="['/details', item.media_type, item.id]"
-            ><strong>{{ item.title || item.name }}</strong>
-            <span class="muted"
-              >&nbsp;as {{ item.character || item.job }}</span
-            ></a
-          >
-        </div>
-      }
+    }
+  </div>
+  } @if ( (department === 'all' && credits.crew.length) || department ===
+  'production') {
+  <h2>Production</h2>
+  <div class="flex flex-column gap-1">
+    @for (item of credits.crew | sort : 'date' | filter : (media === 'all' ? {}
+    : { media_type: media });track item.id) {
+    <div class="flex flex-row align-items-center mb-1 credit-item">
+      <span class="py-2 px-4 year">
+        {{ item.date ? (item.date | date : "yyyy") : "-" }}
+      </span>
+      <a
+        class="cursor-pointer py-2 px-4"
+        [routerLink]="['/details', item.media_type, item.id]"
+        ><strong>{{ item.title || item.name }}</strong>
+        <span class="muted">&nbsp;as {{ item.character || item.job }}</span></a
+      >
     </div>
+    }
+  </div>
   }
 </div>

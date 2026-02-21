@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store, StoreConfig } from '@datorama/akita';
 import { MAX_LIST_PAGE_SIZE } from '../../constants';
-import {
-  DiscoverMovie200ResponseResultsInner,
-  DiscoverTv200ResponseResultsInner,
-  PersonPopularList200Response,
-  PersonPopularList200ResponseResultsInner,
-} from '../../api';
+import { Movie, Person, TV } from 'tmdb-ts';
 export interface ListState {
   fromDate?: Date;
   toDate?: Date;
@@ -17,11 +12,7 @@ export interface ListState {
   voteAverage: number[];
   rows: number;
   total: number;
-  data: (
-    | DiscoverTv200ResponseResultsInner
-    | DiscoverMovie200ResponseResultsInner
-    | PersonPopularList200ResponseResultsInner
-  )[];
+  data: (TV | Movie | Person)[];
 }
 
 function createInitialState(): ListState {

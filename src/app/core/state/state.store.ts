@@ -1,18 +1,16 @@
-import { GenreMovieList200ResponseGenresInner } from '../../api/model/genreMovieList200ResponseGenresInner';
-import { ConfigurationLanguages200ResponseInner } from '../../api/model/configurationLanguages200ResponseInner';
-import { WatchProvidersMovieList200ResponseResultsInner } from '../../api/model/watchProvidersMovieList200ResponseResultsInner';
-import { ConfigurationCountries200ResponseInner } from '../../api/model/configurationCountries200ResponseInner';
+import { Genre, LanguageConfiguration, WatchProvider } from 'tmdb-ts';
+import { Region } from 'tmdb-ts/dist/types/regions';
 
 import { Injectable } from '@angular/core';
 import { Store, StoreConfig } from '@datorama/akita';
 
 export interface State {
-  providers: WatchProvidersMovieList200ResponseResultsInner[];
-  regions: ConfigurationCountries200ResponseInner[];
-  movieGenres: GenreMovieList200ResponseGenresInner[];
-  tvGenres: GenreMovieList200ResponseGenresInner[];
+  providers: WatchProvider[];
+  regions: Region[];
+  movieGenres: Genre[];
+  tvGenres: Genre[];
   isDarkMode: boolean;
-  languages: ConfigurationLanguages200ResponseInner[];
+  languages: LanguageConfiguration[];
 }
 
 export function createInitialState(): State {

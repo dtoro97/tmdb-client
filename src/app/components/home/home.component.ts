@@ -1,5 +1,6 @@
 import { CarouselModule } from 'primeng/carousel';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { TimeWindow } from 'tmdb-ts';
 
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
@@ -38,12 +39,9 @@ export class HomeComponent {
       value: 'movie',
     },
   ];
-  constructor(
-    public homeQuery: HomeQuery,
-    public homeService: HomeService,
-  ) {}
+  constructor(public homeQuery: HomeQuery, public homeService: HomeService) {}
 
-  changeTrending(timeWindow: 'day' | 'week') {
+  changeTrending(timeWindow: TimeWindow) {
     this.homeService.updateTrendingTime(timeWindow);
   }
   changePopular(mediaType: string) {

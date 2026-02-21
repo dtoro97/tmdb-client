@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import { SelectModule } from 'primeng/select';
 import { Observable } from 'rxjs';
+import { PersonCombinedCredits } from 'tmdb-ts';
 
 import { AsyncPipe, DatePipe } from '@angular/common';
 import {
@@ -14,7 +15,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FilterPipe, IOption, SortPipe } from '../../shared';
 import { StateQuery } from '../../core';
-import { PersonCombinedCredits200Response } from '../../api';
 
 @Component({
   selector: 'app-credits-list',
@@ -32,48 +32,52 @@ import { PersonCombinedCredits200Response } from '../../api';
   styleUrl: './credits-list.component.scss',
 })
 export class CreditsListComponent implements OnInit {
-  @Input() set credits(credits: PersonCombinedCredits200Response) {
+  @Input() set credits(credits: PersonCombinedCredits) {
     this._credits = {
       ...credits,
-      cast: credits.cast!.map((r) => ({
+      cast: credits.cast.map((r) => ({
         ...r,
-        date: r.release_date && new Date(r.release_date),
+        date:
+          r.first_air_date ||
+          (r.release_date && new Date(r.first_air_date || r.release_date)),
       })),
-      crew: credits.crew!.map((r) => ({
+      crew: credits.crew.map((r) => ({
         ...r,
-        date: r.release_date && new Date(r.release_date),
+        date:
+          r.first_air_date ||
+          (r.release_date && new Date(r.first_air_date || r.release_date)),
       })),
     };
     const departmentOptions = [{ label: 'All', value: 'all' }];
-    if (this._credits.cast?.length) {
+    if (this._credits.cast.length) {
       departmentOptions.push({ label: 'Acting', value: 'acting' });
     }
-    if (this._credits.crew?.length) {
+    if (this._credits.crew.length) {
       departmentOptions.push({ label: 'Production', value: 'production' });
     }
     this.departmentOptions = departmentOptions;
 
     const mediaOptions = [{ label: 'All', value: 'all' }];
     if (
-      this._credits.cast?.some((c) => get(c, 'media_type') === 'movie') ||
-      this._credits.crew?.some((c) => get(c, 'media_type') === 'movie')
+      this._credits.cast.some((c) => get(c, 'media_type') === 'movie') ||
+      this._credits.crew.some((c) => get(c, 'media_type') === 'movie')
     ) {
       mediaOptions.push({ label: 'Movies', value: 'movie' });
     }
     if (
-      this._credits.cast?.some((c) => get(c, 'media_type') === 'tv') ||
-      this._credits.crew?.some((c) => get(c, 'media_type') === 'tv')
+      this._credits.cast.some((c) => get(c, 'media_type') === 'tv') ||
+      this._credits.crew.some((c) => get(c, 'media_type') === 'tv')
     ) {
       mediaOptions.push({ label: 'TV Shows', value: 'tv' });
     }
     this.mediaOptions = mediaOptions;
   }
 
-  get credits(): PersonCombinedCredits200Response {
+  get credits(): PersonCombinedCredits {
     return this._credits;
   }
 
-  private _credits: PersonCombinedCredits200Response;
+  private _credits: PersonCombinedCredits;
   isDarkMode$: Observable<boolean>;
   isMobile: Signal<boolean>;
   department: string = 'all';

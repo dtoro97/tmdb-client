@@ -5,20 +5,18 @@ import { inject, Injectable, Signal } from '@angular/core';
 import { Query } from '@datorama/akita';
 
 import { State, StateStore } from './state.store';
-import { GenreMovieList200ResponseGenresInner } from '../../api/model/genreMovieList200ResponseGenresInner';
-import { ConfigurationLanguages200ResponseInner } from '../../api/model/configurationLanguages200ResponseInner';
-import { WatchProvidersMovieList200ResponseResultsInner } from '../../api/model/watchProvidersMovieList200ResponseResultsInner';
+import { Genre, LanguageConfiguration, WatchProvider } from 'tmdb-ts';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class StateQuery extends Query<State> {
-  providers$: Observable<WatchProvidersMovieList200ResponseResultsInner[]> = this.select(
+  providers$: Observable<WatchProvider[]> = this.select(
     (state) => state.providers
   );
-  tvGenres$: Observable<GenreMovieList200ResponseGenresInner[]> = this.select((state) => state.tvGenres);
-  movieGenres$: Observable<GenreMovieList200ResponseGenresInner[]> = this.select((state) => state.movieGenres);
+  tvGenres$: Observable<Genre[]> = this.select((state) => state.tvGenres);
+  movieGenres$: Observable<Genre[]> = this.select((state) => state.movieGenres);
   isDarkMode$: Observable<boolean> = this.select((state) => state.isDarkMode);
-  languages$: Observable<ConfigurationLanguages200ResponseInner[]> = this.select(
+  languages$: Observable<LanguageConfiguration[]> = this.select(
     (state) => state.languages
   );
   loading$: Observable<boolean> = this.selectLoading();

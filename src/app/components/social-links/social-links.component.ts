@@ -1,12 +1,12 @@
 import { DividerModule } from 'primeng/divider';
+import {
+  ExternalIds,
+  MovieDetails,
+  PersonDetails,
+  TvShowDetails,
+} from 'tmdb-ts';
 
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import {
-  MovieDetails200Response,
-  MovieExternalIds200Response,
-  PersonDetails200Response,
-  TvSeriesDetails200Response,
-} from '../../api';
 
 @Component({
   selector: 'app-social-links',
@@ -17,9 +17,6 @@ import {
 })
 export class SocialLinksComponent {
   @Input() isPerson: boolean;
-  @Input() links: MovieExternalIds200Response;
-  @Input() item:
-    | TvSeriesDetails200Response
-    | MovieDetails200Response
-    | PersonDetails200Response;
+  @Input() links: ExternalIds;
+  @Input() item: TvShowDetails | MovieDetails | PersonDetails;
 }

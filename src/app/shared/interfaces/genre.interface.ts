@@ -1,5 +1,5 @@
-import { GenreMovieList200ResponseGenresInner } from '../../api/model/genreMovieList200ResponseGenresInner';
+import { Genre } from 'tmdb-ts';
 
-export interface IGenre extends GenreMovieList200ResponseGenresInner {
+export interface IGenre extends Genre {
   selected: boolean;
 }

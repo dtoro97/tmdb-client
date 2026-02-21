@@ -1,23 +1,26 @@
 import { Injectable } from '@angular/core';
 import { Store, StoreConfig } from '@datorama/akita';
-import { MovieCredits200Response } from '../../api/model/movieCredits200Response';
-import { MovieDetails200Response } from '../../api/model/movieDetails200Response';
-import { MovieExternalIds200Response } from '../../api/model/movieExternalIds200Response';
-import { MovieImages200Response } from '../../api/model/movieImages200Response';
-import { MovieVideos200ResponseResultsInner } from '../../api/model/movieVideos200ResponseResultsInner';
-import { TvSeasonDetails200Response } from '../../api/model/tvSeasonDetails200Response';
-import { TvSeriesDetails200Response } from '../../api/model/tvSeriesDetails200Response';
-import { TvSeriesExternalIds200Response } from '../../api/model/tvSeriesExternalIds200Response';
-import { TvSeriesRecommendations200ResponseResultsInner } from '../../api/model/tvSeriesRecommendations200ResponseResultsInner';
+import {
+  Credits,
+  ExternalIds,
+  Images,
+  MovieDetails,
+  Recommendation,
+  Season,
+  SeasonDetails,
+  TvRecommendation,
+  TvShowDetails,
+  Video,
+} from 'tmdb-ts';
 
 export interface MediaState {
-  media: MovieDetails200Response | TvSeriesDetails200Response | undefined;
-  credits: MovieCredits200Response;
-  videos: MovieVideos200ResponseResultsInner[];
-  recommendations: MovieDetails200Response[] | TvSeriesRecommendations200ResponseResultsInner[];
-  socialLinks: MovieExternalIds200Response | TvSeriesExternalIds200Response | undefined;
-  images: MovieImages200Response | undefined;
-  seasons: TvSeasonDetails200Response[];
+  media: MovieDetails | TvShowDetails | undefined;
+  credits: Credits;
+  videos: Video[];
+  recommendations: Recommendation[] | TvRecommendation[];
+  socialLinks: ExternalIds | undefined;
+  images: Images | undefined;
+  seasons: SeasonDetails[];
   selectedSeason: number;
 }
 
