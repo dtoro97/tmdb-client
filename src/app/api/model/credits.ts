@@ -7,13 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { CastListItem } from './castListItem';
-import { CrewListItem } from './crewListItem';
+import { CastMember } from './castMember';
+import { CrewMember } from './crewMember';
 
 
 export interface Credits { 
     id?: number;
-    cast: Array<CastListItem>;
-    crew: Array<CrewListItem>;
+    cast?: Array<CastMember>;
+    crew?: Array<CrewMember>;
 }
 

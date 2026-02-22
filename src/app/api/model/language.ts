@@ -10,11 +10,8 @@
 
 
 export interface Language { 
-    /**
-     * ISO 639-1 tag
-     */
-    iso_639_1: string;
-    english_name: string;
+    iso_639_1?: string;
+    english_name?: string;
     name?: string;
 }
 

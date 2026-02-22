@@ -1,8 +1,8 @@
 # @
 
-The Movie Database (TMDB) API
+The Movie Database API v3
 
-The version of the OpenAPI document: 0.32.0
+The version of the OpenAPI document: 3
 
 ## Building
 

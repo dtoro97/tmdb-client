@@ -7,54 +7,48 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { TvSeriesEpisode } from './tvSeriesEpisode';
-import { ModelObject } from './modelObject';
-import { Language } from './language';
-import { TvSeriesSeason } from './tvSeriesSeason';
-import { Creator } from './creator';
-import { OrganizationBase } from './organizationBase';
-import { MultiListPage } from './multiListPage';
-import { TvListPage } from './tvListPage';
+import { TvSeasonCompact } from './tvSeasonCompact';
+import { ProductionCompany } from './productionCompany';
+import { Network } from './network';
+import { TvEpisodeCompact } from './tvEpisodeCompact';
+import { ItemWithNameAndId } from './itemWithNameAndId';
+import { SpokenLanguage } from './spokenLanguage';
+import { TvCreator } from './tvCreator';
 import { ProductionCountry } from './productionCountry';
 
 
 export interface TvSeries { 
-    /**
-     * The identifier property represents any kind of identifier for any kind of [Thing](https://schema.org/Thing), such as ISBNs, GTIN codes, UUIDs etc. 
-     */
-    id: number;
-    name: string;
     adult?: boolean;
-    backdrop_path?: string;
-    first_air_date?: string;
-    origin_country?: Array<string>;
-    original_language: string;
-    original_name: string;
-    overview?: string;
-    popularity?: number;
-    poster_path?: string;
-    vote_average?: number;
-    vote_count?: number;
-    created_by?: Array<Creator>;
+    backdrop_path?: string | null;
+    created_by?: Array<TvCreator>;
     episode_run_time?: Array<number>;
-    genres?: Array<ModelObject>;
+    first_air_date?: string;
+    genres?: Array<ItemWithNameAndId>;
     homepage?: string;
+    id?: number;
     in_production?: boolean;
     languages?: Array<string>;
     last_air_date?: string;
-    last_episode_to_air?: TvSeriesEpisode;
-    next_episode_to_air?: TvSeriesEpisode;
-    networks?: Array<OrganizationBase>;
+    last_episode_to_air?: TvEpisodeCompact;
+    name?: string;
+    next_episode_to_air?: TvEpisodeCompact;
+    networks?: Array<Network>;
     number_of_episodes?: number;
     number_of_seasons?: number;
-    production_companies?: Array<OrganizationBase>;
+    origin_country?: Array<string>;
+    original_language?: string;
+    original_name?: string;
+    overview?: string;
+    popularity?: number;
+    poster_path?: string | null;
+    production_companies?: Array<ProductionCompany>;
     production_countries?: Array<ProductionCountry>;
-    seasons?: Array<TvSeriesSeason>;
-    spoken_languages?: Array<Language>;
+    seasons?: Array<TvSeasonCompact>;
+    spoken_languages?: Array<SpokenLanguage>;
     status?: string;
     tagline?: string;
     type?: string;
-    recommendations?: MultiListPage;
-    similar?: TvListPage;
+    vote_average?: number;
+    vote_count?: number;
 }
 

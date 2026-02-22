@@ -10,11 +10,8 @@
 
 
 export interface Country { 
-    /**
-     * [ISO 3166-1 alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) 
-     */
-    iso_3166_1: string;
-    english_name: string;
+    iso_3166_1?: string;
+    english_name?: string;
     native_name?: string;
 }
 

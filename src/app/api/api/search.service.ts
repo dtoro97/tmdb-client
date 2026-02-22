@@ -17,17 +17,19 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
-import { CollectionListPage } from '../model/collectionListPage';
+import { CollectionPage } from '../model/collectionPage';
 // @ts-ignore
-import { MovieListPage } from '../model/movieListPage';
+import { CompanyPage } from '../model/companyPage';
 // @ts-ignore
-import { MultiListPage } from '../model/multiListPage';
+import { KeywordPage } from '../model/keywordPage';
 // @ts-ignore
-import { ObjectListPage } from '../model/objectListPage';
+import { MoviePage } from '../model/moviePage';
 // @ts-ignore
-import { PersonListPage } from '../model/personListPage';
+import { MultiPage } from '../model/multiPage';
 // @ts-ignore
-import { TvListPage } from '../model/tvListPage';
+import { PersonPage } from '../model/personPage';
+// @ts-ignore
+import { TvSeriesPage } from '../model/tvSeriesPage';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -39,7 +41,7 @@ import { BaseService } from '../api.base.service';
 @Injectable({
   providedIn: 'root'
 })
-export class SearchService extends BaseService {
+export class SearchRestControllerService extends BaseService {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);
@@ -51,16 +53,16 @@ export class SearchService extends BaseService {
      * @endpoint get /search/collection
      * @param query 
      * @param includeAdult 
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param page 
-     * @param region &#x60;ISO-3166-1&#x60; code
+     * @param region 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CollectionListPage>;
-    public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CollectionListPage>>;
-    public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CollectionListPage>>;
+    public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CollectionPage>;
+    public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CollectionPage>>;
+    public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CollectionPage>>;
     public searchCollection(query: string, includeAdult?: boolean, language?: string, page?: number, region?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (query === null || query === undefined) {
             throw new Error('Required parameter query was null or undefined when calling searchCollection.');
@@ -143,7 +145,89 @@ export class SearchService extends BaseService {
 
         let localVarPath = `/search/collection`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<CollectionListPage>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<CollectionPage>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                params: localVarQueryParameters.toHttpParams(),
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Company
+     * Search for companies by their original and alternative names.
+     * @endpoint get /search/company
+     * @param query 
+     * @param page 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public searchCompany(query: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CompanyPage>;
+    public searchCompany(query: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CompanyPage>>;
+    public searchCompany(query: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CompanyPage>>;
+    public searchCompany(query: string, page?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (query === null || query === undefined) {
+            throw new Error('Required parameter query was null or undefined when calling searchCompany.');
+        }
+
+        let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'query',
+            <any>query,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'page',
+            <any>page,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/search/company`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<CompanyPage>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters.toHttpParams(),
@@ -167,9 +251,9 @@ export class SearchService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public searchKeyword(query: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ObjectListPage>;
-    public searchKeyword(query: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ObjectListPage>>;
-    public searchKeyword(query: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ObjectListPage>>;
+    public searchKeyword(query: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<KeywordPage>;
+    public searchKeyword(query: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<KeywordPage>>;
+    public searchKeyword(query: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<KeywordPage>>;
     public searchKeyword(query: string, page?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (query === null || query === undefined) {
             throw new Error('Required parameter query was null or undefined when calling searchKeyword.');
@@ -225,7 +309,7 @@ export class SearchService extends BaseService {
 
         let localVarPath = `/search/keyword`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<ObjectListPage>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<KeywordPage>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters.toHttpParams(),
@@ -245,19 +329,19 @@ export class SearchService extends BaseService {
      * @endpoint get /search/movie
      * @param query 
      * @param includeAdult 
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param primaryReleaseYear 
      * @param page 
-     * @param region &#x60;ISO-3166-1&#x60; code
+     * @param region 
      * @param year 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: number, page?: number, region?: string, year?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<MovieListPage>;
-    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: number, page?: number, region?: string, year?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<MovieListPage>>;
-    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: number, page?: number, region?: string, year?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<MovieListPage>>;
-    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: number, page?: number, region?: string, year?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: string, page?: number, region?: string, year?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<MoviePage>;
+    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: string, page?: number, region?: string, year?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<MoviePage>>;
+    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: string, page?: number, region?: string, year?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<MoviePage>>;
+    public searchMovie(query: string, includeAdult?: boolean, language?: string, primaryReleaseYear?: string, page?: number, region?: string, year?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (query === null || query === undefined) {
             throw new Error('Required parameter query was null or undefined when calling searchMovie.');
         }
@@ -357,7 +441,7 @@ export class SearchService extends BaseService {
 
         let localVarPath = `/search/movie`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<MovieListPage>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<MoviePage>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters.toHttpParams(),
@@ -377,15 +461,15 @@ export class SearchService extends BaseService {
      * @endpoint get /search/multi
      * @param query 
      * @param includeAdult 
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param page 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<MultiListPage>;
-    public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<MultiListPage>>;
-    public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<MultiListPage>>;
+    public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<MultiPage>;
+    public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<MultiPage>>;
+    public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<MultiPage>>;
     public searchMulti(query: string, includeAdult?: boolean, language?: string, page?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (query === null || query === undefined) {
             throw new Error('Required parameter query was null or undefined when calling searchMulti.');
@@ -459,7 +543,7 @@ export class SearchService extends BaseService {
 
         let localVarPath = `/search/multi`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<MultiListPage>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<MultiPage>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters.toHttpParams(),
@@ -479,15 +563,15 @@ export class SearchService extends BaseService {
      * @endpoint get /search/person
      * @param query 
      * @param includeAdult 
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param page 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PersonListPage>;
-    public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PersonListPage>>;
-    public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PersonListPage>>;
+    public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PersonPage>;
+    public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PersonPage>>;
+    public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PersonPage>>;
     public searchPerson(query: string, includeAdult?: boolean, language?: string, page?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (query === null || query === undefined) {
             throw new Error('Required parameter query was null or undefined when calling searchPerson.');
@@ -561,7 +645,7 @@ export class SearchService extends BaseService {
 
         let localVarPath = `/search/person`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PersonListPage>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<PersonPage>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters.toHttpParams(),
@@ -580,21 +664,21 @@ export class SearchService extends BaseService {
      * Search for TV shows by their original, translated and also known as names.
      * @endpoint get /search/tv
      * @param query 
-     * @param firstAirDateYear 
+     * @param firstAirDateYear Search only the first air date. Valid values are: 1000..9999
      * @param includeAdult 
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param page 
-     * @param year 
+     * @param year Search the first air date and all episode air dates. Valid values are: 1000..9999
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public searchTV(query: string, firstAirDateYear?: string, includeAdult?: boolean, language?: string, page?: number, year?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TvListPage>;
-    public searchTV(query: string, firstAirDateYear?: string, includeAdult?: boolean, language?: string, page?: number, year?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TvListPage>>;
-    public searchTV(query: string, firstAirDateYear?: string, includeAdult?: boolean, language?: string, page?: number, year?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TvListPage>>;
-    public searchTV(query: string, firstAirDateYear?: string, includeAdult?: boolean, language?: string, page?: number, year?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public searchTv(query: string, firstAirDateYear?: number, includeAdult?: boolean, language?: string, page?: number, year?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TvSeriesPage>;
+    public searchTv(query: string, firstAirDateYear?: number, includeAdult?: boolean, language?: string, page?: number, year?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TvSeriesPage>>;
+    public searchTv(query: string, firstAirDateYear?: number, includeAdult?: boolean, language?: string, page?: number, year?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TvSeriesPage>>;
+    public searchTv(query: string, firstAirDateYear?: number, includeAdult?: boolean, language?: string, page?: number, year?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (query === null || query === undefined) {
-            throw new Error('Required parameter query was null or undefined when calling searchTV.');
+            throw new Error('Required parameter query was null or undefined when calling searchTv.');
         }
 
         let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
@@ -683,7 +767,7 @@ export class SearchService extends BaseService {
 
         let localVarPath = `/search/tv`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<TvListPage>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<TvSeriesPage>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters.toHttpParams(),

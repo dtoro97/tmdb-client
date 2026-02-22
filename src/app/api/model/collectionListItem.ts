@@ -10,16 +10,13 @@
 
 
 export interface CollectionListItem { 
-    /**
-     * The identifier property represents any kind of identifier for any kind of [Thing](https://schema.org/Thing), such as ISBNs, GTIN codes, UUIDs etc. 
-     */
-    id: number;
-    name: string;
-    poster_path: string;
-    backdrop_path: string;
     adult?: boolean;
-    original_language: string;
-    original_name: string;
+    backdrop_path?: string | null;
+    id?: number;
+    name?: string;
+    original_language?: string;
+    original_name?: string;
     overview?: string;
+    poster_path?: string | null;
 }
 

@@ -17,15 +17,15 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
-import { ConfigurationDetails200Response } from '../model/configurationDetails200Response';
+import { Configuration } from '../model/configuration';
 // @ts-ignore
 import { Country } from '../model/country';
 // @ts-ignore
-import { CountryWithTimezones } from '../model/countryWithTimezones';
-// @ts-ignore
-import { Department } from '../model/department';
+import { Job } from '../model/job';
 // @ts-ignore
 import { Language } from '../model/language';
+// @ts-ignore
+import { Timezone } from '../model/timezone';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -37,7 +37,7 @@ import { BaseService } from '../api.base.service';
 @Injectable({
   providedIn: 'root'
 })
-export class ConfigurationService extends BaseService {
+export class ConfigurationRestControllerService extends BaseService {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);
@@ -47,7 +47,7 @@ export class ConfigurationService extends BaseService {
      * Countries
      * Get the list of countries (ISO 3166-1 tags) used throughout TMDB.
      * @endpoint get /configuration/countries
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
@@ -120,9 +120,9 @@ export class ConfigurationService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public configurationDetails(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ConfigurationDetails200Response>;
-    public configurationDetails(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ConfigurationDetails200Response>>;
-    public configurationDetails(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ConfigurationDetails200Response>>;
+    public configurationDetails(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Configuration>;
+    public configurationDetails(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Configuration>>;
+    public configurationDetails(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Configuration>>;
     public configurationDetails(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
@@ -155,7 +155,7 @@ export class ConfigurationService extends BaseService {
 
         let localVarPath = `/configuration`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<ConfigurationDetails200Response>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Configuration>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -176,9 +176,9 @@ export class ConfigurationService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public configurationJobs(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<Department>>;
-    public configurationJobs(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<Department>>>;
-    public configurationJobs(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<Department>>>;
+    public configurationJobs(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<Job>>;
+    public configurationJobs(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<Job>>>;
+    public configurationJobs(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<Job>>>;
     public configurationJobs(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
@@ -211,7 +211,7 @@ export class ConfigurationService extends BaseService {
 
         let localVarPath = `/configuration/jobs`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<Department>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Array<Job>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -344,9 +344,9 @@ export class ConfigurationService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public configurationTimezones(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<CountryWithTimezones>>;
-    public configurationTimezones(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<CountryWithTimezones>>>;
-    public configurationTimezones(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<CountryWithTimezones>>>;
+    public configurationTimezones(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<Timezone>>;
+    public configurationTimezones(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<Timezone>>>;
+    public configurationTimezones(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<Timezone>>>;
     public configurationTimezones(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
@@ -379,7 +379,7 @@ export class ConfigurationService extends BaseService {
 
         let localVarPath = `/configuration/timezones`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<CountryWithTimezones>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Array<Timezone>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
