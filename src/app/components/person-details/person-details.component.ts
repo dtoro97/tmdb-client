@@ -24,14 +24,14 @@ import { CAROUSEL_BREAKPOINTS } from '../../constants';
 import { PersonQuery, StateQuery } from '../../core';
 import {
   AgePipe,
+  CardComponent,
+  CreditsListComponent,
   FilterPipe,
   ImagePipe,
   IOption,
+  SocialLinksComponent,
   SortPipe,
 } from '../../shared';
-import { CardComponent } from '../card/card.component';
-import { CreditsListComponent } from '../credits-list/credits-list.component';
-import { SocialLinksComponent } from '../social-links/social-links.component';
 
 @Component({
   selector: 'app-person-details',
@@ -73,7 +73,7 @@ export class PersonDetailsComponent implements OnInit {
     private titleService: Title,
     private personQuery: PersonQuery,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -83,30 +83,30 @@ export class PersonDetailsComponent implements OnInit {
     this.links$ = this.personQuery.socialLinks$;
     this.hasCredits$ = this.personQuery.hasCredits$;
     this.tabs$ = this.personQuery.combinedCredits$.pipe(
-      map((credits) => this.getTabs(credits))
+      map((credits) => this.getTabs(credits)),
     );
     this.activeTab$ = this.route.params.pipe(
-      map((params) => get(params, 'tab'))
+      map((params) => get(params, 'tab')),
     );
     this.person$ = this.personQuery.person$.pipe(
       tap((person) => {
         this.titleService.setTitle(`${person.name} | People`);
         this.scroller.scrollToPosition([0, 0]);
-      })
+      }),
     );
     this.credits$ = this.personQuery.combinedCredits$;
     this.creditsOptions$ = this.personQuery.combinedCredits$.pipe(
-      map((credits) => this.getCreditOptions(credits))
+      map((credits) => this.getCreditOptions(credits)),
     );
     this.visibleCredits$ = new BehaviorSubject(
-      this.getVisibleCredits(this.personQuery.getCredits())
+      this.getVisibleCredits(this.personQuery.getCredits()),
     );
     this.knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
       map(([visible, credits]) => {
         if (visible) {
           return get(credits, visible);
         }
-      })
+      }),
     );
   }
 

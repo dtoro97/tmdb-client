@@ -9,7 +9,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { ImagePipe } from '../../shared/pipes/image.pipe';
+import { ImagePipe } from '../../pipes/image.pipe';
 
 @Component({
   selector: 'app-card',

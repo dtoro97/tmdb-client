@@ -20,8 +20,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ListQuery, ListService, StateQuery } from '../../core';
-import { IGenre, IOption } from '../../shared';
-import { CardComponent } from '../card/card.component';
+import { CardComponent, IGenre, IOption } from '../../shared';
 import { movieSortOptions, tvSortOptions } from './sort-options';
 
 @Component({
@@ -57,21 +56,21 @@ export class MediaListComponent implements OnInit {
     private stateQuery: StateQuery,
     private titleService: Title,
     public listQuery: ListQuery,
-    public listService: ListService
+    public listService: ListService,
   ) {}
   ngOnInit(): void {
     this.isMobile = this.stateQuery.isMobile;
     this.type$ = this.route.params.pipe(
       map((params) => params['type']),
-      tap((type) => this.setTitle(type))
+      tap((type) => this.setTitle(type)),
     );
     this.genres$ = combineLatest([
       this.type$.pipe(
         switchMap((type) =>
           type === 'tv'
             ? this.stateQuery.tvGenres$
-            : this.stateQuery.movieGenres$
-        )
+            : this.stateQuery.movieGenres$,
+        ),
       ),
       this.listQuery.genres$,
     ]).pipe(
@@ -80,10 +79,10 @@ export class MediaListComponent implements OnInit {
           ...genre,
           selected: selected.includes(genre.id.toString()),
         }));
-      })
+      }),
     );
     this.sortOptions$ = this.type$.pipe(
-      map((type) => (type === 'tv' ? tvSortOptions : movieSortOptions))
+      map((type) => (type === 'tv' ? tvSortOptions : movieSortOptions)),
     );
     this.filterPanelState = !this.isMobile();
   }

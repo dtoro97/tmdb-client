@@ -22,15 +22,16 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../constants';
 import { MediaQuery, MediaService, StateQuery, StateService } from '../../core';
-import { FilterPipe } from '../../shared';
+import {
+  CardComponent,
+  FilterPipe,
+  PersonCardComponent,
+  SocialLinksComponent,
+} from '../../shared';
 import { ImagePipe } from '../../shared/pipes/image.pipe';
 import { SortPipe } from '../../shared/pipes/sort.pipe';
 import { MinutesToHours } from '../../shared/pipes/time.pipe';
 import { YoutubeLinkPipe } from '../../shared/pipes/youtube-link.pipe';
-import { CardComponent } from '../card/card.component';
-import { PersonCardComponent } from '../person-card/person-card.component';
-import { SocialLinksComponent } from '../social-links/social-links.component';
-
 @Component({
   selector: 'app-media-details',
   imports: [
@@ -73,7 +74,7 @@ export class MediaDetailsComponent implements OnInit {
     private scroller: ViewportScroller,
     private titleService: Title,
     private stateService: StateService,
-    private mediaService: MediaService
+    private mediaService: MediaService,
   ) {}
 
   ngOnInit(): void {
@@ -81,10 +82,10 @@ export class MediaDetailsComponent implements OnInit {
     this.videos$ = this.mediaQuery.youtubeVideos$;
     this.images$ = this.mediaQuery.images$;
     this.mediaType$ = this.route.params.pipe(
-      map((params) => get(params, 'type'))
+      map((params) => get(params, 'type')),
     );
     this.activeTab$ = this.route.params.pipe(
-      map((params) => get(params, 'tab'))
+      map((params) => get(params, 'tab')),
     );
 
     this.tabs$ = combineLatest([
@@ -97,7 +98,7 @@ export class MediaDetailsComponent implements OnInit {
         //this.scroller.scrollToPosition([0, 0]);
         this.titleService.setTitle(this.getTitle(type, item));
         return this.getTabs(type, videos, photos, item);
-      })
+      }),
     );
 
     this.languages$ = combineLatest([
@@ -111,10 +112,10 @@ export class MediaDetailsComponent implements OnInit {
           type === 'tv' ? item.languages : [item.original_language];
         return languages.length
           ? langCodes.map((code: string) =>
-              languages.find((l) => l['iso_639_1'] === code)
+              languages.find((l) => l['iso_639_1'] === code),
             )
           : langCodes;
-      })
+      }),
     );
   }
 
@@ -144,7 +145,7 @@ export class MediaDetailsComponent implements OnInit {
         title: 'Photos',
         value: 'photos',
         visible: Object.values(photos).some(
-          (v) => Array.isArray(v) && v.length > 0
+          (v) => Array.isArray(v) && v.length > 0,
         ),
       },
     ];
