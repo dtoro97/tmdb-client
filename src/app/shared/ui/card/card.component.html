@@ -1,33 +1,29 @@
-@if(item) {
-<div
-  class="card"
-  [routerLink]="[
-    '/details',
-    type || $any(item).media_type,
-    item.id,
-    'overview'
-  ]"
->
-  <img src="{{ item.poster_path || $any(item).profile_path | imgSrc }}" />
-  <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
-    <div class="flex justify-content-between flex-column">
-      <span class="font-bold pb-3">{{
-        $any(item).title || $any(item).name
-      }}</span>
-      <div class="w-full flex justify-content-between">
-        @if(item.vote_count > 0) {
-        <span class="pb-3"
-          ><i class="fa-solid fa-star"></i>&nbsp;{{
-            item.vote_average | number : "1.1-1"
-          }}</span
-        >
-        }
-
-        <span class="font-light">{{
-          $any(item).release_date || $any(item).first_air_date | date : "yyyy"
+@if (item) {
+  <div
+    class="card"
+    [routerLink]="['/title', item.id, 'overview']"
+    [queryParams]="{ type: type || $any(item).media_type }"
+  >
+    <img src="{{ item.poster_path || $any(item).profile_path | imgSrc }}" />
+    <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
+      <div class="flex justify-content-between flex-column">
+        <span class="font-bold pb-3">{{
+          $any(item).title || $any(item).name
         }}</span>
+        <div class="w-full flex justify-content-between">
+          @if (item.vote_count > 0) {
+            <span class="pb-3"
+              ><i class="fa-solid fa-star"></i>&nbsp;{{
+                item.vote_average | number: "1.1-1"
+              }}</span
+            >
+          }
+
+          <span class="font-light">{{
+            $any(item).release_date || $any(item).first_air_date | date: "yyyy"
+          }}</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
 }

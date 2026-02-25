@@ -1,0 +1,133 @@
+<div
+  class="h-full details-container py-4"
+  [class.mobile]="isMobile()"
+  [class.dark]="isDarkMode$ | async"
+>
+  @if (person$ | async; as person) {
+    <div
+      class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0 inner-container px-3"
+    >
+      <div
+        class="ml-auto mr-auto md:mx-2 md:mx-6 image-container"
+        [style.maxWidth.px]="350"
+      >
+        <img
+          src="{{ person.profile_path | imgSrc: 'w500' }}"
+          class="person-image border-round-xl"
+        />
+
+        @if (isMobile()) {
+          <h1 class="m-0">
+            {{ person.name }}
+          </h1>
+        }
+        <div class="mt-4 mb-3">
+          <app-social-links
+            [links]="links$ | async"
+            [item]="person"
+            [isPerson]="true"
+          ></app-social-links>
+        </div>
+
+        @if (isMobile() === false) {
+          <h2 class="m-0">Personal Info</h2>
+        }
+        <ul class="list-none line-height-4 pl-0">
+          <li class="flex">
+            <div class="person-info-label">Known For</div>
+            <div class="flex-1">{{ person.known_for_department }}</div>
+          </li>
+
+          @if (person.birthday) {
+            <li class="flex">
+              <div class="person-info-label">Born</div>
+              <div class="flex-1">
+                <span>{{ person.birthday | date }}</span>
+                @if (!person.deathday) {
+                  <span> (age {{ person | age }})</span>
+                }
+              </div>
+            </li>
+          }
+          @if (person.deathday) {
+            <li class="flex">
+              <div class="person-info-label">Died</div>
+              <div class="flex-1">
+                <span>{{ person.deathday | date }}</span
+                ><span> (age {{ person | age }})</span>
+              </div>
+            </li>
+          }
+          @if (person.place_of_birth) {
+            <li class="flex">
+              <div class="person-info-label">Place of Birth</div>
+              <div class="flex-1">{{ person.place_of_birth }}</div>
+            </li>
+          }
+        </ul>
+      </div>
+      <div class="flex-1">
+        @if (isMobile() === false) {
+          <h1 class="m-0 mb-4">
+            {{ person.name }}
+          </h1>
+        }
+        @if (person.biography) {
+          <h2 class="m-0 mb-2">Biography</h2>
+        }
+
+        <p class="m-0 line-height-4">
+          {{ person.biography }}
+        </p>
+      </div>
+    </div>
+  }
+  <div class="mt-2 mx-0 md:mx-4">
+    <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
+      <p-tablist>
+        @for (
+          tabHeader of (tabs$ | async)! | filter: { visible: true };
+          track tabHeader.value
+        ) {
+          <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
+        }
+      </p-tablist>
+    </p-tabs>
+    @if ((activeTab$ | async) === "overview" && (hasCredits$ | async)) {
+      <p-select
+        styleClass="mt-3 ml-5"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="visibleCredits$ | async"
+        [options]="creditsOptions$ | async"
+        [disabled]="(creditsOptions$ | async)?.length === 1"
+        (ngModelChange)="changeVisibleCredits($event)"
+      ></p-select>
+
+      <div
+        class="flex flex-wrap gap-3 justify-content-center md:justify-content-start mt-3"
+      >
+        @for (
+          item of (knownFor$ | async)! | sort: "vote_average";
+          track item.id
+        ) {
+          <app-card [item]="item" [type]="item.media_type"></app-card>
+        }
+      </div>
+    }
+    @if ((activeTab$ | async) === "credits" && (hasCredits$ | async)) {
+      <app-credits-list [credits]="credits$ | async"></app-credits-list>
+    }
+    @if ((activeTab$ | async) === "photos") {
+      <div
+        class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start"
+      >
+        @for (image of images$ | async; track image.file_path) {
+          <a href="{{ image.file_path | imgSrc }}" target="_blank">
+            <img class="photos-item" src="{{ image.file_path | imgSrc }}" />
+          </a>
+        }
+      </div>
+    }
+  </div>
+</div>

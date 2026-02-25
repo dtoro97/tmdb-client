@@ -1,0 +1,350 @@
+<div
+  class="h-full details-container pb-4"
+  [class.mobile]="stateQuery.isMobile()"
+  [class.dark]="stateQuery.isDarkMode$ | async"
+>
+  <div class="relative">
+    @if (mediaStoreService.hasBackdrop$ | async) {
+      <img
+        [src]="
+          (mediaStoreService.backdrop$ | async) || ''
+            | imgSrc: 'w1920_and_h800_multi_faces'
+        "
+        class="backdrop-image"
+      />
+    }
+    <div class="gradient-cover"></div>
+  </div>
+  <div
+    class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
+    [class.mt-0]="(mediaStoreService.hasBackdrop$ | async) === false"
+    [class.pt-4]="(mediaStoreService.hasBackdrop$ | async) === false"
+    [style.maxWidth.px]="1400"
+  >
+    @if (mediaItem$ | async; as item) {
+      <div class="flex md:flex-row flex-column">
+        <div class="">
+          <img
+            src="{{ item.poster_path | imgSrc: 'w500' }}"
+            class="poster-image border-round-lg"
+          />
+          <div class="mt-4 mb-3">
+            <app-social-links
+              [links]="mediaStoreService.socialLinks$ | async"
+              [item]="item"
+            ></app-social-links>
+          </div>
+        </div>
+        <div class="flex flex-column mt-2 md:mt-8 gap-2 md:ml-6">
+          <h1 class="m-0">{{ item.title || item.name }}</h1>
+          <p class="m-0">
+            {{ item.release_date || item.first_air_date | date: "yyyy" }}
+          </p>
+          <div class="flex flex-row gap-2">
+            <p-rating
+              [ngModel]="item.vote_average / 2"
+              [readonly]="true"
+            ></p-rating>
+            <span>{{ item.vote_average | number: "1.1-1" }}/10</span>
+          </div>
+          <div class="flex flex-row mt-2 gap-2">
+            @for (genre of item.genres; track genre.id) {
+              <p-chip styleClass="cursor-pointer genre">
+                <a
+                  [routerLink]="['/list']"
+                  [queryParams]="{
+                    withGenres: genre.id,
+                    type: mediaType$ | async,
+                  }"
+                  >{{ genre.name }}</a
+                ></p-chip
+              >
+            }
+          </div>
+          <p class="mt-2 mb-0 line-height-4" [style.maxWidth.px]="550">
+            {{ item.overview }}
+          </p>
+          <ul class="list-none line-height-4 pl-0">
+            @if (item.first_air_date) {
+              <li class="flex">
+                <div class="media-info-label">First Aired</div>
+                <div class="flex-1">{{ item.first_air_date | date }}</div>
+              </li>
+            }
+            @if (item.last_air_date) {
+              <li class="flex">
+                <div class="media-info-label">Last Aired</div>
+                <div class="flex-1">{{ item.last_air_date | date }}</div>
+              </li>
+            }
+            @if (item.release_date) {
+              <li class="flex">
+                <div class="media-info-label">Released</div>
+                <div class="flex-1">{{ item.release_date | date }}</div>
+              </li>
+            }
+            @if (item.runtime) {
+              <li class="flex">
+                <div class="media-info-label">Runtime</div>
+                <div class="flex-1">{{ item.runtime | m2h }}</div>
+              </li>
+            }
+            @if (item.budget) {
+              <li class="flex">
+                <div class="media-info-label">Budget</div>
+                <div class="flex-1">${{ item.budget | number }}</div>
+              </li>
+            }
+            @if (item.revenue) {
+              <li class="flex">
+                <div class="media-info-label">Revenue</div>
+                <div class="flex-1">${{ item.revenue | number }}</div>
+              </li>
+            }
+            @if (item.created_by?.length) {
+              <li class="flex">
+                <div class="media-info-label">Creator</div>
+                <div class="flex-1">
+                  @for (
+                    creator of item.created_by;
+                    track creator.id;
+                    let i = $index
+                  ) {
+                    <span
+                      class="cursor-pointer"
+                      [routerLink]="['/name', creator.id, 'overview']"
+                      [queryParams]="{ type: 'person' }"
+                      >{{ creator.name }}</span
+                    >
+                    @if (i !== item.created_by.length - 1) {
+                      <span>, </span>
+                    }
+                  }
+                </div>
+              </li>
+            }
+            @if (item.number_of_seasons) {
+              <li class="flex">
+                <div class="media-info-label">Seasons</div>
+                <div class="flex-1">{{ item.number_of_seasons }}</div>
+              </li>
+            }
+            @if (item.number_of_episodes) {
+              <li class="flex">
+                <div class="media-info-label">Episodes</div>
+                <div class="flex-1">{{ item.number_of_episodes }}</div>
+              </li>
+            }
+            @if (item.status) {
+              <li class="flex">
+                <div class="media-info-label">Status</div>
+                <div class="flex-1">{{ item.status }}</div>
+              </li>
+            }
+            @if ((languages$ | async)?.length > 0) {
+              <li class="flex">
+                <div class="media-info-label">Languages</div>
+                <div class="flex-1">
+                  @for (
+                    lang of languages$ | async;
+                    track lang.name;
+                    let i = $index
+                  ) {
+                    <span>{{ lang.english_name }}</span>
+                    @if (i !== (languages$ | async)?.length - 1) {
+                      <span>, </span>
+                    }
+                  }
+                </div>
+              </li>
+            }
+            @if (item.networks?.length) {
+              <li class="flex">
+                <div class="media-info-label">Networks</div>
+                <div class="flex-1">
+                  @for (
+                    network of item.networks;
+                    track network.id;
+                    let i = $index
+                  ) {
+                    <span>{{ network.name }}</span>
+                    @if (i !== item.networks.length - 1) {
+                      <span>, </span>
+                    }
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="mt-2 mx-2 md:mx-4">
+    <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
+      <p-tablist>
+        @for (
+          tabHeader of (tabs$ | async)! | filter: { visible: true };
+          track tabHeader.value
+        ) {
+          <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
+        }
+      </p-tablist>
+    </p-tabs>
+    @if ((activeTab$ | async) === "overview") {
+      @if ((mediaStoreService.cast$ | async)?.length) {
+        <div>
+          <div class="flex justify-content-center flex-column">
+            <h2 class="md:px-4 px-2">Full Cast</h2>
+            <p-carousel
+              [value]="mediaStoreService.cast$ | async"
+              [numVisible]="8"
+              [numScroll]="8"
+              [showIndicators]="false"
+              [responsiveOptions]="breakpoints"
+            >
+              <ng-template let-person pTemplate="item">
+                <app-person-card [person]="person"></app-person-card>
+              </ng-template>
+            </p-carousel>
+          </div>
+        </div>
+      }
+    }
+    @if ((activeTab$ | async) === "episodes") {
+      <div class="flex flex-row py-4 mx-2">
+        <div>
+          <label for="seasons" class="mr-2">Seasons</label>
+          <p-select
+            optionLabel="name"
+            optionValue="season_number"
+            id="seasons"
+            [ngModel]="mediaStoreService.selectedSeason$ | async"
+            [options]="mediaStoreService.seasons$ | async"
+            [disabled]="(mediaStoreService.seasons$ | async)?.length === 1"
+            (ngModelChange)="changeSeason($event)"
+          ></p-select>
+          @if (
+            mediaStoreService.seasonEpisodesCount$ | async;
+            as episodeCount
+          ) {
+            <strong class="muted md:px-4 px-2"
+              >{{ episodeCount }} Episodes</strong
+            >
+          }
+        </div>
+      </div>
+
+      <div class="grid m-0">
+        @for (
+          episode of mediaStoreService.seasonEpisodes$ | async;
+          track episode.id
+        ) {
+          <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item">
+            <div>
+              @if (episode.still_path) {
+                <img src="{{ episode.still_path | imgSrc }}" />
+              } @else {
+                <img src="assets/empty_still.svg" />
+              }
+            </div>
+            <h2 class="name">
+              <strong class="mr-2">E{{ episode.episode_number }}</strong
+              >{{ episode.name }}
+            </h2>
+            <div class="mb-3">{{ episode.overview }}</div>
+            <div class="muted">{{ episode.air_date | date }}</div>
+          </div>
+        }
+      </div>
+    }
+    @if ((activeTab$ | async) === "videos") {
+      @if ((videos$ | async)?.length) {
+        <div>
+          <h2 class="md:px-4 px-2">Videos</h2>
+          <div
+            class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
+          >
+            @for (video of videos$ | async; track video.id) {
+              <div class="video-frame">
+                <iframe
+                  [src]="video | yt"
+                  title="{{ video.name }}"
+                  frameborder="0"
+                  allowedfullscreen
+                  class="iframe"
+                ></iframe>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+    @if ((activeTab$ | async) === "photos") {
+      @if ((mediaStoreService.backdrops$ | async)?.length) {
+        <div>
+          <h2 class="md:px-4 px-2 mb-0">Backdrops</h2>
+          <strong class="muted md:px-4 px-2"
+            >{{ (mediaStoreService.backdrops$ | async)?.length }} Images</strong
+          >
+          <div
+            class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
+          >
+            @for (
+              image of mediaStoreService.backdrops$ | async;
+              track image.file_path
+            ) {
+              <a href="{{ image.file_path ?? '' | imgSrc }}" target="_blank">
+                <img
+                  class="backdrop-photo"
+                  src="{{ image.file_path ?? '' | imgSrc }}"
+                />
+              </a>
+            }
+          </div>
+        </div>
+      }
+      @if ((mediaStoreService.posters$ | async)?.length) {
+        <div>
+          <h2 class="md:px-4 px-2 mb-0">Posters</h2>
+          <strong class="muted md:px-4 px-2"
+            >{{ (mediaStoreService.posters$ | async)?.length }} Images</strong
+          >
+          <div
+            class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
+          >
+            @for (
+              image of mediaStoreService.posters$ | async;
+              track image.file_path
+            ) {
+              <a href="{{ image.file_path ?? '' | imgSrc }}" target="_blank">
+                <img
+                  class="poster-photo"
+                  src="{{ image.file_path ?? '' | imgSrc }}"
+                />
+              </a>
+            }
+          </div>
+        </div>
+      }
+    }
+    @if ((mediaStoreService.recommendations$ | async)?.length) {
+      <div>
+        <h2 class="md:px-4 px-2">More Like This</h2>
+        <p-carousel
+          [value]="
+            (mediaStoreService.recommendations$ | async)! | sort: 'vote_average'
+          "
+          [numVisible]="8"
+          [numScroll]="8"
+          [showIndicators]="false"
+          [responsiveOptions]="breakpoints"
+        >
+          <ng-template let-media pTemplate="item">
+            <app-card [item]="media"></app-card>
+          </ng-template>
+        </p-carousel>
+      </div>
+    }
+  </div>
+</div>

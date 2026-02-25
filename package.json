@@ -27,10 +27,12 @@
     "@ngrx/component-store": "^21.0.1",
     "@primeng/themes": "^21.0.0",
     "lodash": "^4.17.21",
+    "ngx-ui-loader": "^19.0.0",
     "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.0",
     "rxjs": "~7.8.0",
+    "tmdb-ts": "^2.3.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },

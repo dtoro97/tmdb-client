@@ -1,29 +1,14 @@
-import { ProgressBarModule } from 'primeng/progressbar';
-
-import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { FooterComponent } from './shared/components';
-import { HeaderComponent } from './shared/components';
-import { HomeService, StateQuery, StateService } from './core';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
+import { FooterComponent, HeaderComponent } from './shared';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [FooterComponent, HeaderComponent, RouterOutlet, ProgressBarModule],
+  imports: [FooterComponent, HeaderComponent, RouterOutlet, NgxUiLoaderModule],
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  isLoading: Signal<boolean>;
-  constructor(
-    private stateQuery: StateQuery,
-    private stateService: StateService,
-    private homeService: HomeService
-  ) {
-    this.isLoading = toSignal(this.stateQuery.loading$, { initialValue: true });
-    this.stateService.loadSession();
-    this.homeService.init();
-  }
-}
+export class AppComponent {}

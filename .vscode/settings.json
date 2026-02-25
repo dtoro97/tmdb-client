@@ -1,3 +1,29 @@
 {
-  "FSharp.suggestGitignore": false
+    "i18n-ally.localesPaths": [
+        "apps/partnernet-client/src/assets/i18n",
+        "libs/document/src/assets/i18n",
+        "libs/news/src/assets/i18n",
+        "libs/notification/src/assets/i18n",
+        "libs/service-report/src/assets/i18n"
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[scss]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "search.exclude": {
+        "documentation.json": true
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": true
 }

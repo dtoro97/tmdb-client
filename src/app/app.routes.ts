@@ -1,47 +1,32 @@
 import { Routes } from '@angular/router';
 
-import { HomeComponent } from './components/home/home.component';
-import { MediaDetailsComponent } from './components/media-details/media-details.component';
-import { MediaListComponent } from './components/media-list/media-list.component';
-import { NotFoundComponent } from './components/not-found/not-found.component';
-import { PersonDetailsComponent } from './components/person-details/person-details.component';
-import { mediaListGuard } from './core/guards/media-list.guard';
-
-import { MediaResolver } from './shared/resolvers/media.resolver';
-import { PersonResolver } from './shared/resolvers/peron.resolver';
-import { mediaTabGuard, personTabGuard } from './core';
-import { ListResolver } from './shared';
+import { MediaListPageComponent } from './features/media-list/media-list-page/media-list.component';
+import { mediaListGuard } from './features/media-list/media-list.guard';
+import { NotFoundComponent } from './shared';
 
 export const routes: Routes = [
   {
-    path: 'details/person/:id/:tab',
-    component: PersonDetailsComponent,
-    resolve: { data: PersonResolver },
-    pathMatch: 'full',
-    canActivate: [personTabGuard],
-    runGuardsAndResolvers: (from, to) =>
-      from.paramMap.get('id') !== to.paramMap.get('id'),
+    path: 'name',
+    loadChildren: () =>
+      import('./features/people-detail/person-detail.routes').then(
+        (m) => m.personDetailRoutes,
+      ),
   },
   {
-    path: 'details/:type/:id/:tab',
-    component: MediaDetailsComponent,
-    resolve: {
-      data: MediaResolver,
-    },
-    canActivate: [mediaTabGuard],
-    runGuardsAndResolvers: (from, to) =>
-      from.paramMap.get('id') !== to.paramMap.get('id'),
+    path: 'title',
+    loadChildren: () =>
+      import('./features/media-detail/media.routes').then((m) => m.mediaRoutes),
   },
   {
-    path: 'list/:type',
-    component: MediaListComponent,
-    resolve: { data: ListResolver },
+    path: 'list',
+    component: MediaListPageComponent,
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',
     canActivate: [mediaListGuard],
   },
   {
     path: '',
-    component: HomeComponent,
+    loadChildren: () =>
+      import('./features/home/home.routes').then((m) => m.homeRoutes),
     pathMatch: 'full',
     title: 'Browse Movies, TV Shows and People',
   },

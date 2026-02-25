@@ -1,2 +1,2 @@
-export * from './footer/footer.component';
-export * from './header/header.component';
+export * from '../ui/footer/footer.component';
+export * from '../ui/header/header.component';
