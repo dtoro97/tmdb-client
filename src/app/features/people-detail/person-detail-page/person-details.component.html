@@ -1,8 +1,4 @@
-<div
-  class="h-full details-container py-4"
-  [class.mobile]="isMobile()"
-  [class.dark]="isDarkMode$ | async"
->
+<div class="h-full details-container py-4" [class.dark]="isDarkMode$ | async">
   @if (person$ | async; as person) {
     <div
       class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0 inner-container px-3"
@@ -16,11 +12,9 @@
           class="person-image border-round-xl"
         />
 
-        @if (isMobile()) {
-          <h1 class="m-0">
-            {{ person.name }}
-          </h1>
-        }
+        <h1 class="m-0 mobile-visible">
+          {{ person.name }}
+        </h1>
         <div class="mt-4 mb-3">
           <app-social-links
             [links]="links$ | async"
@@ -29,9 +23,8 @@
           ></app-social-links>
         </div>
 
-        @if (isMobile() === false) {
-          <h2 class="m-0">Personal Info</h2>
-        }
+        <h2 class="m-0 mobile-hidden">Personal Info</h2>
+
         <ul class="list-none line-height-4 pl-0">
           <li class="flex">
             <div class="person-info-label">Known For</div>
@@ -67,11 +60,9 @@
         </ul>
       </div>
       <div class="flex-1">
-        @if (isMobile() === false) {
-          <h1 class="m-0 mb-4">
-            {{ person.name }}
-          </h1>
-        }
+        <h1 class="m-0 mb-4 mobile-hidden">
+          {{ person.name }}
+        </h1>
         @if (person.biography) {
           <h2 class="m-0 mb-2">Biography</h2>
         }

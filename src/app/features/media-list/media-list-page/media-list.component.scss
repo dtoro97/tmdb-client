@@ -1,8 +1,10 @@
+@use "responsive.scss" as *;
+
 :host ::ng-deep {
   .search-button {
     color: var(--p-text-color);
   }
-  .mobile {
+  @include mobile() {
     app-card {
       .card {
         width: 150px;

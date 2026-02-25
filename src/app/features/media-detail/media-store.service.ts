@@ -9,6 +9,7 @@ import {
   map,
   Observable,
   switchMap,
+  take,
   tap,
 } from 'rxjs';
 
@@ -32,7 +33,7 @@ import {
   TvSeriesRestControllerService,
   Video,
 } from '../../api';
-import { getQueryParam, isDefined, loader } from '../../shared';
+import { getParam, isDefined, loader } from '../../shared';
 
 export interface MediaState {
   media?: Movie | TvSeries;
@@ -120,64 +121,60 @@ export class MediaStoreService extends ComponentStore<MediaState> {
       recommendations: [],
       seasons: [],
       selectedSeason: 1,
-      type: getQueryParam('type')!,
+      type: getParam('type')!,
     });
-    this.getSeasons(this.mediaIfTvSeries$);
   }
 
   updateSelectedSeason(seasonNumber: number): void {
     this.patchState({ selectedSeason: seasonNumber });
   }
 
-  getDetails$(id: number) {
-    return this.type$.pipe(
-      switchMap((type) => {
-        console.log(id);
-        console.log(type);
-        return combineLatest([
-          this.getDetailsRequest$(id, type).pipe(
-            catchError(() => {
-              this.router.navigate(['not-found']);
-              return EMPTY;
-            }),
-            tap((data) => {
-              this.patchState({ media: data });
-            }),
-          ),
-          this.creditsRequest(id, type).pipe(
-            tap((data) => this.patchState({ credits: data })),
-          ),
-          this.videosRequest(id, type).pipe(
-            tap((data) => this.patchState({ videos: data.results ?? [] })),
-          ),
-          this.recommendationsRequest(id, type).pipe(
-            tap((data) =>
-              this.patchState({ recommendations: data.results ?? [] }),
-            ),
-          ),
-          this.socialLinksRequest(id, type).pipe(
-            tap((data) => this.patchState({ socialLinks: data })),
-          ),
-          this.imagesRequest(id, type).pipe(
-            tap((data) => this.patchState({ images: data })),
-          ),
-        ]).pipe(loader(this.ngxUiLoaderService));
-      }),
-    );
+  getDetails$(id: number, type: string) {
+    return combineLatest([
+      this.getDetailsRequest$(id, type).pipe(
+        catchError(() => {
+          this.router.navigate(['not-found']);
+          return EMPTY;
+        }),
+        tap((data) => {
+          this.patchState({ media: data });
+        }),
+      ),
+      iif(
+        () => type === 'tv',
+        this.mediaIfTvSeries$.pipe(
+          take(1),
+          switchMap((tvSeries) => this.getSeasons(tvSeries)),
+          tap((seasons) => this.patchState({ seasons })),
+        ),
+        EMPTY,
+      ),
+      this.creditsRequest(id, type).pipe(
+        tap((data) => this.patchState({ credits: data })),
+      ),
+      this.videosRequest(id, type).pipe(
+        tap((data) => this.patchState({ videos: data.results ?? [] })),
+      ),
+      this.recommendationsRequest(id, type).pipe(
+        tap((data) => this.patchState({ recommendations: data.results ?? [] })),
+      ),
+      this.socialLinksRequest(id, type).pipe(
+        tap((data) => this.patchState({ socialLinks: data })),
+      ),
+      this.imagesRequest(id, type).pipe(
+        tap((data) => this.patchState({ images: data })),
+      ),
+    ]).pipe(loader(this.ngxUiLoaderService));
   }
 
-  private readonly getSeasons = this.effect((param$: Observable<TvSeries>) =>
-    param$.pipe(
-      switchMap((tvSeries) =>
-        forkJoin(
-          (tvSeries.seasons || []).map((season) =>
-            this.getSeason$(tvSeries.id!, season.season_number!),
-          ),
-        ),
+  private getSeasons(tvSeries: TvSeries) {
+    const seasons$ = forkJoin(
+      (tvSeries.seasons || []).map((season) =>
+        this.getSeason$(tvSeries.id!, season.season_number!),
       ),
-    ),
-  );
-
+    );
+    return seasons$;
+  }
   private getSeason$(seriesId: number, seasonNumber: number) {
     return this.tvSeasonRestControllerService.tvSeasonDetails(
       seriesId,

@@ -1,4 +1,4 @@
-<div class="w-full header" [class.mobile]="isMobile()">
+<div class="w-full header">
   <p-menubar [model]="items">
     <ng-template #end>
       <div class="flex flex-row align-items-center gap-1">
@@ -12,9 +12,7 @@
           <ng-template let-item #item>
             <div
               class="flex flex-row w-full autocomplete-item"
-              [class.mobile]="isMobile()"
-              [routerLink]="['title', item.id, 'overview']"
-              [queryParams]="{ type: item.media_type }"
+              [routerLink]="['title', item.id, item.media_type, 'overview']"
             >
               <img
                 class="border-round-md"

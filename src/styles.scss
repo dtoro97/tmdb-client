@@ -24,3 +24,13 @@ html {
     font-size: 15px;
   }
 }
+
+.ngx-overlay {
+  .ngx-foreground-spinner {
+    color: var(--p-primary-color) !important;
+  }
+}
+
+.ngx-progress-bar {
+  color: var(--p-primary-color) !important;
+}

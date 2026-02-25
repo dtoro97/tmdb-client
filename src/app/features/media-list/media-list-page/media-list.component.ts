@@ -14,8 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { StateQuery } from '../../../core';
-import { CardComponent, IGenre, IOption } from '../../../shared';
+import { CardComponent, ConfigStoreService, IOption } from '../../../shared';
 import { movieSortOptions, tvSortOptions } from '../sort-options';
 import { MediaListStoreService } from '../media-list-store.service';
 import { ItemWithNameAndId } from '../../../api';
@@ -42,7 +41,6 @@ import { ItemWithNameAndId } from '../../../api';
 })
 export class MediaListPageComponent {
   filterOptions$ = this.mediaListStoreService.filterOptions$;
-  isMobile: Signal<boolean>;
   type$: Observable<string>;
   sortOptions$: Observable<IOption[]>;
   genres$ = this.mediaListStoreService.genres$;
@@ -52,14 +50,12 @@ export class MediaListPageComponent {
   filterPanelState: boolean;
   title: string;
   constructor(
-    private router: Router,
     private route: ActivatedRoute,
     private scroller: ViewportScroller,
-    private stateQuery: StateQuery,
     private titleService: Title,
     public mediaListStoreService: MediaListStoreService,
+    private configStoreService: ConfigStoreService,
   ) {
-    this.isMobile = this.stateQuery.isMobile;
     this.type$ = this.route.queryParams.pipe(
       map((params) => params['type']),
       tap((type) => this.setTitle(type)),
@@ -67,7 +63,6 @@ export class MediaListPageComponent {
     this.sortOptions$ = this.type$.pipe(
       map((type) => (type === 'tv' ? tvSortOptions : movieSortOptions)),
     );
-    this.filterPanelState = !this.isMobile();
     this.mediaListStoreService.startGettingData();
   }
 

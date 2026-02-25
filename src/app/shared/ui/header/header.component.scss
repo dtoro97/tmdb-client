@@ -1,3 +1,5 @@
+@use "responsive.scss" as *;
+
 :host ::ng-deep {
   .header {
     border-bottom: 1px solid var(--p-menubar-border-color);
@@ -35,26 +37,24 @@
       img {
         width: 100px;
       }
-
-      &.mobile {
-        img {
-          width: 50px;
-          height: 60px;
-        }
-        .result-title {
-          // max-width: 40px;
-          text-wrap: wrap;
-          text-overflow: ellipsis;
-        }
-      }
-
       .p-chip-label {
         font-size: 0.8rem;
       }
     }
   }
 
-  .mobile {
+  @include mobile() {
+    .p-autocomplete-list-container {
+      img {
+        width: 50px;
+        height: 60px;
+      }
+      .result-title {
+        // max-width: 40px;
+        text-wrap: wrap;
+        text-overflow: ellipsis;
+      }
+    }
     .p-menubar-end {
       .p-autocomplete {
         width: 280px;

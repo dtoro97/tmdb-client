@@ -1,6 +1,8 @@
+@use "responsive.scss" as *;
+
 :host ::ng-deep {
   .details-container {
-    &.mobile {
+    @include mobile() {
       .photos-item {
         width: 150px;
         height: auto;
@@ -26,6 +28,14 @@
         .card {
           width: 150px;
         }
+      }
+
+      .mobile-visible {
+        display: block !important;
+      }
+
+      .mobile-hidden {
+        display: none !important;
       }
     }
     app-card {
@@ -56,6 +66,14 @@
 
     .inner-container {
       max-width: 1400px;
+    }
+
+    .mobile-visible {
+      display: none !important;
+    }
+
+    .mobile-hidden {
+      display: block !important;
     }
   }
 

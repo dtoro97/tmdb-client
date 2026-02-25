@@ -4,7 +4,7 @@ import { ChipModule } from 'primeng/chip';
 import { RatingModule } from 'primeng/rating';
 import { SelectModule } from 'primeng/select';
 import { TabsModule } from 'primeng/tabs';
-import { combineLatest, map, Observable, switchMap } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
@@ -13,9 +13,9 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../../constants';
-import { StateQuery, StateService } from '../../../core';
 import {
   CardComponent,
+  ConfigStoreService,
   FilterPipe,
   PersonCardComponent,
   SocialLinksComponent,
@@ -58,6 +58,7 @@ export class MediaDetailsComponent implements OnInit {
   videos$ = this.mediaStoreService.youtubeVideos$;
   images$ = this.mediaStoreService.images$;
   mediaType$ = this.mediaStoreService.type$;
+  isDarkMode$ = this.configStoreService.isDarkMode$;
   languages$: Observable<any[]>;
   breakpoints = CAROUSEL_BREAKPOINTS;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
@@ -65,25 +66,17 @@ export class MediaDetailsComponent implements OnInit {
 
   constructor(
     public mediaStoreService: MediaStoreService,
-    public stateQuery: StateQuery,
+    public configStoreService: ConfigStoreService,
     private route: ActivatedRoute,
     private router: Router,
     private titleService: Title,
-    private stateService: StateService,
   ) {}
 
   ngOnInit(): void {
     this.activeTab$ = this.route.params.pipe(map((p) => get(p, 'tab')));
-    this.mediaItem$.subscribe((v) => console.log(v));
-    this.route.paramMap
-      .pipe(
-        switchMap((paramMap) => {
-          return this.mediaStoreService.getDetails$(
-            Number(paramMap.get('id')!),
-          );
-        }),
-      )
-      .subscribe();
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const type = this.route.snapshot.paramMap.get('type');
+    this.mediaStoreService.getDetails$(id, type!).subscribe();
     this.tabs$ = combineLatest([
       this.mediaType$,
       this.videos$,
@@ -97,12 +90,11 @@ export class MediaDetailsComponent implements OnInit {
     );
 
     this.languages$ = combineLatest([
-      this.stateQuery.languages$,
+      this.configStoreService.languages$,
       this.mediaType$,
       this.mediaItem$,
     ]).pipe(
       map(([languages, type, item]) => {
-        this.stateService.setLoading(false);
         const langCodes =
           type === 'tv'
             ? (item as TvSeries).languages!

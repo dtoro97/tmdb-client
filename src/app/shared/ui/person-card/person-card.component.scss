@@ -1,14 +1,13 @@
+@use "responsive.scss" as *;
+
 .actor-card {
-  transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+  transition:
+    transform 0.25s ease-in-out,
+    opacity 0.25s ease-in-out;
   &:hover {
     opacity: 0.6;
   }
-  &.mobile {
-    img {
-      width: 100px;
-      height: 100px;
-    }
-  }
+
   img {
     background-position: center;
     object-fit: cover;
@@ -19,5 +18,14 @@
 
   .secondary {
     color: var(--p-text-muted-color);
+  }
+}
+
+@include mobile() {
+  .actor-card {
+    img {
+      width: 100px;
+      height: 100px;
+    }
   }
 }

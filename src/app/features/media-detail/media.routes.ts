@@ -5,7 +5,7 @@ import { mediaTabGuard } from './media-tab.guard';
 
 export const mediaRoutes: Routes = [
   {
-    path: ':id/:tab',
+    path: ':id/:type/:tab',
     component: MediaDetailsComponent,
     canActivate: [mediaTabGuard],
     runGuardsAndResolvers: (from, to) =>

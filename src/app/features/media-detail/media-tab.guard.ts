@@ -13,7 +13,7 @@ export const mediaTabGuard = (route: ActivatedRouteSnapshot) => {
       : ['overview', 'videos', 'photos'];
   const tab: string = route.params['tab'];
   if (!tab || !tabs.includes(tab)) {
-    router.navigate(['title', id, 'overview'], { queryParams: { type } });
+    router.navigate(['title', id, type, 'overview']);
     return false;
   }
 

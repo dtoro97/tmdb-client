@@ -1,7 +1,6 @@
 <div
   class="actor-card flex flex-column align-items-center cursor-pointer"
   [routerLink]="['/name', person.id, 'overview']"
-  [class.mobile]="isMobile()"
 >
   <img src="{{ person.profile_path | imgSrc }}" />
   <p class="font-medium text-lg text-center mb-0">{{ person.name }}</p>

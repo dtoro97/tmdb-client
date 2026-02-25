@@ -1,8 +1,12 @@
 @if (item) {
   <div
     class="card"
-    [routerLink]="['/title', item.id, 'overview']"
-    [queryParams]="{ type: type || $any(item).media_type }"
+    [routerLink]="[
+      '/title',
+      item.id,
+      type || $any(item).media_type,
+      'overview',
+    ]"
   >
     <img src="{{ item.poster_path || $any(item).profile_path | imgSrc }}" />
     <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
@@ -11,7 +15,7 @@
           $any(item).title || $any(item).name
         }}</span>
         <div class="w-full flex justify-content-between">
-          @if (item.vote_count > 0) {
+          @if (item.vote_count || 0 > 0) {
             <span class="pb-3"
               ><i class="fa-solid fa-star"></i>&nbsp;{{
                 item.vote_average | number: "1.1-1"

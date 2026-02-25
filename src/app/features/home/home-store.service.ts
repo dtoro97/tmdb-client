@@ -69,7 +69,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                 httpHeaderAccept: 'application/json',
               } as never,
             ),
-          ),
+          ).pipe(loader(this.ngxUiLoaderService, 'master')),
         ),
         tap((response) => this.updatePopular(response.results || [])),
       );
@@ -80,15 +80,13 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     (trendingTime$: Observable<TimeWindow>) =>
       trendingTime$.pipe(
         switchMap((trendingTime) =>
-          this.trendingRestControllerService.trendingAll(
-            trendingTime,
-            undefined,
-            undefined,
-            {
+          this.trendingRestControllerService
+            .trendingAll(trendingTime, undefined, undefined, {
               httpHeaderAccept: 'application/json',
-            } as never,
-          ),
+            } as never)
+            .pipe(loader(this.ngxUiLoaderService, 'master')),
         ),
+
         tap((response) => this.updateTrending(response.results || [])),
       ),
   );

@@ -17,10 +17,10 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { CAROUSEL_BREAKPOINTS } from '../../../constants';
-import { StateQuery } from '../../../core';
 import {
   AgePipe,
   CardComponent,
+  ConfigStoreService,
   CreditsListComponent,
   FilterPipe,
   ImagePipe,
@@ -57,8 +57,7 @@ export class PersonDetailsComponent {
   images$ = this.personDetailStore.images$;
   credits$ = this.personDetailStore.credits$;
   links$ = this.personDetailStore.links$;
-  isMobile = this.stateQuery.isMobile;
-  isDarkMode$ = this.stateQuery.isDarkMode$;
+  isDarkMode$ = this.configStoreService.isDarkMode$;
   breakpoints = CAROUSEL_BREAKPOINTS;
   tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
   activeTab$: Observable<string>;
@@ -67,12 +66,12 @@ export class PersonDetailsComponent {
   visibleCredits$: BehaviorSubject<string>;
   knownFor$;
   constructor(
-    private stateQuery: StateQuery,
     private scroller: ViewportScroller,
     private titleService: Title,
     private router: Router,
     private route: ActivatedRoute,
     private personDetailStore: PersonDetailStoreService,
+    private configStoreService: ConfigStoreService,
   ) {
     this.tabs$ = this.credits$.pipe(map((credits) => this.getTabs(credits)));
     this.activeTab$ = this.route.params.pipe(

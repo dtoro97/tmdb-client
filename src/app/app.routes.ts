@@ -18,7 +18,7 @@ export const routes: Routes = [
       import('./features/media-detail/media.routes').then((m) => m.mediaRoutes),
   },
   {
-    path: 'list',
+    path: 'discover',
     component: MediaListPageComponent,
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',
     canActivate: [mediaListGuard],

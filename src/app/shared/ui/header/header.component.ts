@@ -1,28 +1,17 @@
 import { MenuItem } from 'primeng/api';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
-import {
-  debounceTime,
-  Observable,
-  Subject,
-  Subscription,
-  switchMap,
-} from 'rxjs';
+import { debounceTime, Observable, Subject, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
-import { StateQuery, StateService } from '../../../core';
 import { ImagePipe } from '../../pipes';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MultiListItem, SearchRestControllerService } from '../../../api';
+import { ConfigStoreService } from '../../services';
 
 @Component({
   selector: 'app-header',
@@ -39,31 +28,25 @@ import { MultiListItem, SearchRestControllerService } from '../../../api';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
-export class HeaderComponent implements OnInit, OnDestroy {
-  isDarkMode$: Observable<boolean>;
+export class HeaderComponent {
+  isDarkMode$ = this.configStoreService.isDarkMode$;
   items: MenuItem[];
   autoCompleteValue: string;
-  isMobile: Signal<boolean>;
   search$: Observable<string>;
   searchResults$: Observable<MultiListItem[]>;
   private _searchResults: Subject<MultiListItem[]> = new Subject();
   private _search: Subject<string> = new Subject();
-  private _sub: Subscription;
 
   constructor(
     private searchRestControllerService: SearchRestControllerService,
-    private stateService: StateService,
-    private stateQuery: StateQuery,
-  ) {}
-
-  ngOnInit(): void {
+    private configStoreService: ConfigStoreService,
+  ) {
     this.items = this.getMenuItems();
-    this.isMobile = this.stateQuery.isMobile;
     this.search$ = this._search.asObservable();
     this.searchResults$ = this._searchResults.asObservable();
-    this.isDarkMode$ = this.stateQuery.isDarkMode$;
-    this._sub = this.search$
+    this.search$
       .pipe(
+        takeUntilDestroyed(),
         debounceTime(500),
         switchMap((query) => {
           return this.searchRestControllerService.searchMulti(
@@ -81,14 +64,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this._searchResults.next(data.results || []);
       });
   }
-  ngOnDestroy(): void {
-    this._sub.unsubscribe();
-  }
 
   toggleDarkMode() {
     const element = document.querySelector('html');
     element!.classList.toggle('dark');
-    this.stateService.toggleDarkMode();
+    this.configStoreService.toggleDarkMode();
   }
 
   search(term: string) {
@@ -113,13 +93,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
         items: [
           {
             label: 'Popular',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: { sortBy: 'popularity.desc', page: 1, type: 'movie' },
             routerLinkActiveOptions: { exact: true },
           },
           {
             label: 'Now Playing',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: {
               'primary_release_date.gte': this.getSpecificISODate(-30),
               'primary_release_date.lte': this.getSpecificISODate(+7),
@@ -130,7 +110,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           },
           {
             label: 'Upcoming',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: {
               'primary_release_date.gte': this.getSpecificISODate(-3),
               'primary_release_date.lte': this.getSpecificISODate(+7),
@@ -141,7 +121,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           },
           {
             label: 'Top Rated',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: {
               sortBy: 'vote_average.desc',
               'vote_count.gte': 300,
@@ -157,13 +137,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
         items: [
           {
             label: 'Popular',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: { sortBy: 'popularity.desc', page: 1, type: 'tv' },
             routerLinkActiveOptions: { exact: true },
           },
           {
             label: 'Airing Today',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: {
               'first_air_date.gte': this.getSpecificISODate(+0),
               'first_air_date.lte': this.getSpecificISODate(+0),
@@ -174,7 +154,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           },
           {
             label: 'Top Rated',
-            routerLink: '/list',
+            routerLink: '/discover',
             queryParams: {
               sortBy: 'vote_average.desc',
               'vote_count.gte': 300,
@@ -187,7 +167,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       {
         label: 'People',
         icon: 'fa-solid fa-user',
-        routerLink: '/list/person',
+        routerLink: '/discover/person',
         routerLinkActiveOptions: { exact: false },
       },
     ];

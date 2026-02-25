@@ -34,7 +34,7 @@ export const mediaListGuard = (route: ActivatedRouteSnapshot) => {
   }
 
   if (changed) {
-    router.navigate(['list'], {
+    router.navigate(['discover'], {
       queryParams: newParams,
     });
     return false;

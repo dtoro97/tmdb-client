@@ -1,3 +1,5 @@
+@use "responsive.scss" as *;
+
 .credit-item {
   background-color: var(--p-surface-100);
 
@@ -20,7 +22,7 @@
   }
 }
 
-.mobile {
+@include mobile() {
   .credit-item {
     .year {
       width: 4rem;

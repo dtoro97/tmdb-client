@@ -1,8 +1,4 @@
-<div
-  class="h-full details-container pb-4"
-  [class.mobile]="stateQuery.isMobile()"
-  [class.dark]="stateQuery.isDarkMode$ | async"
->
+<div class="h-full details-container pb-4" [class.dark]="isDarkMode$ | async">
   <div class="relative">
     @if (mediaStoreService.hasBackdrop$ | async) {
       <img
@@ -51,7 +47,7 @@
             @for (genre of item.genres; track genre.id) {
               <p-chip styleClass="cursor-pointer genre">
                 <a
-                  [routerLink]="['/list']"
+                  [routerLink]="['/discover']"
                   [queryParams]="{
                     withGenres: genre.id,
                     type: mediaType$ | async,
