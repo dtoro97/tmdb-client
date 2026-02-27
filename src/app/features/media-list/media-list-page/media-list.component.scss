@@ -1,26 +1,26 @@
 @use "responsive.scss" as *;
 
 :host ::ng-deep {
-  .search-button {
-    color: var(--p-text-color);
-  }
-  @include mobile() {
+    .search-button {
+        color: var(--p-text-color);
+    }
+    @include mobile() {
+        app-card {
+            .card {
+                width: 150px;
+            }
+        }
+    }
     app-card {
-      .card {
-        width: 150px;
-      }
+        .card {
+            margin: 0;
+            width: 200px;
+            max-height: 450px;
+        }
     }
-  }
-  app-card {
-    .card {
-      margin: 0;
-      width: 200px;
-      max-height: 450px;
+    .mat-chip {
+        &.selected {
+            background: var(--primary-color);
+        }
     }
-  }
-  .p-chip {
-    &.selected {
-      background: var(--p-primary-color);
-    }
-  }
 }

@@ -1,124 +1,317 @@
-<div class="h-full details-container py-4" [class.dark]="isDarkMode$ | async">
-  @if (person$ | async; as person) {
-    <div
-      class="flex flex-wrap flex-row gap-3 md:gap-6 md:p-0 inner-container px-3"
-    >
-      <div
-        class="ml-auto mr-auto md:mx-2 md:mx-6 image-container"
-        [style.maxWidth.px]="350"
-      >
-        <img
-          src="{{ person.profile_path | imgSrc: 'w500' }}"
-          class="person-image border-round-xl"
-        />
+<div class="details-container pb-8">
+    @if (personDetailStore.person$ | async; as person) {
+        <div class="hero inner-container">
+            <app-media-thumb
+                class="person-portrait border-round-xl"
+                [src]="person.profile_path"
+                type="person"
+                [alt]="person.name"
+            />
+            <div class="person-info">
+                <h1 class="m-0">{{ person.name }}</h1>
+                <p class="muted m-0">{{ person.known_for_department }}</p>
 
-        <h1 class="m-0 mobile-visible">
-          {{ person.name }}
-        </h1>
-        <div class="mt-4 mb-3">
-          <app-social-links
-            [links]="links$ | async"
-            [item]="person"
-            [isPerson]="true"
-          ></app-social-links>
-        </div>
+                <app-social-links
+                    [links]="personDetailStore.links$ | async"
+                    [item]="person"
+                    [isPerson]="true"
+                />
 
-        <h2 class="m-0 mobile-hidden">Personal Info</h2>
+                <ul class="details-list list-none pl-0 m-0">
+                    @if (person.birthday) {
+                        <li class="details-row">
+                            <span class="details-label">Born</span>
+                            <span>
+                                {{ person.birthday | date }}
+                                @if (!person.deathday) {
+                                    <span class="muted">
+                                        (age {{ person | age }})
+                                    </span>
+                                }
+                            </span>
+                        </li>
+                    }
+                    @if (person.deathday) {
+                        <li class="details-row">
+                            <span class="details-label">Died</span>
+                            <span>
+                                {{ person.deathday | date }}
+                                <span class="muted"
+                                    >(age {{ person | age }})</span
+                                >
+                            </span>
+                        </li>
+                    }
+                    @if (person.place_of_birth) {
+                        <li class="details-row">
+                            <span class="details-label">Birthplace</span>
+                            <span>{{ person.place_of_birth }}</span>
+                        </li>
+                    }
+                    <li class="details-row">
+                        <span class="details-label">Known For</span>
+                        <span>{{ person.known_for_department }}</span>
+                    </li>
+                </ul>
 
-        <ul class="list-none line-height-4 pl-0">
-          <li class="flex">
-            <div class="person-info-label">Known For</div>
-            <div class="flex-1">{{ person.known_for_department }}</div>
-          </li>
-
-          @if (person.birthday) {
-            <li class="flex">
-              <div class="person-info-label">Born</div>
-              <div class="flex-1">
-                <span>{{ person.birthday | date }}</span>
-                @if (!person.deathday) {
-                  <span> (age {{ person | age }})</span>
+                @if (person.biography) {
+                    <div class="biography-wrap">
+                        <p
+                            class="biography line-height-4 m-0"
+                            [class.biography--collapsed]="!bioExpanded"
+                        >
+                            {{ person.biography }}
+                        </p>
+                        @if (isBioLong(person.biography)) {
+                            <button class="bio-toggle" (click)="toggleBio()">
+                                {{ bioExpanded ? "Show less" : "Show more" }}
+                            </button>
+                        }
+                    </div>
                 }
-              </div>
-            </li>
-          }
-          @if (person.deathday) {
-            <li class="flex">
-              <div class="person-info-label">Died</div>
-              <div class="flex-1">
-                <span>{{ person.deathday | date }}</span
-                ><span> (age {{ person | age }})</span>
-              </div>
-            </li>
-          }
-          @if (person.place_of_birth) {
-            <li class="flex">
-              <div class="person-info-label">Place of Birth</div>
-              <div class="flex-1">{{ person.place_of_birth }}</div>
-            </li>
-          }
-        </ul>
-      </div>
-      <div class="flex-1">
-        <h1 class="m-0 mb-4 mobile-hidden">
-          {{ person.name }}
-        </h1>
-        @if (person.biography) {
-          <h2 class="m-0 mb-2">Biography</h2>
+            </div>
+        </div>
+    }
+
+    <div class="inner-container flex flex-column gap-6 mt-6">
+        @if (personDetailStore.hasCredits$ | async) {
+            <section>
+                <div
+                    class="flex align-items-center justify-content-between mb-3"
+                >
+                    <h2 class="section-title m-0">Known For</h2>
+                    <app-pill-toggle
+                        [options]="personDetailStore.creditsOptions$ | async"
+                        [selectedValue]="
+                            personDetailStore.visibleCredits$ | async
+                        "
+                        (selected)="changeVisibleCredits($event)"
+                    />
+                </div>
+                <app-carousel
+                    [items]="
+                        (personDetailStore.knownFor$ | async)!
+                            | sort: 'vote_average'
+                    "
+                    [numVisible]="6"
+                    [numScroll]="6"
+                >
+                    <ng-template let-item>
+                        <app-card
+                            [item]="item"
+                            [type]="item.media_type"
+                            [role]="item.character || item.job"
+                        />
+                    </ng-template>
+                </app-carousel>
+            </section>
         }
 
-        <p class="m-0 line-height-4">
-          {{ person.biography }}
-        </p>
-      </div>
+        @if (personDetailStore.pagedGroupedCredits$ | async; as groups) {
+            @if (groups.length) {
+                <section class="credits-section">
+                    <h2 class="section-title">Credits</h2>
+                    @for (group of groups; track group.department) {
+                        <div class="credits-dept">
+                            <h3 class="credits-dept-heading">
+                                {{ group.department }}
+                            </h3>
+                            @if (group.upcoming.length) {
+                                <mat-expansion-panel>
+                                    <mat-expansion-panel-header>
+                                        <mat-panel-title>
+                                            Upcoming ·
+                                            {{ group.upcoming.length }}
+                                        </mat-panel-title>
+                                    </mat-expansion-panel-header>
+                                    @for (
+                                        credit of group.upcoming;
+                                        track credit.id
+                                    ) {
+                                        <a
+                                            class="credit-row"
+                                            [routerLink]="[
+                                                '/title',
+                                                credit.id,
+                                                credit.mediaType,
+                                            ]"
+                                        >
+                                            <app-media-thumb
+                                                class="credit-thumb"
+                                                [src]="credit.posterPath"
+                                                [alt]="credit.title"
+                                                type="media"
+                                            ></app-media-thumb>
+                                            <div class="credit-body">
+                                                <span class="credit-title">{{
+                                                    credit.title
+                                                }}</span>
+                                                <div class="credit-meta">
+                                                    @if (credit.rating) {
+                                                        <app-rating
+                                                            [value]="
+                                                                credit.rating
+                                                            "
+                                                        />
+                                                    }
+                                                    <mat-chip>{{
+                                                        credit.mediaType ===
+                                                        "tv"
+                                                            ? "TV Series"
+                                                            : "Movie"
+                                                    }}</mat-chip>
+                                                </div>
+                                                @if (
+                                                    credit.character ||
+                                                    credit.job
+                                                ) {
+                                                    <span
+                                                        class="credit-role muted"
+                                                    >
+                                                        {{
+                                                            credit.character ||
+                                                                credit.job
+                                                        }}
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="credit-year muted">
+                                                @if (credit.year) {
+                                                    {{ credit.year }}
+                                                }
+                                                @if (credit.episodeCount) {
+                                                    <span
+                                                        class="credit-episodes"
+                                                        >{{
+                                                            credit.episodeCount
+                                                        }}
+                                                        ep</span
+                                                    >
+                                                }
+                                            </div>
+                                        </a>
+                                    }
+                                </mat-expansion-panel>
+                            }
+                            @if (group.past.length) {
+                                <mat-expansion-panel [expanded]="true">
+                                    <mat-expansion-panel-header>
+                                        <mat-panel-title>
+                                            Previous · {{ group.past.length }}
+                                        </mat-panel-title>
+                                    </mat-expansion-panel-header>
+                                    @for (
+                                        credit of group.pagedPast;
+                                        track credit.id
+                                    ) {
+                                        <a
+                                            class="credit-row"
+                                            [routerLink]="[
+                                                '/title',
+                                                credit.id,
+                                                credit.mediaType,
+                                            ]"
+                                        >
+                                            <app-media-thumb
+                                                class="credit-thumb"
+                                                [src]="credit.posterPath"
+                                                [alt]="credit.title"
+                                                type="media"
+                                            ></app-media-thumb>
+                                            <div class="credit-body">
+                                                <span class="credit-title">{{
+                                                    credit.title
+                                                }}</span>
+                                                <div class="credit-meta">
+                                                    @if (credit.rating) {
+                                                        <app-rating
+                                                            [value]="
+                                                                credit.rating
+                                                            "
+                                                        />
+                                                    }
+                                                    <mat-chip>{{
+                                                        credit.mediaType ===
+                                                        "tv"
+                                                            ? "TV Series"
+                                                            : "Movie"
+                                                    }}</mat-chip>
+                                                </div>
+                                                @if (
+                                                    credit.character ||
+                                                    credit.job
+                                                ) {
+                                                    <span
+                                                        class="credit-role muted"
+                                                    >
+                                                        {{
+                                                            credit.character ||
+                                                                credit.job
+                                                        }}
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="credit-year muted">
+                                                @if (credit.year) {
+                                                    {{ credit.year }}
+                                                }
+                                                @if (credit.episodeCount) {
+                                                    <span
+                                                        class="credit-episodes"
+                                                        >{{
+                                                            credit.episodeCount
+                                                        }}
+                                                        ep</span
+                                                    >
+                                                }
+                                            </div>
+                                        </a>
+                                    }
+                                    @if (group.past.length > 10) {
+                                        <mat-paginator
+                                            [length]="group.past.length"
+                                            [pageSize]="10"
+                                            [pageIndex]="group.pastPageIndex"
+                                            [hidePageSize]="true"
+                                            [showFirstLastButtons]="true"
+                                            (page)="
+                                                personDetailStore.setCreditPage(
+                                                    {
+                                                        department:
+                                                            group.department,
+                                                        index: $event.pageIndex,
+                                                    }
+                                                )
+                                            "
+                                        />
+                                    }
+                                </mat-expansion-panel>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+        }
+
+        @if (personDetailStore.featuredPhotos$ | async; as photos) {
+            @if (photos.length) {
+                <section class="photos-section">
+                    <h2 class="section-title">
+                        Photos
+                        <span class="section-count">{{
+                            personDetailStore.photosTotalCount$ | async
+                        }}</span>
+                    </h2>
+                    <app-photos-grid
+                        [images]="photos"
+                        [totalCount]="
+                            (personDetailStore.photosTotalCount$ | async)!
+                        "
+                        aspectRatio="2 / 3"
+                        (photoClick)="openPhotoViewer($event)"
+                    />
+                </section>
+            }
+        }
     </div>
-  }
-  <div class="mt-2 mx-0 md:mx-4">
-    <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
-      <p-tablist>
-        @for (
-          tabHeader of (tabs$ | async)! | filter: { visible: true };
-          track tabHeader.value
-        ) {
-          <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
-        }
-      </p-tablist>
-    </p-tabs>
-    @if ((activeTab$ | async) === "overview" && (hasCredits$ | async)) {
-      <p-select
-        styleClass="mt-3 ml-5"
-        optionLabel="label"
-        optionValue="value"
-        [ngModel]="visibleCredits$ | async"
-        [options]="creditsOptions$ | async"
-        [disabled]="(creditsOptions$ | async)?.length === 1"
-        (ngModelChange)="changeVisibleCredits($event)"
-      ></p-select>
-
-      <div
-        class="flex flex-wrap gap-3 justify-content-center md:justify-content-start mt-3"
-      >
-        @for (
-          item of (knownFor$ | async)! | sort: "vote_average";
-          track item.id
-        ) {
-          <app-card [item]="item" [type]="item.media_type"></app-card>
-        }
-      </div>
-    }
-    @if ((activeTab$ | async) === "credits" && (hasCredits$ | async)) {
-      <app-credits-list [credits]="credits$ | async"></app-credits-list>
-    }
-    @if ((activeTab$ | async) === "photos") {
-      <div
-        class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start"
-      >
-        @for (image of images$ | async; track image.file_path) {
-          <a href="{{ image.file_path | imgSrc }}" target="_blank">
-            <img class="photos-item" src="{{ image.file_path | imgSrc }}" />
-          </a>
-        }
-      </div>
-    }
-  </div>
 </div>

@@ -1,0 +1,53 @@
+<div class="cast-crew-page pb-8">
+    @if (vm$ | async; as vm) {
+        <div class="inner-container pt-5">
+            <a class="back-link mb-5" [routerLink]="['../']">
+                <i class="fa-solid fa-chevron-left"></i>
+                Back to {{ vm.title }}
+            </a>
+        </div>
+
+        <div class="media-header inner-container">
+            <app-media-thumb
+                class="media-poster"
+                [src]="vm.posterPath"
+                [alt]="vm.title"
+                params="w185"
+            />
+            <div class="media-info">
+                <h1 class="media-title">{{ vm.title }}</h1>
+                <div class="flex align-items-center gap-3 mb-2">
+                    @if (vm.year) {
+                        <span class="muted">{{ vm.year }}</span>
+                    }
+                    @if (vm.mediaType === 'movie' && vm.runtime) {
+                        <span class="muted">{{ vm.runtime | m2h }}</span>
+                    }
+                    @if (vm.mediaType === 'tv' && vm.numberOfSeasons) {
+                        <span class="muted">
+                            {{ vm.numberOfSeasons }}
+                            {{ vm.numberOfSeasons === 1 ? 'Season' : 'Seasons' }}
+                        </span>
+                    }
+                    @if (vm.voteAverage) {
+                        <app-rating [value]="vm.voteAverage" />
+                    }
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    @for (genre of vm.genres; track genre.id) {
+                        <mat-chip>{{ genre.name }}</mat-chip>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="inner-container flex flex-column gap-6 mt-6">
+            @if (castCrew$ | async; as castCrew) {
+                <app-cast-crew-grid
+                    [cast]="castCrew.cast"
+                    [crew]="castCrew.crew"
+                />
+            }
+        </div>
+    }
+</div>

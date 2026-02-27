@@ -1,0 +1,16 @@
+<div class="photos-grid">
+    @for (image of images; track image.file_path; let i = $index; let last = $last) {
+        <button
+            class="photo-item"
+            [class.photo-item--large]="i < 3"
+            [class.photo-item--small]="i >= 3"
+            [style.aspect-ratio]="aspectRatio"
+            (click)="photoClick.emit(i)"
+        >
+            <img [src]="image.file_path ?? '' | imgSrc" alt="" />
+            @if (last && totalCount > images.length) {
+                <div class="photo-item__more">+{{ totalCount - (images.length - 1) }}</div>
+            }
+        </button>
+    }
+</div>

@@ -1,346 +1,483 @@
-<div class="h-full details-container pb-4" [class.dark]="isDarkMode$ | async">
-  <div class="relative">
-    @if (mediaStoreService.hasBackdrop$ | async) {
-      <img
-        [src]="
-          (mediaStoreService.backdrop$ | async) || ''
-            | imgSrc: 'w1920_and_h800_multi_faces'
-        "
-        class="backdrop-image"
-      />
-    }
-    <div class="gradient-cover"></div>
-  </div>
-  <div
-    class="relative info-container md:ml-auto md:mr-auto md:px-8 px-4 w-full"
-    [class.mt-0]="(mediaStoreService.hasBackdrop$ | async) === false"
-    [class.pt-4]="(mediaStoreService.hasBackdrop$ | async) === false"
-    [style.maxWidth.px]="1400"
-  >
-    @if (mediaItem$ | async; as item) {
-      <div class="flex md:flex-row flex-column">
-        <div class="">
-          <img
-            src="{{ item.poster_path | imgSrc: 'w500' }}"
-            class="poster-image border-round-lg"
-          />
-          <div class="mt-4 mb-3">
-            <app-social-links
-              [links]="mediaStoreService.socialLinks$ | async"
-              [item]="item"
-            ></app-social-links>
-          </div>
-        </div>
-        <div class="flex flex-column mt-2 md:mt-8 gap-2 md:ml-6">
-          <h1 class="m-0">{{ item.title || item.name }}</h1>
-          <p class="m-0">
-            {{ item.release_date || item.first_air_date | date: "yyyy" }}
-          </p>
-          <div class="flex flex-row gap-2">
-            <p-rating
-              [ngModel]="item.vote_average / 2"
-              [readonly]="true"
-            ></p-rating>
-            <span>{{ item.vote_average | number: "1.1-1" }}/10</span>
-          </div>
-          <div class="flex flex-row mt-2 gap-2">
-            @for (genre of item.genres; track genre.id) {
-              <p-chip styleClass="cursor-pointer genre">
-                <a
-                  [routerLink]="['/discover']"
-                  [queryParams]="{
-                    withGenres: genre.id,
-                    type: mediaType$ | async,
-                  }"
-                  >{{ genre.name }}</a
-                ></p-chip
-              >
+<div class="details-container pb-8">
+    @if (vm$ | async; as vm) {
+        <section class="hero">
+            @if (mediaStoreService.backdrop$ | async; as backdrop) {
+                <app-media-thumb
+                    class="hero__backdrop"
+                    [alt]="vm.title"
+                    [src]="backdrop"
+                    [params]="'w1920_and_h800_multi_faces'"
+                ></app-media-thumb>
+                <div class="hero__gradient"></div>
             }
-          </div>
-          <p class="mt-2 mb-0 line-height-4" [style.maxWidth.px]="550">
-            {{ item.overview }}
-          </p>
-          <ul class="list-none line-height-4 pl-0">
-            @if (item.first_air_date) {
-              <li class="flex">
-                <div class="media-info-label">First Aired</div>
-                <div class="flex-1">{{ item.first_air_date | date }}</div>
-              </li>
-            }
-            @if (item.last_air_date) {
-              <li class="flex">
-                <div class="media-info-label">Last Aired</div>
-                <div class="flex-1">{{ item.last_air_date | date }}</div>
-              </li>
-            }
-            @if (item.release_date) {
-              <li class="flex">
-                <div class="media-info-label">Released</div>
-                <div class="flex-1">{{ item.release_date | date }}</div>
-              </li>
-            }
-            @if (item.runtime) {
-              <li class="flex">
-                <div class="media-info-label">Runtime</div>
-                <div class="flex-1">{{ item.runtime | m2h }}</div>
-              </li>
-            }
-            @if (item.budget) {
-              <li class="flex">
-                <div class="media-info-label">Budget</div>
-                <div class="flex-1">${{ item.budget | number }}</div>
-              </li>
-            }
-            @if (item.revenue) {
-              <li class="flex">
-                <div class="media-info-label">Revenue</div>
-                <div class="flex-1">${{ item.revenue | number }}</div>
-              </li>
-            }
-            @if (item.created_by?.length) {
-              <li class="flex">
-                <div class="media-info-label">Creator</div>
-                <div class="flex-1">
-                  @for (
-                    creator of item.created_by;
-                    track creator.id;
-                    let i = $index
-                  ) {
-                    <span
-                      class="cursor-pointer"
-                      [routerLink]="['/name', creator.id, 'overview']"
-                      [queryParams]="{ type: 'person' }"
-                      >{{ creator.name }}</span
-                    >
-                    @if (i !== item.created_by.length - 1) {
-                      <span>, </span>
-                    }
-                  }
-                </div>
-              </li>
-            }
-            @if (item.number_of_seasons) {
-              <li class="flex">
-                <div class="media-info-label">Seasons</div>
-                <div class="flex-1">{{ item.number_of_seasons }}</div>
-              </li>
-            }
-            @if (item.number_of_episodes) {
-              <li class="flex">
-                <div class="media-info-label">Episodes</div>
-                <div class="flex-1">{{ item.number_of_episodes }}</div>
-              </li>
-            }
-            @if (item.status) {
-              <li class="flex">
-                <div class="media-info-label">Status</div>
-                <div class="flex-1">{{ item.status }}</div>
-              </li>
-            }
-            @if ((languages$ | async)?.length > 0) {
-              <li class="flex">
-                <div class="media-info-label">Languages</div>
-                <div class="flex-1">
-                  @for (
-                    lang of languages$ | async;
-                    track lang.name;
-                    let i = $index
-                  ) {
-                    <span>{{ lang.english_name }}</span>
-                    @if (i !== (languages$ | async)?.length - 1) {
-                      <span>, </span>
-                    }
-                  }
-                </div>
-              </li>
-            }
-            @if (item.networks?.length) {
-              <li class="flex">
-                <div class="media-info-label">Networks</div>
-                <div class="flex-1">
-                  @for (
-                    network of item.networks;
-                    track network.id;
-                    let i = $index
-                  ) {
-                    <span>{{ network.name }}</span>
-                    @if (i !== item.networks.length - 1) {
-                      <span>, </span>
-                    }
-                  }
-                </div>
-              </li>
-            }
-          </ul>
-        </div>
-      </div>
-    }
-  </div>
-  <div class="mt-2 mx-2 md:mx-4">
-    <p-tabs [value]="activeTab$ | async" (valueChange)="changeTab($event)">
-      <p-tablist>
-        @for (
-          tabHeader of (tabs$ | async)! | filter: { visible: true };
-          track tabHeader.value
-        ) {
-          <p-tab [value]="tabHeader.value">{{ tabHeader.title }}</p-tab>
-        }
-      </p-tablist>
-    </p-tabs>
-    @if ((activeTab$ | async) === "overview") {
-      @if ((mediaStoreService.cast$ | async)?.length) {
-        <div>
-          <div class="flex justify-content-center flex-column">
-            <h2 class="md:px-4 px-2">Full Cast</h2>
-            <p-carousel
-              [value]="mediaStoreService.cast$ | async"
-              [numVisible]="8"
-              [numScroll]="8"
-              [showIndicators]="false"
-              [responsiveOptions]="breakpoints"
-            >
-              <ng-template let-person pTemplate="item">
-                <app-person-card [person]="person"></app-person-card>
-              </ng-template>
-            </p-carousel>
-          </div>
-        </div>
-      }
-    }
-    @if ((activeTab$ | async) === "episodes") {
-      <div class="flex flex-row py-4 mx-2">
-        <div>
-          <label for="seasons" class="mr-2">Seasons</label>
-          <p-select
-            optionLabel="name"
-            optionValue="season_number"
-            id="seasons"
-            [ngModel]="mediaStoreService.selectedSeason$ | async"
-            [options]="mediaStoreService.seasons$ | async"
-            [disabled]="(mediaStoreService.seasons$ | async)?.length === 1"
-            (ngModelChange)="changeSeason($event)"
-          ></p-select>
-          @if (
-            mediaStoreService.seasonEpisodesCount$ | async;
-            as episodeCount
-          ) {
-            <strong class="muted md:px-4 px-2"
-              >{{ episodeCount }} Episodes</strong
-            >
-          }
-        </div>
-      </div>
 
-      <div class="grid m-0">
-        @for (
-          episode of mediaStoreService.seasonEpisodes$ | async;
-          track episode.id
-        ) {
-          <div class="col-12 sm:col-6 md:col-4 lg:col-3 p-2 episode-item">
-            <div>
-              @if (episode.still_path) {
-                <img src="{{ episode.still_path | imgSrc }}" />
-              } @else {
-                <img src="assets/empty_still.svg" />
-              }
+            <div class="hero__content inner-container">
+                <app-media-thumb
+                    class="hero__poster border-round-xl"
+                    [src]="vm.posterPath"
+                    type="media"
+                    [alt]="vm.title"
+                />
+                <div class="hero__info">
+                    <h1 class="hero__title">{{ vm.title }}</h1>
+                    <p class="hero__year">{{ vm.year }}</p>
+
+                    @if (vm.voteAverage) {
+                        <div class="flex align-items-center gap-3 mt-2">
+                            <app-rating [value]="vm.voteAverage" />
+                            @if (vm.runtime) {
+                                <span class="muted">{{
+                                    vm.runtime | m2h
+                                }}</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        @for (genre of vm.genres; track genre.id) {
+                            <mat-chip
+                                [routerLink]="['/discover']"
+                                [queryParams]="{
+                                    withGenres: genre.id,
+                                    type: vm.mediaType,
+                                }"
+                            >
+                                {{ genre.name }}
+                            </mat-chip>
+                        }
+                    </div>
+
+                    <p class="hero__overview line-height-4 mt-2 mb-3">
+                        {{ vm.overview }}
+                    </p>
+
+                    <app-social-links
+                        [links]="mediaStoreService.socialLinks$ | async"
+                        [item]="mediaStoreService.media$ | async"
+                    />
+                </div>
             </div>
-            <h2 class="name">
-              <strong class="mr-2">E{{ episode.episode_number }}</strong
-              >{{ episode.name }}
-            </h2>
-            <div class="mb-3">{{ episode.overview }}</div>
-            <div class="muted">{{ episode.air_date | date }}</div>
-          </div>
-        }
-      </div>
-    }
-    @if ((activeTab$ | async) === "videos") {
-      @if ((videos$ | async)?.length) {
-        <div>
-          <h2 class="md:px-4 px-2">Videos</h2>
-          <div
-            class="flex flex-row gap-2 mx-2 md:mx-7 overflow-y-hidden overflow-x-auto"
-          >
-            @for (video of videos$ | async; track video.id) {
-              <div class="video-frame">
-                <iframe
-                  [src]="video | yt"
-                  title="{{ video.name }}"
-                  frameborder="0"
-                  allowedfullscreen
-                  class="iframe"
-                ></iframe>
-              </div>
+        </section>
+
+        <div class="inner-container mt-4 flex flex-column gap-6">
+            @if ((mediaStoreService.cast$ | async)?.length) {
+                <section class="cast-section">
+                    <h2 class="section-title">Top Cast</h2>
+                    <app-carousel
+                        [items]="(mediaStoreService.cast$ | async)!"
+                        [numVisible]="6"
+                        [numScroll]="6"
+                    >
+                        <ng-template let-person>
+                            <app-person-card [person]="person" />
+                        </ng-template>
+                    </app-carousel>
+
+                    <div class="crew-rows">
+                        @if (
+                            mediaStoreService.directors$ | async;
+                            as directors
+                        ) {
+                            @if (directors.length) {
+                                <div class="crew-row">
+                                    <span class="crew-row-label"
+                                        >Director{{
+                                            directors.length > 1 ? "s" : ""
+                                        }}</span
+                                    >
+                                    <span class="crew-row-names">
+                                        @for (
+                                            person of directors;
+                                            track person.id;
+                                            let i = $index
+                                        ) {
+                                            <a
+                                                class="crew-row-link"
+                                                [routerLink]="[
+                                                    '/name',
+                                                    person.id,
+                                                ]"
+                                                >{{ person.name }}</a
+                                            >
+                                            @if (i < directors.length - 1) {
+                                                <span class="crew-row-sep"
+                                                    >·</span
+                                                >
+                                            }
+                                        }
+                                    </span>
+                                </div>
+                            }
+                        }
+                        @if (vm.creators?.length) {
+                            <div class="crew-row">
+                                <span class="crew-row-label"
+                                    >Creator{{
+                                        vm.creators!.length > 1 ? "s" : ""
+                                    }}</span
+                                >
+                                <span class="crew-row-names">
+                                    @for (
+                                        creator of vm.creators;
+                                        track creator.id;
+                                        let i = $index
+                                    ) {
+                                        <a
+                                            class="crew-row-link"
+                                            [routerLink]="['/name', creator.id]"
+                                            >{{ creator.name }}</a
+                                        >
+                                        @if (i < vm.creators!.length - 1) {
+                                            <span class="crew-row-sep">·</span>
+                                        }
+                                    }
+                                </span>
+                            </div>
+                        }
+                        <a
+                            class="crew-row crew-row-all"
+                            [routerLink]="['cast']"
+                        >
+                            <span class="crew-row-label">All cast & crew</span>
+                            <i
+                                class="fa-solid fa-chevron-right crew-row-chevron"
+                            ></i>
+                        </a>
+                    </div>
+                </section>
             }
-          </div>
-        </div>
-      }
-    }
-    @if ((activeTab$ | async) === "photos") {
-      @if ((mediaStoreService.backdrops$ | async)?.length) {
-        <div>
-          <h2 class="md:px-4 px-2 mb-0">Backdrops</h2>
-          <strong class="muted md:px-4 px-2"
-            >{{ (mediaStoreService.backdrops$ | async)?.length }} Images</strong
-          >
-          <div
-            class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
-          >
-            @for (
-              image of mediaStoreService.backdrops$ | async;
-              track image.file_path
-            ) {
-              <a href="{{ image.file_path ?? '' | imgSrc }}" target="_blank">
-                <img
-                  class="backdrop-photo"
-                  src="{{ image.file_path ?? '' | imgSrc }}"
-                />
-              </a>
+
+            @if (vm.mediaType === "tv") {
+                <section class="episodes-section">
+                    <div
+                        class="flex align-items-center justify-content-between mb-3"
+                    >
+                        <div>
+                            <h2 class="section-title m-0">Episodes</h2>
+                            @if (
+                                mediaStoreService.latestSeason$ | async;
+                                as latest
+                            ) {
+                                <span class="muted text-sm">{{
+                                    latest.name
+                                }}</span>
+                            }
+                        </div>
+                        <a
+                            class="browse-episodes-link"
+                            [routerLink]="['episodes']"
+                        >
+                            Browse all episodes
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="episode-preview-list">
+                        @for (
+                            episode of mediaStoreService.latestSeasonPreviewEpisodes$
+                                | async;
+                            track episode.id
+                        ) {
+                            <a
+                                class="episode-preview-card"
+                                [routerLink]="[
+                                    'episodes',
+                                    episode.season_number,
+                                    episode.episode_number,
+                                ]"
+                            >
+                                <app-media-thumb
+                                    class="episode-preview-still"
+                                    [src]="episode.still_path ?? null"
+                                />
+                                <div class="episode-preview-meta">
+                                    <span class="episode-preview-label">
+                                        S{{ episode.season_number }}E{{
+                                            episode.episode_number
+                                        }}
+                                    </span>
+                                    <span class="episode-preview-title">{{
+                                        episode.name
+                                    }}</span>
+                                    <p class="episode-preview-overview">
+                                        {{ episode.overview }}
+                                    </p>
+                                    <span class="muted text-sm">{{
+                                        episode.air_date | date
+                                    }}</span>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </section>
             }
-          </div>
-        </div>
-      }
-      @if ((mediaStoreService.posters$ | async)?.length) {
-        <div>
-          <h2 class="md:px-4 px-2 mb-0">Posters</h2>
-          <strong class="muted md:px-4 px-2"
-            >{{ (mediaStoreService.posters$ | async)?.length }} Images</strong
-          >
-          <div
-            class="flex flex-wrap gap-3 mt-4 justify-content-center md:justify-content-start mx-2 md:mx-6"
-          >
-            @for (
-              image of mediaStoreService.posters$ | async;
-              track image.file_path
-            ) {
-              <a href="{{ image.file_path ?? '' | imgSrc }}" target="_blank">
-                <img
-                  class="poster-photo"
-                  src="{{ image.file_path ?? '' | imgSrc }}"
-                />
-              </a>
+
+            @if (mediaStoreService.featuredVideos$ | async; as featured) {
+                @if (featured.length) {
+                    <section class="videos-section">
+                        <div
+                            class="flex align-items-center justify-content-between mb-3"
+                        >
+                            <h2 class="section-title m-0">
+                                Videos
+                                <span class="section-count">{{
+                                    mediaStoreService.youtubeVideosTotalCount$
+                                        | async
+                                }}</span>
+                            </h2>
+                            <a
+                                class="browse-episodes-link"
+                                [routerLink]="['videos']"
+                            >
+                                Browse all videos
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+
+                        <div class="videos-featured">
+                            @for (video of featured; track video.id) {
+                                <a
+                                    class="video-thumb"
+                                    [href]="getYoutubeUrl(video.key!)"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    <div class="video-thumb__img">
+                                        <img
+                                            [src]="
+                                                getYoutubeThumbnail(video.key!)
+                                            "
+                                            [alt]="video.name"
+                                        />
+                                        <div class="video-thumb__play">
+                                            <i class="fa-solid fa-play"></i>
+                                        </div>
+                                        @if (video.type) {
+                                            <span class="video-thumb__badge">{{
+                                                video.type
+                                            }}</span>
+                                        }
+                                    </div>
+                                    <p class="video-thumb__name">
+                                        {{ video.name }}
+                                    </p>
+                                </a>
+                            }
+                        </div>
+
+                        @if (mediaStoreService.gridVideos$ | async; as grid) {
+                            @if (grid.length) {
+                                <div class="videos-grid">
+                                    @for (
+                                        video of grid;
+                                        track video.id;
+                                        let last = $last
+                                    ) {
+                                        @if (
+                                            last &&
+                                            (mediaStoreService.youtubeVideosTotalCount$
+                                                | async)! > 6
+                                        ) {
+                                            <a
+                                                class="video-thumb"
+                                                [routerLink]="['videos']"
+                                            >
+                                                <div class="video-thumb__img">
+                                                    <img
+                                                        [src]="
+                                                            getYoutubeThumbnail(
+                                                                video.key!
+                                                            )
+                                                        "
+                                                        [alt]="video.name"
+                                                    />
+                                                    <div
+                                                        class="video-thumb__more"
+                                                    >
+                                                        +{{
+                                                            (mediaStoreService.youtubeVideosTotalCount$
+                                                                | async)! - 5
+                                                        }}
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        } @else {
+                                            <a
+                                                class="video-thumb"
+                                                [href]="
+                                                    getYoutubeUrl(video.key!)
+                                                "
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                <div class="video-thumb__img">
+                                                    <img
+                                                        [src]="
+                                                            getYoutubeThumbnail(
+                                                                video.key!
+                                                            )
+                                                        "
+                                                        [alt]="video.name"
+                                                    />
+                                                    <div
+                                                        class="video-thumb__play video-thumb__play--sm"
+                                                    >
+                                                        <i
+                                                            class="fa-solid fa-play"
+                                                        ></i>
+                                                    </div>
+                                                    @if (video.type) {
+                                                        <span
+                                                            class="video-thumb__badge"
+                                                            >{{
+                                                                video.type
+                                                            }}</span
+                                                        >
+                                                    }
+                                                </div>
+                                                <p class="video-thumb__name">
+                                                    {{ video.name }}
+                                                </p>
+                                            </a>
+                                        }
+                                    }
+                                </div>
+                            }
+                        }
+                    </section>
+                }
             }
-          </div>
+            @if (mediaStoreService.featuredBackdrops$ | async; as photos) {
+                @if (photos.length) {
+                    <section class="photos-section">
+                        <h2 class="section-title">
+                            Photos
+                            <span class="section-count">{{
+                                mediaStoreService.backdropsTotalCount$ | async
+                            }}</span>
+                        </h2>
+                        <app-photos-grid
+                            [images]="photos"
+                            [totalCount]="
+                                (mediaStoreService.backdropsTotalCount$
+                                    | async)!
+                            "
+                            aspectRatio="16 / 9"
+                            (photoClick)="openPhotoViewer($event)"
+                        />
+                    </section>
+                }
+            }
+
+            @if ((mediaStoreService.recommendations$ | async)?.length) {
+                <section class="recommendations-section">
+                    <h2 class="section-title">More Like This</h2>
+                    <app-carousel
+                        [items]="
+                            (mediaStoreService.recommendations$ | async)!
+                                | sort: 'vote_average'
+                        "
+                        [numVisible]="8"
+                        [numScroll]="8"
+                    >
+                        <ng-template let-media>
+                            <app-card [item]="media" />
+                        </ng-template>
+                    </app-carousel>
+                </section>
+            }
+            <section class="details-section">
+                <h2 class="section-title">Details</h2>
+                <ul class="details-list list-none pl-0 m-0">
+                    @if (vm.releaseDate) {
+                        <li class="details-row">
+                            <span class="details-label">Released</span>
+                            <span>{{ vm.releaseDate | date }}</span>
+                        </li>
+                    }
+
+                    @if (vm.firstAirDate) {
+                        <li class="details-row">
+                            <span class="details-label">First Aired</span>
+                            <span>{{ vm.firstAirDate | date }}</span>
+                        </li>
+                    }
+
+                    @if (vm.lastAirDate) {
+                        <li class="details-row">
+                            <span class="details-label">Last Aired</span>
+                            <span>{{ vm.lastAirDate | date }}</span>
+                        </li>
+                    }
+
+                    @if (vm.runtime) {
+                        <li class="details-row">
+                            <span class="details-label">Runtime</span>
+                            <span>{{ vm.runtime | m2h }}</span>
+                        </li>
+                    }
+
+                    @if (vm.budget) {
+                        <li class="details-row">
+                            <span class="details-label">Budget</span>
+                            <span>${{ vm.budget | number }}</span>
+                        </li>
+                    }
+
+                    @if (vm.revenue) {
+                        <li class="details-row">
+                            <span class="details-label">Revenue</span>
+                            <span>${{ vm.revenue | number }}</span>
+                        </li>
+                    }
+
+                    @if (vm.numberOfSeasons) {
+                        <li class="details-row">
+                            <span class="details-label">Seasons</span>
+                            <span>{{ vm.numberOfSeasons }}</span>
+                        </li>
+                    }
+
+                    @if (vm.numberOfEpisodes) {
+                        <li class="details-row">
+                            <span class="details-label">Episodes</span>
+                            <span>{{ vm.numberOfEpisodes }}</span>
+                        </li>
+                    }
+
+                    @if (vm.status) {
+                        <li class="details-row">
+                            <span class="details-label">Status</span>
+                            <span>{{ vm.status }}</span>
+                        </li>
+                    }
+
+                    @if (vm.languages.length) {
+                        <li class="details-row">
+                            <span class="details-label">Languages</span>
+                            <span>{{ vm.languages.join(", ") }}</span>
+                        </li>
+                    }
+
+                    @if (vm.networks?.length) {
+                        <li class="details-row">
+                            <span class="details-label">Networks</span>
+                            <span>
+                                @for (
+                                    network of vm.networks;
+                                    track network.id;
+                                    let i = $index
+                                ) {
+                                    {{ network.name }}
+                                    @if (i !== vm.networks!.length - 1) {
+                                        <span>, </span>
+                                    }
+                                }
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </section>
         </div>
-      }
     }
-    @if ((mediaStoreService.recommendations$ | async)?.length) {
-      <div>
-        <h2 class="md:px-4 px-2">More Like This</h2>
-        <p-carousel
-          [value]="
-            (mediaStoreService.recommendations$ | async)! | sort: 'vote_average'
-          "
-          [numVisible]="8"
-          [numScroll]="8"
-          [showIndicators]="false"
-          [responsiveOptions]="breakpoints"
-        >
-          <ng-template let-media pTemplate="item">
-            <app-card [item]="media"></app-card>
-          </ng-template>
-        </p-carousel>
-      </div>
-    }
-  </div>
 </div>

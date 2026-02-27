@@ -1,31 +1,50 @@
 @use "responsive.scss" as *;
 
-.actor-card {
-  transition:
-    transform 0.25s ease-in-out,
-    opacity 0.25s ease-in-out;
-  &:hover {
-    opacity: 0.6;
-  }
+.person-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.2s ease;
 
-  img {
-    background-position: center;
-    object-fit: cover;
-    width: 150px;
-    height: 150px;
-    border-radius: 9999px;
-  }
+    &:hover {
+        opacity: 0.8;
+    }
+}
 
-  .secondary {
-    color: var(--p-text-muted-color);
-  }
+.photo-wrap {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+    transition: border-color 0.25s ease;
+
+    app-media-thumb {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+}
+
+.name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 8px 0 0;
+    color: var(--mat-sys-on-surface);
+}
+
+.character {
+    font-size: 0.78rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin: 3px 0 0;
 }
 
 @include mobile() {
-  .actor-card {
-    img {
-      width: 100px;
-      height: 100px;
+    .photo-wrap {
+        width: 120px;
+        height: 120px;
     }
-  }
 }

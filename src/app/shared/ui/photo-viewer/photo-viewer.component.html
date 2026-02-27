@@ -1,0 +1,60 @@
+@if (activeImage$ | async; as image) {
+    <div class="container">
+        <div class="topbar">
+            <span class="counter">{{ counter$ | async }}</span>
+            <button
+                class="close"
+                mat-icon-button
+                (click)="close()"
+                aria-label="Close"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="main">
+            <button
+                class="nav-button left-button"
+                mat-icon-button
+                (click)="prev()"
+                [disabled]="!(hasPrev$ | async)"
+                aria-label="Previous photo"
+            >
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            <img
+                class="image"
+                [src]="image.file_path ?? '' | imgSrc: 'w1280'"
+                alt=""
+            />
+
+            <button
+                class="nav-button right-button"
+                mat-icon-button
+                (click)="next()"
+                [disabled]="!(hasNext$ | async)"
+                aria-label="Next photo"
+            >
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+        </div>
+
+        <div class="meta">
+            @if (image.caption) {
+                <span class="caption">{{ image.caption }}</span>
+                <span class="separator">·</span>
+            }
+            @if (image.width && image.height) {
+                <span> {{ image.width }} × {{ image.height }} </span>
+            }
+            @if (image.vote_average && image.vote_average > 0) {
+                <span class="separator">·</span>
+                <app-rating [value]="image.vote_average"></app-rating>
+                @if (image.vote_count && image.vote_count > 0) {
+                    <span class="votes">({{ image.vote_count }})</span>
+                }
+            }
+        </div>
+    </div>
+}

@@ -1,0 +1,37 @@
+:root {
+    --font-size-xl: 2rem;
+    --font-size-lg: 1.25rem;
+    --font-size-base: 0.9rem;
+    --font-size-sm: 0.8rem;
+
+    --primary-color: #ef5350;
+    --mat-sys-primary: #ef5350;
+    --mat-sys-on-primary: #ffffff;
+
+    --mat-sys-on-surface: #ffffff;
+    --mat-sys-on-surface-variant: #a1a1aa;
+
+    --mat-sys-surface: #09090b;
+    --mat-sys-surface-dim: #18181b;
+    --mat-sys-surface-bright: #27272a;
+    --mat-sys-surface-container-lowest: #09090b;
+    --mat-sys-surface-container-low: #1f1f22;
+    --mat-sys-surface-container: #27272a;
+    --mat-sys-surface-container-high: #2d2d30;
+    --mat-sys-surface-container-highest: #3f3f46;
+
+    --mat-sys-outline: #3f3f46;
+    --mat-sys-outline-variant: rgba(255, 255, 255, 0.06);
+
+    --mat-chip-elevated-container-color: var(--primary-color);
+    --mat-chip-container-shape-radius: 4px;
+    --mat-chip-focus-state-layer-color: var(--primary-color);
+    --mat-chip-label-text-size: 0.75rem;
+    --mat-chip-label-text-weight: 600;
+    --mat-chip-label-text-tracking: 0.5px;
+    --mat-chip-container-height: 22px;
+    --mat-chip-outline-width: 0;
+    --mat-chip-label-text-color: var(--mat-sys-on-surface);
+
+    --mat-divider-color: var(--mat-sys-on-primary);
+}

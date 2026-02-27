@@ -1,0 +1,212 @@
+@use "responsive.scss" as *;
+
+:host {
+    display: block;
+}
+
+:host ::ng-deep {
+    .episodes-page {
+        background-color: var(--mat-sys-surface);
+        min-height: 100vh;
+
+        .muted {
+            color: var(--mat-sys-on-surface-variant);
+        }
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0.5rem 0 1.5rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    // ---- Featured row ----
+
+    .featured-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .featured-card {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--mat-sys-surface-container);
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+
+        app-media-thumb {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+        }
+
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.6rem;
+        z-index: 1;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 3px 8px;
+        border-radius: 4px;
+
+        &--top {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        &--recent {
+            background: #f59e0b;
+            color: #000;
+        }
+    }
+
+    .featured-info {
+        padding: 0.6rem 0.75rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .featured-ep-label {
+        font-size: 0.72rem;
+        color: var(--mat-sys-on-surface-variant);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .featured-ep-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        transition: color 0.15s ease;
+    }
+
+    .featured-row .featured-card:hover .featured-ep-title {
+        color: var(--primary-color);
+    }
+
+    // ---- Season header ----
+
+    .season-header {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+
+    .season-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    // ---- Episode list ----
+
+    .episode-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .episode-row {
+        display: flex;
+        gap: 1rem;
+        padding: 0.875rem 0;
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
+        text-decoration: none;
+        color: inherit;
+
+        &:first-child {
+            border-top: 1px solid var(--mat-sys-outline-variant);
+        }
+
+        &:hover .episode-title {
+            color: var(--primary-color);
+        }
+
+        app-media-thumb {
+            flex-shrink: 0;
+            width: 200px;
+            aspect-ratio: 16 / 9;
+            border-radius: 6px;
+        }
+    }
+
+    .episode-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-width: 0;
+    }
+
+    .episode-label {
+        font-size: 0.75rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .episode-title {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .episode-overview {
+        font-size: 0.85rem;
+        color: var(--mat-sys-on-surface-variant);
+        margin: 0.15rem 0 0;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    // ---- Mobile ----
+
+    @include mobile() {
+        .page-title {
+            font-size: 1.4rem;
+        }
+
+        .featured-row {
+            grid-template-columns: 1fr;
+        }
+
+        .episode-row {
+            app-media-thumb {
+                width: 110px;
+            }
+        }
+
+        .episode-title {
+            font-size: 0.9rem;
+        }
+    }
+}

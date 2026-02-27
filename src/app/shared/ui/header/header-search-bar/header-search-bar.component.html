@@ -1,0 +1,93 @@
+<div class="search-container" [class.search-open]="searchOpen">
+    <div class="search-wrap">
+        <mat-form-field
+            class="filter-field"
+            appearance="outline"
+            subscriptSizing="dynamic"
+        >
+            <mat-select
+                [(value)]="searchFilter"
+                (selectionChange)="setFilter(searchFilter)"
+            >
+                @for (opt of filterOptions; track opt.value) {
+                    <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+            class="search-field"
+            appearance="outline"
+            subscriptSizing="dynamic"
+        >
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+                cdkTrapFocus
+                [cdkTrapFocusAutoCapture]="true"
+                matInput
+                [formControl]="searchControl"
+                (focus)="onSearchFocus()"
+                (input)="search(searchControl.value)"
+                placeholder="Search movies, TV shows, people…"
+                autocomplete="off"
+            />
+            <button
+                matSuffix
+                mat-icon-button
+                class="search-close-btn"
+                (click)="closeSearch()"
+                aria-label="Close"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
+    </div>
+
+    @if (showSearchDropdown && searchResults.length) {
+        <div class="search-dropdown">
+            @for (item of searchResults; track item.id) {
+                <div class="search-result" (click)="navigateToResult(item)">
+                    <app-media-thumb
+                        class="result-thumb"
+                        [src]="item.thumb"
+                        [type]="
+                            item.mediaType === 'person' ? 'person' : 'media'
+                        "
+                        [alt]="item.title"
+                    />
+                    <div class="result-info">
+                        <div class="result-meta">
+                            <mat-chip>{{ item.mediaType }}</mat-chip>
+                            @if (item.year) {
+                                <span class="result-year">{{ item.year }}</span>
+                            }
+                            @if (item.rating && item.rating > 0) {
+                                <app-rating [value]="item.rating" />
+                            }
+                            @if (item.department) {
+                                <span class="result-dept">{{
+                                    item.department
+                                }}</span>
+                            }
+                        </div>
+                        <span class="result-title">{{ item.title }}</span>
+                        @if (item.overview) {
+                            <span class="result-overview">{{
+                                item.overview
+                            }}</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<button
+    mat-icon-button
+    class="search-toggle-btn"
+    (click)="searchOpen = !searchOpen"
+    aria-label="Search"
+>
+    <mat-icon>search</mat-icon>
+</button>

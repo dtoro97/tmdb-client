@@ -1,148 +1,115 @@
-import { get } from 'lodash';
-import { SelectModule } from 'primeng/select';
-import { TabsModule } from 'primeng/tabs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  map,
-  Observable,
-  switchMap,
-  tap,
-} from 'rxjs';
-
 import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatPaginatorModule } from '@angular/material/paginator';
+
+import { take, switchMap, tap } from 'rxjs';
+
+import type { ViewerImage } from '../../../shared';
 import { CAROUSEL_BREAKPOINTS } from '../../../constants';
 import {
-  AgePipe,
-  CardComponent,
-  ConfigStoreService,
-  CreditsListComponent,
-  FilterPipe,
-  ImagePipe,
-  IOption,
-  SocialLinksComponent,
-  SortPipe,
+    AgePipe,
+    CardComponent,
+    CarouselComponent,
+    MediaThumbComponent,
+    PhotoViewerComponent,
+    PhotosGridComponent,
+    PillToggleComponent,
+    RatingComponent,
+    SocialLinksComponent,
+    SortPipe,
 } from '../../../shared';
+import { ImagePipe } from '../../../shared/pipes/image.pipe';
 import { PersonDetailStoreService } from '../person-store.service';
-import { PersonCombinedCredits } from '../../../api';
 
 @Component({
-  selector: 'app-person-details',
-  imports: [
-    ImagePipe,
-    TabsModule,
-    SelectModule,
-    AsyncPipe,
-    CardComponent,
-    SortPipe,
-    CreditsListComponent,
-    FilterPipe,
-    AgePipe,
-    SocialLinksComponent,
-    FormsModule,
-    DatePipe,
-  ],
-  providers: [PersonDetailStoreService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './person-details.component.html',
-  styleUrl: './person-details.component.scss',
+    selector: 'app-person-details',
+    imports: [
+        AsyncPipe,
+        DatePipe,
+        RouterLink,
+        MatChipsModule,
+        MatDialogModule,
+        MatExpansionModule,
+        MatPaginatorModule,
+        CarouselComponent,
+        CardComponent,
+        MediaThumbComponent,
+        PhotosGridComponent,
+        PillToggleComponent,
+        RatingComponent,
+        SocialLinksComponent,
+        ImagePipe,
+        AgePipe,
+        SortPipe,
+    ],
+    providers: [PersonDetailStoreService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './person-details.component.html',
+    styleUrl: './person-details.component.scss',
 })
 export class PersonDetailsComponent {
-  person$ = this.personDetailStore.person$;
-  images$ = this.personDetailStore.images$;
-  credits$ = this.personDetailStore.credits$;
-  links$ = this.personDetailStore.links$;
-  isDarkMode$ = this.configStoreService.isDarkMode$;
-  breakpoints = CAROUSEL_BREAKPOINTS;
-  tabs$: Observable<{ title: string; value: string; visible: boolean }[]>;
-  activeTab$: Observable<string>;
-  hasCredits$ = this.personDetailStore.hasCredits$;
-  creditsOptions$: Observable<IOption[]>;
-  visibleCredits$: BehaviorSubject<string>;
-  knownFor$;
-  constructor(
-    private scroller: ViewportScroller,
-    private titleService: Title,
-    private router: Router,
-    private route: ActivatedRoute,
-    private personDetailStore: PersonDetailStoreService,
-    private configStoreService: ConfigStoreService,
-  ) {
-    this.tabs$ = this.credits$.pipe(map((credits) => this.getTabs(credits)));
-    this.activeTab$ = this.route.params.pipe(
-      map((params) => get(params, 'tabId')),
-    );
-    this.route.paramMap
-      .pipe(
-        switchMap((paramMap) => {
-          return this.personDetailStore.getPersonDetails$(
-            Number(paramMap.get('personId')!),
-          );
-        }),
-      )
-      .subscribe();
-    this.person$ = this.person$.pipe(
-      tap((person) => {
-        this.titleService.setTitle(`${person.name} | People`);
-        this.scroller.scrollToPosition([0, 0]);
-      }),
-    );
-    this.creditsOptions$ = this.credits$.pipe(
-      map((credits) => this.getCreditOptions(credits)),
-    );
-    this.visibleCredits$ = new BehaviorSubject('cast');
-    this.knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
-      map(([visible, credits]) => {
-        if (visible) {
-          return get(credits, visible);
-        }
-      }),
-    );
-  }
+    bioExpanded = false;
 
-  changeTab(tab: string): void {
-    this.router.navigate([`../${tab}`], { relativeTo: this.route });
-  }
+    constructor(
+        public personDetailStore: PersonDetailStoreService,
+        private scroller: ViewportScroller,
+        private titleService: Title,
+        private route: ActivatedRoute,
+        private dialog: MatDialog,
+    ) {
+        this.route.paramMap
+            .pipe(
+                switchMap((paramMap) => {
+                    this.bioExpanded = false;
+                    return this.personDetailStore.getPersonDetails$(
+                        Number(paramMap.get('personId')!),
+                    );
+                }),
+            )
+            .subscribe();
 
-  changeVisibleCredits(value: string) {
-    this.visibleCredits$.next(value);
-  }
-
-  private getVisibleCredits(credits: PersonCombinedCredits): string {
-    if (credits?.cast?.length) {
-      return 'cast';
-    } else if (credits?.crew?.length) {
-      return 'crew';
+        this.personDetailStore.person$
+            .pipe(
+                tap((person) => {
+                    this.titleService.setTitle(`${person.name} | People`);
+                    this.scroller.scrollToPosition([0, 0]);
+                }),
+            )
+            .subscribe();
     }
-    return '';
-  }
 
-  private getCreditOptions(credits: PersonCombinedCredits): IOption[] {
-    const options = [];
-    if (credits?.cast?.length) {
-      options.push({ label: 'Cast', value: 'cast' });
+    openPhotoViewer(index: number): void {
+        this.personDetailStore.allPhotos$
+            .pipe(take(1))
+            .subscribe((images: ViewerImage[]) => {
+                this.dialog.open(PhotoViewerComponent, {
+                    data: { images, activeIndex: index },
+                    panelClass: 'photo-viewer-panel',
+                    maxWidth: '100vw',
+                    maxHeight: '100vh',
+                    width: '100vw',
+                    height: '100vh',
+                    autoFocus: false,
+                });
+            });
     }
-    if (credits?.crew?.length) {
-      options.push({ label: 'Production', value: 'crew' });
+
+    toggleBio(): void {
+        this.bioExpanded = !this.bioExpanded;
     }
-    return options;
-  }
-  private getTabs(credits: PersonCombinedCredits) {
-    return [
-      { title: 'Known For', value: 'overview', visible: true },
-      {
-        title: 'Credits',
-        value: 'credits',
-        visible:
-          (Boolean(credits!.cast) && credits!.cast!.length > 0) ||
-          (Boolean(credits!.crew) && credits!.crew!.length > 0),
-      },
-      { title: 'Photos', value: 'photos', visible: true },
-    ];
-  }
+
+    isBioLong(bio: string): boolean {
+        return bio.length > 300;
+    }
+
+    changeVisibleCredits(value: string): void {
+        this.personDetailStore.updateVisibleCredits(value as 'cast' | 'crew');
+    }
 }

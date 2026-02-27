@@ -1,43 +1,88 @@
-<div class="w-full header">
-  <p-menubar [model]="items">
-    <ng-template #end>
-      <div class="flex flex-row align-items-center gap-1">
-        <p-autocomplete
-          #searchBar
-          (onSelect)="onSearchSelect(searchBar)"
-          [suggestions]="searchResults$ | async"
-          (completeMethod)="search($event.query)"
-          placeholder="Search..."
-        >
-          <ng-template let-item #item>
-            <div
-              class="flex flex-row w-full autocomplete-item"
-              [routerLink]="['title', item.id, item.media_type, 'overview']"
+<nav class="navbar" #navbarEl>
+    <div class="navbar-inner inner-container">
+        <a class="logo" routerLink="/">
+            <mat-icon class="logo-icon">movie</mat-icon>
+            <span class="logo-text">TMDB</span>
+        </a>
+
+        <button class="menu-btn" (click)="toggleMenu()">
+            <mat-icon>menu</mat-icon>
+            <span class="menu-label">Menu</span>
+        </button>
+
+        <div class="spacer"></div>
+
+        <div class="navbar-actions">
+            <app-header-search-bar />
+
+            <!-- <button
+                mat-icon-button
+                class="theme-btn"
+                (click)="toggleDarkMode()"
+                aria-label="Toggle theme"
             >
-              <img
-                class="border-round-md"
-                src="{{ item.poster_path || item.profile_path | imgSrc }}"
-              />
-              <div class="flex flex-column pl-3 pr-3 overflow-hidden text-wrap">
-                <span class="font-bold pb-1 result-title">
-                  {{ item.title || item.name }}
-                </span>
-                <span class="text-sm pb-3">{{
-                  item.release_date || item.first_air_date | date: "yyyy"
-                }}</span>
-              </div>
+                <mat-icon>{{
+                    (isDarkMode$ | async) ? "light_mode" : "dark_mode"
+                }}</mat-icon>
+            </button> -->
+        </div>
+    </div>
+
+    @if (menuOpen) {
+        <div class="mega-menu">
+            <div class="mega-inner inner-container">
+                <div class="mega-col">
+                    <h4 class="mega-heading">MOVIES</h4>
+                    <ul>
+                        @for (item of movieItems; track item.label) {
+                            <li>
+                                <a
+                                    [routerLink]="item.routerLink"
+                                    [queryParams]="item.queryParams"
+                                    (click)="onNavLinkClick()"
+                                    >{{ item.label }}</a
+                                >
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="mega-col">
+                    <h4 class="mega-heading">TV SHOWS</h4>
+                    <ul>
+                        @for (item of tvItems; track item.label) {
+                            <li>
+                                <a
+                                    [routerLink]="item.routerLink"
+                                    [queryParams]="item.queryParams"
+                                    (click)="onNavLinkClick()"
+                                    >{{ item.label }}</a
+                                >
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="mega-col">
+                    <h4 class="mega-heading">PEOPLE</h4>
+                    <ul>
+                        <li>
+                            <a
+                                routerLink="/discover/person"
+                                (click)="onNavLinkClick()"
+                                >Popular People</a
+                            >
+                        </li>
+                    </ul>
+                </div>
             </div>
-          </ng-template>
-        </p-autocomplete>
-        <p-button
-          icon="{{
-            (isDarkMode$ | async) ? 'fa-regular fa-sun' : 'fa-solid fa-moon'
-          }}"
-          [text]="true"
-          severity="secondary"
-          (click)="toggleDarkMode()"
-        ></p-button>
-      </div>
-    </ng-template>
-  </p-menubar>
-</div>
+
+            <div class="mega-footer">
+                <a routerLink="/" (click)="onNavLinkClick()">
+                    <mat-icon>home</mat-icon>
+                    Home
+                </a>
+            </div>
+        </div>
+    }
+</nav>

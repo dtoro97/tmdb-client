@@ -1,10 +1,17 @@
 <div
-  class="actor-card flex flex-column align-items-center cursor-pointer"
-  [routerLink]="['/name', person.id, 'overview']"
+    class="person-card"
+    [routerLink]="['/name', person.id]"
 >
-  <img src="{{ person.profile_path | imgSrc }}" />
-  <p class="font-medium text-lg text-center mb-0">{{ person.name }}</p>
-  <p class="text-sm text-center mt-1 px-3 secondary">
-    {{ person.character }}
-  </p>
+    <div class="photo-wrap">
+        <app-media-thumb
+            [src]="person.profile_path"
+            type="person"
+            [alt]="person.name"
+        />
+    </div>
+
+    <p class="name">{{ person.name }}</p>
+    @if (person.character) {
+        <p class="character">{{ person.character }}</p>
+    }
 </div>

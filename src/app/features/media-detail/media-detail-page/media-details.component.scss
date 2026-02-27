@@ -1,126 +1,463 @@
 @use "responsive.scss" as *;
 
 :host ::ng-deep {
-  .details-container {
-    .muted {
-      color: var(--p-text-muted-color);
-    }
-    .backdrop-photo {
-      width: 250px;
-    }
-    .poster-photo {
-      width: 200px;
-    }
-    .p-tablist-tab-list {
-      justify-content: center;
-    }
-    .media-info-label {
-      width: 120px;
-    }
-    .episode-item {
-      .muted {
-        color: var(--p-text-muted-color);
-      }
-      .name {
-        strong {
-          color: var(--p-primary-color);
+    .details-container {
+        background-color: var(--mat-sys-surface);
+
+        // ---- Shared utilities ----
+
+        .muted {
+            color: var(--mat-sys-on-surface-variant);
         }
-      }
-      img {
-        height: auto;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: cover;
-      }
-    }
 
-    @include mobile() {
-      .backdrop-photo {
-        width: 160px;
-      }
-      .poster-photo {
-        width: 120px;
-      }
-      .video-frame {
-        width: 360px !important;
-        height: 200px !important;
+        // ---- Section headings (IMDB-style left accent) ----
 
-        .iframe {
-          width: 360px !important;
-          height: 200px !important;
+        .section-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin: 0 0 1rem;
+            padding-left: 0.75rem;
+            border-left: 3px solid var(--primary-color);
         }
-      }
 
-      .backdrop-image {
-        max-width: 100%;
-        height: 296px;
-        vertical-align: middle;
-      }
+        // ---- Hero ----
 
-      .info-container {
-        margin-top: -8rem !important;
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 520px;
+            display: flex;
+            align-items: flex-end;
 
-        .poster-image {
-          max-width: 130px !important;
+            &__backdrop {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center top;
+                display: block;
+            }
+
+            &__gradient {
+                position: absolute;
+                inset: 0;
+                background:
+                    // Left fade: makes info text readable against the image
+                    linear-gradient(
+                        to right,
+                        var(--mat-sys-surface) 30%,
+                        transparent 70%
+                    ),
+                    // Bottom fade: strong fade where content sits
+                    linear-gradient(
+                            to top,
+                            var(--mat-sys-surface) 15%,
+                            rgba(0, 0, 0, 0.5) 55%,
+                            transparent
+                        );
+            }
+
+            &__content {
+                position: relative;
+                z-index: 1;
+                width: 100%;
+                display: flex;
+                align-items: flex-end;
+                gap: 2.5rem;
+                padding-top: 5rem;
+                padding-bottom: 2.5rem;
+            }
+
+            &__poster {
+                flex-shrink: 0;
+                width: 220px;
+                max-height: 330px;
+            }
+
+            &__info {
+                flex: 1;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            &__title {
+                font-size: var(--font-size-xl);
+                font-weight: 700;
+                margin: 0;
+                line-height: 1.2;
+            }
+
+            &__year {
+                color: var(--mat-sys-on-surface-variant);
+                margin: 0.25rem 0 0;
+                font-size: var(--font-size-base);
+            }
+
+            &__overview {
+                max-width: 580px;
+                font-size: var(--font-size-base);
+                margin-bottom: 0;
+            }
         }
-      }
-    }
-    background-color: var(--p-surface-0);
 
-    &.dark {
-      background-color: var(--p-zinc-950);
-      .gradient-cover {
-        background-image: linear-gradient(
-          to top,
-          rgb(9, 9, 11),
-          rgba(9, 9, 11, 0.2) 50%,
-          rgba(0, 0, 0, 0.2) 70%
-        );
-      }
-    }
-    .backdrop-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      color: transparent;
-    }
+        // ---- Cast section ----
 
-    .gradient-cover {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: linear-gradient(
-        to top,
-        var(--p-surface-0),
-        rgb(246 248 253 / 0.2) 50%,
-        rgb(246 248 253 / 0.05) 70%
-      );
-    }
-
-    .info-container {
-      margin-top: -20rem;
-      .p-chip {
-        a {
-          text-decoration: none;
-          color: var(--p-text-color);
+        .crew-rows {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            border-top: 1px solid var(--mat-sys-outline-variant);
+            padding-top: 0.5rem;
         }
-      }
 
-      .poster-image {
-        max-width: 350px;
-      }
+        .crew-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+            padding: 0.35rem 0;
+            font-size: var(--font-size-base);
+        }
+
+        .crew-row-label {
+            width: 80px;
+            flex-shrink: 0;
+            color: var(--mat-sys-on-surface-variant);
+        }
+
+        .crew-row-names {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .crew-row-link {
+            color: var(--mat-sys-on-surface);
+            text-decoration: none;
+
+            &:hover {
+                color: var(--primary-color);
+            }
+        }
+
+        .crew-row-sep {
+            color: var(--mat-sys-on-surface-variant);
+        }
+
+        .crew-row-all {
+            text-decoration: none;
+            color: var(--mat-sys-on-surface);
+            cursor: pointer;
+            justify-content: space-between;
+            border-top: 1px solid var(--mat-sys-outline-variant);
+            margin-top: 0.15rem;
+            padding-top: 0.5rem;
+
+            .crew-row-label {
+                width: auto;
+                color: var(--mat-sys-on-surface);
+                font-weight: 500;
+            }
+
+            &:hover .crew-row-label {
+                color: var(--primary-color);
+            }
+        }
+
+        .crew-row-chevron {
+            font-size: var(--font-size-sm);
+            color: var(--mat-sys-on-surface-variant);
+        }
+
+        // ---- Episodes section ----
+
+        .browse-episodes-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: var(--font-size-base);
+            white-space: nowrap;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .episode-preview-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .episode-preview-card {
+            display: flex;
+            gap: 1rem;
+            padding: 0.875rem 0;
+            border-bottom: 1px solid var(--mat-sys-outline-variant);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+
+            &:first-child {
+                border-top: 1px solid var(--mat-sys-outline-variant);
+            }
+
+            &:hover .episode-preview-still {
+                opacity: 0.8;
+            }
+
+            &:hover .episode-preview-title {
+                color: var(--primary-color);
+            }
+        }
+
+        .episode-preview-still {
+            flex-shrink: 0;
+            width: 160px;
+            aspect-ratio: 16 / 9;
+            border-radius: 6px;
+        }
+
+        .episode-preview-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+
+        .episode-preview-label {
+            font-size: var(--font-size-sm);
+            color: var(--primary-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .episode-preview-title {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+        }
+
+        .episode-preview-overview {
+            font-size: var(--font-size-sm);
+            color: var(--mat-sys-on-surface-variant);
+            margin: 0.1rem 0 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        // ---- Section heading count ----
+
+        .section-count {
+            font-size: var(--font-size-base);
+            font-weight: 400;
+            color: var(--mat-sys-on-surface-variant);
+            margin-left: 0.4rem;
+        }
+
+        // ---- Videos section ----
+
+        .videos-featured {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .video-thumb {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+
+            &__img {
+                position: relative;
+                aspect-ratio: 16 / 9;
+                overflow: hidden;
+                border-radius: 8px;
+                background: #000;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    opacity: 0.85;
+                    transition: opacity 0.2s ease;
+                }
+            }
+
+            &:hover &__img img {
+                opacity: 0.65;
+            }
+
+            &__play {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                i {
+                    width: 48px;
+                    height: 48px;
+                    background: rgba(0, 0, 0, 0.55);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: var(--font-size-base);
+                    color: #fff;
+                    padding-left: 3px; // optical center for play icon
+                }
+
+                &--sm i {
+                    width: 36px;
+                    height: 36px;
+                    font-size: var(--font-size-sm);
+                }
+            }
+
+            &__badge {
+                position: absolute;
+                bottom: 0.5rem;
+                left: 0.5rem;
+                background: rgba(0, 0, 0, 0.65);
+                color: rgba(255, 255, 255, 0.8);
+                font-size: var(--font-size-sm);
+                padding: 2px 6px;
+                border-radius: 3px;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+            }
+
+            &__name {
+                margin: 0.4rem 0 0;
+                font-size: var(--font-size-sm);
+                line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            &__more {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.75rem;
+                font-weight: 600;
+                color: #fff;
+            }
+        }
+
+        // ---- Details section ----
+
+        .details-list {
+            border-top: 1px solid var(--mat-sys-outline-variant);
+        }
+
+        .details-row {
+            display: flex;
+            align-items: baseline;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--mat-sys-outline-variant);
+            line-height: 1.5;
+        }
+
+        .details-label {
+            width: 130px;
+            flex-shrink: 0;
+            color: var(--mat-sys-on-surface-variant);
+            font-size: var(--font-size-sm);
+        }
+
+        .details-link {
+            color: var(--primary-color);
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        // ---- Mobile overrides ----
+
+        @include mobile() {
+            .hero {
+                min-height: auto;
+                display: block;
+
+                &__backdrop {
+                    position: relative;
+                    inset: unset;
+                    height: 220px;
+                }
+
+                &__gradient {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 220px;
+                    // Only bottom fade on mobile; no side fade needed
+                    background: linear-gradient(
+                        to top,
+                        var(--mat-sys-surface) 5%,
+                        rgba(0, 0, 0, 0.3) 60%,
+                        transparent
+                    );
+                }
+
+                &__content {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 1rem;
+                    padding-top: 1rem;
+                    padding-bottom: 1.5rem;
+                }
+
+                &__poster {
+                    width: 110px;
+                    max-height: 165px;
+                    margin-top: -3.5rem;
+                }
+
+                &__title {
+                    font-size: 1.4rem;
+                }
+
+                &__overview {
+                    max-width: 100%;
+                }
+            }
+
+            .details-label {
+                width: 110px;
+            }
+
+            .episode-preview-still {
+                width: 100px;
+                aspect-ratio: 16 / 9;
+            }
+
+            .videos-featured,
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     }
-
-    .video-frame {
-      width: 500px !important;
-      height: 300px !important;
-
-      .iframe {
-        width: 500px !important;
-        height: 300px !important;
-      }
-    }
-  }
 }

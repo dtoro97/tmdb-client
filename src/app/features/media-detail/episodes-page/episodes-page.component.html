@@ -1,0 +1,130 @@
+<div class="episodes-page pb-8">
+    <div class="inner-container pt-5">
+        @if (mediaStoreService.viewModel$ | async; as vm) {
+            <a class="back-link mb-5" [routerLink]="['../']">
+                <i class="fa-solid fa-chevron-left"></i>
+                Back to {{ vm.title }}
+            </a>
+
+            <h1 class="page-title">Episodes</h1>
+        }
+
+        <div class="featured-row mb-5">
+            @if (mediaStoreService.topRatedEpisode$ | async; as top) {
+                <a
+                    class="featured-card"
+                    [routerLink]="[top.season_number, top.episode_number]"
+                >
+                    <span class="featured-badge featured-badge--top"
+                        >Top Rated</span
+                    >
+                    <app-media-thumb
+                        class="featured-still"
+                        [src]="top.still_path ?? null"
+                    />
+                    <div class="featured-info">
+                        <span class="featured-ep-label"
+                            >S{{ top.season_number }}E{{
+                                top.episode_number
+                            }}</span
+                        >
+                        <span class="featured-ep-title">{{ top.name }}</span>
+                        <app-rating [value]="top.vote_average ?? 0" />
+                    </div>
+                </a>
+            }
+
+            @if (mediaStoreService.latestEpisode$ | async; as latest) {
+                <a
+                    class="featured-card"
+                    [routerLink]="[latest.season_number, latest.episode_number]"
+                >
+                    <span class="featured-badge featured-badge--recent"
+                        >Most Recent</span
+                    >
+                    <app-media-thumb
+                        class="featured-still"
+                        [src]="latest.still_path ?? null"
+                    />
+                    <div class="featured-info">
+                        <span class="featured-ep-label"
+                            >S{{ latest.season_number }}E{{
+                                latest.episode_number
+                            }}</span
+                        >
+                        <span class="featured-ep-title">{{ latest.name }}</span>
+                        <span class="muted text-sm">{{
+                            latest.air_date | date
+                        }}</span>
+                    </div>
+                </a>
+            }
+        </div>
+        <div class="season-header mb-3">
+            <h2 class="season-title">
+                @if (mediaStoreService.selectedSeason$ | async; as sel) {
+                    Season {{ sel }}
+                }
+            </h2>
+            <span class="muted text-sm">
+                {{ mediaStoreService.seasonEpisodesCount$ | async }} episodes
+            </span>
+        </div>
+
+        <div class="mb-4">
+            <app-pill-toggle
+                [options]="(mediaStoreService.seasonPillOptions$ | async) ?? []"
+                [selectedValue]="mediaStoreService.selectedSeason$ | async"
+                (selected)="changeSeason($event)"
+            />
+        </div>
+
+        <div class="episode-list">
+            @for (
+                episode of mediaStoreService.seasonEpisodes$ | async;
+                track episode.id
+            ) {
+                <a
+                    class="episode-row"
+                    [routerLink]="[
+                        episode.season_number,
+                        episode.episode_number,
+                    ]"
+                >
+                    <app-media-thumb
+                        class="episode-still"
+                        [src]="episode.still_path ?? null"
+                    />
+                    <div class="episode-details">
+                        <span class="episode-label"
+                            >S{{ episode.season_number }}E{{
+                                episode.episode_number
+                            }}</span
+                        >
+                        <span class="episode-title">{{ episode.name }}</span>
+                        <div class="flex align-items-center gap-3">
+                            <span class="muted text-sm">{{
+                                episode.air_date | date
+                            }}</span>
+                            @if (episode.runtime) {
+                                <span class="muted text-sm"
+                                    >{{ episode.runtime }}m</span
+                                >
+                            }
+                            @if (
+                                episode.vote_average && episode.vote_average > 0
+                            ) {
+                                <app-rating [value]="episode.vote_average" />
+                            }
+                        </div>
+                        @if (episode.overview) {
+                            <p class="episode-overview">
+                                {{ episode.overview }}
+                            </p>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</div>

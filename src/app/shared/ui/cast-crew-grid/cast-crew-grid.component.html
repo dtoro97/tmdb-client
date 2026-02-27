@@ -1,0 +1,37 @@
+@if (cast.length) {
+    <section class="credit-section">
+        <h2 class="section-title">Cast</h2>
+        <div class="credit-table">
+            @for (member of cast; track member.id) {
+                <a class="credit-row cast-credit-row" [routerLink]="['/name', member.id]">
+                    <div class="cast-name-cell">
+                        <app-media-thumb
+                            class="cast-thumb"
+                            [src]="member.profile_path ?? null"
+                            [alt]="member.name"
+                            type="person"
+                        />
+                        <span class="credit-name">{{ member.name }}</span>
+                    </div>
+                    @if (member.character) {
+                        <span class="credit-role">{{ member.character }}</span>
+                    }
+                </a>
+            }
+        </div>
+    </section>
+}
+
+@for (group of groupedCrew; track group.department) {
+    <section class="credit-section">
+        <h2 class="section-title">{{ group.department }}</h2>
+        <div class="credit-table">
+            @for (member of group.members; track member.id) {
+                <a class="credit-row" [routerLink]="['/name', member.id]">
+                    <span class="credit-name">{{ member.name }}</span>
+                    <span class="credit-role">{{ member.job }}</span>
+                </a>
+            }
+        </div>
+    </section>
+}

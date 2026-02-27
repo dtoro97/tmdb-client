@@ -1,33 +1,31 @@
 @if (item) {
-  <div
-    class="card"
-    [routerLink]="[
-      '/title',
-      item.id,
-      type || $any(item).media_type,
-      'overview',
-    ]"
-  >
-    <img src="{{ item.poster_path || $any(item).profile_path | imgSrc }}" />
-    <div class="flex flex-column pl-3 pr-3 pb-3 pt-3">
-      <div class="flex justify-content-between flex-column">
-        <span class="font-bold pb-3">{{
-          $any(item).title || $any(item).name
-        }}</span>
-        <div class="w-full flex justify-content-between">
-          @if (item.vote_count || 0 > 0) {
-            <span class="pb-3"
-              ><i class="fa-solid fa-star"></i>&nbsp;{{
-                item.vote_average | number: "1.1-1"
-              }}</span
-            >
-          }
+    <div
+        class="card"
+        [routerLink]="['/title', item.id, type || item.media_type]"
+    >
+        <app-media-thumb
+            [src]="item.poster_path || item.profile_path"
+            [alt]="item.title || item.name"
+        />
 
-          <span class="font-light">{{
-            $any(item).release_date || $any(item).first_air_date | date: "yyyy"
-          }}</span>
+        @if (item.vote_average) {
+            <div class="rating-badge">
+                <i class="fa-solid fa-star"></i>
+                {{ item.vote_average | number: "1.1-1" }}
+            </div>
+        }
+
+        <div class="card-info">
+            <span class="title">{{ item.title || item.name }}</span>
+            <span class="year">{{
+                item.release_date || item.first_air_date | date: "yyyy"
+            }}</span>
+            @if (role) {
+                <span class="role">{{ role }}</span>
+            }
+            <div class="hover-details">
+                <p class="overview">{{ item.overview }}</p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 }

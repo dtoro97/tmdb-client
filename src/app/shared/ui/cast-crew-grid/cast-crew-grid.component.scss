@@ -1,0 +1,88 @@
+@use "responsive.scss" as *;
+
+.credit-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 3px solid var(--primary-color);
+}
+
+.credit-table {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.credit-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    color: inherit;
+    background: var(--mat-sys-surface-container-low);
+
+    &:nth-child(even) {
+        background: var(--mat-sys-surface-container);
+    }
+
+    &:hover {
+        background: var(--mat-sys-surface-container-high);
+    }
+
+    &:hover .credit-name {
+        color: var(--primary-color);
+    }
+}
+
+.cast-credit-row {
+    grid-template-columns: 1fr 1fr;
+}
+
+.cast-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.cast-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.credit-name {
+    font-weight: 500;
+    font-size: var(--font-size-base);
+    transition: color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.credit-role {
+    font-size: var(--font-size-base);
+    color: var(--mat-sys-on-surface-variant);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@include mobile() {
+    .credit-row {
+        grid-template-columns: 1fr;
+    }
+
+    .credit-role {
+        display: none;
+    }
+}

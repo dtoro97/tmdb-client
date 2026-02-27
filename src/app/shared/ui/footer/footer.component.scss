@@ -1,41 +1,75 @@
-footer {
-  background-color: var(--p-menubar-background);
-  border-top: 1px solid var(--p-menubar-border-color);
+.footer {
+    background: var(--mat-sys-surface);
+}
 
-  .inner-container {
-    max-width: 1400px;
-    margin: auto;
-    width: 100%;
+.footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 1.75rem;
 
     a {
-      color: var(--p-form-field-color);
-      text-decoration: none;
-      &:last-child {
-        transition: opacity 0.2s ease-in-out;
-        &:hover {
-          opacity: 0.6;
+        color: var(--mat-sys-on-surface-variant);
+        text-decoration: none;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: color 0.2s;
+
+        i {
+            font-size: 0.65rem;
+            opacity: 0.6;
         }
-      }
+
+        &:hover {
+            color: var(--mat-sys-on-surface);
+        }
+    }
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+
+    span {
+        font-size: 0.8rem;
+        color: var(--mat-sys-on-surface-variant);
+        opacity: 0.6;
     }
 
-    i {
-      font-size: 2rem;
-      cursor: pointer;
-      color: rgba(124, 124, 124, 0.596);
-      transition: color 0.2s ease-in-out;
+    a {
+        display: inline-flex;
+        align-items: center;
+        transition: opacity 0.2s;
 
-      &:hover {
-        color: white;
-      }
+        &:hover {
+            opacity: 0.7;
+        }
     }
 
-    p {
-      color: rgba(124, 124, 124, 0.596);
+    .tmdb-logo {
+        height: 18px;
+        width: auto;
+        opacity: 0.75;
     }
+}
 
-    svg {
-      width: 200px;
-      opacity: 0.8;
-    }
-  }
+.footer-copyright {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.5;
 }

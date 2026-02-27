@@ -1,0 +1,41 @@
+───────────────────────────────────────────────────────────────────── :root {
+    --mat-form-field-container-height: 36px;
+    --mat-form-field-container-vertical-padding: 6px;
+    --mdc-outlined-text-field-label-text-size: 0.8rem;
+
+    --mat-select-trigger-text-size: 0.8rem;
+    --mat-select-trigger-text-weight: 500;
+    --mat-select-enabled-trigger-text-color: var(--mat-sys-on-surface-variant);
+    --mat-select-enabled-arrow-color: var(--mat-sys-on-surface-variant);
+    --mat-select-focused-arrow-color: var(--mat-sys-on-surface-variant);
+    --mat-select-placeholder-text-color: var(--mat-sys-on-surface-variant);
+
+    --mat-select-panel-background-color: var(--mat-sys-surface-container);
+    --mat-select-container-elevation-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    --mat-option-label-text-size: 0.875rem;
+    --mat-option-label-text-weight: 400;
+    --mat-option-label-text-color: var(--mat-sys-on-surface-variant);
+    --mat-option-hover-state-layer-color: var(--mat-sys-outline-variant);
+    --mat-option-focus-state-layer-color: var(--mat-sys-outline-variant);
+    --mat-option-selected-state-label-text-color: var(--primary-color);
+    --mat-option-selected-state-layer-color: transparent;
+}
+
+.mat-mdc-select-panel {
+    border: 1px solid var(--mat-sys-outline) !important;
+    border-radius: 8px !important;
+    padding-block: 4px !important;
+    min-width: 120px !important;
+}
+
+.mat-mdc-option {
+    min-height: 38px !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+    .mdc-list-item__primary-text {
+        color: var(--primary-color) !important;
+        font-weight: 600 !important;
+    }
+}

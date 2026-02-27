@@ -1,0 +1,28 @@
+<div class="carousel-wrapper">
+    <div class="carousel-viewport" #viewport>
+        <div class="carousel-track">
+            @for (item of items; track $index) {
+                <div
+                    class="carousel-item"
+                    [style.width.%]="100 / activeNumVisible"
+                >
+                    <ng-container
+                        [ngTemplateOutlet]="itemTemplate"
+                        [ngTemplateOutletContext]="{ $implicit: item }"
+                    ></ng-container>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (canPrev) {
+        <button class="nav-btn prev-btn" (click)="prev()">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+    }
+    @if (canNext) {
+        <button class="nav-btn next-btn" (click)="next()">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    }
+</div>
