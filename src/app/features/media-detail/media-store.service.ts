@@ -28,6 +28,7 @@ import {
     ItemWithNameAndId,
     Language,
     Movie,
+    MovieListItemForList,
     MovieRestControllerService,
     Network,
     TvCreator,
@@ -81,6 +82,7 @@ export interface MediaState {
     seasons: TvSeason[];
     selectedSeason?: number;
     type: string;
+    lists?: MovieListItemForList[];
 }
 
 @Injectable()
@@ -216,6 +218,10 @@ export class MediaStoreService extends ComponentStore<MediaState> {
         ),
     );
 
+    lists$: Observable<MovieListItemForList[]> = this.select(
+        (state) => state.lists ?? [],
+    );
+
     viewModel$: Observable<MediaViewModel> = combineLatest([
         this.media$,
         this.type$,
@@ -247,6 +253,35 @@ export class MediaStoreService extends ComponentStore<MediaState> {
 
     updateSelectedSeason(seasonNumber: number): void {
         this.patchState({ selectedSeason: seasonNumber });
+    }
+
+    getLists$(id: number, type: string): Observable<MovieListItemForList[]> {
+        return iif(
+            () => type === 'tv',
+            this.tvSeriesRestControllerService.listsCopy(
+                id,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                { httpHeaderAccept: 'application/json' },
+            ),
+            this.movieRestControllerService.movieLists(
+                id,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                { httpHeaderAccept: 'application/json' },
+            ),
+        ).pipe(
+            map((page) => page.results ?? []),
+            tap((lists) => this.patchState({ lists })),
+            catchError(() => {
+                this.patchState({ lists: [] });
+                return EMPTY;
+            }),
+        );
     }
 
     getDetails$(id: number, type: string) {

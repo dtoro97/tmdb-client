@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
-import { switchMap } from 'rxjs';
+import { switchMap, tap } from 'rxjs';
 
 import { MediaStoreService } from '../media-store.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -23,14 +23,16 @@ export class MediaWrapperComponent {
     ) {
         this.route.paramMap
             .pipe(
-                takeUntilDestroyed(),
                 switchMap((params) =>
                     this.mediaStoreService.getDetails$(
                         Number(params.get('id'))!,
                         params.get('type')!,
                     ),
                 ),
+                tap(() => this.scroller.scrollToPosition([0, 0])),
             )
-            .subscribe(() => this.scroller.scrollToPosition([0, 0]));
+
+            .pipe(takeUntilDestroyed())
+            .subscribe();
     }
 }
