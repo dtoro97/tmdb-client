@@ -3,24 +3,24 @@
         <section class="hero">
             @if (mediaStoreService.backdrop$ | async; as backdrop) {
                 <app-media-thumb
-                    class="hero__backdrop"
+                    class="hero-backdrop"
                     [alt]="vm.title"
                     [src]="backdrop"
                     [params]="'w1920_and_h800_multi_faces'"
                 ></app-media-thumb>
-                <div class="hero__gradient"></div>
+                <div class="hero-gradient"></div>
             }
 
-            <div class="hero__content inner-container">
+            <div class="hero-content inner-container">
                 <app-media-thumb
-                    class="hero__poster border-round-xl"
+                    class="hero-poster border-round-xl"
                     [src]="vm.posterPath"
                     type="media"
                     [alt]="vm.title"
                 />
-                <div class="hero__info">
-                    <h1 class="hero__title">{{ vm.title }}</h1>
-                    <p class="hero__type">
+                <div class="hero-info">
+                    <h1 class="hero-title">{{ vm.title }}</h1>
+                    <p class="hero-type">
                         @if (vm.mediaType === "movie") {
                             Movie
                         } @else {
@@ -31,7 +31,7 @@
                             }
                         }
                     </p>
-                    <p class="hero__year">{{ vm.year }}</p>
+                    <p class="hero-year">{{ vm.year }}</p>
 
                     @if (vm.voteAverage) {
                         <div class="flex align-items-center gap-3 mt-2">
@@ -58,7 +58,7 @@
                         }
                     </div>
 
-                    <p class="hero__overview line-height-4 mt-2 mb-3">
+                    <p class="hero-overview line-height-4 mt-2 mb-3">
                         {{ vm.overview }}
                     </p>
 
@@ -95,19 +95,19 @@
                             ) {
                                 @if (directors.length) {
                                     <div class="crew-row">
-                                        <span class="crew-row-label"
+                                        <span class="crew-label"
                                             >Director{{
                                                 directors.length > 1 ? "s" : ""
                                             }}</span
                                         >
-                                        <span class="crew-row-names">
+                                        <span class="crew-names">
                                             @for (
                                                 person of directors;
                                                 track person.id;
                                                 let i = $index
                                             ) {
                                                 <a
-                                                    class="crew-row-link"
+                                                    class="crew-link"
                                                     [routerLink]="[
                                                         '/name',
                                                         person.id,
@@ -115,7 +115,7 @@
                                                     >{{ person.name }}</a
                                                 >
                                                 @if (i < directors.length - 1) {
-                                                    <span class="crew-row-sep"
+                                                    <span class="crew-separator"
                                                         >·</span
                                                     >
                                                 }
@@ -126,19 +126,19 @@
                             }
                             @if (vm.creators?.length) {
                                 <div class="crew-row">
-                                    <span class="crew-row-label"
+                                    <span class="crew-label"
                                         >Creator{{
                                             vm.creators!.length > 1 ? "s" : ""
                                         }}</span
                                     >
-                                    <span class="crew-row-names">
+                                    <span class="crew-names">
                                         @for (
                                             creator of vm.creators;
                                             track creator.id;
                                             let i = $index
                                         ) {
                                             <a
-                                                class="crew-row-link"
+                                                class="crew-link"
                                                 [routerLink]="[
                                                     '/name',
                                                     creator.id,
@@ -146,7 +146,7 @@
                                                 >{{ creator.name }}</a
                                             >
                                             @if (i < vm.creators!.length - 1) {
-                                                <span class="crew-row-sep"
+                                                <span class="crew-separator"
                                                     >·</span
                                                 >
                                             }
@@ -156,10 +156,10 @@
                             }
                         </div>
                     }
-                    <a class="crew-row crew-row-all" [routerLink]="['cast']">
-                        <span class="crew-row-label">All cast & crew</span>
+                    <a class="crew-row crew-all" [routerLink]="['cast']">
+                        <span class="crew-label">All cast & crew</span>
                         <i
-                            class="fa-solid fa-chevron-right crew-row-chevron"
+                            class="fa-solid fa-chevron-right crew-chevron"
                         ></i>
                     </a>
                 </section>
@@ -227,14 +227,14 @@
                         </a>
                     </div>
 
-                    <div class="episode-preview-list">
+                    <div class="episode-list">
                         @for (
                             episode of mediaStoreService.latestSeasonPreviewEpisodes$
                                 | async;
                             track episode.id
                         ) {
                             <a
-                                class="episode-preview-card"
+                                class="episode-card"
                                 [routerLink]="[
                                     'episodes',
                                     episode.season_number,
@@ -242,19 +242,19 @@
                                 ]"
                             >
                                 <app-media-thumb
-                                    class="episode-preview-still"
+                                    class="episode-still"
                                     [src]="episode.still_path ?? null"
                                 />
-                                <div class="episode-preview-meta">
-                                    <span class="episode-preview-label">
+                                <div class="episode-meta">
+                                    <span class="episode-label">
                                         S{{ episode.season_number }}E{{
                                             episode.episode_number
                                         }}
                                     </span>
-                                    <span class="episode-preview-title">{{
+                                    <span class="episode-title">{{
                                         episode.name
                                     }}</span>
-                                    <p class="episode-preview-overview">
+                                    <p class="episode-overview">
                                         {{ episode.overview }}
                                     </p>
                                     <span class="muted text-sm">{{
@@ -294,23 +294,23 @@
                                     target="_blank"
                                     rel="noopener"
                                 >
-                                    <div class="video-thumb__img">
+                                    <div class="video-img">
                                         <img
                                             [src]="
                                                 getYoutubeThumbnail(video.key!)
                                             "
                                             [alt]="video.name"
                                         />
-                                        <div class="video-thumb__play">
+                                        <div class="video-play">
                                             <i class="fa-solid fa-play"></i>
                                         </div>
                                         @if (video.type) {
-                                            <span class="video-thumb__badge">{{
+                                            <span class="video-badge">{{
                                                 video.type
                                             }}</span>
                                         }
                                     </div>
-                                    <p class="video-thumb__name">
+                                    <p class="video-name">
                                         {{ video.name }}
                                     </p>
                                 </a>
@@ -334,7 +334,7 @@
                                                 class="video-thumb"
                                                 [routerLink]="['videos']"
                                             >
-                                                <div class="video-thumb__img">
+                                                <div class="video-img">
                                                     <img
                                                         [src]="
                                                             getYoutubeThumbnail(
@@ -343,9 +343,7 @@
                                                         "
                                                         [alt]="video.name"
                                                     />
-                                                    <div
-                                                        class="video-thumb__more"
-                                                    >
+                                                    <div class="video-more">
                                                         +{{
                                                             (mediaStoreService.youtubeVideosTotalCount$
                                                                 | async)! - 5
@@ -362,7 +360,7 @@
                                                 target="_blank"
                                                 rel="noopener"
                                             >
-                                                <div class="video-thumb__img">
+                                                <div class="video-img">
                                                     <img
                                                         [src]="
                                                             getYoutubeThumbnail(
@@ -372,7 +370,7 @@
                                                         [alt]="video.name"
                                                     />
                                                     <div
-                                                        class="video-thumb__play video-thumb__play--sm"
+                                                        class="video-play video-play-sm"
                                                     >
                                                         <i
                                                             class="fa-solid fa-play"
@@ -380,14 +378,14 @@
                                                     </div>
                                                     @if (video.type) {
                                                         <span
-                                                            class="video-thumb__badge"
+                                                            class="video-badge"
                                                             >{{
                                                                 video.type
                                                             }}</span
                                                         >
                                                     }
                                                 </div>
-                                                <p class="video-thumb__name">
+                                                <p class="video-name">
                                                     {{ video.name }}
                                                 </p>
                                             </a>
@@ -399,22 +397,20 @@
                     </section>
                 }
             }
-            @if (mediaStoreService.featuredBackdrops$ | async; as photos) {
+            @if (mediaStoreService.featuredPhotos$ | async; as photos) {
                 @if (photos.length) {
                     <section class="photos-section">
                         <h2 class="section-title">
                             Photos
                             <span class="section-count">{{
-                                mediaStoreService.backdropsTotalCount$ | async
+                                mediaStoreService.photosTotalCount$ | async
                             }}</span>
                         </h2>
                         <app-photos-grid
                             [images]="photos"
                             [totalCount]="
-                                (mediaStoreService.backdropsTotalCount$
-                                    | async)!
+                                mediaStoreService.photosTotalCount$ | async
                             "
-                            aspectRatio="16 / 9"
                             (photoClick)="openPhotoViewer($event)"
                         />
                     </section>

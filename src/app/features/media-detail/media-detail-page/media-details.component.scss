@@ -16,94 +16,87 @@
             border-left: 3px solid var(--primary-color);
         }
 
+        .section-count {
+            font-size: var(--font-size-base);
+            font-weight: 400;
+            color: var(--mat-sys-on-surface-variant);
+            margin-left: 0.4rem;
+        }
+
         .hero {
             position: relative;
             overflow: hidden;
             min-height: 520px;
             display: flex;
             align-items: flex-end;
-
-            &__backdrop {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: center top;
-                display: block;
-            }
-
-            &__gradient {
-                position: absolute;
-                inset: 0;
-                background:
-                    // Left fade: makes info text readable against the image
-                    linear-gradient(
-                        to right,
-                        var(--mat-sys-surface) 30%,
-                        transparent 70%
-                    ),
-                    // Bottom fade: strong fade where content sits
-                    linear-gradient(
-                            to top,
-                            var(--mat-sys-surface) 15%,
-                            rgba(0, 0, 0, 0.5) 55%,
-                            transparent
-                        );
-            }
-
-            &__content {
-                position: relative;
-                z-index: 1;
-                width: 100%;
-                display: flex;
-                align-items: flex-end;
-                gap: 2.5rem;
-                padding-top: 5rem;
-                padding-bottom: 2.5rem;
-            }
-
-            &__poster {
-                flex-shrink: 0;
-                width: 220px;
-                max-height: 330px;
-            }
-
-            &__info {
-                flex: 1;
-                min-width: 0;
-                display: flex;
-                flex-direction: column;
-            }
-
-            &__title {
-                font-size: var(--font-size-xl);
-                font-weight: 700;
-                margin: 0;
-                line-height: 1.2;
-            }
-
-            &__year,
-            &__type {
-                color: var(--mat-sys-on-surface-variant);
-                margin: 0.25rem 0 0;
-                font-size: var(--font-size-base);
-            }
-
-            &__overview {
-                max-width: 580px;
-                font-size: var(--font-size-base);
-                margin-bottom: 0;
-            }
         }
 
-        // ---- Cast section ----
+        .hero-backdrop {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+        }
+
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(to right, var(--mat-sys-surface) 30%, transparent 70%),
+                linear-gradient(to top, var(--mat-sys-surface) 15%, rgba(0, 0, 0, 0.5) 55%, transparent);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            gap: 2.5rem;
+            padding-top: 5rem;
+            padding-bottom: 2.5rem;
+        }
+
+        .hero-poster {
+            flex-shrink: 0;
+            width: 220px;
+            max-height: 330px;
+        }
+
+        .hero-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .hero-year,
+        .hero-type {
+            color: var(--mat-sys-on-surface-variant);
+            margin: 0.25rem 0 0;
+            font-size: var(--font-size-base);
+        }
+
+        .hero-overview {
+            max-width: 580px;
+            font-size: var(--font-size-base);
+            margin-bottom: 0;
+        }
 
         .crew-rows {
             margin-top: 0.75rem;
             display: flex;
             flex-direction: column;
-            gap: 0;
             border-top: 1px solid var(--mat-sys-outline-variant);
             padding-top: 0.5rem;
         }
@@ -116,20 +109,20 @@
             font-size: var(--font-size-base);
         }
 
-        .crew-row-label {
+        .crew-label {
             width: 80px;
             flex-shrink: 0;
             color: var(--mat-sys-on-surface-variant);
         }
 
-        .crew-row-names {
+        .crew-names {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 0.3rem;
         }
 
-        .crew-row-link {
+        .crew-link {
             color: var(--mat-sys-on-surface);
             text-decoration: none;
 
@@ -138,11 +131,11 @@
             }
         }
 
-        .crew-row-sep {
+        .crew-separator {
             color: var(--mat-sys-on-surface-variant);
         }
 
-        .crew-row-all {
+        .crew-all {
             text-decoration: none;
             color: var(--mat-sys-on-surface);
             cursor: pointer;
@@ -151,23 +144,21 @@
             margin-top: 0.15rem;
             padding-top: 0.5rem;
 
-            .crew-row-label {
+            .crew-label {
                 width: auto;
                 color: var(--mat-sys-on-surface);
                 font-weight: 500;
             }
 
-            &:hover .crew-row-label {
+            &:hover .crew-label {
                 color: var(--primary-color);
             }
         }
 
-        .crew-row-chevron {
+        .crew-chevron {
             font-size: var(--font-size-sm);
             color: var(--mat-sys-on-surface-variant);
         }
-
-        // ---- Collection section ----
 
         .collection-banner {
             position: relative;
@@ -203,12 +194,7 @@
         .collection-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(
-                to right,
-                rgba(0, 0, 0, 0.85) 35%,
-                rgba(0, 0, 0, 0.4) 70%,
-                transparent
-            );
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.4) 70%, transparent);
         }
 
         .collection-info {
@@ -247,12 +233,12 @@
             }
         }
 
-        .episode-preview-list {
+        .episode-list {
             display: flex;
             flex-direction: column;
         }
 
-        .episode-preview-card {
+        .episode-card {
             display: flex;
             gap: 1rem;
             padding: 0.875rem 0;
@@ -265,30 +251,30 @@
                 border-top: 1px solid var(--mat-sys-outline-variant);
             }
 
-            &:hover .episode-preview-still {
+            &:hover .episode-still {
                 opacity: 0.8;
             }
 
-            &:hover .episode-preview-title {
+            &:hover .episode-title {
                 color: var(--primary-color);
             }
         }
 
-        .episode-preview-still {
+        .episode-still {
             flex-shrink: 0;
             width: 160px;
             aspect-ratio: 16 / 9;
             border-radius: 6px;
         }
 
-        .episode-preview-meta {
+        .episode-meta {
             display: flex;
             flex-direction: column;
             gap: 0.2rem;
             min-width: 0;
         }
 
-        .episode-preview-label {
+        .episode-label {
             font-size: var(--font-size-sm);
             color: var(--primary-color);
             font-weight: 600;
@@ -296,26 +282,20 @@
             letter-spacing: 0.04em;
         }
 
-        .episode-preview-title {
+        .episode-title {
             font-size: var(--font-size-base);
             font-weight: 600;
         }
 
-        .episode-preview-overview {
+        .episode-overview {
             font-size: var(--font-size-sm);
             color: var(--mat-sys-on-surface-variant);
             margin: 0.1rem 0 0;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-        }
-
-        .section-count {
-            font-size: var(--font-size-base);
-            font-weight: 400;
-            color: var(--mat-sys-on-surface-variant);
-            margin-left: 0.4rem;
         }
 
         .videos-featured {
@@ -336,99 +316,98 @@
             text-decoration: none;
             color: inherit;
 
-            &:hover &__img {
+            &:hover .video-img {
                 opacity: 0.8;
-            }
-
-            &__img {
-                position: relative;
-                aspect-ratio: 16 / 9;
-                overflow: hidden;
-                border-radius: 8px;
-                background: #000;
-                transition: opacity 0.2s ease;
-
-                &:hover {
-                    opacity: 0.8;
-                }
 
                 img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    opacity: 0.85;
-                    transition: opacity 0.2s ease;
+                    opacity: 0.65;
                 }
-            }
-
-            &:hover &__img img {
-                opacity: 0.65;
-            }
-
-            &__play {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                i {
-                    width: 48px;
-                    height: 48px;
-                    background: rgba(0, 0, 0, 0.55);
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: var(--font-size-base);
-                    color: #fff;
-                    padding-left: 3px; // optical center for play icon
-                }
-
-                &--sm i {
-                    width: 36px;
-                    height: 36px;
-                    font-size: var(--font-size-sm);
-                }
-            }
-
-            &__badge {
-                position: absolute;
-                bottom: 0.5rem;
-                left: 0.5rem;
-                background: rgba(0, 0, 0, 0.65);
-                color: rgba(255, 255, 255, 0.8);
-                font-size: var(--font-size-sm);
-                padding: 2px 6px;
-                border-radius: 3px;
-                text-transform: uppercase;
-                letter-spacing: 0.03em;
-            }
-
-            &__name {
-                margin: 0.4rem 0 0;
-                font-size: var(--font-size-sm);
-                line-height: 1.3;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-
-            &__more {
-                position: absolute;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.6);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.75rem;
-                font-weight: 600;
-                color: #fff;
             }
         }
 
-        // ---- Details section ----
+        .video-img {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #000;
+            transition: opacity 0.2s ease;
+
+            &:hover {
+                opacity: 0.8;
+            }
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.85;
+                transition: opacity 0.2s ease;
+            }
+        }
+
+        .video-play {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            i {
+                width: 48px;
+                height: 48px;
+                background: rgba(0, 0, 0, 0.55);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: var(--font-size-base);
+                color: #fff;
+                padding-left: 3px;
+            }
+        }
+
+        .video-play-sm i {
+            width: 36px;
+            height: 36px;
+            font-size: var(--font-size-sm);
+        }
+
+        .video-badge {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0.5rem;
+            background: rgba(0, 0, 0, 0.65);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: var(--font-size-sm);
+            padding: 2px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .video-name {
+            margin: 0.4rem 0 0;
+            font-size: var(--font-size-sm);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-more {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: #fff;
+        }
 
         .details-list {
             border-top: 1px solid var(--mat-sys-outline-variant);
@@ -458,55 +437,47 @@
             }
         }
 
-        // ---- Mobile overrides ----
-
         @include mobile() {
             .hero {
                 min-height: auto;
                 display: block;
+            }
 
-                &__backdrop {
-                    position: relative;
-                    inset: unset;
-                    height: 220px;
-                }
+            .hero-backdrop {
+                position: relative;
+                inset: unset;
+                height: 220px;
+            }
 
-                &__gradient {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 220px;
-                    // Only bottom fade on mobile; no side fade needed
-                    background: linear-gradient(
-                        to top,
-                        var(--mat-sys-surface) 5%,
-                        rgba(0, 0, 0, 0.3) 60%,
-                        transparent
-                    );
-                }
+            .hero-gradient {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 220px;
+                background: linear-gradient(to top, var(--mat-sys-surface) 5%, rgba(0, 0, 0, 0.3) 60%, transparent);
+            }
 
-                &__content {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 1rem;
-                    padding-top: 1rem;
-                    padding-bottom: 1.5rem;
-                }
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                padding-top: 1rem;
+                padding-bottom: 1.5rem;
+            }
 
-                &__poster {
-                    width: 110px;
-                    max-height: 165px;
-                    margin-top: -3.5rem;
-                }
+            .hero-poster {
+                width: 110px;
+                max-height: 165px;
+                margin-top: -3.5rem;
+            }
 
-                &__title {
-                    font-size: 1.4rem;
-                }
+            .hero-title {
+                font-size: 1.4rem;
+            }
 
-                &__overview {
-                    max-width: 100%;
-                }
+            .hero-overview {
+                max-width: 100%;
             }
 
             .collection-banner {
@@ -522,7 +493,7 @@
                 width: 110px;
             }
 
-            .episode-preview-still {
+            .episode-still {
                 width: 100px;
                 aspect-ratio: 16 / 9;
             }

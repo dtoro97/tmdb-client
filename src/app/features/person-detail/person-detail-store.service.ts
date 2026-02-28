@@ -122,24 +122,9 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailStoreSt
             return [...tagged, ...profiles];
         }),
     );
-    featuredPhotos$ = this.person$.pipe(
-        map((person) =>
-            person.images?.profiles
-                ?.filter((i) => (i.aspect_ratio ?? 0) < 1)
-                .slice(0, 6),
-        ),
-    );
+    featuredPhotos$ = this.allPhotos$.pipe(map((photos) => photos.slice(0, 7)));
     photosTotalCount$ = this.allPhotos$.pipe(
         map((photos) => photos?.length || 0),
-    );
-
-    taggedCount$ = this.person$.pipe(
-        map(
-            (person) =>
-                (person.tagged_images?.results ?? []).filter(
-                    (t) => (t.aspect_ratio ?? 0) > 1,
-                ).length,
-        ),
     );
 
     groupedCredits$ = this.credits$.pipe(

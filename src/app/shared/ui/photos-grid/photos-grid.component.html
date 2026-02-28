@@ -1,21 +1,37 @@
 <div class="photos-grid">
-    @for (
-        image of images;
-        track image.file_path;
-        let i = $index;
-        let last = $last
-    ) {
-        <button
-            class="photo-item"
-            [class.large]="i < 3"
-            [class.small]="i >= 3"
-            [style.aspect-ratio]="aspectRatio"
-            (click)="photoClick.emit(i)"
-        >
-            <img [src]="image.file_path ?? '' | imgSrc" alt="" />
-            @if (last && totalCount > images.length) {
-                <div class="more">+{{ totalCount - (images.length - 1) }}</div>
+    <div class="grid-row">
+        @for (image of firstRow; track image.file_path; let i = $index) {
+            <button
+                class="photo-item"
+                [style.flex-grow]="getFlexGrow(image)"
+                (click)="photoClick.emit(i)"
+            >
+                <img [src]="image.file_path ?? '' | imgSrc" alt="" />
+            </button>
+        }
+    </div>
+    @if (secondRow.length) {
+        <div class="grid-row">
+            @for (
+                image of secondRow;
+                track image.file_path;
+                let i = $index;
+                let last = $last
+            ) {
+                <button
+                    class="photo-item"
+                    [class.mobile-hidden]="i === secondRow.length - 2"
+                    [style.flex-grow]="last ? 0.67 : getFlexGrow(image) * 0.6"
+                    (click)="photoClick.emit(firstRowCount + i)"
+                >
+                    <img [src]="image.file_path ?? '' | imgSrc" alt="" />
+                    @if (last && totalCount > images.length) {
+                        <div class="more">
+                            +{{ totalCount - (images.length - 1) }}
+                        </div>
+                    }
+                </button>
             }
-        </button>
+        </div>
     }
 </div>

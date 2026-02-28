@@ -43,7 +43,12 @@ import {
     TvSeriesRestControllerService,
     Video,
 } from '../../api';
-import { ConfigStoreService, isDefined, loader } from '../../shared';
+import {
+    ConfigStoreService,
+    isDefined,
+    loader,
+    ViewerImage,
+} from '../../shared';
 
 export type MediaEnriched = (Movie | TvSeries) & {
     credits?: Credits;
@@ -283,6 +288,19 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
         ),
     );
     title$ = this.viewModel$.pipe(map((vm) => vm.title));
+
+    allPhotos$: Observable<ViewerImage[]> = this.images$.pipe(
+        map((images) => [
+            ...(images.backdrops ?? []),
+            ...(images.posters ?? []),
+            ...(images.logos ?? []),
+        ]),
+    );
+
+    featuredPhotos$ = this.allPhotos$.pipe(map((photos) => photos.slice(0, 7)));
+    photosTotalCount$ = this.allPhotos$.pipe(
+        map((allPhotos) => allPhotos.length),
+    );
 
     constructor(
         private movieRestControllerService: MovieRestControllerService,

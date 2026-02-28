@@ -10,6 +10,9 @@
 
     &:hover {
         opacity: 0.8;
+        .name {
+            color: var(--mat-sys-primary);
+        }
     }
 }
 

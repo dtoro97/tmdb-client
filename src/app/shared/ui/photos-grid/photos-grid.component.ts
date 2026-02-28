@@ -19,6 +19,18 @@ import type { ViewerImage } from '../photo-viewer/photo-viewer.component';
 export class PhotosGridComponent {
     @Input() images: ViewerImage[] = [];
     @Input() totalCount = 0;
-    @Input() aspectRatio = '16 / 9';
+    @Input() firstRowCount = 3;
     @Output() photoClick = new EventEmitter<number>();
+
+    get firstRow(): ViewerImage[] {
+        return this.images.slice(0, this.firstRowCount);
+    }
+
+    get secondRow(): ViewerImage[] {
+        return this.images.slice(this.firstRowCount);
+    }
+
+    getFlexGrow(image: ViewerImage): number {
+        return image.aspect_ratio ?? 1;
+    }
 }
