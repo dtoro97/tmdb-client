@@ -8,7 +8,6 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { take } from 'rxjs';
 
 import { Image } from '../../../api';
-import { CAROUSEL_BREAKPOINTS } from '../../../constants';
 import {
     CardComponent,
     CarouselComponent,
@@ -20,7 +19,6 @@ import {
     SocialLinksComponent,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
-import { SortPipe } from '../../../shared/pipes/sort.pipe';
 import { MediaStoreService } from '../media-store.service';
 
 @Component({
@@ -40,7 +38,6 @@ import { MediaStoreService } from '../media-store.service';
         RatingComponent,
         SocialLinksComponent,
         MinutesToHours,
-        SortPipe,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './media-details.component.html',
@@ -48,7 +45,6 @@ import { MediaStoreService } from '../media-store.service';
 })
 export class MediaDetailsComponent {
     readonly vm$ = this.mediaStoreService.viewModel$;
-    readonly breakpoints = CAROUSEL_BREAKPOINTS;
     constructor(
         public mediaStoreService: MediaStoreService,
         private dialog: MatDialog,

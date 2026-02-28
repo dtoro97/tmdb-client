@@ -147,6 +147,41 @@
                 </section>
             }
 
+            @if (mediaStoreService.collection$ | async; as collection) {
+                <a
+                    class="collection-banner"
+                    [routerLink]="['/collection', collection.id]"
+                >
+                    <app-media-thumb
+                        class="collection-backdrop"
+                        [src]="collection.backdrop_path"
+                        [params]="'w1280'"
+                    />
+                    <div class="collection-overlay"></div>
+                    <div class="collection-info">
+                        <h2 class="collection-title">
+                            Part of the {{ collection.name }}
+                        </h2>
+                        @if (collection.parts?.length) {
+                            <p class="collection-includes">
+                                Includes
+                                @for (
+                                    part of collection.parts;
+                                    track part.id;
+                                    let i = $index;
+                                    let last = $last
+                                ) {
+                                    @if (last && collection.parts!.length > 1) {
+                                        and
+                                    }
+                                    {{ part.title }}@if (!last && collection.parts!.length > 2) {,}
+                                }
+                            </p>
+                        }
+                    </div>
+                </a>
+            }
+
             @if (vm.mediaType === "tv") {
                 <section class="episodes-section">
                     <div
@@ -373,10 +408,7 @@
                 <section class="recommendations-section">
                     <h2 class="section-title">More Like This</h2>
                     <app-carousel
-                        [items]="
-                            (mediaStoreService.recommendations$ | async)!
-                                | sort: 'vote_average'
-                        "
+                        [items]="(mediaStoreService.recommendations$ | async)!"
                         [numVisible]="8"
                         [numScroll]="8"
                     >

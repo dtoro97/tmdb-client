@@ -1,0 +1,88 @@
+<div class="collection-container pb-8">
+    @if (store.collection$ | async; as collection) {
+        <section class="hero">
+            @if (store.backdropPath$ | async; as backdrop) {
+                <app-media-thumb
+                    class="hero-backdrop"
+                    [alt]="collection.name"
+                    [src]="backdrop"
+                    [params]="'w1920_and_h800_multi_faces'"
+                />
+                <div class="hero-gradient"></div>
+            }
+
+            <div class="hero-content inner-container">
+                <div class="hero-info">
+                    <h1 class="hero-title">{{ collection.name }}</h1>
+                    <div class="flex align-items-center gap-3 mt-2">
+                        @if (store.averageRating$ | async; as rating) {
+                            @if (rating > 0) {
+                                <app-rating [value]="rating" />
+                            }
+                        }
+                        @if (store.partsCount$ | async; as count) {
+                            <span class="muted">
+                                {{ count }} {{ count === 1 ? 'Movie' : 'Movies' }}
+                            </span>
+                        }
+                    </div>
+                    @if (collection.overview) {
+                        <p class="hero-overview line-height-4 mt-2">
+                            {{ collection.overview }}
+                        </p>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <div class="inner-container mt-4 flex flex-column gap-6">
+            @if (store.parts$ | async; as parts) {
+                @if (parts.length) {
+                    <section>
+                        <h2 class="section-title">
+                            Movies
+                            <span class="section-count">{{ parts.length }}</span>
+                        </h2>
+                        <div class="movie-list">
+                            @for (part of parts; track part.id) {
+                                <a
+                                    class="movie-row"
+                                    [routerLink]="['/title', part.id, 'movie']"
+                                >
+                                    <app-media-thumb
+                                        class="movie-poster"
+                                        [src]="part.poster_path"
+                                        [alt]="part.title"
+                                        type="media"
+                                    />
+                                    <div class="movie-body">
+                                        <span class="movie-title">{{
+                                            part.title
+                                        }}</span>
+                                        <div class="movie-meta">
+                                            @if (part.vote_average) {
+                                                <app-rating
+                                                    [value]="part.vote_average"
+                                                />
+                                            }
+                                            @if (part.release_date) {
+                                                <span class="muted">{{
+                                                    part.release_date | date
+                                                }}</span>
+                                            }
+                                        </div>
+                                        @if (part.overview) {
+                                            <p class="movie-overview">
+                                                {{ part.overview }}
+                                            </p>
+                                        }
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    </section>
+                }
+            }
+        </div>
+    }
+</div>

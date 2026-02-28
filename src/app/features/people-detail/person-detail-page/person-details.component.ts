@@ -12,7 +12,6 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { take, switchMap, tap } from 'rxjs';
 
 import type { ViewerImage } from '../../../shared';
-import { CAROUSEL_BREAKPOINTS } from '../../../constants';
 import {
     AgePipe,
     CardComponent,
@@ -23,9 +22,7 @@ import {
     PillToggleComponent,
     RatingComponent,
     SocialLinksComponent,
-    SortPipe,
 } from '../../../shared';
-import { ImagePipe } from '../../../shared/pipes/image.pipe';
 import { PersonDetailStoreService } from '../person-store.service';
 
 @Component({
@@ -45,9 +42,7 @@ import { PersonDetailStoreService } from '../person-store.service';
         PillToggleComponent,
         RatingComponent,
         SocialLinksComponent,
-        ImagePipe,
         AgePipe,
-        SortPipe,
     ],
     providers: [PersonDetailStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,

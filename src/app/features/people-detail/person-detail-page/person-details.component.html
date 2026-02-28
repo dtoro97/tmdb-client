@@ -89,10 +89,7 @@
                     />
                 </div>
                 <app-carousel
-                    [items]="
-                        (personDetailStore.knownFor$ | async)!
-                            | sort: 'vote_average'
-                    "
+                    [items]="(personDetailStore.knownFor$ | async)!"
                     [numVisible]="6"
                     [numScroll]="6"
                 >

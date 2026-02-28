@@ -1,0 +1,192 @@
+@use "responsive.scss" as *;
+
+:host ::ng-deep {
+    .collection-container {
+        background-color: var(--mat-sys-surface);
+
+        .muted {
+            color: var(--mat-sys-on-surface-variant);
+        }
+
+        .section-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin: 0 0 1rem;
+            padding-left: 0.75rem;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .section-count {
+            font-size: var(--font-size-base);
+            font-weight: 400;
+            color: var(--mat-sys-on-surface-variant);
+            margin-left: 0.4rem;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 360px;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .hero-backdrop {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+        }
+
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    to right,
+                    var(--mat-sys-surface) 30%,
+                    transparent 70%
+                ),
+                linear-gradient(
+                    to top,
+                    var(--mat-sys-surface) 15%,
+                    rgba(0, 0, 0, 0.5) 55%,
+                    transparent
+                );
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding-top: 5rem;
+            padding-block: 2.5rem;
+        }
+
+        .hero-info {
+            max-width: 600px;
+        }
+
+        .hero-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .hero-overview {
+            font-size: var(--font-size-base);
+            max-width: 580px;
+            margin-bottom: 0;
+        }
+
+        .movie-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .movie-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--mat-sys-outline-variant);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+
+            &:first-child {
+                border-top: 1px solid var(--mat-sys-outline-variant);
+            }
+
+            &:hover .movie-title {
+                color: var(--primary-color);
+            }
+        }
+
+        .movie-poster {
+            flex-shrink: 0;
+            width: 100px;
+            border-radius: 6px;
+            background: var(--mat-sys-surface-container);
+        }
+
+        .movie-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .movie-title {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            transition: color 0.15s ease;
+        }
+
+        .movie-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .movie-overview {
+            font-size: var(--font-size-sm);
+            color: var(--mat-sys-on-surface-variant);
+            margin: 0.25rem 0 0;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        @include mobile() {
+            .hero {
+                min-height: auto;
+                display: block;
+            }
+
+            .hero-backdrop {
+                position: relative;
+                inset: unset;
+                height: 200px;
+            }
+
+            .hero-gradient {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 200px;
+                background: linear-gradient(
+                    to top,
+                    var(--mat-sys-surface) 5%,
+                    rgba(0, 0, 0, 0.3) 60%,
+                    transparent
+                );
+            }
+
+            .hero-content {
+                padding-top: 1rem;
+                padding-block: 1.5rem;
+            }
+
+            .hero-title {
+                font-size: 1.4rem;
+            }
+
+            .movie-poster {
+                width: 75px;
+            }
+
+            .movie-row {
+                gap: 1rem;
+            }
+        }
+    }
+}

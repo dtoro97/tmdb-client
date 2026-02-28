@@ -83,11 +83,15 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailStoreSt
     );
 
     knownFor$ = combineLatest([this.visibleCredits$, this.credits$]).pipe(
-        map(([visible, credits]) =>
-            visible === 'crew'
-                ? deduplicateCrew(credits.crew ?? [])
-                : deduplicateCast(credits.cast ?? []),
-        ),
+        map(([visible, credits]) => {
+            const items =
+                visible === 'crew'
+                    ? deduplicateCrew(credits.crew ?? [])
+                    : deduplicateCast(credits.cast ?? []);
+            return [...items].sort(
+                (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
+            );
+        }),
     );
 
     featuredPhotos$ = this.person$.pipe(

@@ -12,7 +12,6 @@ import {
     CarouselComponent,
     PillToggleComponent,
 } from '../../../shared';
-import { CAROUSEL_BREAKPOINTS } from '../../../constants';
 
 @Component({
     selector: 'app-home',

@@ -18,6 +18,13 @@ export const routes: Routes = [
       import('./features/media-detail/media.routes').then((m) => m.mediaRoutes),
   },
   {
+    path: 'collection',
+    loadChildren: () =>
+      import('./features/collection-detail/collection.routes').then(
+        (m) => m.collectionRoutes,
+      ),
+  },
+  {
     path: 'discover',
     component: MediaListPageComponent,
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',

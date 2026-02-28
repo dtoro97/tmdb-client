@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
@@ -16,7 +16,6 @@ import { MediaStoreService } from '../media-store.service';
     selector: 'app-media-cast-crew',
     imports: [
         AsyncPipe,
-        DatePipe,
         RouterLink,
         MatChipsModule,
         MediaThumbComponent,

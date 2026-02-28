@@ -1,9 +1,5 @@
 @use "responsive.scss" as *;
 
-:host {
-    display: block;
-}
-
 :host ::ng-deep {
     .cast-crew-page {
         background-color: var(--mat-sys-surface);

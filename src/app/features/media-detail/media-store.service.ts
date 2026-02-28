@@ -7,6 +7,8 @@ import {
     iif,
     map,
     Observable,
+    of,
+    shareReplay,
     switchMap,
     tap,
 } from 'rxjs';
@@ -20,6 +22,8 @@ import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 import {
     CastMember,
+    CollectionDetails,
+    CollectionRestControllerService,
     Credits,
     CrewMember,
     ExternalIds,
@@ -113,7 +117,31 @@ export class MediaStoreService extends ComponentStore<MediaState> {
         filter(isDefined),
     );
 
-    recommendations$ = this.media$.pipe(map((m) => m.similar?.results ?? []));
+    recommendations$ = this.media$.pipe(
+        map((m) => {
+            const items = (m.similar?.results ?? []) as Record<string, unknown>[];
+            return [...items].sort(
+                (a, b) =>
+                    ((b['vote_average'] as number) ?? 0) -
+                    ((a['vote_average'] as number) ?? 0),
+            );
+        }),
+    );
+
+    collection$: Observable<CollectionDetails | null> = this.media$.pipe(
+        switchMap((media) => {
+            const collection = (media as Movie).belongs_to_collection;
+            if (!collection?.id) return of(null);
+            return this.collectionRestControllerService.collectionDetails(
+                collection.id,
+                undefined,
+                undefined,
+                undefined,
+                { httpHeaderAccept: 'application/json' },
+            ).pipe(catchError(() => of(null)));
+        }),
+        shareReplay(1),
+    );
 
     allVideos$ = this.media$.pipe(
         map((m) =>
@@ -240,6 +268,7 @@ export class MediaStoreService extends ComponentStore<MediaState> {
         private movieRestControllerService: MovieRestControllerService,
         private tvSeriesRestControllerService: TvSeriesRestControllerService,
         private tvSeasonRestControllerService: TvSeasonRestControllerService,
+        private collectionRestControllerService: CollectionRestControllerService,
         private ngxUiLoaderService: NgxUiLoaderService,
         private configStoreService: ConfigStoreService,
         private titleService: Title,
