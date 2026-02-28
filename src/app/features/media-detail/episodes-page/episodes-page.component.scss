@@ -14,27 +14,6 @@
         }
     }
 
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: var(--primary-color);
-        text-decoration: none;
-        font-size: 0.9rem;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0.5rem 0 1.5rem;
-        padding-left: 0.75rem;
-        border-left: 3px solid var(--primary-color);
-    }
-
     // ---- Featured row ----
 
     .featured-row {
@@ -191,10 +170,6 @@
     // ---- Mobile ----
 
     @include mobile() {
-        .page-title {
-            font-size: 1.4rem;
-        }
-
         .featured-row {
             grid-template-columns: 1fr;
         }

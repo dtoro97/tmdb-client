@@ -1,8 +1,5 @@
 @if (item) {
-    <div
-        class="card"
-        [routerLink]="['/title', item.id, type || item.media_type]"
-    >
+    <div class="card" [routerLink]="['/title', item.id, type]">
         <app-media-thumb
             [src]="item.poster_path || item.profile_path"
             [alt]="item.title || item.name"

@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-import { take } from 'rxjs';
+import { take, tap } from 'rxjs';
 
 import { Image } from '../../../api';
 import {
@@ -19,7 +19,8 @@ import {
     SocialLinksComponent,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
-import { MediaStoreService } from '../media-store.service';
+import { MediaDetailStoreService } from '../media-detail-store.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-media-details',
@@ -44,10 +45,16 @@ import { MediaStoreService } from '../media-store.service';
     styleUrl: './media-details.component.scss',
 })
 export class MediaDetailsComponent {
-    readonly vm$ = this.mediaStoreService.viewModel$;
+    readonly vm$ = this.mediaStoreService.viewModel$.pipe(
+        tap((vm) => {
+            const typeLabel = vm.mediaType === 'tv' ? 'TV Show' : 'Movie';
+            this.title.setTitle(`${vm.title} | ${typeLabel}`);
+        }),
+    );
     constructor(
-        public mediaStoreService: MediaStoreService,
+        public mediaStoreService: MediaDetailStoreService,
         private dialog: MatDialog,
+        private title: Title,
     ) {}
 
     openPhotoViewer(index: number): void {

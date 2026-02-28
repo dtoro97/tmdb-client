@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+} from '@angular/core';
 
 import { ImagePipe } from '../../pipes/image.pipe';
 import type { ViewerImage } from '../photo-viewer/photo-viewer.component';

@@ -4,13 +4,9 @@
     .details-container {
         background-color: var(--mat-sys-surface);
 
-        // ---- Shared utilities ----
-
         .muted {
             color: var(--mat-sys-on-surface-variant);
         }
-
-        // ---- Section headings (IMDB-style left accent) ----
 
         .section-title {
             font-size: var(--font-size-lg);
@@ -19,8 +15,6 @@
             padding-left: 0.75rem;
             border-left: 3px solid var(--primary-color);
         }
-
-        // ---- Hero ----
 
         .hero {
             position: relative;
@@ -89,7 +83,8 @@
                 line-height: 1.2;
             }
 
-            &__year {
+            &__year,
+            &__type {
                 color: var(--mat-sys-on-surface-variant);
                 margin: 0.25rem 0 0;
                 font-size: var(--font-size-base);
@@ -238,9 +233,7 @@
             line-height: 1.5;
         }
 
-        // ---- Episodes section ----
-
-        .browse-episodes-link {
+        .browse-link {
             display: flex;
             align-items: center;
             gap: 0.4rem;
@@ -318,16 +311,12 @@
             overflow: hidden;
         }
 
-        // ---- Section heading count ----
-
         .section-count {
             font-size: var(--font-size-base);
             font-weight: 400;
             color: var(--mat-sys-on-surface-variant);
             margin-left: 0.4rem;
         }
-
-        // ---- Videos section ----
 
         .videos-featured {
             display: grid;
@@ -347,12 +336,21 @@
             text-decoration: none;
             color: inherit;
 
+            &:hover &__img {
+                opacity: 0.8;
+            }
+
             &__img {
                 position: relative;
                 aspect-ratio: 16 / 9;
                 overflow: hidden;
                 border-radius: 8px;
                 background: #000;
+                transition: opacity 0.2s ease;
+
+                &:hover {
+                    opacity: 0.8;
+                }
 
                 img {
                     width: 100%;

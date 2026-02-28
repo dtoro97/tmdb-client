@@ -11,3 +11,4 @@ export * from './carousel/carousel.component';
 export * from './photo-viewer/photo-viewer.component';
 export * from './photos-grid/photos-grid.component';
 export * from './cast-crew-grid/cast-crew-grid.component';
+export * from './sub-page-banner/sub-page-banner.component';

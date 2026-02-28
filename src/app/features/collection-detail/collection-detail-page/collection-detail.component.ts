@@ -41,9 +41,12 @@ export class CollectionDetailComponent {
 
         this.store.collection$
             .pipe(
-                tap((c) => this.titleService.setTitle(`${c.name} | Collection`)),
+                tap((c) =>
+                    this.titleService.setTitle(`${c.name} | Collection`),
+                ),
                 takeUntilDestroyed(),
             )
             .subscribe();
+        this.store.photos$.subscribe((v) => console.log(v));
     }
 }

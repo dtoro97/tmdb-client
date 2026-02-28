@@ -14,29 +14,6 @@
         }
     }
 
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: var(--primary-color);
-        text-decoration: none;
-        font-size: 0.9rem;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0.5rem 0 1.5rem;
-        padding-left: 0.75rem;
-        border-left: 3px solid var(--primary-color);
-    }
-
-    // ---- Sort bar ----
-
     .sort-bar {
         display: flex;
         align-items: center;
@@ -45,11 +22,11 @@
         border-bottom: 1px solid var(--mat-sys-outline-variant);
     }
 
-    .sort-bar__count {
+    .sort-bar-count {
         font-size: 0.875rem;
     }
 
-    .sort-bar__controls {
+    .sort-bar-controls {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -84,8 +61,6 @@
         }
     }
 
-    // ---- Video grid ----
-
     .video-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -99,16 +74,16 @@
         flex-direction: column;
         gap: 0.5rem;
 
-        &:hover .video-card__play {
+        &:hover .video-card-play {
             opacity: 1;
         }
 
-        &:hover .video-card__thumb img {
+        &:hover .video-card-thumb img {
             opacity: 0.7;
         }
     }
 
-    .video-card__thumb {
+    .video-card-thumb {
         position: relative;
         border-radius: 8px;
         overflow: hidden;
@@ -125,7 +100,7 @@
         }
     }
 
-    .video-card__play {
+    .video-card-play {
         position: absolute;
         inset: 0;
         display: flex;
@@ -144,11 +119,11 @@
             justify-content: center;
             font-size: 1.1rem;
             color: #fff;
-            padding-left: 4px; // optical center for play icon
+            padding-left: 4px;
         }
     }
 
-    .video-card__type-badge {
+    .video-card-type-badge {
         position: absolute;
         bottom: 0.5rem;
         left: 0.5rem;
@@ -162,7 +137,7 @@
         letter-spacing: 0.05em;
     }
 
-    .video-card__official-badge {
+    .video-card-official-badge {
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
@@ -176,13 +151,13 @@
         letter-spacing: 0.05em;
     }
 
-    .video-card__info {
+    .video-card-info {
         display: flex;
         flex-direction: column;
         gap: 0.15rem;
     }
 
-    .video-card__title {
+    .video-card-title {
         font-size: 0.9rem;
         font-weight: 600;
         line-height: 1.3;
@@ -193,32 +168,26 @@
         overflow: hidden;
     }
 
-    .video-card__media {
+    .video-card-media {
         margin: 0;
         font-size: 0.82rem;
     }
 
-    .video-card__meta {
+    .video-card-meta {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         margin-top: 0.1rem;
     }
 
-    .video-card__quality {
+    .video-card-quality {
         font-size: 0.72rem;
         background: var(--mat-sys-surface-container);
         padding: 1px 5px;
         border-radius: 3px;
     }
 
-    // ---- Mobile ----
-
     @include mobile() {
-        .page-title {
-            font-size: 1.4rem;
-        }
-
         .sort-label {
             display: none;
         }

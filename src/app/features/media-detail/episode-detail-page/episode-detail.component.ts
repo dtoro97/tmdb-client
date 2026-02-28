@@ -1,6 +1,5 @@
-import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
@@ -16,9 +15,10 @@ import {
     PhotoViewerComponent,
     PhotosGridComponent,
     RatingComponent,
+    SubPageBannerComponent,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
-import { MediaStoreService } from '../media-store.service';
+import { MediaDetailStoreService } from '../media-detail-store.service';
 import { EpisodeDetailStoreService } from './episode-detail-store.service';
 
 @Component({
@@ -26,7 +26,6 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
     imports: [
         AsyncPipe,
         DatePipe,
-        RouterLink,
         MatChipsModule,
         MatDialogModule,
         CastCrewGridComponent,
@@ -34,6 +33,7 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
         PhotosGridComponent,
         RatingComponent,
         MinutesToHours,
+        SubPageBannerComponent,
     ],
     providers: [EpisodeDetailStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,10 +43,9 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
 export class EpisodeDetailComponent {
     constructor(
         public episodeStore: EpisodeDetailStoreService,
-        public mediaStore: MediaStoreService,
+        public mediaStore: MediaDetailStoreService,
         private route: ActivatedRoute,
         private titleService: Title,
-        private scroller: ViewportScroller,
         private dialog: MatDialog,
     ) {
         combineLatest([this.route.paramMap, this.route.parent!.paramMap])
@@ -68,7 +67,6 @@ export class EpisodeDetailComponent {
             .pipe(
                 tap((episode) => {
                     this.titleService.setTitle(`${episode.name} | Episode`);
-                    this.scroller.scrollToPosition([0, 0]);
                 }),
             )
             .subscribe();

@@ -10,19 +10,6 @@
         }
     }
 
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: var(--primary-color);
-        text-decoration: none;
-        font-size: var(--font-size-base);
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
     .media-header {
         display: flex;
         align-items: flex-start;

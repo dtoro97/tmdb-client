@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -23,7 +23,7 @@ import {
     RatingComponent,
     SocialLinksComponent,
 } from '../../../shared';
-import { PersonDetailStoreService } from '../person-store.service';
+import { PersonDetailStoreService } from '../person-detail-store.service';
 
 @Component({
     selector: 'app-person-details',
@@ -54,7 +54,6 @@ export class PersonDetailsComponent {
 
     constructor(
         public personDetailStore: PersonDetailStoreService,
-        private scroller: ViewportScroller,
         private titleService: Title,
         private route: ActivatedRoute,
         private dialog: MatDialog,
@@ -74,7 +73,6 @@ export class PersonDetailsComponent {
             .pipe(
                 tap((person) => {
                     this.titleService.setTitle(`${person.name} | People`);
-                    this.scroller.scrollToPosition([0, 0]);
                 }),
             )
             .subscribe();

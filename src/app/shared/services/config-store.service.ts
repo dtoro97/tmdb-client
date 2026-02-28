@@ -26,9 +26,7 @@ export class ConfigStoreService extends ComponentStore<ConfigStoreState> {
     ) {
         super({});
 
-        combineLatest([this.getLanguages$(), this.getCountries$()]).subscribe(
-            (v) => console.log(v),
-        );
+        combineLatest([this.getLanguages$(), this.getCountries$()]).subscribe();
     }
 
     getLanguages$() {

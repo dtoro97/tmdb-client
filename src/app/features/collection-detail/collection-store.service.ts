@@ -3,10 +3,19 @@ import { Router } from '@angular/router';
 
 import { ComponentStore } from '@ngrx/component-store';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
-import { catchError, EMPTY, filter, map, Observable, tap } from 'rxjs';
+import {
+    catchError,
+    EMPTY,
+    filter,
+    map,
+    Observable,
+    switchMap,
+    tap,
+} from 'rxjs';
 
 import {
     CollectionDetails,
+    CollectionImages,
     CollectionPart,
     CollectionRestControllerService,
 } from '../../api';
@@ -14,6 +23,7 @@ import { isDefined, loader } from '../../shared';
 
 interface CollectionState {
     collection?: CollectionDetails;
+    photos?: CollectionImages;
 }
 
 @Injectable()
@@ -24,9 +34,8 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
     parts$: Observable<CollectionPart[]> = this.collection$.pipe(
         map((c) =>
-            [...(c.parts ?? [])].sort(
-                (a, b) =>
-                    (a.release_date ?? '').localeCompare(b.release_date ?? ''),
+            [...(c.parts ?? [])].sort((a, b) =>
+                (a.release_date ?? '').localeCompare(b.release_date ?? ''),
             ),
         ),
     );
@@ -46,6 +55,8 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         }),
     );
 
+    photos$ = this.select((state) => state.photos).pipe(filter(isDefined));
+
     constructor(
         private collectionRestControllerService: CollectionRestControllerService,
         private ngxUiLoaderService: NgxUiLoaderService,
@@ -59,9 +70,21 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
             .collectionDetails(id, undefined, undefined, undefined, {
                 httpHeaderAccept: 'application/json',
             })
+            .pipe(tap((collection) => this.patchState({ collection })))
             .pipe(
+                switchMap(() =>
+                    this.collectionRestControllerService
+                        .collectionImages(
+                            id,
+                            undefined,
+                            undefined,
+                            undefined,
+                            undefined,
+                            { httpHeaderAccept: 'application/json' },
+                        )
+                        .pipe(tap((photos) => this.patchState({ photos }))),
+                ),
                 loader(this.ngxUiLoaderService),
-                tap((collection) => this.patchState({ collection })),
                 catchError(() => {
                     this.router.navigate(['not-found']);
                     return EMPTY;

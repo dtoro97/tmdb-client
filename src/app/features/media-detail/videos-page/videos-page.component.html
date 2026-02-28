@@ -1,21 +1,19 @@
 <div class="videos-page pb-8">
-    <div class="inner-container pt-5">
-        @if (mediaStoreService.viewModel$ | async; as vm) {
-            <!-- Back link -->
-            <a class="back-link mb-5" [routerLink]="['../']">
-                <i class="fa-solid fa-chevron-left"></i>
-                Back to {{ vm.title }}
-            </a>
+    @if (mediaStoreService.viewModel$ | async; as vm) {
+        <app-sub-page-banner
+            [backdropPath]="vm.backdropPath"
+            [parentTitle]="vm.title"
+            [backLink]="['../']"
+            pageTitle="Videos"
+        />
 
-            <h1 class="page-title">Videos</h1>
-
+        <div class="inner-container pt-5">
             @if (videos$ | async; as videos) {
-                <!-- Sort controls bar -->
                 <div class="sort-bar mb-5">
-                    <span class="sort-bar__count muted">
+                    <span class="sort-bar-count muted">
                         1–{{ videos.length }} of {{ videos.length }}
                     </span>
-                    <div class="sort-bar__controls">
+                    <div class="sort-bar-controls">
                         <i class="fa-solid fa-sliders muted"></i>
                         <span class="muted text-sm sort-label">Sort by</span>
                         <mat-select
@@ -40,7 +38,6 @@
                     </div>
                 </div>
 
-                <!-- Video grid -->
                 <div class="video-grid">
                     @for (video of videos; track video.id) {
                         <a
@@ -49,36 +46,36 @@
                             target="_blank"
                             rel="noopener"
                         >
-                            <div class="video-card__thumb">
+                            <div class="video-card-thumb">
                                 <img
                                     [src]="getYoutubeThumbnail(video.key!)"
                                     [alt]="video.name"
                                 />
-                                <div class="video-card__play">
+                                <div class="video-card-play">
                                     <i class="fa-solid fa-play"></i>
                                 </div>
                                 @if (video.type) {
-                                    <span class="video-card__type-badge">{{
+                                    <span class="video-card-type-badge">{{
                                         video.type
                                     }}</span>
                                 }
                                 @if (video.official) {
-                                    <span class="video-card__official-badge"
+                                    <span class="video-card-official-badge"
                                         >Official</span
                                     >
                                 }
                             </div>
-                            <div class="video-card__info">
-                                <p class="video-card__title">
+                            <div class="video-card-info">
+                                <p class="video-card-title">
                                     {{ video.name }}
                                 </p>
-                                <p class="video-card__media muted text-sm">
+                                <p class="video-card-media muted text-sm">
                                     {{ vm.title }}
                                     @if (vm.year) {
                                         ({{ vm.year }})
                                     }
                                 </p>
-                                <div class="video-card__meta">
+                                <div class="video-card-meta">
                                     @if (video.published_at) {
                                         <span class="muted text-sm">{{
                                             video.published_at
@@ -86,7 +83,7 @@
                                         }}</span>
                                     }
                                     @if (video.size) {
-                                        <span class="video-card__quality muted">
+                                        <span class="video-card-quality muted">
                                             {{ video.size }}p
                                         </span>
                                     }
@@ -96,6 +93,6 @@
                     }
                 </div>
             }
-        }
-    </div>
+        </div>
+    }
 </div>

@@ -14,13 +14,13 @@ import {
 } from 'rxjs';
 
 import { Injectable } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
 import { ComponentStore } from '@ngrx/component-store';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 import {
+    AggregateCredits,
     CastMember,
     CollectionDetails,
     CollectionRestControllerService,
@@ -47,8 +47,10 @@ import { ConfigStoreService, isDefined, loader } from '../../shared';
 
 export type MediaEnriched = (Movie | TvSeries) & {
     credits?: Credits;
+    aggregate_credits?: AggregateCredits;
     videos?: { results?: Video[] };
     similar?: { results?: unknown[] };
+    recommendations?: { results?: unknown[] };
     external_ids?: ExternalIds;
     images?: ImageList;
 };
@@ -90,21 +92,36 @@ export interface MediaState {
 }
 
 @Injectable()
-export class MediaStoreService extends ComponentStore<MediaState> {
+export class MediaDetailStoreService extends ComponentStore<MediaState> {
     media$ = this.select((state) => state.media).pipe(filter(isDefined));
 
-    cast$: Observable<CastMember[]> = this.credits$.pipe(
-        map((credits) => credits.cast ?? []),
+    cast$: Observable<CastMember[]> = this.media$.pipe(
+        map((m) => {
+            if (m.aggregate_credits?.cast?.length) {
+                return m.aggregate_credits.cast.map((ac) => {
+                    const roles = (ac.roles ?? [])
+                        .map((r) => r.character)
+                        .filter(Boolean);
+                    const rest = roles.length - 1;
+                    const character = roles.length
+                        ? roles[0] + (rest > 0 ? ` +${rest} more` : '')
+                        : '';
+                    return { ...ac, character } as CastMember;
+                });
+            }
+            return m.credits?.cast ?? [];
+        }),
     );
 
-    crew$: Observable<CrewMember[]> = this.credits$.pipe(
-        map((credits) => credits.crew ?? []),
+    crew$: Observable<CrewMember[]> = this.media$.pipe(
+        map((m) => (m.credits?.crew ?? []) as CrewMember[]),
     );
 
-    directors$: Observable<CrewMember[]> = this.credits$.pipe(
-        map((credits) => {
+    directors$: Observable<CrewMember[]> = this.media$.pipe(
+        map((m) => {
+            const crew = (m.credits?.crew ?? []) as CrewMember[];
             const seen = new Set<number>();
-            return (credits.crew ?? []).filter((c) => {
+            return crew.filter((c) => {
                 if (c.job !== 'Director' || seen.has(c.id!)) return false;
                 seen.add(c.id!);
                 return true;
@@ -119,7 +136,10 @@ export class MediaStoreService extends ComponentStore<MediaState> {
 
     recommendations$ = this.media$.pipe(
         map((m) => {
-            const items = (m.similar?.results ?? []) as Record<string, unknown>[];
+            const items = (m.similar?.results ?? []) as Record<
+                string,
+                unknown
+            >[];
             return [...items].sort(
                 (a, b) =>
                     ((b['vote_average'] as number) ?? 0) -
@@ -132,13 +152,15 @@ export class MediaStoreService extends ComponentStore<MediaState> {
         switchMap((media) => {
             const collection = (media as Movie).belongs_to_collection;
             if (!collection?.id) return of(null);
-            return this.collectionRestControllerService.collectionDetails(
-                collection.id,
-                undefined,
-                undefined,
-                undefined,
-                { httpHeaderAccept: 'application/json' },
-            ).pipe(catchError(() => of(null)));
+            return this.collectionRestControllerService
+                .collectionDetails(
+                    collection.id,
+                    undefined,
+                    undefined,
+                    undefined,
+                    { httpHeaderAccept: 'application/json' },
+                )
+                .pipe(catchError(() => of(null)));
         }),
         shareReplay(1),
     );
@@ -198,7 +220,8 @@ export class MediaStoreService extends ComponentStore<MediaState> {
                     .sort(
                         (a, b) =>
                             (b.season_number ?? 0) - (a.season_number ?? 0),
-                    )[0] ?? null,
+                    )
+                    .find((season) => season.episodes?.length ?? 0 > 0) ?? null,
         ),
     );
 
@@ -258,11 +281,8 @@ export class MediaStoreService extends ComponentStore<MediaState> {
         map(([media, type, languages]) =>
             this.toViewModel(media, type, languages),
         ),
-        tap((vm) => {
-            const typeLabel = vm.mediaType === 'tv' ? 'TV Show' : 'Movie';
-            this.titleService.setTitle(`${vm.title} | ${typeLabel}`);
-        }),
     );
+    title$ = this.viewModel$.pipe(map((vm) => vm.title));
 
     constructor(
         private movieRestControllerService: MovieRestControllerService,
@@ -271,7 +291,6 @@ export class MediaStoreService extends ComponentStore<MediaState> {
         private collectionRestControllerService: CollectionRestControllerService,
         private ngxUiLoaderService: NgxUiLoaderService,
         private configStoreService: ConfigStoreService,
-        private titleService: Title,
         private router: Router,
     ) {
         super({
@@ -318,6 +337,7 @@ export class MediaStoreService extends ComponentStore<MediaState> {
 
         return combineLatest([
             this.detailsRequest$(id, type).pipe(
+                loader(this.ngxUiLoaderService),
                 catchError(() => {
                     this.router.navigate(['not-found']);
                     return EMPTY;
@@ -334,13 +354,7 @@ export class MediaStoreService extends ComponentStore<MediaState> {
                     return EMPTY;
                 }),
             ),
-        ]).pipe(loader(this.ngxUiLoaderService));
-    }
-
-    private get credits$() {
-        return this.media$.pipe(
-            map((m) => m.credits ?? { cast: [], crew: [] }),
-        );
+        ]);
     }
 
     private get images$() {
@@ -438,7 +452,7 @@ export class MediaStoreService extends ComponentStore<MediaState> {
             () => type === 'tv',
             this.tvSeriesRestControllerService.tvSeriesDetails(
                 id,
-                'credits,videos,similar,external_ids,images',
+                'credits,videos,similar,external_ids,images,aggregate_credits',
                 undefined,
                 undefined,
                 undefined,

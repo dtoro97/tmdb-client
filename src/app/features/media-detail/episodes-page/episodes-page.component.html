@@ -1,14 +1,14 @@
 <div class="episodes-page pb-8">
+    @if (mediaStoreService.viewModel$ | async; as vm) {
+        <app-sub-page-banner
+            [backdropPath]="vm.backdropPath"
+            [parentTitle]="vm.title"
+            [backLink]="['../']"
+            pageTitle="Episodes"
+        />
+    }
+
     <div class="inner-container pt-5">
-        @if (mediaStoreService.viewModel$ | async; as vm) {
-            <a class="back-link mb-5" [routerLink]="['../']">
-                <i class="fa-solid fa-chevron-left"></i>
-                Back to {{ vm.title }}
-            </a>
-
-            <h1 class="page-title">Episodes</h1>
-        }
-
         <div class="featured-row mb-5">
             @if (mediaStoreService.topRatedEpisode$ | async; as top) {
                 <a

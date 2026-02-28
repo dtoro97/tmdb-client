@@ -12,6 +12,14 @@
             }
 
             <div class="hero-content inner-container">
+                @if (collection.poster_path) {
+                    <app-media-thumb
+                        class="hero-poster border-round-xl"
+                        [src]="collection.poster_path"
+                        type="media"
+                        [alt]="collection.name"
+                    />
+                }
                 <div class="hero-info">
                     <h1 class="hero-title">{{ collection.name }}</h1>
                     <div class="flex align-items-center gap-3 mt-2">

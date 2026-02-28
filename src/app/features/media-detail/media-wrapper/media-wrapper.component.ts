@@ -2,24 +2,21 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
-import { switchMap, tap } from 'rxjs';
+import { switchMap } from 'rxjs';
 
-import { MediaStoreService } from '../media-store.service';
+import { MediaDetailStoreService } from '../media-detail-store.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ViewportScroller } from '@angular/common';
-
 @Component({
     selector: 'app-media-wrapper',
     template: '<router-outlet />',
     imports: [RouterOutlet],
-    providers: [MediaStoreService],
+    providers: [MediaDetailStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaWrapperComponent {
     constructor(
-        public mediaStoreService: MediaStoreService,
+        public mediaStoreService: MediaDetailStoreService,
         private route: ActivatedRoute,
-        private scroller: ViewportScroller,
     ) {
         this.route.paramMap
             .pipe(
@@ -29,7 +26,6 @@ export class MediaWrapperComponent {
                         params.get('type')!,
                     ),
                 ),
-                tap(() => this.scroller.scrollToPosition([0, 0])),
             )
 
             .pipe(takeUntilDestroyed())

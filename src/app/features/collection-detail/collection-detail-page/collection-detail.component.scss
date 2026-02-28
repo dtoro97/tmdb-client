@@ -62,8 +62,17 @@
             position: relative;
             z-index: 1;
             width: 100%;
+            display: flex;
+            align-items: flex-end;
+            gap: 2rem;
             padding-top: 5rem;
             padding-block: 2.5rem;
+        }
+
+        .hero-poster {
+            flex-shrink: 0;
+            width: 180px;
+            max-height: 270px;
         }
 
         .hero-info {
@@ -110,6 +119,7 @@
         .movie-poster {
             flex-shrink: 0;
             width: 100px;
+            height: 150px;
             border-radius: 6px;
             background: var(--mat-sys-surface-container);
         }
@@ -141,6 +151,7 @@
             line-height: 1.5;
             display: -webkit-box;
             -webkit-line-clamp: 3;
+            line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -172,8 +183,17 @@
             }
 
             .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
                 padding-top: 1rem;
                 padding-block: 1.5rem;
+            }
+
+            .hero-poster {
+                width: 100px;
+                max-height: 150px;
+                margin-top: -2rem;
             }
 
             .hero-title {
@@ -182,6 +202,7 @@
 
             .movie-poster {
                 width: 75px;
+                height: 112.5px;
             }
 
             .movie-row {

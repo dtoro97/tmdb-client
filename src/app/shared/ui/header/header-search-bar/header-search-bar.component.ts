@@ -20,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { RatingComponent } from '../../rating/rating.component';
 import { MediaThumbComponent } from '../../media-thumb/media-thumb.component';
-import { SearchRestControllerService } from '../../../../api';
+import { MultiListItem, SearchRestControllerService } from '../../../../api';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 
 interface DisplayResult {
@@ -32,6 +32,7 @@ interface DisplayResult {
     overview: string;
     rating: number | null;
     department: string;
+    known_for?: string;
 }
 
 @Component({
@@ -86,6 +87,7 @@ export class HeaderSearchBarComponent {
             )
             .subscribe((results) => {
                 this.searchResults = results;
+                console.log(results);
                 this.showSearchDropdown = results.length > 0;
                 this.cdr.markForCheck();
             });
@@ -221,6 +223,9 @@ export class HeaderSearchBarComponent {
                                 rating: null,
                                 department:
                                     (person as any).known_for_department || '',
+                                known_for: person.known_for
+                                    ?.map((i) => i.title || i.name)
+                                    .join(', '),
                             })),
                         ),
                     );
@@ -250,6 +255,9 @@ export class HeaderSearchBarComponent {
                                 overview: m.overview || '',
                                 rating: m.vote_average ?? null,
                                 department: m.known_for_department || '',
+                                known_for: m.known_for
+                                    ?.map((i) => i.title || i.name)
+                                    .join(', '),
                             })),
                         ),
                     );

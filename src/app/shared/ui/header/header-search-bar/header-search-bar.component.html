@@ -20,7 +20,6 @@
             appearance="outline"
             subscriptSizing="dynamic"
         >
-            <mat-icon matPrefix>search</mat-icon>
             <input
                 cdkTrapFocus
                 [cdkTrapFocusAutoCapture]="true"
@@ -31,6 +30,7 @@
                 placeholder="Search movies, TV shows, people…"
                 autocomplete="off"
             />
+            <mat-icon matSuffix>search</mat-icon>
             <button
                 matSuffix
                 mat-icon-button
@@ -75,6 +75,11 @@
                             <span class="result-overview">{{
                                 item.overview
                             }}</span>
+                        }
+                        @if (item.mediaType === "person" && searchResults) {
+                            <span class="result-known-for">
+                                {{ item.known_for }}
+                            </span>
                         }
                     </div>
                 </div>

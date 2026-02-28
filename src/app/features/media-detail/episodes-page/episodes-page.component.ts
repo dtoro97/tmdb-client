@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, ViewportScroller } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -6,8 +6,12 @@ import {
     MediaThumbComponent,
     PillToggleComponent,
     RatingComponent,
+    SubPageBannerComponent,
 } from '../../../shared';
-import { MediaStoreService } from '../media-store.service';
+import { MediaDetailStoreService } from '../media-detail-store.service';
+import { Title } from '@angular/platform-browser';
+import { tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-episodes-page',
@@ -18,6 +22,7 @@ import { MediaStoreService } from '../media-store.service';
         MediaThumbComponent,
         PillToggleComponent,
         RatingComponent,
+        SubPageBannerComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './episodes-page.component.html',
@@ -25,10 +30,17 @@ import { MediaStoreService } from '../media-store.service';
 })
 export class EpisodesPageComponent {
     constructor(
-        public mediaStoreService: MediaStoreService,
-        private scroller: ViewportScroller,
+        public mediaStoreService: MediaDetailStoreService,
+        private title: Title,
     ) {
-        this.scroller.scrollToPosition([0, 0]);
+        this.mediaStoreService.viewModel$
+            .pipe(
+                takeUntilDestroyed(),
+                tap((vm) => {
+                    this.title.setTitle(`${vm.title} | Episodes`);
+                }),
+            )
+            .subscribe();
     }
 
     changeSeason(value: unknown): void {

@@ -20,6 +20,17 @@
                 />
                 <div class="hero__info">
                     <h1 class="hero__title">{{ vm.title }}</h1>
+                    <p class="hero__type">
+                        @if (vm.mediaType === "movie") {
+                            Movie
+                        } @else {
+                            TV Series &#x2022;
+                            {{ vm.firstAirDate | date: "yyyy" }}
+                            @if (vm.lastAirDate) {
+                                - {{ vm.lastAirDate | date: "yyyy" }}
+                            }
+                        }
+                    </p>
                     <p class="hero__year">{{ vm.year }}</p>
 
                     @if (vm.voteAverage) {
@@ -73,33 +84,68 @@
                         </ng-template>
                     </app-carousel>
 
-                    <div class="crew-rows">
-                        @if (
-                            mediaStoreService.directors$ | async;
-                            as directors
-                        ) {
-                            @if (directors.length) {
+                    @if (
+                        (mediaStoreService.directors$ | async)?.length ||
+                        vm.creators?.length
+                    ) {
+                        <div class="crew-rows">
+                            @if (
+                                mediaStoreService.directors$ | async;
+                                as directors
+                            ) {
+                                @if (directors.length) {
+                                    <div class="crew-row">
+                                        <span class="crew-row-label"
+                                            >Director{{
+                                                directors.length > 1 ? "s" : ""
+                                            }}</span
+                                        >
+                                        <span class="crew-row-names">
+                                            @for (
+                                                person of directors;
+                                                track person.id;
+                                                let i = $index
+                                            ) {
+                                                <a
+                                                    class="crew-row-link"
+                                                    [routerLink]="[
+                                                        '/name',
+                                                        person.id,
+                                                    ]"
+                                                    >{{ person.name }}</a
+                                                >
+                                                @if (i < directors.length - 1) {
+                                                    <span class="crew-row-sep"
+                                                        >·</span
+                                                    >
+                                                }
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            @if (vm.creators?.length) {
                                 <div class="crew-row">
                                     <span class="crew-row-label"
-                                        >Director{{
-                                            directors.length > 1 ? "s" : ""
+                                        >Creator{{
+                                            vm.creators!.length > 1 ? "s" : ""
                                         }}</span
                                     >
                                     <span class="crew-row-names">
                                         @for (
-                                            person of directors;
-                                            track person.id;
+                                            creator of vm.creators;
+                                            track creator.id;
                                             let i = $index
                                         ) {
                                             <a
                                                 class="crew-row-link"
                                                 [routerLink]="[
                                                     '/name',
-                                                    person.id,
+                                                    creator.id,
                                                 ]"
-                                                >{{ person.name }}</a
+                                                >{{ creator.name }}</a
                                             >
-                                            @if (i < directors.length - 1) {
+                                            @if (i < vm.creators!.length - 1) {
                                                 <span class="crew-row-sep"
                                                     >·</span
                                                 >
@@ -108,42 +154,14 @@
                                     </span>
                                 </div>
                             }
-                        }
-                        @if (vm.creators?.length) {
-                            <div class="crew-row">
-                                <span class="crew-row-label"
-                                    >Creator{{
-                                        vm.creators!.length > 1 ? "s" : ""
-                                    }}</span
-                                >
-                                <span class="crew-row-names">
-                                    @for (
-                                        creator of vm.creators;
-                                        track creator.id;
-                                        let i = $index
-                                    ) {
-                                        <a
-                                            class="crew-row-link"
-                                            [routerLink]="['/name', creator.id]"
-                                            >{{ creator.name }}</a
-                                        >
-                                        @if (i < vm.creators!.length - 1) {
-                                            <span class="crew-row-sep">·</span>
-                                        }
-                                    }
-                                </span>
-                            </div>
-                        }
-                        <a
-                            class="crew-row crew-row-all"
-                            [routerLink]="['cast']"
-                        >
-                            <span class="crew-row-label">All cast & crew</span>
-                            <i
-                                class="fa-solid fa-chevron-right crew-row-chevron"
-                            ></i>
-                        </a>
-                    </div>
+                        </div>
+                    }
+                    <a class="crew-row crew-row-all" [routerLink]="['cast']">
+                        <span class="crew-row-label">All cast & crew</span>
+                        <i
+                            class="fa-solid fa-chevron-right crew-row-chevron"
+                        ></i>
+                    </a>
                 </section>
             }
 
@@ -174,7 +192,12 @@
                                     @if (last && collection.parts!.length > 1) {
                                         and
                                     }
-                                    {{ part.title }}@if (!last && collection.parts!.length > 2) {,}
+                                    {{ part.title }}
+                                    @if (
+                                        !last && collection.parts!.length > 2
+                                    ) {
+                                        ,
+                                    }
                                 }
                             </p>
                         }
@@ -198,10 +221,7 @@
                                 }}</span>
                             }
                         </div>
-                        <a
-                            class="browse-episodes-link"
-                            [routerLink]="['episodes']"
-                        >
+                        <a class="browse-link" [routerLink]="['episodes']">
                             Browse all episodes
                             <i class="fa-solid fa-chevron-right"></i>
                         </a>
@@ -260,10 +280,7 @@
                                         | async
                                 }}</span>
                             </h2>
-                            <a
-                                class="browse-episodes-link"
-                                [routerLink]="['videos']"
-                            >
+                            <a class="browse-link" [routerLink]="['videos']">
                                 Browse all videos
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
@@ -409,11 +426,11 @@
                     <h2 class="section-title">More Like This</h2>
                     <app-carousel
                         [items]="(mediaStoreService.recommendations$ | async)!"
-                        [numVisible]="8"
-                        [numScroll]="8"
+                        [numVisible]="6"
+                        [numScroll]="6"
                     >
                         <ng-template let-media>
-                            <app-card [item]="media" />
+                            <app-card [item]="media" [type]="vm.mediaType" />
                         </ng-template>
                     </app-carousel>
                 </section>

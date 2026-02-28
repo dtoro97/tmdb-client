@@ -1,69 +1,77 @@
 <div class="episode-detail pb-8">
-    @if (episodeStore.episode$ | async; as episode) {
-        <div class="inner-container pt-5">
-            @if (mediaStore.viewModel$ | async; as vm) {
-                <a
-                    class="back-link mb-5"
-                    [routerLink]="['/title', vm.id, 'tv', 'episodes']"
-                >
-                    <i class="fa-solid fa-chevron-left"></i>
-                    Back to Episodes
-                </a>
-            }
-        </div>
+    @if (mediaStore.viewModel$ | async; as vm) {
+        <app-sub-page-banner
+            [backdropPath]="vm.backdropPath"
+            parentTitle="episodes"
+            [backLink]="['/title', vm.id, 'tv', 'episodes']"
+            pageTitle="Episode Detail"
+        />
 
-        <div class="hero inner-container">
-            <app-media-thumb
-                class="episode-still"
-                [src]="episode.still_path ?? null"
-            />
-            <div class="episode-info">
-                <mat-chip class="ep-chip">
-                    S{{ episode.season_number }}E{{ episode.episode_number }}
-                </mat-chip>
-                <h1 class="episode-title">{{ episode.name }}</h1>
-                <div class="flex align-items-center gap-3 mb-3">
-                    @if (episode.air_date) {
-                        <span class="muted">{{ episode.air_date | date }}</span>
-                    }
-                    @if (episode.runtime) {
-                        <span class="muted">{{ episode.runtime | m2h }}</span>
-                    }
-                    @if (episode.vote_average && episode.vote_average > 0) {
-                        <app-rating [value]="episode.vote_average" />
-                    }
+        @if (episodeStore.episode$ | async; as episode) {
+            <div class="episode-header inner-container">
+                <app-media-thumb
+                    class="episode-still"
+                    [src]="episode.still_path ?? null"
+                    params="w300"
+                />
+                <div class="episode-info">
+                    <mat-chip class="ep-chip">
+                        S{{ episode.season_number }}E{{
+                            episode.episode_number
+                        }}
+                    </mat-chip>
+                    <h2 class="episode-title">{{ episode.name }}</h2>
+                    <div class="flex align-items-center gap-3">
+                        @if (episode.air_date) {
+                            <span class="muted">{{
+                                episode.air_date | date
+                            }}</span>
+                        }
+                        @if (episode.runtime) {
+                            <span class="muted">{{
+                                episode.runtime | m2h
+                            }}</span>
+                        }
+                        @if (episode.vote_average && episode.vote_average > 0) {
+                            <app-rating [value]="episode.vote_average" />
+                        }
+                    </div>
                 </div>
-                @if (episode.overview) {
+            </div>
+
+            @if (episode.overview) {
+                <div class="inner-container">
                     <p class="episode-overview">{{ episode.overview }}</p>
+                </div>
+            }
+
+            <div class="inner-container flex flex-column gap-6 mt-6">
+                <app-cast-crew-grid
+                    [cast]="episode.guest_stars ?? []"
+                    [crew]="episode.crew ?? []"
+                />
+
+                @if (episodeStore.stills$ | async; as stills) {
+                    @if (stills.length) {
+                        <section>
+                            <h2 class="section-title">
+                                Stills
+                                <span class="section-count">{{
+                                    (episodeStore.allStills$ | async)?.length
+                                }}</span>
+                            </h2>
+                            <app-photos-grid
+                                [images]="stills"
+                                [totalCount]="
+                                    (episodeStore.allStills$ | async)?.length ??
+                                    0
+                                "
+                                (photoClick)="openPhotoViewer($event)"
+                            />
+                        </section>
+                    }
                 }
             </div>
-        </div>
-
-        <div class="inner-container flex flex-column gap-6 mt-6">
-            <app-cast-crew-grid
-                [cast]="episode.guest_stars ?? []"
-                [crew]="episode.crew ?? []"
-            />
-
-            @if (episodeStore.stills$ | async; as stills) {
-                @if (stills.length) {
-                    <section>
-                        <h2 class="section-title">
-                            Stills
-                            <span class="section-count">{{
-                                (episodeStore.allStills$ | async)?.length
-                            }}</span>
-                        </h2>
-                        <app-photos-grid
-                            [images]="stills"
-                            [totalCount]="
-                                (episodeStore.allStills$ | async)?.length ?? 0
-                            "
-                            (photoClick)="openPhotoViewer($event)"
-                        />
-                    </section>
-                }
-            }
-        </div>
+        }
     }
 </div>

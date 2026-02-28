@@ -10,39 +10,31 @@
         }
     }
 
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: var(--primary-color);
-        text-decoration: none;
-        font-size: var(--font-size-base);
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    .hero {
-        display: grid;
-        grid-template-columns: 1fr 480px;
-        gap: 2.5rem;
-        align-items: center;
-        padding-block: 2.5rem;
+    .episode-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding-block: 1.5rem;
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
     }
 
     .episode-still {
-        aspect-ratio: 16 / 9;
-        width: 100%;
-        border-radius: 8px;
+        width: 200px;
+        flex-shrink: 0;
+        border-radius: 6px;
         overflow: hidden;
+        aspect-ratio: 16 / 9;
     }
 
     .episode-info {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
         gap: 0.5rem;
+        padding-top: 0.25rem;
+    }
+
+    .ep-chip {
+        align-self: flex-start;
     }
 
     .episode-title {
@@ -56,7 +48,8 @@
         font-size: var(--font-size-base);
         line-height: 1.6;
         color: var(--mat-sys-on-surface-variant);
-        margin: 0;
+        margin: 0.75rem 0 0;
+        max-width: 700px;
     }
 
     .section-title {
@@ -74,80 +67,13 @@
         margin-left: 0.4rem;
     }
 
-    .crew-groups {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .crew-dept {
-        font-size: var(--font-size-base);
-        font-weight: 600;
-        color: var(--mat-sys-on-surface-variant);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin: 0 0 0.5rem;
-    }
-
-    .crew-row {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid var(--mat-sys-outline-variant);
-        text-decoration: none;
-        color: inherit;
-
-        &:first-of-type {
-            border-top: 1px solid var(--mat-sys-outline-variant);
-        }
-
-        &:hover .crew-name {
-            color: var(--primary-color);
-        }
-    }
-
-    .crew-thumb {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-        background: var(--mat-sys-surface-container);
-    }
-
-    .crew-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.1rem;
-        min-width: 0;
-    }
-
-    .crew-name {
-        font-size: var(--font-size-base);
-        font-weight: 500;
-        transition: color 0.15s ease;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .crew-job {
-        font-size: var(--font-size-sm);
-    }
-
     @include mobile() {
-        .hero {
-            grid-template-columns: 1fr;
-            padding-block: 1.5rem;
+        .episode-still {
+            width: 120px;
         }
 
         .episode-title {
-            font-size: 1.4rem;
-        }
-
-        .crew-groups {
-            grid-template-columns: 1fr;
+            font-size: var(--font-size-lg);
         }
     }
 }

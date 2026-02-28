@@ -59,6 +59,16 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailStoreSt
         filter(isDefined),
     );
     links$ = this.select((state) => state.person?.external_ids);
+    heroBackdrop$ = this.person$.pipe(
+        map((person) => {
+            const tagged = person.tagged_images?.results ?? [];
+            if (!tagged.length) return null;
+            const best = tagged.reduce((a, b) =>
+                (b.vote_average ?? 0) > (a.vote_average ?? 0) ? b : a,
+            );
+            return best.file_path ?? null;
+        }),
+    );
     visibleCredits$ = this.select((state) => state.visibleCredits);
 
     hasCredits$ = this.credits$.pipe(
@@ -89,26 +99,13 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailStoreSt
                     ? deduplicateCrew(credits.crew ?? [])
                     : deduplicateCast(credits.cast ?? []);
             return [...items].sort(
-                (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
+                (a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0),
             );
         }),
     );
 
-    featuredPhotos$ = this.person$.pipe(
-        map((person) => (person.images?.profiles ?? []).slice(0, 7)),
-    );
-
-    photosTotalCount$ = this.person$.pipe(
-        map(
-            (person) =>
-                (person.images?.profiles?.length ?? 0) +
-                (person.tagged_images?.results?.length ?? 0),
-        ),
-    );
-
     allPhotos$ = this.person$.pipe(
         map((person): ViewerImage[] => {
-            const profiles: ViewerImage[] = person.images?.profiles ?? [];
             const tagged: ViewerImage[] = (
                 person.tagged_images?.results ?? []
             ).map((t) => ({
@@ -121,8 +118,28 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailStoreSt
                 iso_639_1: t.iso_639_1,
                 caption: getMediaTitle(t.media),
             }));
-            return [...profiles, ...tagged];
+            const profiles: ViewerImage[] = person.images?.profiles ?? [];
+            return [...tagged, ...profiles];
         }),
+    );
+    featuredPhotos$ = this.person$.pipe(
+        map((person) =>
+            person.images?.profiles
+                ?.filter((i) => (i.aspect_ratio ?? 0) < 1)
+                .slice(0, 6),
+        ),
+    );
+    photosTotalCount$ = this.allPhotos$.pipe(
+        map((photos) => photos?.length || 0),
+    );
+
+    taggedCount$ = this.person$.pipe(
+        map(
+            (person) =>
+                (person.tagged_images?.results ?? []).filter(
+                    (t) => (t.aspect_ratio ?? 0) > 1,
+                ).length,
+        ),
     );
 
     groupedCredits$ = this.credits$.pipe(
