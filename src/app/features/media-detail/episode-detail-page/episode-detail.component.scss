@@ -1,0 +1,79 @@
+@use "responsive.scss" as *;
+
+:host ::ng-deep {
+    .episode-detail {
+        background-color: var(--mat-sys-surface);
+        min-height: 100vh;
+
+        .muted {
+            color: var(--mat-sys-on-surface-variant);
+        }
+    }
+
+    .episode-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding-block: 1.5rem;
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    .episode-still {
+        width: 200px;
+        flex-shrink: 0;
+        border-radius: 6px;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+    }
+
+    .episode-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 0.25rem;
+    }
+
+    .ep-chip {
+        align-self: flex-start;
+    }
+
+    .episode-title {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .episode-overview {
+        font-size: var(--font-size-base);
+        line-height: 1.6;
+        color: var(--mat-sys-on-surface-variant);
+        margin: 0.75rem 0 0;
+        max-width: 700px;
+    }
+
+    .section-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin: 0 0 1rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .section-count {
+        font-size: var(--font-size-base);
+        font-weight: 400;
+        color: var(--mat-sys-on-surface-variant);
+        margin-left: 0.4rem;
+    }
+
+    @include mobile() {
+        .episode-still {
+            width: 120px;
+        }
+
+        .episode-title {
+            font-size: var(--font-size-lg);
+        }
+    }
+}

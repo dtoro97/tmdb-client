@@ -1,0 +1,17 @@
+<div class="photos-page pb-8">
+    @if (mediaStoreService.viewModel$ | async; as vm) {
+        <app-sub-page-banner
+            [backdropPath]="vm.backdropPath"
+            [parentTitle]="vm.title"
+            [backLink]="['../']"
+            pageTitle="Photos"
+        />
+    }
+
+    <div class="inner-container pt-5">
+        <app-photos-browser
+            [images]="mediaStoreService.allPhotos$ | async"
+            (photoSelect)="openPhotoViewer($event)"
+        />
+    </div>
+</div>

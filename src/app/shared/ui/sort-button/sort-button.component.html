@@ -1,0 +1,19 @@
+<div class="sort-button">
+    <mat-icon class="sort-icon" aria-hidden="true">sort</mat-icon>
+    <mat-select
+        class="sort-select"
+        [value]="selectedValue"
+        (selectionChange)="onSortChange($event.value)"
+    >
+        @for (option of options; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+    </mat-select>
+    <button class="sort-dir-btn" type="button" (click)="onToggleDirection()">
+        @if (direction === "asc") {
+            <mat-icon aria-hidden="true">north</mat-icon>
+        } @else {
+            <mat-icon aria-hidden="true">south</mat-icon>
+        }
+    </button>
+</div>

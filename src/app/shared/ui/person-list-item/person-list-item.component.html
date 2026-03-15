@@ -1,0 +1,38 @@
+<div class="person-list-row">
+    @if (index) {
+        <span class="person-list-index">{{ index }}.</span>
+    }
+    <app-media-thumb
+        class="person-list-avatar"
+        [src]="person.thumb"
+        [alt]="person.title"
+        type="person"
+    />
+    <div class="person-list-body">
+        <a class="person-list-title" [routerLink]="['/name', person.id]">{{
+            person.title
+        }}</a>
+
+        @if (person.department) {
+            <span class="person-list-department">{{ person.department }}</span>
+        }
+        @if (person.knownForLinks.length) {
+            <p class="person-list-known-for">
+                @for (
+                    kf of person.knownForLinks;
+                    track kf.id;
+                    let last = $last
+                ) {
+                    <a
+                        class="known-for-link"
+                        [routerLink]="['/title', kf.id, kf.mediaType]"
+                        >{{ kf.title }}</a
+                    >
+                    @if (!last) {
+                        <span class="known-for-separator">, </span>
+                    }
+                }
+            </p>
+        }
+    </div>
+</div>

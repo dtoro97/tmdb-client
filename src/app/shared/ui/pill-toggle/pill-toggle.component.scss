@@ -1,0 +1,27 @@
+.pill-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    gap: 0.5rem;
+
+    .pill-btn {
+        background: none;
+        color: var(--mat-sys-on-surface-variant);
+        border: none;
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: var(--primary-color);
+        }
+
+        &.active {
+            background-color: var(--primary-color);
+            color: var(--mat-on-sys-surface);
+        }
+    }
+}

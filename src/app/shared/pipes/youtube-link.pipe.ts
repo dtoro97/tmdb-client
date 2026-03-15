@@ -7,9 +7,10 @@ import { Video } from '../../api';
 })
 export class YoutubeLinkPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
-  transform(video: Video): SafeResourceUrl {
+  transform(video: Video, params?: string): SafeResourceUrl {
+    const query = params ? `?${params}` : '';
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://www.youtube.com/embed/${video.key}`,
+      `https://www.youtube.com/embed/${video.key}${query}`,
     );
   }
 }

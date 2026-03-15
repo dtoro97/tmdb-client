@@ -1,0 +1,75 @@
+<div class="video-card" [class.video-card-embed]="variant === 'embed'">
+    @if (variant === "embed") {
+        <div class="video-card-thumb video-embed-wrap">
+            <iframe
+                class="video-embed"
+                [src]="video | yt"
+                [title]="video.name"
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="
+                    accelerometer;
+                    autoplay;
+                    clipboard-write;
+                    encrypted-media;
+                    gyroscope;
+                    picture-in-picture;
+                    web-share;
+                "
+                allowfullscreen
+            ></iframe>
+            @if (showTypeBadge && video.type) {
+                <span class="video-card-type-badge">{{ video.type }}</span>
+            }
+        </div>
+    } @else {
+        <button
+            type="button"
+            class="video-card-thumb-link"
+            (click)="onCardClick()"
+            [attr.aria-label]="'Open video: ' + video.name"
+        >
+            <div class="video-card-thumb">
+                <img
+                    [src]="getYoutubeThumbnail(video.key!)"
+                    [alt]="video.name"
+                />
+                <div class="video-card-play">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                @if (showTypeBadge && video.type) {
+                    <span class="video-card-type-badge">{{ video.type }}</span>
+                }
+                @if (showOfficialBadge && video.official) {
+                    <span class="video-card-official-badge">Official</span>
+                }
+            </div>
+        </button>
+    }
+
+    <div class="video-card-info">
+        @if (showTitle) {
+            <p class="video-card-title">{{ video.name }}</p>
+        }
+        @if (mediaTitle) {
+            <p class="video-card-media">
+                {{ mediaTitle }}
+                @if (mediaYear) {
+                    ({{ mediaYear }})
+                }
+            </p>
+        }
+        @if (showPublishedDate || showQuality) {
+            <div class="video-card-meta">
+                @if (showPublishedDate && video.published_at) {
+                    <span class="video-card-date">{{
+                        video.published_at | date: "mediumDate"
+                    }}</span>
+                }
+                @if (showQuality && video.size) {
+                    <span class="video-card-quality">{{ video.size }}p</span>
+                }
+            </div>
+        }
+    </div>
+</div>

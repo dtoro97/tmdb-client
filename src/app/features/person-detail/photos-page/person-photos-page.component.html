@@ -1,0 +1,17 @@
+<div class="photos-page pb-8">
+    @if (personDetailStore.person$ | async; as person) {
+        <app-sub-page-banner
+            [backdropPath]="personDetailStore.heroBackdrop$ | async"
+            [parentTitle]="person.name ?? ''"
+            [backLink]="['../']"
+            pageTitle="Photos"
+        />
+    }
+
+    <div class="inner-container pt-5">
+        <app-photos-browser
+            [images]="personDetailStore.allPhotos$ | async"
+            (photoSelect)="openPhotoViewer($event)"
+        />
+    </div>
+</div>

@@ -1,0 +1,72 @@
+<div class="collection-container pb-8">
+    @if (store.collection$ | async; as collection) {
+        <section class="hero">
+            @if (store.backdropPath$ | async; as backdrop) {
+                <app-media-thumb
+                    class="hero-backdrop"
+                    [alt]="collection.name"
+                    [src]="backdrop"
+                    [params]="'w1920_and_h800_multi_faces'"
+                />
+                <div class="hero-scrim"></div>
+            } @else {
+                <div class="hero-solid"></div>
+            }
+
+            <div class="hero-content inner-container">
+                @if (collection.poster_path) {
+                    <app-media-thumb
+                        class="hero-poster border-round-xl"
+                        [src]="collection.poster_path"
+                        type="media"
+                        [alt]="collection.name"
+                    />
+                }
+                <div class="hero-info">
+                    <h1 class="hero-title">{{ collection.name }}</h1>
+                    <div class="flex align-items-center gap-3 mt-2">
+                        @if (store.averageRating$ | async; as rating) {
+                            @if (rating > 0) {
+                                <app-rating [value]="rating" />
+                            }
+                        }
+                        @if (store.partsCount$ | async; as count) {
+                            <span class="muted">
+                                {{ count }}
+                                {{ count === 1 ? "Movie" : "Movies" }}
+                            </span>
+                        }
+                    </div>
+                    <p class="hero-overview line-height-4 mt-2" [class.muted]="!collection.overview">
+                        {{ collection.overview || "No overview available." }}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class="inner-container mt-4 flex flex-column gap-6">
+            @if (store.parts$ | async; as parts) {
+                @if (parts.length) {
+                    <section>
+                        <h2 class="section-title">
+                            Movies
+                            <span class="section-count">{{
+                                parts.length
+                            }}</span>
+                        </h2>
+
+                        @for (
+                            part of (store.mappedParts$ | async) ?? [];
+                            track part.id
+                        ) {
+                            <app-media-list-item
+                                [item]="part"
+                                [routerLink]="['/title', part.id, 'movie']"
+                            />
+                        }
+                    </section>
+                }
+            }
+        </div>
+    }
+</div>

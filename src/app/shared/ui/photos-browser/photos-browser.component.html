@@ -1,0 +1,47 @@
+<div class="photos-browser">
+    <div class="controls mb-4">
+        <div class="controls-left">
+            <span class="count muted">{{ visibleCountLabel$ | async }}</span>
+            <app-pill-toggle
+                [options]="(typePillOptions$ | async) ?? []"
+                [multiple]="true"
+                [selectedValues]="(selectedTypes$ | async) ?? []"
+                (selected)="setSelectedTypes($event)"
+            />
+        </div>
+        <app-sort-button
+            class="photos-sort"
+            [options]="sortOptions"
+            [selectedValue]="sortField$ | async"
+            [direction]="(sortDirection$ | async) ?? 'desc'"
+            (sortChange)="setSortField($event)"
+            (directionToggle)="toggleSortDirection()"
+        />
+    </div>
+
+    @if (visibleImages$ | async; as visibleImages) {
+        @if (visibleImages.length) {
+            <div class="photos-grid">
+                @for (image of visibleImages; track image.file_path; let i = $index) {
+                    <button
+                        type="button"
+                        class="photo-card"
+                        (click)="onImageClick(i, visibleImages)"
+                    >
+                        <img [src]="image.file_path ?? '' | imgSrc: 'w780'" alt="" />
+                    </button>
+                }
+            </div>
+
+            @if (hasMore$ | async) {
+                <div class="show-more-wrap mt-4">
+                    <button mat-stroked-button class="load-more-btn" (click)="showMore()">
+                        Show more photos
+                    </button>
+                </div>
+            }
+        } @else {
+            <p class="muted empty-state">{{ emptyText }}</p>
+        }
+    }
+</div>

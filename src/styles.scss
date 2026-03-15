@@ -1,36 +1,86 @@
+@use "@angular/material" as mat;
+@use "variables.scss";
+@use "select_overrides.scss";
+
+html {
+    height: 100%;
+    @include mat.theme(
+        (
+            color: (
+                theme-type: dark,
+                primary: mat.$red-palette,
+                tertiary: mat.$orange-palette,
+            ),
+            density: 0,
+        )
+    );
+}
+
+body {
+}
 @import "../node_modules/@fortawesome/fontawesome-free/css/all.css";
 @import "../node_modules/primeflex/primeflex.css";
 
 body,
 html {
-  font-family: "Inter", serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  font-size: 14px;
+    font-family: "Inter", serif !important;
+    font-optical-sizing: auto;
+    font-style: normal;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-size: 16px;
+
+    color-scheme: dark;
+    background-color: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    //font: var(--mat-sys-body-medium);
+
+    margin: 0;
+    height: 100%;
 }
 
 .inner-container {
-  max-width: 1400px;
-  margin: auto;
-  width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @media screen and (max-width: 768px) {
-  html,
-  body {
-    font-size: 15px;
-  }
+    html,
+    body {
+        font-size: 15px;
+    }
 }
 
 .ngx-overlay {
-  .ngx-foreground-spinner {
-    color: var(--p-primary-color) !important;
-  }
+    .ngx-foreground-spinner {
+        color: var(--primary-color) !important;
+    }
 }
 
 .ngx-progress-bar {
-  color: var(--p-primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.photo-viewer-panel {
+    .mat-mdc-dialog-container,
+    .mdc-dialog__surface {
+        background: rgba(0, 0, 0, 0.95) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-height: 100vh !important;
+    }
+}
+
+.mat-mdc-standard-chip {
+    .mdc-evolution-chip__text-label {
+        text-transform: uppercase;
+    }
+    .mat-mdc-chip-action {
+        cursor: pointer !important;
+    }
 }

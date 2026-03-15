@@ -1,0 +1,20 @@
+:host {
+    display: block;
+}
+
+.skeleton {
+    display: block;
+    background: var(--mat-sys-surface-container-highest);
+    animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0%,
+    100% {
+        opacity: 0.9;
+    }
+
+    50% {
+        opacity: 0.55;
+    }
+}

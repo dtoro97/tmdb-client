@@ -1,0 +1,100 @@
+@if (src) {
+    <img [src]="src | imgSrc: params" [alt]="alt" />
+} @else if (type === "person") {
+    <div class="placeholder">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle
+                cx="12"
+                cy="8.5"
+                r="3.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+            />
+            <path
+                d="M4.5 21c0-4.142 3.358-7.5 7.5-7.5s7.5 3.358 7.5 7.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+            />
+        </svg>
+    </div>
+} @else {
+    <div class="placeholder">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect
+                x="2"
+                y="5"
+                width="20"
+                height="14"
+                rx="1.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+            />
+            <rect
+                x="4"
+                y="7"
+                width="2"
+                height="2"
+                rx="0.3"
+                fill="currentColor"
+            />
+            <rect
+                x="4"
+                y="11"
+                width="2"
+                height="2"
+                rx="0.3"
+                fill="currentColor"
+            />
+            <rect
+                x="4"
+                y="15"
+                width="2"
+                height="2"
+                rx="0.3"
+                fill="currentColor"
+            />
+            <rect
+                x="18"
+                y="7"
+                width="2"
+                height="2"
+                rx="0.3"
+                fill="currentColor"
+            />
+            <rect
+                x="18"
+                y="11"
+                width="2"
+                height="2"
+                rx="0.3"
+                fill="currentColor"
+            />
+            <rect
+                x="18"
+                y="15"
+                width="2"
+                height="2"
+                rx="0.3"
+                fill="currentColor"
+            />
+            <line
+                x1="7"
+                y1="5"
+                x2="7"
+                y2="19"
+                stroke="currentColor"
+                stroke-width="1"
+            />
+            <line
+                x1="17"
+                y1="5"
+                x2="17"
+                y2="19"
+                stroke="currentColor"
+                stroke-width="1"
+            />
+            <path d="M10 9.5L15 12L10 14.5V9.5Z" fill="currentColor" />
+        </svg>
+    </div>
+}

@@ -1,0 +1,118 @@
+@use "responsive.scss" as *;
+
+:host {
+    display: block;
+}
+
+:host ::ng-deep {
+    .trailers-page {
+        min-height: 100vh;
+        background: var(--mat-sys-surface);
+    }
+
+    .trailers-page .main-title {
+        margin: 0;
+        font-size: clamp(1.35rem, 1.2rem + 1vw, 1.9rem);
+        line-height: 1.1;
+        font-weight: 750;
+        color: var(--primary-color);
+    }
+
+    .trailers-page .banner {
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    .trailers-tabs {
+        margin-top: 0.25rem;
+    }
+
+    .trailers-tabs .mat-mdc-tab-body-wrapper,
+    .trailers-tabs .mat-mdc-tab-body,
+    .trailers-tabs .mat-mdc-tab-body-content {
+        height: auto !important;
+        overflow: hidden !important;
+    }
+
+    .trailers-tabs .mat-mdc-tab-body-content {
+        overflow-x: hidden !important;
+        overflow-y: clip !important;
+        scrollbar-width: none;
+    }
+
+    .trailers-tabs .mat-mdc-tab-body-content::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .trailer-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .trailer-skeleton-card {
+        height: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--mat-sys-outline-variant);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        background: var(--mat-sys-surface-container);
+    }
+
+    .trailer-skeleton-art {
+        aspect-ratio: 2 / 3;
+        background: var(--mat-sys-surface-container-high);
+        overflow: hidden;
+    }
+
+    .trailer-skeleton-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        padding: 0.72rem 0.75rem 0.85rem;
+    }
+
+    .trailer-skeleton-line {
+        display: block;
+    }
+
+    .trailer-skeleton-line.line-1 {
+        width: 88%;
+    }
+
+    .trailer-skeleton-line.line-2 {
+        width: 68%;
+    }
+
+    .trailer-skeleton-line.line-3 {
+        width: 52%;
+        margin-top: auto;
+    }
+
+    .load-more-wrap {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.2rem;
+    }
+
+    @media (max-width: 1200px) {
+        .trailer-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 960px) {
+        .trailer-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @include mobile() {
+        .trailer-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+    }
+}

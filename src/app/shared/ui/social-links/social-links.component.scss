@@ -1,4 +1,8 @@
 i {
-  font-size: 1.5rem;
-  color: var(--p-text-color) !important;
+    font-size: 1.5rem;
+    color: var(--mat-sys-on-surface-variant) !important;
+
+    &:hover {
+        color: var(--primary-color) !important;
+    }
 }

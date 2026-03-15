@@ -1,0 +1,92 @@
+@use "responsive.scss" as *;
+
+:host {
+    display: block;
+}
+
+:host ::ng-deep {
+    .banner {
+        position: relative;
+        overflow: hidden;
+        min-height: 180px;
+        display: flex;
+        align-items: flex-end;
+        background: var(--hero-fallback-bg);
+    }
+
+    .banner-backdrop {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        display: block;
+        opacity: var(--hero-backdrop-opacity);
+    }
+
+    .banner-scrim {
+        position: absolute;
+        inset: 0;
+        background: var(--hero-scrim-color);
+    }
+
+    .banner-solid {
+        position: absolute;
+        inset: 0;
+        background: var(--hero-fallback-bg);
+    }
+
+    .banner-content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        padding-block: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: var(--font-size-base);
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .banner-title {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .banner-kicker {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .banner-subtitle {
+        color: var(--mat-sys-on-surface-variant);
+        font-size: var(--font-size-base);
+    }
+
+    @include mobile() {
+        .banner {
+            min-height: 140px;
+        }
+
+        .banner-title {
+            font-size: 1.4rem;
+        }
+    }
+}

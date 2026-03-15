@@ -3,12 +3,22 @@ import { RouterOutlet } from '@angular/router';
 
 import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { FooterComponent, HeaderComponent } from './shared';
+import { MatIconRegistry } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  imports: [FooterComponent, HeaderComponent, RouterOutlet, NgxUiLoaderModule],
-  styleUrl: './app.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    imports: [
+        FooterComponent,
+        HeaderComponent,
+        RouterOutlet,
+        NgxUiLoaderModule,
+    ],
+    styleUrl: './app.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {}
+export class AppComponent {
+    constructor(private matIconRegistry: MatIconRegistry) {
+        this.matIconRegistry.registerFontClassAlias('fa');
+    }
+}

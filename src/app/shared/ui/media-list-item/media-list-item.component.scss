@@ -1,0 +1,95 @@
+@use "responsive.scss" as *;
+
+:host {
+    display: block;
+    min-width: 0;
+}
+
+.media-list-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover .media-list-title {
+        color: var(--primary-color);
+    }
+}
+
+:host:first-child .media-list-row {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.media-list-index {
+    font-size: var(--font-size-sm);
+    color: var(--mat-sys-on-surface-variant);
+    min-width: 1.5rem;
+    text-align: right;
+    flex-shrink: 0;
+    padding-top: 0.25rem;
+}
+
+.media-list-poster {
+    flex-shrink: 0;
+    width: 100px;
+    height: 150px;
+    border-radius: 6px;
+    background: var(--mat-sys-surface-container);
+}
+
+.media-list-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.media-list-title {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.media-list-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--font-size-sm);
+    color: var(--mat-sys-on-surface-variant);
+
+    app-rating {
+        display: flex;
+    }
+}
+
+.muted {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.media-list-overview {
+    font-size: var(--font-size-sm);
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0.25rem 0 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@include mobile() {
+    .media-list-poster {
+        width: 75px;
+        height: 112.5px;
+    }
+
+    .media-list-row {
+        gap: 1rem;
+    }
+}

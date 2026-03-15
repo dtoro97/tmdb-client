@@ -1,0 +1,96 @@
+<div class="keyword-container pb-8">
+    @if (store.keyword$ | async; as keyword) {
+        <section class="hero">
+            <div class="hero-solid"></div>
+            <div class="hero-content inner-container">
+                <div class="hero-info">
+                    <h1 class="hero-title">{{ keyword.name }}</h1>
+                    <p class="hero-subtitle">
+                        Titles tagged with this keyword.
+                    </p>
+                    <div class="hero-meta">
+                        <mat-chip
+                            [class.active-chip]="
+                                (store.selectedType$ | async) === 'movie'
+                            "
+                            (click)="setType('movie')"
+                        >
+                            {{ store.moviesTotalResults$ | async }} Movies
+                        </mat-chip>
+                        <mat-chip
+                            [class.active-chip]="
+                                (store.selectedType$ | async) === 'tv'
+                            "
+                            (click)="setType('tv')"
+                        >
+                            {{ store.tvTotalResults$ | async }} TV Shows
+                        </mat-chip>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="inner-container mt-5 flex flex-column gap-6">
+            <section>
+                <div class="list-header mb-3">
+                    <h2 class="section-title m-0">
+                        @if ((store.selectedType$ | async) === 'movie') {
+                            Movies
+                        } @else {
+                            TV Shows
+                        }
+                        <span class="section-count">{{
+                            store.activeTotalResults$ | async
+                        }}</span>
+                    </h2>
+                    <app-sort-button
+                        [options]="(store.activeSortOptions$ | async) ?? []"
+                        [selectedValue]="store.activeSortField$ | async"
+                        [direction]="
+                            (store.activeSortDirection$ | async) ?? 'desc'
+                        "
+                        (sortChange)="onSortChange($event)"
+                        (directionToggle)="toggleSortDirection()"
+                    />
+                </div>
+
+                @if (store.activeResults$ | async; as items) {
+                    @if (items.length) {
+                        @for (item of items; track item.id) {
+                            <app-media-list-item
+                                [item]="item"
+                                [routerLink]="[
+                                    '/title',
+                                    item.id,
+                                    item.mediaType,
+                                ]"
+                            />
+                        }
+                    } @else {
+                        <p class="muted empty-text">
+                            @if ((store.selectedType$ | async) === 'movie') {
+                                No movies found for this keyword.
+                            } @else {
+                                No TV shows found for this keyword.
+                            }
+                        </p>
+                    }
+                }
+
+                @if (store.activeHasMore$ | async) {
+                    <button
+                        mat-stroked-button
+                        class="load-more-btn mt-4"
+                        (click)="loadMore()"
+                    >
+                        @if ((store.selectedType$ | async) === 'movie') {
+                            Show more movies
+                        } @else {
+                            Show more TV shows
+                        }
+                    </button>
+                }
+            </section>
+        </div>
+    }
+</div>

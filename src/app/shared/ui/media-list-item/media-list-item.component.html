@@ -1,0 +1,28 @@
+<a class="media-list-row" [routerLink]="routerLink">
+    @if (index) {
+        <span class="media-list-index">{{ index }}.</span>
+    }
+    <app-media-thumb
+        class="media-list-poster"
+        [src]="item.thumb"
+        [alt]="item.title"
+        type="media"
+    />
+    <div class="media-list-body">
+        <span class="media-list-title">{{ item.title }}</span>
+        <div class="media-list-meta">
+            @if (item.rating) {
+                <app-rating [value]="item.rating" />
+            }
+            @if (item.voteCount) {
+                ({{ item.voteCount }})
+            }
+            @if (item.date) {
+                <span class="muted">{{ item.date }}</span>
+            }
+        </div>
+        @if (item.overview) {
+            <p class="media-list-overview">{{ item.overview }}</p>
+        }
+    </div>
+</a>
