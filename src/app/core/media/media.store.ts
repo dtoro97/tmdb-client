@@ -8,6 +8,7 @@ import {
   Recommendation,
   Season,
   SeasonDetails,
+  TvRecommendation,
   TvShowDetails,
   Video,
 } from 'tmdb-ts';
@@ -16,7 +17,7 @@ export interface MediaState {
   media: MovieDetails | TvShowDetails | undefined;
   credits: Credits;
   videos: Video[];
-  recommendations: Recommendation[];
+  recommendations: Recommendation[] | TvRecommendation[];
   socialLinks: ExternalIds | undefined;
   images: Images | undefined;
   seasons: SeasonDetails[];

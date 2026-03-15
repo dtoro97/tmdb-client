@@ -1,7 +1,6 @@
 import { MenuItem } from 'primeng/api';
 import { AutoComplete, AutoCompleteModule } from 'primeng/autocomplete';
 import {
-  BehaviorSubject,
   debounceTime,
   from,
   Observable,
@@ -58,7 +57,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private tmdb: TmdbService,
     private stateService: StateService,
     private stateQuery: StateQuery,
-    private sessionService: StateService
   ) {}
 
   ngOnInit(): void {
@@ -73,7 +71,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         debounceTime(500),
         switchMap((query) => {
           return from(this.tmdb.search.multi({ query }));
-        })
+        }),
       )
       .subscribe((data) => {
         this.stateService.setLoading(false);
@@ -87,7 +85,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   toggleDarkMode() {
     const element = document.querySelector('html');
     element!.classList.toggle('dark');
-    this.sessionService.toggleDarkMode();
+    this.stateService.toggleDarkMode();
   }
 
   search(term: string) {
