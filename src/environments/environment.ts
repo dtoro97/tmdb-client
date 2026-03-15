@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'https://api.themoviedb.org/3',
   apiKey: '${API_KEY}',
 };

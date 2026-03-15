@@ -7,6 +7,8 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
 import { MATERIAL } from './constants';
+import { provideApi } from './api/provide-api';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,5 +24,11 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     provideHttpClient(),
+    provideApi({
+      basePath: 'https://api.themoviedb.org/3',
+      credentials: {
+        bearerAuth: environment.apiKey,
+      },
+    }),
   ],
 };

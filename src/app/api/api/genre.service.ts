@@ -29,7 +29,7 @@ import { BaseService } from '../api.base.service';
 @Injectable({
   providedIn: 'root'
 })
-export class GenreService extends BaseService {
+export class GenreRestControllerService extends BaseService {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);
@@ -39,7 +39,7 @@ export class GenreService extends BaseService {
      * Movie List
      * Get the list of official genres for movies.
      * @endpoint get /genre/movie/list
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
@@ -108,7 +108,7 @@ export class GenreService extends BaseService {
      * TV List
      * Get the list of official genres for TV shows.
      * @endpoint get /genre/tv/list
-     * @param language &#x60;ISO-639-1&#x60;-&#x60;ISO-3166-1&#x60; code
+     * @param language 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options

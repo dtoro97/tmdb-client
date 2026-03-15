@@ -7,13 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { MovieListItem } from './movieListItem';
+import { MovieListItemForList } from './movieListItemForList';
 
 
 export interface MovieListPage { 
-    page: number;
-    total_pages: number;
-    total_results: number;
-    results: Array<MovieListItem>;
+    id?: number;
+    page?: number;
+    results?: Array<MovieListItemForList>;
+    total_pages?: number;
+    total_results?: number;
 }
 

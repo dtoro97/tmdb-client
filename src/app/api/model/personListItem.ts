@@ -7,18 +7,18 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { PersonListItemKnownForInner } from './personListItemKnownForInner';
+import { MultiListItem } from './multiListItem';
 
 
 export interface PersonListItem { 
-    id: number;
-    name: string;
-    original_name: string;
     adult?: boolean;
     gender?: number;
+    id?: number;
     known_for_department?: string;
+    name?: string;
+    original_name?: string;
     popularity?: number;
-    profile_path?: string;
-    known_for?: Array<PersonListItemKnownForInner>;
+    profile_path?: string | null;
+    known_for?: Array<MultiListItem>;
 }
 
