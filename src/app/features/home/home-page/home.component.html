@@ -1,0 +1,52 @@
+@if (homeVM$ | async; as homeVM) {
+  <div class="h-full flex flex-column pb-4 md:pt-4">
+  <div class="flex flex-column">
+    <div class="column-header ml-4 md:ml-6 mb-4">
+      <h2>Trending</h2>
+      <p-select-button
+        [options]="trendingOptions"
+        [ngModel]="homeVM.trendingTime"
+        (ngModelChange)="changeTrending($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <p-carousel
+      [value]="homeVM.trending"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-movie pTemplate="item">
+        <app-card [item]="movie"></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
+  <div class="flex flex-column">
+    <div class="column-header ml-4 md:ml-6 mb-4">
+      <h2>What's Popular</h2>
+      <p-select-button
+        [options]="popularOptions"
+        [ngModel]="homeVM.popularType"
+        (ngModelChange)="changePopular($event)"
+        optionValue="value"
+      ></p-select-button>
+    </div>
+    <p-carousel
+      [value]="homeVM.popular"
+      [numVisible]="8"
+      [numScroll]="8"
+      [showIndicators]="false"
+      [responsiveOptions]="breakpoints"
+    >
+      <ng-template let-movie pTemplate="item">
+        <app-card
+          [item]="movie"
+          [type]="homeVM.popularType"
+        ></app-card>
+      </ng-template>
+    </p-carousel>
+  </div>
+</div>
+
+}
