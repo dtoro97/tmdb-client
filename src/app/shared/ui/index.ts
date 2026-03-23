@@ -11,6 +11,7 @@ export * from './badge/badge.component';
 export * from './backdrop-card/backdrop-card.component';
 export * from './rating/rating.component';
 export * from './rating-badge/rating-badge.component';
+export * from './rating-distribution/rating-distribution.component';
 export * from './skeleton/skeleton.component';
 export * from './image/image.component';
 export * from './carousel/carousel.component';

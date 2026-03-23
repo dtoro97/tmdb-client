@@ -6,9 +6,6 @@ import {
     OnChanges,
 } from '@angular/core';
 
-import { Review } from '../../../api';
-import { VoteCountPipe } from '../../../shared';
-
 interface RatingBucket {
     readonly label: number;
     readonly count: number;
@@ -21,50 +18,51 @@ const EMPTY_BUCKETS = createBuckets(EMPTY_COUNTS);
 
 @Component({
     selector: 'app-rating-distribution',
-    imports: [DecimalPipe, VoteCountPipe],
+    imports: [DecimalPipe],
     templateUrl: './rating-distribution.component.html',
     styleUrl: './rating-distribution.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RatingDistributionComponent implements OnChanges {
-    @Input() average: number | null | undefined = null;
-    @Input() voteCount: number | null | undefined = null;
-    @Input() reviews: Review[] = [];
+    @Input() ratings: readonly number[] = [];
+    @Input() ariaLabel = 'Ratings overview';
+    @Input() summaryLabel: string | null = null;
+    @Input() summaryValue: number | null = null;
+    @Input() summaryValueSuffix = '/10';
+    @Input() summaryMeta: string | null = null;
+    @Input() summaryEmptyText: string | null = null;
+    @Input() distributionLabel = 'Ratings';
+    @Input() distributionMeta: string | null = null;
+    @Input() distributionAriaLabel = 'Rating distribution';
+    @Input() distributionEmptyText = 'No ratings yet.';
 
-    tmdbAverage: number | null = null;
-    tmdbVoteCount = 0;
-    reviewRatedCount = 0;
-    hasReviewRatings = false;
+    hasSummary = false;
+    hasRatings = false;
+    ratedCount = 0;
+    resolvedDistributionMeta = '0 rated';
     buckets: readonly RatingBucket[] = EMPTY_BUCKETS;
 
     ngOnChanges(): void {
-        this.tmdbAverage = normalizeAverage(this.average);
-        this.tmdbVoteCount = normalizeVoteCount(this.voteCount);
+        const counts = getRatingCounts(this.ratings);
 
-        const counts = getRatingCounts(this.reviews);
-        this.reviewRatedCount = counts.reduce(
-            (total, count) => total + count,
-            0,
-        );
-        this.hasReviewRatings = this.reviewRatedCount > 0;
+        this.hasSummary =
+            this.summaryLabel !== null ||
+            this.summaryValue !== null ||
+            this.summaryMeta !== null ||
+            this.summaryEmptyText !== null;
+        this.ratedCount = counts.reduce((total, count) => total + count, 0);
+        this.hasRatings = this.ratedCount > 0;
+        this.resolvedDistributionMeta =
+            this.distributionMeta ?? `${this.ratedCount} rated`;
         this.buckets = createBuckets(counts);
     }
 }
 
-function normalizeAverage(average: number | null | undefined): number | null {
-    return average != null && average > 0 ? average : null;
-}
-
-function normalizeVoteCount(voteCount: number | null | undefined): number {
-    return voteCount != null && voteCount > 0 ? voteCount : 0;
-}
-
-function getRatingCounts(reviews: readonly Review[]): number[] {
+function getRatingCounts(ratings: readonly number[]): number[] {
     const counts = [...EMPTY_COUNTS];
 
-    for (const review of reviews) {
-        const rating = review.author_details?.rating;
-        if (typeof rating !== 'number') {
+    for (const rating of ratings) {
+        if (typeof rating !== 'number' || Number.isNaN(rating)) {
             continue;
         }
 

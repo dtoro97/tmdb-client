@@ -121,6 +121,15 @@
     gap: var(--space-5);
 }
 
+.user-data-overview__rating-distribution {
+    margin-bottom: var(--space-4);
+}
+
+.user-data-overview__ratings-note {
+    margin: 0;
+    color: var(--text-muted);
+}
+
 .user-data-overview__browse-action {
     text-align: center;
 }

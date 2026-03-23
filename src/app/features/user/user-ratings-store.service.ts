@@ -42,6 +42,21 @@ import {
 import { UserRatedEpisodeItem, UserRatedMediaItem } from './user-data.models';
 
 type ApiSortBy = 'created_at.asc' | 'created_at.desc';
+type RatedMovieListItemWithCreatedAt = RatedMovieListItem & {
+    created_at?: string | null;
+};
+type RatedTvSeriesListItemWithCreatedAt = RatedTvSeriesListItem & {
+    created_at?: string | null;
+};
+type RatedTvEpisodeListItemWithCreatedAt = RatedTvEpisodeListItem & {
+    created_at?: string | null;
+};
+interface UserRecentRatingItem {
+    readonly userRating: number;
+    readonly ratedAt: string | null;
+}
+
+const RECENT_RATINGS_PREVIEW_LIMIT = 20;
 
 interface UserRatingsState {
     ratedMoviesState: LoadableItems<UserRatedMediaItem>;
@@ -90,6 +105,7 @@ function toUserRatedMovie(item: RatedMovieListItem): UserRatedMediaItem {
     return {
         media: toMediaListItem(item, 'movie'),
         userRating: item.rating ?? null,
+        ratedAt: toRatedAt((item as RatedMovieListItemWithCreatedAt).created_at),
     };
 }
 
@@ -97,6 +113,9 @@ function toUserRatedTv(item: RatedTvSeriesListItem): UserRatedMediaItem {
     return {
         media: toMediaListItem(item, 'tv'),
         userRating: item.rating ?? null,
+        ratedAt: toRatedAt(
+            (item as RatedTvSeriesListItemWithCreatedAt).created_at,
+        ),
     };
 }
 
@@ -117,6 +136,9 @@ function toUserRatedEpisode(
         voteAverage: item.vote_average ?? null,
         stillPath: item.still_path ?? null,
         userRating: item.rating ?? null,
+        ratedAt: toRatedAt(
+            (item as RatedTvEpisodeListItemWithCreatedAt).created_at,
+        ),
     };
 }
 
@@ -140,6 +162,9 @@ export interface UserRatingsVm {
     readonly ratedTvHasMore: boolean;
     readonly ratedEpisodesHasMore: boolean;
     readonly ratingPreviewCards: LoadableItems<CardItem>;
+    readonly recentRatings: readonly number[];
+    readonly recentRatingsCount: number;
+    readonly recentRatingsAverage: number | null;
     readonly ratingsTotal: number;
     readonly sortDirection: SortDirection;
 }
@@ -180,6 +205,12 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         const hasRatedEpisodes =
             state.ratedEpisodesState.type === 'loaded' &&
             state.ratedEpisodesState.value.length > 0;
+        const recentRatingItems = getRecentRatingItems(
+            state.ratedMoviesState,
+            state.ratedTvState,
+            state.ratedEpisodesState,
+        );
+        const recentRatings = recentRatingItems.map((item) => item.userRating);
 
         return {
             ratedMoviesState: state.ratedMoviesState,
@@ -208,6 +239,9 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                 ],
                 10,
             ),
+            recentRatings,
+            recentRatingsCount: recentRatings.length,
+            recentRatingsAverage: getAverageRating(recentRatings),
             ratingsTotal:
                 state.ratedMoviesTotal +
                 state.ratedTvTotal +
@@ -743,4 +777,86 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
             map(() => undefined),
         );
     }
+}
+
+function toRatedAt(value: string | null | undefined): string | null {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    const normalizedValue = value.trim();
+
+    return normalizedValue.length > 0 ? normalizedValue : null;
+}
+
+function toRecentRatingItem(
+    item: Pick<UserRatedMediaItem, 'userRating' | 'ratedAt'>,
+): UserRecentRatingItem | null;
+function toRecentRatingItem(
+    item: Pick<UserRatedEpisodeItem, 'userRating' | 'ratedAt'>,
+): UserRecentRatingItem | null;
+function toRecentRatingItem(
+    item: Pick<UserRatedMediaItem | UserRatedEpisodeItem, 'userRating' | 'ratedAt'>,
+): UserRecentRatingItem | null {
+    if (item.userRating == null) {
+        return null;
+    }
+
+    return {
+        userRating: item.userRating,
+        ratedAt: item.ratedAt,
+    };
+}
+
+function toRecentRatingItems<T extends UserRatedMediaItem | UserRatedEpisodeItem>(
+    state: LoadableItems<T>,
+): readonly UserRecentRatingItem[] {
+    if (state.type !== 'loaded' && state.type !== 'loading-more') {
+        return [];
+    }
+
+    return state.value
+        .map((item) => toRecentRatingItem(item))
+        .filter((item): item is UserRecentRatingItem => item !== null);
+}
+
+function getRecentRatingItems(
+    ratedMoviesState: LoadableItems<UserRatedMediaItem>,
+    ratedTvState: LoadableItems<UserRatedMediaItem>,
+    ratedEpisodesState: LoadableItems<UserRatedEpisodeItem>,
+): readonly UserRecentRatingItem[] {
+    return [
+        ...toRecentRatingItems(ratedMoviesState),
+        ...toRecentRatingItems(ratedTvState),
+        ...toRecentRatingItems(ratedEpisodesState),
+    ]
+        .sort(compareRecentRatings)
+        .slice(0, RECENT_RATINGS_PREVIEW_LIMIT);
+}
+
+function compareRecentRatings(
+    left: UserRecentRatingItem,
+    right: UserRecentRatingItem,
+): number {
+    return getRatedAtTime(right.ratedAt) - getRatedAtTime(left.ratedAt);
+}
+
+function getRatedAtTime(value: string | null): number {
+    if (value === null) {
+        return 0;
+    }
+
+    const time = Date.parse(value);
+
+    return Number.isNaN(time) ? 0 : time;
+}
+
+function getAverageRating(ratings: readonly number[]): number | null {
+    if (ratings.length === 0) {
+        return null;
+    }
+
+    const total = ratings.reduce((sum, rating) => sum + rating, 0);
+
+    return total / ratings.length;
 }

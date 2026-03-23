@@ -23,6 +23,7 @@ export interface UserDataListItem {
 export interface UserRatedMediaItem {
     readonly media: MediaListItem;
     readonly userRating: number | null;
+    readonly ratedAt: string | null;
 }
 
 export interface UserRatedEpisodeItem {
@@ -38,6 +39,7 @@ export interface UserRatedEpisodeItem {
     readonly voteAverage: number | null;
     readonly stillPath: string | null;
     readonly userRating: number | null;
+    readonly ratedAt: string | null;
 }
 
 export interface UserDataOverviewStat {

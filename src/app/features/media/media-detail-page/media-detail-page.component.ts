@@ -21,6 +21,7 @@ import {
     VoteCountPipe,
     VideosGridComponent,
     MediaCarouselPanelComponent,
+    RatingDistributionComponent,
     buildYoutubeWatchUrl,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
@@ -34,7 +35,6 @@ import { MediaCreditsPanelComponent } from '../media-credits-panel/media-credits
 import { MediaDetailVm } from '../media-detail.models';
 import { UserRatingComponent } from '../../../shared';
 import { KeywordsListComponent } from '../keywords-list/keywords-list.component';
-import { RatingDistributionComponent } from '../rating-distribution/rating-distribution.component';
 import { ReviewCardComponent } from '../review-card/review-card.component';
 import { MediaListActionsComponent } from '../media-list-actions/media-list-actions.component';
 import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
@@ -92,6 +92,17 @@ export class MediaDetailsComponent {
         state: this.mediaVideoStoreService.videosState$,
         totalCount: this.mediaVideoStoreService.youtubeVideosTotalCount$,
     });
+    readonly reviewRatings$ = this.mediaReviewsStoreService.reviewsState$.pipe(
+        map((state) =>
+            state.type === 'loaded'
+                ? state.value.flatMap((review) =>
+                      typeof review.author_details?.rating === 'number'
+                          ? [review.author_details.rating]
+                          : [],
+                  )
+                : [],
+        ),
+    );
 
     constructor(
         private mediaStoreService: MediaDetailStoreService,

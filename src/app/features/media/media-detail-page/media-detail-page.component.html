@@ -588,11 +588,22 @@
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
 
-                            <app-rating-distribution
-                                [average]="media.voteAverage"
-                                [voteCount]="media.voteCount"
-                                [reviews]="reviewsState.value"
-                            />
+                            @if (reviewRatings$ | async; as reviewRatings) {
+                                <app-rating-distribution
+                                    [ratings]="reviewRatings"
+                                    summaryLabel="TMDb rating"
+                                    [summaryValue]="media.voteAverage || null"
+                                    [summaryMeta]="
+                                        media.voteCount
+                                            ? (media.voteCount | voteCount) +
+                                              ' votes'
+                                            : 'No TMDb votes yet'
+                                    "
+                                    distributionLabel="Review ratings"
+                                    distributionAriaLabel="Review rating distribution"
+                                    distributionEmptyText="No numeric ratings in reviews."
+                                />
+                            }
                             <div class="media-detail-page__reviews-list">
                                 @for (
                                     review of (mediaReviewsStoreService.previewReviews$

@@ -144,7 +144,7 @@
 
                     @if (
                         vm.ratingPreviewCards.type === "loaded" &&
-                        vm.ratingPreviewCards.value.length === 0
+                        !vm.hasRatings
                     ) {
                         <div class="user-data-overview__empty-block">
                             <app-empty-state
@@ -174,10 +174,47 @@
                             </div>
                         </div>
                     } @else {
-                        <app-media-carousel-panel
-                            [state]="vm.ratingPreviewCards"
-                            [showRating]="true"
-                        />
+                        @if (vm.recentRatingsCount > 0) {
+                            <app-rating-distribution
+                                class="user-data-overview__rating-distribution"
+                                [ratings]="vm.recentRatings"
+                                summaryLabel="Recent average"
+                                [summaryValue]="vm.recentRatingsAverage"
+                                [summaryMeta]="
+                                    'Based on your latest ' +
+                                    vm.recentRatingsCount +
+                                    ' ratings'
+                                "
+                                distributionLabel="Recent ratings"
+                                [distributionMeta]="
+                                    vm.recentRatingsCount + ' recent'
+                                "
+                                distributionAriaLabel="Recent rating distribution"
+                                distributionEmptyText="No recent ratings yet."
+                            />
+                        }
+
+                        @if (
+                            vm.ratingPreviewCards.type === "loaded" &&
+                            vm.ratingPreviewCards.value.length > 0
+                        ) {
+                            <app-media-carousel-panel
+                                [state]="vm.ratingPreviewCards"
+                                [showRating]="true"
+                            />
+                        } @else if (vm.hasRatedEpisodes) {
+                            <p
+                                class="user-data-overview__ratings-note text-caption"
+                            >
+                                Your most recent ratings are episode ratings.
+                                Open the full ratings page to browse them all.
+                            </p>
+                        } @else {
+                            <app-media-carousel-panel
+                                [state]="vm.ratingPreviewCards"
+                                [showRating]="true"
+                            />
+                        }
                     }
                 </app-page-section>
 

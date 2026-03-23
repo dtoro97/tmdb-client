@@ -19,6 +19,10 @@
     gap: var(--space-4);
 }
 
+.rating-distribution--single-panel {
+    grid-template-columns: 1fr;
+}
+
 .rating-distribution__section {
     display: flex;
     flex-direction: column;
@@ -30,11 +34,11 @@
     border: 1px solid var(--rating-distribution-border);
 }
 
-.rating-distribution__section--tmdb {
+.rating-distribution__section--summary {
     min-height: 100%;
 }
 
-.rating-distribution__section--reviews {
+.rating-distribution__section--distribution {
     justify-content: space-between;
 }
 
@@ -64,10 +68,6 @@
     min-width: 0;
 }
 
-.rating-distribution__votes {
-    display: block;
-}
-
 .rating-distribution__score-icon {
     flex-shrink: 0;
     color: var(--color-rating);
@@ -79,6 +79,14 @@
 .rating-distribution__value {
     color: var(--color-rating);
     line-height: 0.92;
+}
+
+.rating-distribution__value-suffix {
+    margin-left: var(--space-1);
+}
+
+.rating-distribution__meta {
+    display: block;
 }
 
 .rating-distribution__bars {

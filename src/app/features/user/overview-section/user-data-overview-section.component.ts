@@ -12,6 +12,7 @@ import {
     LoadableItems,
     MediaCarouselPanelComponent,
     PageSectionComponent,
+    RatingDistributionComponent,
     SkeletonComponent,
     UserAvatarComponent,
 } from '../../../shared';
@@ -31,6 +32,11 @@ interface OverviewVm extends UserProfileVm {
     readonly overviewStats: readonly UserDataOverviewStat[];
     readonly watchlistPreviewCards: LoadableItems<CardItem>;
     readonly ratingPreviewCards: LoadableItems<CardItem>;
+    readonly hasRatings: boolean;
+    readonly hasRatedEpisodes: boolean;
+    readonly recentRatings: readonly number[];
+    readonly recentRatingsCount: number;
+    readonly recentRatingsAverage: number | null;
     readonly listPreviewState: LoadableItems<UserDataOverviewListPreviewItem>;
     readonly hasLibraryContent: boolean;
 }
@@ -69,6 +75,7 @@ function toOverviewStats(
         ImageComponent,
         MediaCarouselPanelComponent,
         PageSectionComponent,
+        RatingDistributionComponent,
         SkeletonComponent,
         UserAvatarComponent,
     ],
@@ -89,6 +96,11 @@ export class UserDataOverviewSectionComponent {
                 overviewStats: toOverviewStats(watchlist, ratings, lists),
                 watchlistPreviewCards: watchlist.watchlistPreviewCards,
                 ratingPreviewCards: ratings.ratingPreviewCards,
+                hasRatings: ratings.hasRatings,
+                hasRatedEpisodes: ratings.hasRatedEpisodes,
+                recentRatings: ratings.recentRatings,
+                recentRatingsCount: ratings.recentRatingsCount,
+                recentRatingsAverage: ratings.recentRatingsAverage,
                 listPreviewState: lists.listPreviewState,
                 hasLibraryContent:
                     watchlist.hasWatchlistMovies ||
