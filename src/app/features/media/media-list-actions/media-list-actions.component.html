@@ -1,0 +1,44 @@
+@if (vm$ | async; as vm) {
+    <div class="media-list-actions">
+        <button
+            mat-stroked-button
+            class="media-list-actions__watchlist"
+            [class.media-list-actions__watchlist--active]="vm.isInWatchlist"
+            type="button"
+            [disabled]="vm.pending"
+            [attr.aria-label]="
+                vm.isInWatchlist
+                    ? title + ' is on your watchlist'
+                    : 'Add ' + title + ' to watchlist'
+            "
+            (click)="toggleWatchlist()"
+        >
+            <i
+                [class.fa-solid]="vm.isInWatchlist"
+                [class.fa-regular]="!vm.isInWatchlist"
+                class="media-list-actions__icon fa-bookmark"
+                aria-hidden="true"
+            ></i>
+
+            <span class="media-list-actions__label text-body-sm">
+                {{ vm.watchlistLabel }}
+            </span>
+        </button>
+
+        <button
+            class="media-list-actions__menu"
+            type="button"
+            [disabled]="vm.pending"
+            [matMenuTriggerFor]="listActionsMenu"
+            [attr.aria-label]="'More list actions for ' + title"
+        >
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+        </button>
+    </div>
+}
+
+<mat-menu #listActionsMenu="matMenu" xPosition="before">
+    <button mat-menu-item type="button" (click)="openCustomListsDialog()">
+        Add to custom list
+    </button>
+</mat-menu>

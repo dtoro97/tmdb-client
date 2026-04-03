@@ -1,5 +1,4 @@
 @use "breakpoints" as *;
-@use "mixins" as *;
 
 :host {
     display: block;
@@ -7,129 +6,6 @@
 
 .trailers-page {
     display: block;
-}
-
-.trailers-hero {
-    position: relative;
-    isolation: isolate;
-    padding-block: var(--space-12) var(--space-8);
-}
-
-.trailers-hero-layout {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-8);
-}
-
-.trailers-hero-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    max-width: 560px;
-}
-
-.trailers-hero-title {
-    text-shadow: var(--shadow-text-hero);
-    max-width: 14ch;
-}
-
-.trailers-hero-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
-.trailers-featured {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-brand);
-}
-
-.trailers-hero-type {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--space-1) var(--space-2);
-    background: color-mix(in srgb, var(--color-brand) 15%, transparent);
-    color: var(--color-brand);
-    border: 1px solid var(--color-primary-muted);
-    border-radius: var(--radius-sm);
-}
-
-.trailers-hero-actions {
-    gap: var(--space-2);
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-}
-
-.trailers-hero-skeleton {
-    min-height: 520px;
-    background: linear-gradient(
-        to bottom,
-        var(--color-surface-dim),
-        var(--surface-page)
-    );
-    display: flex;
-    align-items: flex-end;
-}
-
-.trailers-hero-skeleton-content {
-    width: 100%;
-    max-width: var(--layout-content-max-width);
-    margin: 0 auto;
-    padding: 0 var(--space-6) var(--space-8);
-    box-sizing: border-box;
-}
-
-.trailers-hero-skeleton-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-8);
-}
-
-.trailers-hero-skeleton-copy-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-}
-
-.trailers-hero-skeleton-badge {
-    width: 120px;
-    height: 13px;
-    border-radius: var(--radius-sm);
-}
-
-.trailers-hero-skeleton-title {
-    width: 360px;
-    max-width: 85%;
-    height: 88px;
-    border-radius: var(--radius-md);
-}
-
-.trailers-hero-skeleton-meta {
-    width: 180px;
-    height: 20px;
-    border-radius: var(--radius-sm);
-}
-
-.trailers-hero-skeleton-copy {
-    width: 320px;
-    max-width: 70%;
-    height: 20px;
-    border-radius: var(--radius-sm);
-}
-
-.trailers-hero-skeleton-button {
-    width: 152px;
-    height: 44px;
-    border-radius: var(--radius-pill);
 }
 
 .trailers-page__content,
@@ -203,46 +79,6 @@
 }
 
 @include mobile() {
-    .trailers-hero {
-        padding-block: var(--space-8) var(--space-6);
-    }
-
-    .trailers-hero-layout,
-    .trailers-hero-skeleton-layout {
-        grid-template-columns: 1fr;
-        align-items: flex-start;
-        gap: var(--space-4);
-    }
-
-    .trailers-hero-content {
-        max-width: none;
-    }
-
-    .trailers-hero-title {
-        max-width: 100%;
-    }
-
-    .trailers-hero-actions {
-        justify-content: flex-start;
-    }
-
-    .trailers-hero-skeleton {
-        min-height: 360px;
-    }
-
-    .trailers-hero-skeleton-content {
-        padding-inline: var(--space-4);
-    }
-
-    .trailers-hero-skeleton-title {
-        height: 64px;
-        max-width: 100%;
-    }
-
-    .trailers-hero-skeleton-copy {
-        max-width: 100%;
-    }
-
     .trailers-page__content {
         gap: var(--space-4);
     }

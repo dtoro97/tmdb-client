@@ -1,0 +1,23 @@
+<div class="episode-rating-list">
+    @if (state.type === "loading") {
+        @for (i of skeletonCount | repeat; track i) {
+            <app-episode-list-item [loading]="true" />
+        }
+    } @else if (state.type === "loaded" || state.type === "loading-more") {
+        @for (entry of displayItems; track entry.item.id) {
+            <app-episode-list-item [item]="entry.episodeItem">
+                <app-rating
+                    episode-list-item-actions
+                    class="episode-rating-list__score-badge"
+                    [value]="entry.item.userRating | number: '1.1-1'"
+                />
+            </app-episode-list-item>
+        }
+
+        @if (state.type === "loading-more") {
+            @for (i of state.placeholderCount | repeat; track i) {
+                <app-episode-list-item [loading]="true" />
+            }
+        }
+    }
+</div>

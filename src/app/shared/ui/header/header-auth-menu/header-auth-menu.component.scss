@@ -1,0 +1,121 @@
+@use "breakpoints" as *;
+@use "mixins" as *;
+
+:host {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    flex-shrink: 0;
+}
+
+.header-auth-menu__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    width: var(--icon-button-size);
+    height: var(--icon-button-size);
+    padding: 0;
+    border: none;
+    border-radius: var(--icon-button-radius);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition:
+        background-color var(--motion-fast),
+        color var(--motion-fast);
+
+    &:disabled {
+        cursor: progress;
+        opacity: 0.68;
+    }
+
+    @include focus-ring();
+}
+
+.header-auth-menu__trigger--anonymous {
+    width: auto;
+    height: auto;
+    padding: 0;
+    color: var(--text-primary);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--color-brand-hover);
+    }
+}
+
+.header-auth-menu__trigger--signed-in {
+    &:hover,
+    &:focus-visible,
+    &[aria-expanded="true"] {
+        background: var(--control-subtle-surface);
+    }
+}
+
+.header-auth-menu__badge {
+    flex-shrink: 0;
+}
+
+.header-auth-menu__panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 15rem;
+}
+
+.header-auth-menu__profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+}
+
+.header-auth-menu__profile-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.header-auth-menu__panel-name {
+    color: var(--text-primary);
+    font-weight: var(--weight-semibold);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-auth-menu__panel-subtitle {
+    color: var(--text-muted);
+}
+
+.header-auth-menu__group {
+    display: flex;
+    flex-direction: column;
+    padding-block: var(--space-1);
+}
+
+.header-auth-menu__item {
+    width: 100%;
+    min-height: 2.625rem;
+    padding-inline: var(--space-3);
+    background: transparent;
+}
+
+.header-auth-menu__divider {
+    margin: 0 var(--space-3);
+    --mat-menu-divider-color: var(--mat-sys-outline-variant);
+}
+
+@include mobile() {
+    .header-auth-menu__trigger {
+        width: var(--icon-button-size);
+        height: var(--icon-button-size);
+    }
+
+    .header-auth-menu__trigger--anonymous {
+        width: auto;
+        height: auto;
+        padding: 0;
+    }
+}

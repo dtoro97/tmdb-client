@@ -20,11 +20,10 @@ import {
     LoadableItems,
     MediaOrPersonFilterType,
     MediaOrPersonType,
-    movieToSearchResultItem,
+    mediaToSearchResultItem,
     multiToSearchResultItem,
     personToSearchResultItem,
     SearchResultItem,
-    tvToSearchResultItem,
 } from '../../..';
 
 export type SearchFilterValue = MediaOrPersonFilterType;
@@ -187,8 +186,8 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
                     )
                     .pipe(
                         map((response) =>
-                            (response.results ?? []).map(
-                                movieToSearchResultItem,
+                            (response.results ?? []).map((item) =>
+                                mediaToSearchResultItem(item, 'movie'),
                             ),
                         ),
                     );
@@ -207,7 +206,9 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
                     )
                     .pipe(
                         map((response) =>
-                            (response.results ?? []).map(tvToSearchResultItem),
+                            (response.results ?? []).map((item) =>
+                                mediaToSearchResultItem(item, 'tv'),
+                            ),
                         ),
                     );
             case 'person':

@@ -1,0 +1,80 @@
+@if (vm$ | async; as vm) {
+    @if (vm.isAuthenticated) {
+        <button
+            class="header-auth-menu__trigger header-auth-menu__trigger--signed-in text-body-sm"
+            type="button"
+            [matMenuTriggerFor]="authMenu"
+            [matMenuTriggerRestoreFocus]="false"
+            [disabled]="vm.logoutPending"
+            [attr.aria-label]="'Open account menu for ' + vm.displayName"
+            [attr.aria-busy]="vm.logoutPending ? 'true' : null"
+        >
+            <app-user-avatar
+                class="header-auth-menu__badge"
+                [name]="vm.displayName"
+                [avatarPath]="vm.avatarPath"
+                size="sm"
+            />
+        </button>
+
+        <mat-menu #authMenu="matMenu">
+            <div class="header-auth-menu__panel">
+                <div class="header-auth-menu__profile">
+                    <app-user-avatar
+                        class="header-auth-menu__badge"
+                        [name]="vm.displayName"
+                        [avatarPath]="vm.avatarPath"
+                        size="sm"
+                    />
+                    <div class="header-auth-menu__profile-copy">
+                        <span class="header-auth-menu__panel-name text-body-sm u-truncate">
+                            {{ vm.displayName }}
+                        </span>
+                        <span class="header-auth-menu__panel-subtitle text-caption">
+                            TMDb account
+                        </span>
+                    </div>
+                </div>
+
+                <mat-divider class="header-auth-menu__divider"></mat-divider>
+
+                <div class="header-auth-menu__group">
+                    @for (link of accountLinks; track link.route) {
+                        <a
+                            mat-menu-item
+                            class="header-auth-menu__item"
+                            [routerLink]="link.route"
+                        >
+                            {{ link.label }}
+                        </a>
+                    }
+                </div>
+
+                <mat-divider class="header-auth-menu__divider"></mat-divider>
+
+                <div class="header-auth-menu__group">
+                    <button
+                        mat-menu-item
+                        class="header-auth-menu__item"
+                        type="button"
+                        [disabled]="vm.logoutPending"
+                        (click)="signOut()"
+                    >
+                        Sign out
+                    </button>
+                </div>
+            </div>
+        </mat-menu>
+    } @else {
+        <button
+            class="header-auth-menu__trigger header-auth-menu__trigger--anonymous text-body-sm"
+            type="button"
+            [disabled]="vm.loginPending"
+            [attr.aria-busy]="vm.loginPending ? 'true' : null"
+            aria-label="Sign in with TMDb"
+            (click)="startLogin()"
+        >
+            <span class="header-auth-menu__label">Sign in</span>
+        </button>
+    }
+}

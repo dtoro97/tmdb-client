@@ -1,0 +1,74 @@
+@use "./breakpoints" as *;
+
+.mat-mdc-snack-bar-container {
+    --mat-snack-bar-container-color: var(--color-surface-raised-2);
+    --mat-snack-bar-container-shape: var(--radius-2xl);
+    --mat-snack-bar-supporting-text-color: var(--text-primary);
+    --mat-snack-bar-supporting-text-font: inherit;
+    --mat-snack-bar-supporting-text-size: var(--text-sm);
+    --mat-snack-bar-supporting-text-weight: var(--weight-medium);
+    --mat-snack-bar-supporting-text-line-height: var(--lh-normal);
+    --mat-snack-bar-button-color: var(--color-brand-light);
+
+    margin: var(--space-4);
+
+    .mdc-snackbar__surface {
+        border: 1px solid var(--surface-panel-border);
+        box-shadow: var(--shadow-lg);
+        padding-right: var(--space-2);
+    }
+
+    .mdc-snackbar__label {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .mat-mdc-snack-bar-action {
+        .mat-mdc-button {
+            font-weight: var(--weight-semibold);
+            font-size: var(--text-sm);
+            letter-spacing: 0.02em;
+            min-width: auto;
+            padding-inline: var(--space-3);
+
+            &:hover {
+                color: var(--text-primary);
+            }
+        }
+    }
+}
+
+/* Error variant — applied via panelClass: 'snackbar-error' */
+.snackbar-error {
+    --mat-snack-bar-container-color: color-mix(
+        in srgb,
+        var(--color-brand) 24%,
+        var(--color-surface-raised-2)
+    );
+
+    .mdc-snackbar__surface {
+        border-color: color-mix(
+            in srgb,
+            var(--color-brand) 32%,
+            transparent
+        );
+    }
+}
+
+/* Success variant — applied via panelClass: 'snackbar-success' */
+.snackbar-success {
+    --mat-snack-bar-container-color: color-mix(
+        in srgb,
+        #4caf50 14%,
+        var(--color-surface-raised-2)
+    );
+
+    .mdc-snackbar__surface {
+        border-color: color-mix(in srgb, #4caf50 28%, transparent);
+    }
+}
+
+@include mobile() {
+    .mat-mdc-snack-bar-container {
+        margin: var(--space-3);
+    }
+}

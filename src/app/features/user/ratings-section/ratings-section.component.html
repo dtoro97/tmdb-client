@@ -1,0 +1,145 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Your Ratings"
+        subtitle="See the titles and episodes you have rated."
+    />
+
+    <div class="page-main page-main--full-padding">
+        <app-browse-toolbar>
+            <app-pill-toggle
+                start
+                [options]="tabs"
+                [selectedValue]="selectedTab"
+                (selected)="onTabChange($event)"
+            />
+            <app-sort-button
+                end
+                [options]="sortOptions"
+                selectedValue="created_at"
+                [direction]="vm.sortDirection"
+                (directionToggle)="onToggleSortDirection()"
+            />
+        </app-browse-toolbar>
+
+        <div class="ratings-section__list">
+            @if (selectedTab === "movies") {
+                <div class="catalog-panel">
+                    <app-media-list
+                        [state]="vm.ratedMoviesMediaState"
+                        [userRatings]="vm.ratedMoviesUserRatings"
+                        routeType="movie"
+                    />
+
+                    @if (
+                        vm.ratedMoviesMediaState.type === "loaded" &&
+                        !vm.hasRatedMovies
+                    ) {
+                        <div class="empty-panel ratings-section__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-star"
+                                title="No rated movies"
+                                text="Rate movies to see them here."
+                            />
+                        </div>
+                    }
+
+                    @if (vm.ratedMoviesHasMore) {
+                        <footer class="catalog-panel-footer">
+                            <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="
+                                    vm.ratedMoviesState.type === 'loading-more'
+                                "
+                                (click)="onShowMore()"
+                            >
+                                {{
+                                    vm.ratedMoviesState.type === "loading-more"
+                                        ? "Loading more"
+                                        : "Show more"
+                                }}
+                            </button>
+                        </footer>
+                    }
+                </div>
+            } @else if (selectedTab === "tv") {
+                <div class="catalog-panel">
+                    <app-media-list
+                        [state]="vm.ratedTvMediaState"
+                        [userRatings]="vm.ratedTvUserRatings"
+                        routeType="tv"
+                    />
+
+                    @if (
+                        vm.ratedTvMediaState.type === "loaded" && !vm.hasRatedTv
+                    ) {
+                        <div class="empty-panel ratings-section__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-star"
+                                title="No rated TV series"
+                                text="Rate TV series to see them here."
+                            />
+                        </div>
+                    }
+
+                    @if (vm.ratedTvHasMore) {
+                        <footer class="catalog-panel-footer">
+                            <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="
+                                    vm.ratedTvState.type === 'loading-more'
+                                "
+                                (click)="onShowMore()"
+                            >
+                                {{
+                                    vm.ratedTvState.type === "loading-more"
+                                        ? "Loading more"
+                                        : "Show more"
+                                }}
+                            </button>
+                        </footer>
+                    }
+                </div>
+            } @else {
+                <app-episode-rating-list
+                    [state]="vm.ratedEpisodesState"
+                />
+
+                @if (
+                    vm.ratedEpisodesState.type === "loaded" &&
+                    !vm.hasRatedEpisodes
+                ) {
+                    <div class="empty-panel ratings-section__empty">
+                        <app-empty-state
+                            iconClass="fa-solid fa-star"
+                            title="No rated episodes"
+                            text="Rate TV episodes to see them here."
+                        />
+                    </div>
+                }
+
+                @if (vm.ratedEpisodesHasMore) {
+                    <footer class="catalog-panel-footer">
+                        <button
+                            mat-stroked-button
+                            type="button"
+                            [disabled]="
+                                vm.ratedEpisodesState.type === 'loading-more'
+                            "
+                            (click)="onShowMore()"
+                        >
+                            {{
+                                vm.ratedEpisodesState.type === "loading-more"
+                                    ? "Loading more"
+                                    : "Show more"
+                            }}
+                        </button>
+                    </footer>
+                }
+            }
+        </div>
+    </div>
+}

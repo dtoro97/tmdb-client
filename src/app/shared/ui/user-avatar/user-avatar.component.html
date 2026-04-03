@@ -1,0 +1,20 @@
+<span
+    class="user-avatar"
+    [class.user-avatar--sm]="size === 'sm'"
+    [class.user-avatar--lg]="size === 'lg'"
+    [attr.aria-label]="avatarPath ? null : name"
+>
+    @if (avatarPath) {
+        <app-image
+            class="user-avatar__image"
+            [src]="avatarPath"
+            [alt]="name"
+            type="person"
+            params="w185"
+        />
+    } @else {
+        <span class="user-avatar__fallback text-headline" aria-hidden="true">
+            {{ fallbackLabel }}
+        </span>
+    }
+</span>

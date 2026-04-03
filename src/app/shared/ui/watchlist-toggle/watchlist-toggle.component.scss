@@ -1,0 +1,103 @@
+:host {
+    display: inline-flex;
+}
+
+.watchlist-toggle {
+    inline-size: var(--icon-button-size);
+    block-size: var(--icon-button-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--icon-button-radius);
+    background: var(--control-subtle-surface);
+    color: var(--text-accent);
+    font: inherit;
+    cursor: pointer;
+    transition: var(--control-transition);
+
+    --mat-icon-button-state-layer-color: transparent;
+    --mat-icon-button-ripple-color: transparent;
+
+    &:hover:not(:disabled) {
+        background: var(--control-subtle-surface-hover);
+        color: var(--color-brand-hover);
+    }
+
+    &:active:not(:disabled) {
+        background: var(--control-subtle-surface-active);
+        color: var(--color-brand-active);
+    }
+
+    &--active {
+        color: var(--color-brand);
+
+        &:hover:not(:disabled) {
+            color: var(--color-brand-hover);
+        }
+
+        &:active:not(:disabled) {
+            color: var(--color-brand-active);
+        }
+    }
+
+    &--labeled {
+        inline-size: auto;
+        block-size: auto;
+        gap: var(--space-2);
+        min-height: var(--control-height-lg);
+        padding-inline: var(--space-4) var(--space-5);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-pill);
+        background: color-mix(in srgb, var(--surface-panel) 84%, transparent);
+        color: var(--text-primary);
+
+        &:hover:not(:disabled) {
+            background: color-mix(
+                in srgb,
+                var(--surface-panel-strong) 88%,
+                transparent
+            );
+            color: var(--text-primary);
+        }
+
+        &:active:not(:disabled) {
+            color: var(--text-primary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--control-focus-outline);
+            outline-offset: -2px;
+        }
+
+        &.watchlist-toggle--active {
+            color: var(--text-primary);
+
+            .fa-bookmark {
+                color: var(--color-brand);
+            }
+
+            &:hover:not(:disabled) {
+                color: var(--text-primary);
+
+                .fa-bookmark {
+                    color: var(--color-brand-hover);
+                }
+            }
+        }
+    }
+
+    &:disabled {
+        cursor: wait;
+        opacity: var(--icon-button-disabled-opacity);
+    }
+}
+
+.watchlist-toggle__label {
+    font-size: var(--font-size-body-sm);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+}

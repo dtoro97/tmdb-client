@@ -1,0 +1,48 @@
+@if (rating$ | async; as rating) {
+    <button
+        class="user-rating"
+        type="button"
+        [class.user-rating--rated]="rating.currentRating !== null"
+        [class.user-rating--pending]="rating.pending"
+        [disabled]="
+            rating.pending ||
+            rating.value.type === 'loading' ||
+            rating.value.type === 'idle'
+        "
+        [attr.aria-busy]="
+            rating.pending ||
+            rating.value.type === 'loading' ||
+            rating.value.type === 'idle'
+                ? 'true'
+                : null
+        "
+        (click)="open()"
+    >
+        <span class="user-rating__label text-overline">Your rating</span>
+
+        @if (rating.value.type === "loading" || rating.value.type === "idle") {
+            <span class="user-rating__skeleton" aria-hidden="true">
+                <app-skeleton class="user-rating__skeleton-bar" />
+            </span>
+        } @else {
+            <span class="user-rating__summary">
+                <mat-icon class="user-rating__icon" aria-hidden="true">
+                    @if (rating.currentRating !== null) {
+                        star
+                    } @else {
+                        star_outline
+                    }
+                </mat-icon>
+
+                <span class="user-rating__value text-title">
+                    @if (rating.currentRating !== null) {
+                        {{ rating.currentRating | number: "1.1-1" }}
+                        <span class="user-rating__scale text-caption">/10</span>
+                    } @else {
+                        Rate
+                    }
+                </span>
+            </span>
+        }
+    </button>
+}

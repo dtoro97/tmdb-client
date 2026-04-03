@@ -2,7 +2,6 @@
 
 :host {
     --carousel-columns: 6;
-    display: block;
 }
 
 @include carousel-md() {
@@ -72,4 +71,3 @@
 .carousel__nav--next {
     right: calc(var(--space-1) * -1);
 }
-

@@ -1,0 +1,146 @@
+<div class="collection-detail page-container">
+    @if (store.collection$ | async; as collectionState) {
+        <app-hero-surface
+            [backdropPath]="
+                collectionState.type === 'loaded' && collectionState.value
+                    ? (store.backdropPath$ | async)
+                    : null
+            "
+            [alt]="
+                collectionState.type === 'loaded' && collectionState.value
+                    ? collectionState.value.name
+                    : 'Collection'
+            "
+            variant="detail"
+        >
+            <div class="collection-detail__hero">
+                @if (store.posterPath$ | async; as posterPath) {
+                    <app-image
+                        class="collection-detail__poster"
+                        [src]="posterPath"
+                        type="media"
+                        [alt]="
+                            collectionState.type === 'loaded' &&
+                            collectionState.value
+                                ? collectionState.value.name
+                                : 'Collection poster'
+                        "
+                    />
+                } @else {
+                    <app-skeleton
+                        class="collection-detail__poster collection-detail__poster--skeleton"
+                    />
+                }
+
+                <div class="collection-detail__hero-copy">
+                    @if (
+                        collectionState.type === "loaded"
+                            ? collectionState.value
+                            : null;
+                        as collection
+                    ) {
+                        <h1 class="text-display">
+                            {{ collection.name }}
+                        </h1>
+                    } @else {
+                        <app-skeleton
+                            class="collection-detail__title-skeleton"
+                        />
+                    }
+
+                    @if (collectionState.type === "loaded") {
+                        <div class="collection-detail__meta">
+                            @if (store.averageRating$ | async; as rating) {
+                                @if (rating > 0) {
+                                    <app-rating [value]="rating" />
+                                }
+                            }
+                            @if (store.partsCount$ | async; as count) {
+                                <span class="muted">
+                                    {{ count }}
+                                    {{ count === 1 ? "Movie" : "Movies" }}
+                                </span>
+                            }
+                        </div>
+                    } @else {
+                        <div class="collection-detail__meta-skeleton">
+                            <app-skeleton
+                                class="collection-detail__meta-skeleton-rating"
+                            />
+                            <app-skeleton
+                                class="collection-detail__meta-skeleton-count"
+                            />
+                        </div>
+                    }
+
+                    @if (
+                        collectionState.type === "loaded"
+                            ? collectionState.value
+                            : null;
+                        as collection
+                    ) {
+                        <p
+                            class="collection-detail__overview text-body"
+                            [class.muted]="!collection.overview"
+                        >
+                            {{
+                                collection.overview || "No overview available."
+                            }}
+                        </p>
+                    } @else {
+                        <div class="collection-detail__overview-skeleton">
+                            <app-skeleton
+                                class="collection-detail__overview-line"
+                            />
+                            <app-skeleton
+                                class="collection-detail__overview-line collection-detail__overview-line--wide"
+                            />
+                            <app-skeleton
+                                class="collection-detail__overview-line collection-detail__overview-line--medium"
+                            />
+                        </div>
+                    }
+                </div>
+            </div>
+        </app-hero-surface>
+
+        <div class="page-main">
+            @if (store.mappedPartsState$ | async; as partsState) {
+                @if (
+                    partsState.type === "loading" ||
+                    (partsState.type === "loaded" && partsState.value.length)
+                ) {
+                    <section>
+                        <h2 class="section-title">
+                            Movies
+                            @if (partsState.type === "loaded") {
+                                <span class="section-count">{{
+                                    partsState.value.length
+                                }}</span>
+                            } @else {
+                                <app-skeleton
+                                    class="collection-detail__section-count-skeleton"
+                                />
+                            }
+                        </h2>
+
+                        <div class="catalog-panel">
+                            <div class="result-list">
+                                <app-media-list
+                                    [state]="partsState"
+                                    routeType="movie"
+                                />
+                            </div>
+                        </div>
+                    </section>
+                } @else if (
+                    partsState.type === "loaded" && !partsState.value.length
+                ) {
+                    <p class="muted empty-text">
+                        No movies in this collection.
+                    </p>
+                }
+            }
+        </div>
+    }
+</div>

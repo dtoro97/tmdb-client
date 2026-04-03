@@ -20,8 +20,7 @@ import {
     LocaleStoreService,
     pickBestYoutubeTrailer,
     shuffle,
-    toMovieVideoTrailerSeed,
-    toTvVideoTrailerSeed,
+    toVideoTrailerSeedItem,
     VideoCardItem,
     VideoTrailerSeedItem,
 } from '../../shared';
@@ -206,8 +205,8 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         tvSeries: readonly TvSeriesListItem[],
     ): VideoTrailerSeedItem[] {
         return shuffle([
-            ...movies.map((movie) => toMovieVideoTrailerSeed(movie)),
-            ...tvSeries.map((tv) => toTvVideoTrailerSeed(tv)),
+            ...movies.map((movie) => toVideoTrailerSeedItem(movie, 'movie')),
+            ...tvSeries.map((tv) => toVideoTrailerSeedItem(tv, 'tv')),
         ])
             .filter((seed) => seed.mediaId > 0)
             .slice(0, TRAILERS_PAGE_SEED_COUNT);

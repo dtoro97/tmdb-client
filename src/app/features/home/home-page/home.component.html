@@ -1,6 +1,23 @@
 @if (homeVM$ | async; as homeVM) {
     <div class="page-container">
-        <app-home-spotlight [state]="homeVM.spotlight" />
+        @if (
+            homeVM.spotlight.type === "loaded" && homeVM.spotlight.value;
+            as spotlight
+        ) {
+            <app-hero-spotlight
+                badge="Trending"
+                [spotlight]="spotlight"
+            >
+                <a
+                    matButton="filled"
+                    [routerLink]="['/title', spotlight.id, spotlight.mediaType]"
+                >
+                    More Info
+                </a>
+            </app-hero-spotlight>
+        } @else if (homeVM.spotlight.type === "loading") {
+            <app-hero-spotlight [loading]="true" />
+        }
 
         <div class="page-sections">
             <app-page-section title="Now Trending">

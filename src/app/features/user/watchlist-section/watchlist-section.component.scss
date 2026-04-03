@@ -1,0 +1,16 @@
+@use "breakpoints" as *;
+
+:host {
+    display: block;
+}
+
+.watchlist-section__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+}
+
+.watchlist-section__empty {
+    border-radius: inherit;
+}

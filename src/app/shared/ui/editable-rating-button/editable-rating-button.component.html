@@ -1,0 +1,19 @@
+<button
+    class="editable-rating-button"
+    type="button"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel ?? ('Edit your rating for ' + title)"
+    (click)="open()"
+>
+    <i
+        class="fa-solid fa-pen editable-rating-button__icon"
+        aria-hidden="true"
+    ></i>
+    <span class="editable-rating-button__value">
+        @if (currentRating !== null) {
+            {{ currentRating | number: "1.1-1" }}
+        } @else {
+            Rate
+        }
+    </span>
+</button>

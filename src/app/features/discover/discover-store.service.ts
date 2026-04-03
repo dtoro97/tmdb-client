@@ -34,9 +34,8 @@ import {
     MediaOrPersonType,
     PersonListItem,
     SortDirection,
-    toMovieMediaListItem,
+    toMediaListItem,
     toPersonListItem,
-    toTvMediaListItem,
 } from '../../shared';
 import {
     ConfigStoreService,
@@ -1036,7 +1035,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                 .pipe(
                     map((result) => {
                         const mapped = (result.results ?? []).map((item) =>
-                            toMovieMediaListItem(item, 'year'),
+                            toMediaListItem(item, 'movie', 'year'),
                         );
                         this.patchLoadedResults(
                             page,
@@ -1093,7 +1092,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             .pipe(
                 map((result) => {
                     const mapped = (result.results ?? []).map((item) =>
-                        toTvMediaListItem(item, 'year'),
+                        toMediaListItem(item, 'tv', 'year'),
                     );
                     this.patchLoadedResults(
                         page,

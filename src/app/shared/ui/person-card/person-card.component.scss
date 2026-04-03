@@ -41,6 +41,7 @@
 }
 
 .person-card__name {
+    margin: 0;
     @include line-clamp(2);
     color: var(--text-primary);
     font-weight: var(--weight-semibold);
@@ -49,17 +50,13 @@
 }
 
 .person-card__department {
+    margin: 0;
     color: var(--text-muted);
     line-height: var(--lh-normal);
-    min-height: calc(1em * var(--lh-normal));
 }
 
 @include mobile() {
     .person-card {
         gap: var(--space-1);
-
-        &__name {
-            min-height: calc(2 * 1em * var(--lh-tight));
-        }
     }
 }

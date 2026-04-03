@@ -1,9 +1,41 @@
 .mat-mdc-menu-panel {
     --mat-menu-container-shape: var(--radius-xl);
-    --mat-menu-container-color: var(--mat-sys-surface-dim);
+    --mat-menu-container-color: var(
+        --mat-select-panel-background-color,
+        var(--mat-sys-surface-container)
+    );
+    --mat-menu-item-label-text-size: var(
+        --mat-option-label-text-size,
+        var(--text-sm)
+    );
+    --mat-menu-item-label-text-weight: var(
+        --mat-option-label-text-weight,
+        var(--weight-regular)
+    );
+    --mat-menu-item-label-text-color: var(
+        --mat-option-label-text-color,
+        var(--mat-sys-on-surface)
+    );
+    --mat-menu-item-hover-state-layer-color: var(--control-surface-hover);
+    --mat-menu-item-focus-state-layer-color: var(--control-surface-hover);
+    --mat-menu-item-pressed-state-layer-color: var(
+        --control-subtle-surface-active
+    );
 
     border: 1px solid var(--surface-panel-border);
     box-shadow: var(--shadow-lg);
+
+    .mat-mdc-menu-content {
+        padding-block: var(--space-1);
+    }
+
+    .mat-mdc-menu-item {
+        min-height: var(--control-height-md);
+        transition:
+            background-color var(--motion-fast),
+            color var(--motion-fast);
+    }
+
     .mat-divider {
         border-top-color: var(--mat-sys-outline-variant);
     }

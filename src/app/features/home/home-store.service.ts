@@ -20,14 +20,13 @@ import {
     CardItem,
     PersonCardItem,
     shuffle,
-    toMovieCardItem,
+    toCardItem,
     toPersonCardItem,
-    toTvCardItem,
 } from '../../shared';
 import {
     SpotlightItem,
     toSpotlightItem,
-} from './home-spotlight/home-spotlight.models';
+} from './home-spotlight-models';
 import { TrailerDataStoreService } from './trailer-data-store.service';
 import { WatchProviderStoreService } from '../../shared/services';
 
@@ -158,7 +157,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                                         [provider.id]: {
                                             type: 'loaded' as const,
                                             value: results
-                                                .map((item) => toTvCardItem(item))
+                                                .map((item) => toCardItem(item, 'tv'))
                                                 .slice(0, PAGE_SIZE),
                                         },
                                     };
@@ -267,9 +266,9 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             map(({ movie, tv }) =>
                 shuffle([
                     ...(movie.results ?? []).map((item) =>
-                        toMovieCardItem(item),
+                        toCardItem(item, 'movie'),
                     ),
-                    ...(tv.results ?? []).map((item) => toTvCardItem(item)),
+                    ...(tv.results ?? []).map((item) => toCardItem(item, 'tv')),
                 ]).slice(0, PAGE_SIZE),
             ),
             catchError(() => of([] as CardItem[])),
@@ -333,8 +332,8 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         trendingToday: carouselItems
                             .map((item) =>
                                 item.media_type === 'movie'
-                                    ? toMovieCardItem(item)
-                                    : toTvCardItem(item),
+                                    ? toCardItem(item, 'movie')
+                                    : toCardItem(item, 'tv'),
                             )
                             .slice(0, PAGE_SIZE),
                     };
@@ -373,7 +372,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             .pipe(
                 map((response) =>
                     (response.results ?? [])
-                        .map((item) => toTvCardItem(item))
+                        .map((item) => toCardItem(item, 'tv'))
                         .slice(0, PAGE_SIZE),
                 ),
                 catchError(() => of([] as CardItem[])),
@@ -412,9 +411,9 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             map(({ movies, tv }) =>
                 shuffle([
                     ...(movies.results ?? []).map((item) =>
-                        toMovieCardItem(item),
+                        toCardItem(item, 'movie'),
                     ),
-                    ...(tv.results ?? []).map((item) => toTvCardItem(item)),
+                    ...(tv.results ?? []).map((item) => toCardItem(item, 'tv')),
                 ]).slice(0, PAGE_SIZE),
             ),
             catchError(() => of([] as CardItem[])),
@@ -483,7 +482,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             .pipe(
                 map((response) =>
                     (response.results ?? [])
-                        .map((item) => toMovieCardItem(item))
+                        .map((item) => toCardItem(item, 'movie'))
                         .slice(0, PAGE_SIZE),
                 ),
                 catchError(() => of([] as CardItem[])),

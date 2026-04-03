@@ -77,6 +77,14 @@
     justify-content: flex-end;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    flex-shrink: 0;
+}
+
 .header-menu-button {
     display: none;
     align-items: center;
@@ -161,6 +169,10 @@
 }
 
 @include mobile() {
+    .header-actions {
+        gap: var(--space-1);
+    }
+
     .header-nav {
         display: none;
     }

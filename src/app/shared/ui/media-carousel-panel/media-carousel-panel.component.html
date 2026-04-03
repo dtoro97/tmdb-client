@@ -1,5 +1,6 @@
 <app-carousel
     [class.media-carousel-panel--backdrop]="variant === 'backdrop'"
+    [columns]="columns"
     [items]="
         state.type === 'loading'
             ? (skeletonCount | repeat)

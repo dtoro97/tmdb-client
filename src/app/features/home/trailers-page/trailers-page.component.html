@@ -1,88 +1,27 @@
 <div class="page-container">
     @if (vm$ | async; as vm) {
         <main class="trailers-page">
-            @if (vm.featuredTrailer; as featured) {
-                <app-hero-surface
-                    variant="detail"
-                    [backdropPath]="featured.backdropPath ?? null"
-                    [alt]="featured.mediaTitle"
+            @if (vm.featuredSpotlight; as featured) {
+                <app-hero-spotlight
+                    badge="Featured Trailer"
+                    backLink="/"
+                    backLabel="Home"
+                    [spotlight]="featured.spotlight"
                 >
-                    <div class="trailers-hero">
-                        <div class="trailers-hero-layout">
-                            <div class="trailers-hero-content">
-                                <span class="trailers-featured text-overline">
-                                    Featured Trailer
-                                </span>
-
-                                <h1 class="trailers-hero-title text-hero-title">
-                                    {{ featured.mediaTitle }}
-                                </h1>
-
-                                <div class="trailers-hero-meta">
-                                    <span
-                                        class="trailers-hero-type text-overline"
-                                    >
-                                        {{ featured.videoTypeLabel }}
-                                    </span>
-                                    @if (featured.mediaYear) {
-                                        <span class="text-meta">
-                                            {{ featured.mediaYear }}
-                                        </span>
-                                    }
-                                </div>
-                            </div>
-
-                            <div class="trailers-hero-actions">
-                                <button
-                                    matButton="filled"
-                                    type="button"
-                                    (click)="openTrailer(featured.videoUrl)"
-                                >
-                                    <i
-                                        class="fa-solid fa-play"
-                                        aria-hidden="true"
-                                    ></i>
-                                    Play Trailer
-                                </button>
-                                <button
-                                    mat-stroked-button
-                                    (click)="openMedia(featured.mediaLink)"
-                                >
-                                    More info
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </app-hero-surface>
+                    <button
+                        matButton="filled"
+                        type="button"
+                        (click)="openTrailer(featured.videoUrl)"
+                    >
+                        <i
+                            class="fa-solid fa-play"
+                            aria-hidden="true"
+                        ></i>
+                        Play Trailer
+                    </button>
+                </app-hero-spotlight>
             } @else {
-                <div class="trailers-hero-skeleton" aria-hidden="true">
-                    <div class="trailers-hero-skeleton-content">
-                        <div class="trailers-hero-skeleton-layout">
-                            <div class="trailers-hero-skeleton-copy-group">
-                                <div
-                                    class="trailers-hero-skeleton-badge skeleton"
-                                ></div>
-                                <div
-                                    class="trailers-hero-skeleton-title skeleton"
-                                ></div>
-                                <div
-                                    class="trailers-hero-skeleton-meta skeleton"
-                                ></div>
-                                <div
-                                    class="trailers-hero-skeleton-copy skeleton"
-                                ></div>
-                            </div>
-                            <div class="trailers-hero-actions">
-                                <div
-                                    class="trailers-hero-skeleton-button skeleton"
-                                ></div>
-                                <div
-                                    class="trailers-hero-skeleton-button skeleton"
-                                ></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <app-hero-spotlight [loading]="true" />
             }
 
             <div class="page-main">

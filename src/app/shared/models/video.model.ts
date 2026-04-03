@@ -6,6 +6,7 @@ export interface VideoCardItem {
     mediaType: MediaType;
     mediaTitle: string;
     mediaYear?: string;
+    mediaOverview?: string;
     mediaPosterPath?: string | null;
     backdropPath?: string | null;
     video?: Video;

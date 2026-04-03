@@ -20,8 +20,6 @@
     min-width: 0;
     cursor: pointer;
     @include list-row-hover(
-        ".person-list-item__avatar",
-        ".person-list-item__trailing-icon",
         $title-selector: ".person-list-item__title"
     );
     @include focus-ring();
@@ -51,7 +49,7 @@
     display: block;
     min-width: 0;
     color: var(--mat-sys-on-surface);
-    font-weight: var(--weight-semibold);
+    font-weight: var(--weight-bold);
     transition: color var(--transition-fast);
     @include line-clamp(1);
 }
@@ -114,8 +112,4 @@
         @include line-clamp(2);
     }
 
-    .person-list-item__trailing-icon {
-        grid-area: icon;
-        align-self: center;
-    }
 }

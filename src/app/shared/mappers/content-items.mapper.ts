@@ -12,25 +12,14 @@ import {
 
 type DatePrecision = 'year' | 'full';
 
-type MovieLike = {
+type MediaItemLike = {
     id?: number | null;
     poster_path?: string | null;
     backdrop_path?: string | null;
     title?: string | null;
-    genre_ids?: number[] | null;
-    release_date?: string | null;
-    overview?: string | null;
-    vote_average?: number | null;
-    vote_count?: number | null;
-    popularity?: number | null;
-};
-
-type TvLike = {
-    id?: number | null;
-    poster_path?: string | null;
-    backdrop_path?: string | null;
     name?: string | null;
     genre_ids?: number[] | null;
+    release_date?: string | null;
     first_air_date?: string | null;
     overview?: string | null;
     vote_average?: number | null;
@@ -68,6 +57,15 @@ const toDateValue = (
     return precision === 'year' ? value.slice(0, 4) : value;
 };
 
+const extractMediaFields = (
+    item: MediaItemLike,
+    mediaType: MediaType,
+): { title: string; date: string } => ({
+    title: (mediaType === 'movie' ? item.title : item.name) ?? '',
+    date:
+        (mediaType === 'movie' ? item.release_date : item.first_air_date) ?? '',
+});
+
 const toKnownForLinks = (
     items: PersonKnownForLike[] | null | undefined,
 ): KnownForLink[] =>
@@ -89,6 +87,7 @@ const toKnownForText = (knownForLinks: KnownForLink[]): string | undefined => {
 const toVideoTrailerSeed = (
     item: {
         id?: number | null;
+        overview?: string | null;
         poster_path?: string | null;
         backdrop_path?: string | null;
     },
@@ -100,45 +99,35 @@ const toVideoTrailerSeed = (
     mediaType,
     mediaTitle: mediaTitle ?? '',
     mediaYear: toDateValue(mediaDate, 'year'),
+    mediaOverview: item.overview ?? '',
     mediaPosterPath: item.poster_path ?? null,
     backdropPath: item.backdrop_path ?? null,
 });
 
-export const toMovieMediaListItem = (
-    item: MovieLike,
+export const toMediaListItem = (
+    item: MediaItemLike,
+    mediaType: MediaType,
     datePrecision: DatePrecision = 'full',
-): MediaListItem => ({
-    id: item.id ?? 0,
-    thumb: item.poster_path ?? null,
-    title: item.title ?? '',
-    overview: item.overview ?? '',
-    rating: item.vote_average ?? null,
-    date: toDateValue(item.release_date, datePrecision),
-    mediaType: 'movie',
-    genreIds: item.genre_ids ?? [],
-    voteCount: item.vote_count ?? 0,
-});
-
-export const toTvMediaListItem = (
-    item: TvLike,
-    datePrecision: DatePrecision = 'full',
-): MediaListItem => ({
-    id: item.id ?? 0,
-    thumb: item.poster_path ?? null,
-    title: item.name ?? '',
-    overview: item.overview ?? '',
-    rating: item.vote_average ?? null,
-    date: toDateValue(item.first_air_date, datePrecision),
-    mediaType: 'tv',
-    genreIds: item.genre_ids ?? [],
-    voteCount: item.vote_count ?? 0,
-});
+): MediaListItem => {
+    const { title, date } = extractMediaFields(item, mediaType);
+    return {
+        id: item.id ?? 0,
+        thumb: item.poster_path ?? null,
+        title,
+        overview: item.overview ?? '',
+        rating: item.vote_average ?? null,
+        date: toDateValue(date, datePrecision),
+        mediaType,
+        genreIds: item.genre_ids ?? [],
+        voteCount: item.vote_count ?? 0,
+    };
+};
 
 export const toCollectionPartMediaListItem = (
     item: CollectionPart,
     datePrecision: DatePrecision = 'full',
 ): MediaListItem =>
-    toMovieMediaListItem(
+    toMediaListItem(
         {
             id: item.id,
             poster_path: item.poster_path,
@@ -148,6 +137,7 @@ export const toCollectionPartMediaListItem = (
             vote_count: item.vote_count,
             release_date: item.release_date,
         },
+        'movie',
         datePrecision,
     );
 
@@ -173,17 +163,13 @@ export const toCastPersonCardItem = (person: CastLike): PersonCardItem => ({
     subtitle: person.character ?? '',
 });
 
-export const movieToSearchResultItem = (item: MovieLike): SearchResultItem => ({
-    ...toMovieMediaListItem(item, 'year'),
-    year: toDateValue(item.release_date, 'year'),
-    mediaType: 'movie',
-    department: '',
-});
-
-export const tvToSearchResultItem = (item: TvLike): SearchResultItem => ({
-    ...toTvMediaListItem(item, 'year'),
-    year: toDateValue(item.first_air_date, 'year'),
-    mediaType: 'tv',
+export const mediaToSearchResultItem = (
+    item: MediaItemLike,
+    mediaType: Extract<MediaType, 'movie' | 'tv'>,
+): SearchResultItem => ({
+    ...toMediaListItem(item, mediaType, 'year'),
+    year: toDateValue(extractMediaFields(item, mediaType).date, 'year'),
+    mediaType,
     department: '',
 });
 
@@ -221,33 +207,27 @@ export const multiToSearchResultItem = (
     };
 };
 
-export const toMovieCardItem = (item: MovieLike): CardItem => ({
-    id: item.id ?? 0,
-    mediaType: 'movie',
-    title: item.title ?? '',
-    imagePath: item.poster_path ?? null,
-    backdropPath: item.backdrop_path ?? null,
-    rating: item.vote_average ?? null,
-    date: item.release_date ?? '',
-    overview: item.overview ?? '',
-});
+export const toCardItem = (
+    item: MediaItemLike,
+    mediaType: MediaType,
+): CardItem => {
+    const { title, date } = extractMediaFields(item, mediaType);
+    return {
+        id: item.id ?? 0,
+        mediaType,
+        title,
+        imagePath: item.poster_path ?? null,
+        backdropPath: item.backdrop_path ?? null,
+        rating: item.vote_average ?? null,
+        date,
+        overview: item.overview ?? '',
+    };
+};
 
-export const toTvCardItem = (item: TvLike): CardItem => ({
-    id: item.id ?? 0,
-    mediaType: 'tv',
-    title: item.name ?? '',
-    imagePath: item.poster_path ?? null,
-    backdropPath: item.backdrop_path ?? null,
-    rating: item.vote_average ?? null,
-    date: item.first_air_date ?? '',
-    overview: item.overview ?? '',
-});
-
-export const toMovieVideoTrailerSeed = (
-    item: MovieLike,
-): VideoTrailerSeedItem =>
-    toVideoTrailerSeed(item, 'movie', item.title, item.release_date);
-
-export const toTvVideoTrailerSeed = (item: TvLike): VideoTrailerSeedItem =>
-    toVideoTrailerSeed(item, 'tv', item.name, item.first_air_date);
-
+export const toVideoTrailerSeedItem = (
+    item: MediaItemLike,
+    mediaType: MediaType,
+): VideoTrailerSeedItem => {
+    const { title, date } = extractMediaFields(item, mediaType);
+    return toVideoTrailerSeed(item, mediaType, title, date);
+};

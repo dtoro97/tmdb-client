@@ -1,0 +1,17 @@
+@if (state.type === "loading") {
+    <ul class="episode-list" aria-label="Episodes loading">
+        @for (i of skeletonCount | repeat; track i) {
+            <li class="episode-list__entry">
+                <app-episode-list-item [loading]="true" />
+            </li>
+        }
+    </ul>
+} @else if (state.type === "loaded") {
+    <ul class="episode-list" aria-label="Episodes">
+        @for (item of episodeItems; track item.id) {
+            <li class="episode-list__entry">
+                <app-episode-list-item [item]="item.item" />
+            </li>
+        }
+    </ul>
+}

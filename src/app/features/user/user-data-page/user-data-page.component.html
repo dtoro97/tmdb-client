@@ -1,0 +1,27 @@
+@if (currentSection === "profile") {
+    <app-user-data-overview-section />
+} @else if (currentSection === "watchlists") {
+    <app-watchlist-section />
+} @else if (currentSection === "ratings") {
+    <app-ratings-section />
+} @else {
+    <section class="user-data-page page-container">
+        <div class="page-main page-main--full-padding">
+            <header class="user-data-page__intro">
+                <span class="page-kicker">TMDb account</span>
+                <h1 class="page-title">{{ sectionContent.title }}</h1>
+                <p class="page-subtitle">
+                    {{ sectionContent.description }}
+                </p>
+            </header>
+
+            <div class="surface-panel empty-panel">
+                <app-empty-state
+                    [iconClass]="sectionContent.iconClass"
+                    [title]="sectionContent.emptyStateTitle"
+                    [text]="sectionContent.emptyStateText"
+                />
+            </div>
+        </div>
+    </section>
+}

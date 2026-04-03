@@ -1,0 +1,99 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Your Watchlist"
+        subtitle="Keep track of the movies and shows you want to revisit."
+    />
+
+    <div class="page-main page-main--full-padding">
+        <app-browse-toolbar>
+            <app-pill-toggle
+                start
+                [options]="tabs"
+                [selectedValue]="selectedTab"
+                (selected)="onTabChange($event)"
+            />
+            <app-sort-button
+                end
+                [options]="sortOptions"
+                selectedValue="created_at"
+                [direction]="vm.sortDirection"
+                (directionToggle)="onToggleSortDirection()"
+            />
+        </app-browse-toolbar>
+
+        <div class="watchlist-section__list">
+            <div class="catalog-panel">
+                @if (selectedTab === "movies") {
+                    <app-media-list
+                        [state]="vm.watchlistMoviesState"
+                        routeType="movie"
+                    />
+
+                    @if (vm.watchlistMoviesState.type === "loaded" && !vm.hasWatchlistMovies) {
+                        <div class="empty-panel watchlist-section__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-bookmark"
+                                title="No movies on your watchlist"
+                                text="Browse titles and add them to your watchlist to see them here."
+                            />
+                        </div>
+                    }
+
+                    @if (vm.watchlistMoviesHasMore) {
+                        <footer class="catalog-panel-footer">
+                            <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="
+                                    vm.watchlistMoviesState.type ===
+                                    'loading-more'
+                                "
+                                (click)="onShowMore()"
+                            >
+                                {{
+                                    vm.watchlistMoviesState.type ===
+                                    "loading-more"
+                                        ? "Loading more"
+                                        : "Show more"
+                                }}
+                            </button>
+                        </footer>
+                    }
+                } @else {
+                    <app-media-list [state]="vm.watchlistTvState" routeType="tv" />
+
+                    @if (vm.watchlistTvState.type === "loaded" && !vm.hasWatchlistTv) {
+                        <div class="empty-panel watchlist-section__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-bookmark"
+                                title="No TV series on your watchlist"
+                                text="Browse titles and add them to your watchlist to see them here."
+                            />
+                        </div>
+                    }
+
+                    @if (vm.watchlistTvHasMore) {
+                        <footer class="catalog-panel-footer">
+                            <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="
+                                    vm.watchlistTvState.type === 'loading-more'
+                                "
+                                (click)="onShowMore()"
+                            >
+                                {{
+                                    vm.watchlistTvState.type === "loading-more"
+                                        ? "Loading more"
+                                        : "Show more"
+                                }}
+                            </button>
+                        </footer>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}

@@ -28,17 +28,20 @@
                 <app-header-search-bar />
             </div>
 
-            <app-header-locale-selector />
+            <div class="header-actions">
+                <app-header-auth-menu />
+                <app-header-locale-selector />
 
-            <button
-                class="header-menu-button"
-                type="button"
-                aria-haspopup="true"
-                [attr.aria-expanded]="menuOpen"
-                (click)="toggleMenu()"
-            >
-                <mat-icon class="header-menu-button-icon">menu</mat-icon>
-            </button>
+                <button
+                    class="header-menu-button"
+                    type="button"
+                    aria-haspopup="true"
+                    [attr.aria-expanded]="menuOpen"
+                    (click)="toggleMenu()"
+                >
+                    <mat-icon class="header-menu-button-icon">menu</mat-icon>
+                </button>
+            </div>
         </div>
     </nav>
 

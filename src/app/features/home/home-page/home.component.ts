@@ -11,9 +11,11 @@ import {
     PillToggleComponent,
     RatingComponent,
 } from '../../../shared';
+import { MatButtonModule } from '@angular/material/button';
+
 import { HomeTopPicksComponent } from '../home-top-picks/home-top-picks.component';
 import { HomeStoreService } from '../home-store.service';
-import { HomeSpotlightComponent } from '../home-spotlight/home-spotlight.component';
+import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.component';
 
 @Component({
     selector: 'app-home',
@@ -26,7 +28,8 @@ import { HomeSpotlightComponent } from '../home-spotlight/home-spotlight.compone
         DatePipe,
         SlicePipe,
         RouterLink,
-        HomeSpotlightComponent,
+        HeroSpotlightComponent,
+        MatButtonModule,
         HomeTopPicksComponent,
         ImageComponent,
         RatingComponent,

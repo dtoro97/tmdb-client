@@ -3,3 +3,6 @@ export const getISODate = (daysOffset: number): string => {
     d.setDate(d.getDate() + daysOffset);
     return d.toISOString().split('T')[0];
 };
+
+export const toYear = (date?: string | null): string | null =>
+    date ? date.slice(0, 4) : null;

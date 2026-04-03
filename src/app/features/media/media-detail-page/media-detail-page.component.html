@@ -1,0 +1,851 @@
+<div class="media-detail-page page-container">
+    @if (vm$ | async; as vm) {
+        @if (vm.media; as media) {
+            <app-hero-surface
+                [backdropPath]="media.backdropPath"
+                [alt]="media.title"
+                variant="detail"
+            >
+                <div class="media-detail-page__hero-cinematic">
+                    <p class="media-detail-page__hero-kicker text-overline">
+                        @if (media.mediaType === "movie") {
+                            Movie &#x2022; {{ media.year }}
+                        } @else {
+                            TV Series
+                            @if (vm.tvYearLabel; as tvYearLabel) {
+                                &#x2022;
+                                {{ tvYearLabel }}
+                            }
+                        }
+                    </p>
+                    <h1 class="media-detail-page__hero-title text-hero-title">
+                        {{ media.title }}
+                    </h1>
+                    @if (media.tagline) {
+                        <p class="media-detail-page__hero-tagline text-body-sm">
+                            "{{ media.tagline }}"
+                        </p>
+                    }
+                </div>
+            </app-hero-surface>
+
+            <div class="media-detail-page__info-shelf">
+                <div
+                    class="media-detail-page__info-shelf-inner inner-container"
+                >
+                    <div class="media-detail-page__poster-column">
+                        <app-image
+                            class="media-detail-page__hero-poster"
+                            [src]="media.posterPath"
+                            type="media"
+                            [alt]="media.title"
+                        />
+                    </div>
+
+                    <div class="media-detail-page__info-content">
+                        @if (media.voteAverage || vm.canRateTitle) {
+                            <div class="media-detail-page__hero-ratings">
+                                @if (media.voteAverage) {
+                                    <div
+                                        class="media-detail-page__hero-rating-stat"
+                                    >
+                                        <span
+                                            class="media-detail-page__hero-rating-label text-overline"
+                                        >
+                                            TMDb rating
+                                        </span>
+
+                                        <div
+                                            class="media-detail-page__hero-rating-summary"
+                                        >
+                                            <span
+                                                class="media-detail-page__hero-rating-primary"
+                                            >
+                                                <i
+                                                    class="media-detail-page__hero-rating-icon fa-solid fa-star"
+                                                    aria-hidden="true"
+                                                ></i>
+                                                <span
+                                                    class="media-detail-page__hero-rating-value text-title"
+                                                >
+                                                    {{
+                                                        media.voteAverage
+                                                            | number: "1.1-1"
+                                                    }}
+                                                </span>
+                                                <span
+                                                    class="media-detail-page__hero-rating-scale text-caption"
+                                                >
+                                                    /10
+                                                </span>
+                                            </span>
+
+                                            @if (media.voteCount) {
+                                                <span
+                                                    class="media-detail-page__hero-rating-meta text-caption"
+                                                >
+                                                    ({{
+                                                        media.voteCount
+                                                            | voteCount
+                                                    }})
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (vm.canRateTitle) {
+                                    <app-user-rating
+                                        class="media-detail-page__hero-user-rating media-detail-page__hero-user-rating--with-divider"
+                                        [title]="media.title"
+                                    />
+                                }
+                            </div>
+                        }
+
+                        <div class="media-detail-page__hero-stats">
+                            @if (
+                                vm.certification.type === "loading" ||
+                                vm.certification.type === "idle"
+                            ) {
+                                <app-skeleton
+                                    class="media-detail-page__hero-certification-skeleton"
+                                    aria-hidden="true"
+                                />
+                            } @else if (vm.certification.type === "loaded") {
+                                @if (
+                                    vm.certification.value;
+                                    as certification
+                                ) {
+                                    <span
+                                        class="media-detail-page__hero-certification text-meta"
+                                    >
+                                        {{ certification }}
+                                    </span>
+                                } @else if (!media.runtime) {
+                                    <span
+                                        class="media-detail-page__hero-stats-spacer"
+                                        aria-hidden="true"
+                                    ></span>
+                                }
+                            }
+
+                            @if (media.runtime) {
+                                <span
+                                    class="media-detail-page__hero-meta text-meta"
+                                >
+                                    {{ media.runtime | m2h }}
+                                </span>
+                            }
+                        </div>
+
+                        <div class="media-detail-page__hero-genres">
+                            @for (genre of media.genres; track genre.id) {
+                                <mat-chip
+                                    class="chip--accent chip--link"
+                                    [routerLink]="['/discover']"
+                                    [queryParams]="{
+                                        genres: genre.id,
+                                        type: media.mediaType,
+                                    }"
+                                >
+                                    {{ genre.name }}
+                                </mat-chip>
+                            }
+                        </div>
+
+                        <p
+                            class="media-detail-page__hero-overview text-body"
+                            [class.media-detail-page__hero-overview--empty]="
+                                !media.overview
+                            "
+                        >
+                            {{ media.overview || "No overview available." }}
+                        </p>
+
+                        @if (vm.externalLinks; as externalLinks) {
+                            <app-external-links
+                                class="media-detail-page__hero-links"
+                                [externalLinks]="externalLinks"
+                            />
+                        }
+
+                        @if (media.nextEpisode) {
+                            <a
+                                class="media-detail-page__hero-next-episode text-body-sm"
+                                [routerLink]="[
+                                    'episodes',
+                                    media.nextEpisode.season_number,
+                                    media.nextEpisode.episode_number,
+                                ]"
+                            >
+                                Next:
+                                {{ media.nextEpisode.air_date | date }}
+                                &#x2022; S{{
+                                    media.nextEpisode.season_number
+                                }}E{{ media.nextEpisode.episode_number }} "{{
+                                    media.nextEpisode.name
+                                }}"
+                            </a>
+                        }
+
+                        <div class="media-detail-page__hero-footer">
+                            <div class="media-detail-page__hero-providers">
+                                @if (
+                                    vm.watchProviders.type === "loading" ||
+                                    vm.watchProviders.type === "idle"
+                                ) {
+                                    <div
+                                        class="media-detail-page__provider-preview media-detail-page__provider-preview--skeleton"
+                                    >
+                                        <div
+                                            class="media-detail-page__provider-container"
+                                        >
+                                            <app-skeleton
+                                                class="media-detail-page__provider-label-skeleton media-detail-page__provider-label-skeleton--title"
+                                            />
+                                            <app-skeleton
+                                                class="media-detail-page__provider-label-skeleton media-detail-page__provider-label-skeleton--meta"
+                                            />
+                                        </div>
+                                        <div
+                                            class="media-detail-page__provider-preview-logos"
+                                        >
+                                            @for (i of 3 | repeat; track i) {
+                                                <app-skeleton
+                                                    class="media-detail-page__provider-logo-skeleton"
+                                                />
+                                            }
+                                        </div>
+                                    </div>
+                                } @else if (
+                                    vm.watchProviders.type === "loaded"
+                                ) {
+                                    @if (
+                                        vm.watchProviders.value;
+                                        as providers
+                                    ) {
+                                        @if (providers.providers.length) {
+                                            <div
+                                                class="media-detail-page__provider-preview media-detail-page__provider-preview--loaded"
+                                            >
+                                                <div
+                                                    class="media-detail-page__provider-preview-copy"
+                                                >
+                                                    <span
+                                                        class="media-detail-page__provider-label text-label u-nowrap"
+                                                    >
+                                                        Watch on
+                                                    </span>
+                                                    @if (providers.link) {
+                                                        <a
+                                                            class="media-detail-page__section-link text-body-sm muted"
+                                                            [href]="
+                                                                providers.link
+                                                            "
+                                                            target="_blank"
+                                                            rel="noopener"
+                                                        >
+                                                            Data provided by
+                                                            JustWatch
+                                                        </a>
+                                                    }
+                                                </div>
+                                                <div
+                                                    class="media-detail-page__provider-preview-logos"
+                                                >
+                                                    @for (
+                                                        provider of providers.providers;
+                                                        track provider.provider_id
+                                                    ) {
+                                                        <a
+                                                            class="media-detail-page__provider-preview-link"
+                                                            [routerLink]="[
+                                                                '/discover',
+                                                            ]"
+                                                            [queryParams]="{
+                                                                type: media.mediaType,
+                                                                providers:
+                                                                    provider.provider_id,
+                                                            }"
+                                                            [attr.aria-label]="
+                                                                provider.provider_name ??
+                                                                'Watch provider'
+                                                            "
+                                                        >
+                                                            <app-image
+                                                                class="media-detail-page__provider-preview-logo"
+                                                                [src]="
+                                                                    provider.logo_path ??
+                                                                    null
+                                                                "
+                                                                [params]="'w92'"
+                                                                [alt]="
+                                                                    provider.provider_name ??
+                                                                    'Watch provider'
+                                                                "
+                                                            />
+                                                        </a>
+                                                    }
+                                                    @if (
+                                                        providers.hiddenCount &&
+                                                        providers.link
+                                                    ) {
+                                                        <a
+                                                            class="media-detail-page__provider-preview-more text-caption"
+                                                            [href]="
+                                                                providers.link
+                                                            "
+                                                            target="_blank"
+                                                            rel="noopener"
+                                                        >
+                                                            +{{
+                                                                providers.hiddenCount
+                                                            }}
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        } @else {
+                                            <span
+                                                class="media-detail-page__provider-preview-spacer"
+                                                aria-hidden="true"
+                                            ></span>
+                                        }
+                                    } @else {
+                                        <span
+                                            class="media-detail-page__provider-preview-spacer"
+                                            aria-hidden="true"
+                                        ></span>
+                                    }
+                                }
+                            </div>
+
+                            <div class="media-detail-page__hero-actions">
+                                <div class="media-detail-page__hero-trailer">
+                                    @if (heroTrailerState$ | async; as trailerState) {
+                                        @if (trailerState.loading) {
+                                            <app-skeleton
+                                                class="media-detail-page__hero-trailer-skeleton"
+                                                aria-hidden="true"
+                                            />
+                                        } @else if (trailerState.key; as trailerKey) {
+                                            <button
+                                                matButton="filled"
+                                                type="button"
+                                                (click)="openTrailer(trailerKey)"
+                                            >
+                                                <i class="fa-solid fa-play"></i>
+                                                Play Trailer
+                                            </button>
+                                        } @else {
+                                            <app-skeleton
+                                                class="media-detail-page__hero-trailer-spacer"
+                                                aria-hidden="true"
+                                            />
+                                        }
+                                    }
+                                </div>
+
+                                <app-media-list-actions
+                                    class="media-detail-page__hero-list-actions"
+                                    [title]="media.title"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-sections">
+                @if (vm.creditsPanel.showPanel) {
+                    <app-page-section subtitle="Top Cast">
+                        <app-media-credits-panel [data]="vm.creditsPanel" />
+                    </app-page-section>
+                }
+
+                @if (
+                    vm.collection.type === "loading" ||
+                    vm.collection.type === "idle"
+                ) {
+                    <div
+                        class="media-detail-page__collection media-detail-page__collection--loading"
+                    >
+                        <app-skeleton
+                            class="media-detail-page__collection-skeleton"
+                        />
+                    </div>
+                } @else if (vm.collection.type === "loaded") {
+                    @if (vm.collection.value; as collection) {
+                        <a
+                            class="media-detail-page__collection"
+                            [routerLink]="['/collection', collection.id]"
+                        >
+                            <app-image
+                                class="media-detail-page__collection-backdrop"
+                                [src]="collection.backdrop_path"
+                                [params]="'w1280'"
+                            />
+                            <div
+                                class="media-detail-page__collection-overlay"
+                            ></div>
+                            <div class="media-detail-page__collection-content">
+                                <h2
+                                    class="media-detail-page__collection-title text-title"
+                                >
+                                    Part of the {{ collection.name }}
+                                </h2>
+                                @if (collection.parts?.length) {
+                                    <p
+                                        class="media-detail-page__collection-meta text-body-sm"
+                                    >
+                                        Includes
+                                        @for (
+                                            part of collection.parts;
+                                            track part.id;
+                                            let last = $last
+                                        ) {
+                                            @if (
+                                                last &&
+                                                collection.parts!.length > 1
+                                            ) {
+                                                and
+                                            }
+                                            {{ part.title }}
+                                            @if (
+                                                !last &&
+                                                collection.parts!.length > 2
+                                            ) {
+                                                ,
+                                            }
+                                        }
+                                    </p>
+                                }
+                            </div>
+                        </a>
+                    }
+                }
+
+                @if (media.mediaType === "tv" && media.lastEpisode) {
+                    <app-page-section title="Latest Episode">
+                        <a
+                            section-controls
+                            class="media-detail-page__section-link text-body-sm"
+                            [routerLink]="['episodes']"
+                        >
+                            Browse all episodes
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+
+                        <div>
+                            @if (vm.latestEpisode.type === "loaded") {
+                                @if (vm.latestEpisode.value; as episode) {
+                                    <app-episode-list-item
+                                        [item]="{
+                                            name: episode.name,
+                                            subtitle: null,
+                                            overview: episode.overview,
+                                            stillPath: episode.still_path ?? null,
+                                            seasonNumber: episode.season_number ?? null,
+                                            episodeNumber: episode.episode_number ?? null,
+                                            airDate: episode.air_date ?? null,
+                                            runtime: episode.runtime ?? null,
+                                            voteAverage: episode.vote_average ?? null,
+                                            routeCommands: [
+                                                '/title',
+                                                vm.media.id,
+                                                vm.media.mediaType,
+                                                'episodes',
+                                                episode.season_number,
+                                                episode.episode_number,
+                                            ],
+                                        }"
+                                    />
+                                }
+                            }
+                        </div>
+                    </app-page-section>
+                }
+
+                @if (
+                    mediaVideoStoreService.videosState$ | async;
+                    as videosState
+                ) {
+                    @if (
+                        videosState.type === "loading" ||
+                        videosState.type === "idle" ||
+                        ((mediaVideoStoreService.youtubeVideosTotalCount$
+                            | async) ?? 0) > 0
+                    ) {
+                        <app-page-section subtitle="Videos">
+                            @if (
+                                ((mediaVideoStoreService.youtubeVideosTotalCount$
+                                    | async) ?? 0) > 0
+                            ) {
+                                <a
+                                    section-controls
+                                    class="media-detail-page__section-link text-body-sm"
+                                    [routerLink]="['videos']"
+                                >
+                                    Browse all videos ({{
+                                        (mediaVideoStoreService.youtubeVideosTotalCount$
+                                            | async) ?? 0
+                                    }})
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            }
+
+                            <app-videos-grid [state]="videosState" />
+                        </app-page-section>
+                    }
+                }
+
+                @if (
+                    vm.photos.state.type !== "loaded" ||
+                    vm.photos.totalCount > 0
+                ) {
+                    <app-page-section subtitle="Photos">
+                        @if (vm.photos.totalCount > 0) {
+                            <a
+                                section-controls
+                                class="media-detail-page__section-link text-body-sm"
+                                [routerLink]="['photos']"
+                            >
+                                Browse all photos ({{ vm.photos.totalCount }})
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        }
+                        <app-photos-grid
+                            [state]="vm.photos.state"
+                            [totalCount]="vm.photos.totalCount"
+                            (photoClick)="openPhotoViewer($event)"
+                        />
+                    </app-page-section>
+                }
+
+                @if (mediaReviewsStoreService.reviewsState$ | async; as reviewsState) {
+                    @if (
+                        reviewsState.type === "loading" ||
+                        reviewsState.type === "idle"
+                    ) {
+                        <app-page-section subtitle="Reviews">
+                            <div class="media-detail-page__reviews-snapshot">
+                                <div
+                                    class="media-detail-page__reviews-distribution-skeleton"
+                                >
+                                    <div
+                                        class="media-detail-page__reviews-distribution-skeleton-side"
+                                    >
+                                        <app-skeleton
+                                            class="media-detail-page__reviews-distribution-avatar-skeleton"
+                                        />
+                                        <div
+                                            class="media-detail-page__reviews-distribution-skeleton-copy"
+                                        >
+                                            <app-skeleton
+                                                class="media-detail-page__reviews-distribution-value-skeleton"
+                                            />
+                                            <app-skeleton
+                                                class="media-detail-page__reviews-distribution-label-skeleton"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="media-detail-page__reviews-distribution-skeleton-bars"
+                                    >
+                                        @for (i of 10 | repeat; track i) {
+                                            <app-skeleton
+                                                class="media-detail-page__reviews-distribution-bar-skeleton"
+                                            />
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="media-detail-page__reviews-list">
+                                @for (i of 3 | repeat; track i) {
+                                    <article
+                                        class="media-detail-page__review-skeleton"
+                                    >
+                                        <div
+                                            class="media-detail-page__review-skeleton-header"
+                                        >
+                                            <app-skeleton
+                                                class="media-detail-page__review-skeleton-avatar"
+                                            />
+                                            <div
+                                                class="media-detail-page__review-skeleton-meta"
+                                            >
+                                                <app-skeleton
+                                                    class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--author"
+                                                />
+                                                <app-skeleton
+                                                    class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--meta"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="media-detail-page__review-skeleton-body"
+                                        >
+                                            <app-skeleton
+                                                class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--full"
+                                            />
+                                            <app-skeleton
+                                                class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--wide"
+                                            />
+                                            <app-skeleton
+                                                class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--medium"
+                                            />
+                                            <app-skeleton
+                                                class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--short"
+                                            />
+                                        </div>
+                                        <div
+                                            class="media-detail-page__review-skeleton-footer"
+                                        >
+                                            <app-skeleton
+                                                class="media-detail-page__review-skeleton-line media-detail-page__review-skeleton-line--footer"
+                                            />
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        </app-page-section>
+                    } @else if (
+                        reviewsState.type === "loaded" &&
+                        reviewsState.value.length
+                    ) {
+                        <app-page-section subtitle="Reviews">
+                            <a
+                                section-controls
+                                class="media-detail-page__section-link text-body-sm"
+                                routerLink="reviews"
+                            >
+                                @if (mediaReviewsStoreService.totalResults$ | async; as totalResults) {
+                                    Browse all reviews ({{ totalResults }})
+                                }
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+
+                            <app-rating-distribution
+                                [average]="media.voteAverage"
+                                [voteCount]="media.voteCount"
+                                [reviews]="reviewsState.value"
+                            />
+                            <div class="media-detail-page__reviews-list">
+                                @for (
+                                    review of (mediaReviewsStoreService.previewReviews$ | async) ?? [];
+                                    track review.id
+                                ) {
+                                    <app-review-card [review]="review" />
+                                }
+                            </div>
+                        </app-page-section>
+                    }
+                }
+
+                @if (
+                    vm.recommendations.type !== "loaded" ||
+                    vm.recommendations.value.length
+                ) {
+                    <app-page-section title="More Like This">
+                        <app-media-carousel-panel
+                            [state]="vm.recommendations"
+                            variant="backdrop"
+                            [showRating]="true"
+                            [showDate]="true"
+                        ></app-media-carousel-panel>
+                    </app-page-section>
+                }
+
+                @if (
+                    vm.keywords.type === "loaded" && vm.keywords.value.length
+                ) {
+                    <app-page-section subtitle="Keywords">
+                        <app-keywords-list
+                            [keywords]="vm.keywords.value"
+                            [mediaType]="media.mediaType"
+                        />
+                    </app-page-section>
+                }
+
+                @if (
+                    media.releaseDate ||
+                    media.firstAirDate ||
+                    media.lastAirDate ||
+                    media.runtime ||
+                    media.budget ||
+                    media.revenue ||
+                    media.numberOfSeasons ||
+                    media.numberOfEpisodes ||
+                    media.status ||
+                    media.languages.length ||
+                    media.networks?.length
+                ) {
+                    <app-page-section subtitle="Details">
+                        <ul class="media-detail-page__details-list">
+                            @if (media.releaseDate) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Released</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.releaseDate | date }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.firstAirDate) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >First Aired</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.firstAirDate | date }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.lastAirDate) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Last Aired</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.lastAirDate | date }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.runtime) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Runtime</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.runtime | m2h }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.budget) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Budget</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >${{ media.budget | number }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.revenue) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Revenue</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >${{ media.revenue | number }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.numberOfSeasons) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Seasons</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.numberOfSeasons }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.numberOfEpisodes) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Episodes</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.numberOfEpisodes }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.status) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Status</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.status }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.languages.length) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Languages</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                        >{{ media.languages.join(", ") }}</span
+                                    >
+                                </li>
+                            }
+
+                            @if (media.networks?.length) {
+                                <li class="media-detail-page__details-row">
+                                    <span
+                                        class="media-detail-page__details-label text-caption"
+                                        >Networks</span
+                                    >
+                                    <span
+                                        class="media-detail-page__details-value text-body-sm"
+                                    >
+                                        @for (
+                                            network of media.networks;
+                                            track network.id;
+                                            let i = $index
+                                        ) {
+                                            <span
+                                                class="media-detail-page__details-value text-body-sm"
+                                            >
+                                                {{ network.name }}
+                                            </span>
+                                            @if (
+                                                i !== media.networks!.length - 1
+                                            ) {
+                                                <span>, </span>
+                                            }
+                                        }
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </app-page-section>
+                }
+            </div>
+        }
+    }
+</div>

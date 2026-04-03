@@ -33,5 +33,6 @@ export class MediaCarouselPanelComponent {
     @Input() showRating = true;
     @Input() showDate = false;
     @Input() variant: MediaCarouselPanelVariant = 'card';
+    @Input() columns: number | null = null;
     readonly skeletonCount = PAGE_SIZE;
 }

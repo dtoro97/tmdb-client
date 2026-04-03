@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    Input,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 import { MediaListItem } from '../../models';
-import { VoteCountPipe } from '../../pipes';
 import { ImageComponent } from '../image/image.component';
 import { BadgeComponent } from '../badge/badge.component';
 import { RatingComponent } from '../rating/rating.component';
@@ -16,8 +19,8 @@ import { RatingComponent } from '../rating/rating.component';
     imports: [
         RouterLink,
         DecimalPipe,
+        DatePipe,
         ImageComponent,
-        VoteCountPipe,
         RatingComponent,
         BadgeComponent,
     ],
@@ -30,6 +33,7 @@ export class MediaListItemComponent {
     @Input({ required: true }) routerLink!: (string | number)[];
     @Input() index: number | null = null;
     @Input() genreNames: string[] = [];
+    @Input() userRating: number | null = null;
 
     onRowClick(event: MouseEvent) {
         if (this.isNestedInteractiveEvent(event)) {
@@ -40,6 +44,10 @@ export class MediaListItemComponent {
     }
 
     onRowKeydown(event: KeyboardEvent) {
+        if (this.isNestedInteractiveTarget(event.target)) {
+            return;
+        }
+
         if (event.key !== 'Enter' && event.key !== ' ') {
             return;
         }
@@ -50,8 +58,10 @@ export class MediaListItemComponent {
     }
 
     private isNestedInteractiveEvent(event: MouseEvent): boolean {
-        const target = event.target;
+        return this.isNestedInteractiveTarget(event.target);
+    }
 
+    private isNestedInteractiveTarget(target: EventTarget | null): boolean {
         if (!(target instanceof HTMLElement)) {
             return false;
         }

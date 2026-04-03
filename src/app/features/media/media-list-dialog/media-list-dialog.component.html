@@ -1,0 +1,98 @@
+<div class="media-list-dialog">
+    <header class="media-list-dialog__header">
+        <p class="media-list-dialog__eyebrow text-overline">Lists</p>
+        <h2 class="media-list-dialog__title text-title">
+            @if (data.mode === "lists") {
+                Save {{ data.title }}
+            } @else {
+                Sign in to create lists
+            }
+        </h2>
+        <p class="media-list-dialog__subtitle text-body-sm">
+            @if (data.mode === "lists") {
+                Choose one of your TMDb lists, or create a new one later.
+            } @else {
+                Use a full TMDb account session to create custom lists and save
+                titles to your watchlist.
+            }
+        </p>
+    </header>
+
+    <div class="media-list-dialog__content" mat-dialog-content>
+        @if (data.mode === "lists") {
+            @if (!data.customLists.length) {
+                <p class="media-list-dialog__state text-body-sm">
+                    You do not have any custom lists yet.
+                </p>
+            }
+
+            <div class="media-list-dialog__list">
+                @for (list of data.customLists; track list.id) {
+                    <button
+                        class="media-list-dialog__list-item"
+                        type="button"
+                        (click)="selectList(list.id)"
+                    >
+                        <span class="media-list-dialog__list-copy">
+                            <span
+                                class="media-list-dialog__list-name text-body-sm"
+                            >
+                                {{ list.name }}
+                            </span>
+                            <span
+                                class="media-list-dialog__list-meta text-caption"
+                            >
+                                {{ list.itemCount }} items
+                            </span>
+                        </span>
+                        <i
+                            class="fa-solid fa-chevron-right"
+                            aria-hidden="true"
+                        ></i>
+                    </button>
+                }
+
+                <button
+                    class="media-list-dialog__list-item media-list-dialog__list-item--create"
+                    type="button"
+                    disabled
+                >
+                    <span class="media-list-dialog__list-copy">
+                        <span class="media-list-dialog__list-name text-body-sm">
+                            Create new list
+                        </span>
+                        <span class="media-list-dialog__list-meta text-caption">
+                            Coming soon
+                        </span>
+                    </span>
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                </button>
+            </div>
+        } @else {
+            <div class="media-list-dialog__signin-state">
+                <p class="media-list-dialog__state text-body-sm">
+                    Sign in with TMDb to create custom lists and manage your
+                    watchlist.
+                </p>
+                <button
+                    matButton="filled"
+                    type="button"
+                    (click)="requestLogin()"
+                >
+                    Sign in with TMDb
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="media-list-dialog__footer" mat-dialog-actions>
+        <button
+            mat-stroked-button
+            mat-dialog-close
+            type="button"
+            (click)="cancel()"
+        >
+            Close
+        </button>
+    </div>
+</div>

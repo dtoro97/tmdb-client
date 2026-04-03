@@ -1,0 +1,208 @@
+@if (personDetailStore.personDetailVm$ | async; as vm) {
+    <div class="page-container">
+        @if (vm.person.type === "loaded" && vm.person.value; as person) {
+            <app-hero-surface [alt]="person.name" variant="detail">
+                <div class="person-hero">
+                    <app-image
+                        class="person-hero__portrait aspect-poster"
+                        [src]="person.profile_path"
+                        type="person"
+                        [alt]="person.name"
+                    />
+                    <div class="person-hero__body">
+                        <header class="person-hero__header">
+                            <div class="person-hero__title-block">
+                                <p class="text-overline">
+                                    {{ person.known_for_department }}
+                                </p>
+                                <h1 class="person-hero__name text-display">
+                                    {{ person.name }}
+                                </h1>
+                            </div>
+
+                            <app-external-links
+                                class="person-hero__socials"
+                                [externalLinks]="vm.externalLinks"
+                            />
+                        </header>
+
+                        <div class="person-hero__biography-block">
+                            <p
+                                class="person-hero__biography text-body"
+                                [class.person-hero__biography--collapsed]="
+                                    !!person.biography && !bioExpanded
+                                "
+                                [class.person-hero__biography--empty]="
+                                    !person.biography
+                                "
+                            >
+                                {{
+                                    person.biography ||
+                                        "No biography available."
+                                }}
+                            </p>
+                            @if (
+                                person.biography &&
+                                person.biography.length > bioPreviewThreshold
+                            ) {
+                                <button
+                                    class="person-hero__bio-toggle text-caption"
+                                    (click)="toggleBio()"
+                                >
+                                    {{
+                                        bioExpanded ? "Show less" : "Show more"
+                                    }}
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </app-hero-surface>
+
+            <div class="page-sections">
+                @if (
+                    vm.knownFor.type === "loading" ||
+                    (vm.knownFor.type === "loaded" && vm.knownFor.value.length)
+                ) {
+                    <app-page-section subtitle="Known For">
+                        <app-media-carousel-panel
+                            [state]="vm.knownFor"
+                        ></app-media-carousel-panel>
+                    </app-page-section>
+                }
+
+                @if (
+                    vm.photos.type === "loading" ||
+                    (vm.photos.type === "loaded" && vm.photos.value.length > 0)
+                ) {
+                    <app-page-section subtitle="Photos">
+                        <ng-container section-controls>
+                            @if (
+                                vm.photos.type === "loaded" &&
+                                vm.photos.value.length
+                            ) {
+                                <a
+                                    class="person-details__browse-link text-body-sm"
+                                    [routerLink]="[
+                                        '/name',
+                                        person.id,
+                                        'photos',
+                                    ]"
+                                >
+                                    Browse all photos ({{
+                                        vm.photos.value.length
+                                    }})
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            }
+                        </ng-container>
+                        <app-photos-grid
+                            [state]="vm.photos"
+                            [totalCount]="
+                                vm.photos.type === 'loaded'
+                                    ? vm.photos.value.length
+                                    : 0
+                            "
+                            (photoClick)="openPhotoViewer($event)"
+                        />
+                    </app-page-section>
+                }
+
+                @if (
+                    vm.creditsDisplay.type === "loading" ||
+                    (vm.creditsDisplay.type === "loaded" &&
+                        vm.creditsDisplay.value.totalCount > 0)
+                ) {
+                    <section class="section-panel">
+                        <app-page-section subtitle="Credits">
+                            <app-person-credits
+                                [state]="vm.creditsDisplay"
+                                [section]="vm.creditsUi.section"
+                                [mediaType]="vm.creditsUi.mediaType"
+                                [sortBy]="vm.creditsUi.sortBy"
+                                [sortDirection]="vm.creditsUi.sortDirection"
+                                (sectionChange)="onCreditsSectionChange($event)"
+                                (mediaTypeChange)="
+                                    onCreditsMediaTypeChange($event)
+                                "
+                                (sortByChange)="onCreditsSortByChange($event)"
+                                (sortDirectionToggle)="
+                                    toggleCreditsSortDirection()
+                                "
+                            />
+                        </app-page-section>
+                    </section>
+                }
+
+                @if (
+                    person.birthday ||
+                    person.deathday ||
+                    person.place_of_birth ||
+                    person.known_for_department ||
+                    person.also_known_as?.length
+                ) {
+                    <app-page-section subtitle="Personal Details">
+                        <ul class="person-facts" aria-label="Personal details">
+                            @if (person.birthday) {
+                                <li class="person-facts__item">
+                                    <span class="text-meta">Born</span>
+                                    <span
+                                        class="person-facts__value text-body-sm"
+                                    >
+                                        {{ person.birthday | date }}
+                                        @if (!person.deathday) {
+                                            <span class="text-caption">
+                                                (age {{ person | age }})
+                                            </span>
+                                        }
+                                    </span>
+                                </li>
+                            }
+                            @if (person.deathday) {
+                                <li class="person-facts__item">
+                                    <span class="text-meta">Died</span>
+                                    <span
+                                        class="person-facts__value text-body-sm"
+                                    >
+                                        {{ person.deathday | date }}
+                                        <span class="text-caption">
+                                            (age {{ person | age }})
+                                        </span>
+                                    </span>
+                                </li>
+                            }
+                            @if (person.place_of_birth) {
+                                <li class="person-facts__item">
+                                    <span class="text-meta">Birthplace</span>
+                                    <span
+                                        class="person-facts__value text-body-sm"
+                                    >
+                                        {{ person.place_of_birth }}
+                                    </span>
+                                </li>
+                            }
+                            <li class="person-facts__item">
+                                <span class="text-meta">Known For</span>
+                                <span class="person-facts__value text-body-sm">
+                                    {{ person.known_for_department }}
+                                </span>
+                            </li>
+                            @if (person.also_known_as?.length) {
+                                <li class="person-facts__item">
+                                    <span class="text-meta"
+                                        >Alternative name</span
+                                    >
+                                    <span
+                                        class="person-facts__value text-body-sm"
+                                    >
+                                        {{ person.also_known_as![0] }}
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </app-page-section>
+                }
+            </div>
+        }
+    </div>
+}

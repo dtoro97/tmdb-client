@@ -11,9 +11,8 @@ import {
     MediaListItem,
     MediaOrPersonFilterType,
     PersonListItem,
-    toMovieMediaListItem,
+    toMediaListItem,
     toPersonListItem,
-    toTvMediaListItem,
 } from '../../shared';
 
 export type SearchType = MediaOrPersonFilterType;
@@ -276,7 +275,7 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             .pipe(
                 tap((result) => {
                     const mapped = (result.results ?? []).map((item) =>
-                        toMovieMediaListItem(item, 'year'),
+                        toMediaListItem(item, 'movie', 'year'),
                     );
                     const current = this.get().movies;
                     const nextMovies: SectionState<MediaListItem> = {
@@ -330,7 +329,7 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             .pipe(
                 tap((result) => {
                     const mapped = (result.results ?? []).map((item) =>
-                        toTvMediaListItem(item, 'year'),
+                        toMediaListItem(item, 'tv', 'year'),
                     );
                     const current = this.get().tv;
                     const nextTv: SectionState<MediaListItem> = {

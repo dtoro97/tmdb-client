@@ -10,6 +10,7 @@ import { IsActiveMatchOptions, RouterLink, RouterLinkActive } from '@angular/rou
 
 import { MatIconModule } from '@angular/material/icon';
 
+import { HeaderAuthMenuComponent } from './header-auth-menu/header-auth-menu.component';
 import { HeaderSearchBarComponent } from './header-search-bar/header-search-bar.component';
 import { HeaderLocaleSelectorComponent } from './header-locale-selector/header-locale-selector.component';
 
@@ -26,6 +27,7 @@ interface NavLink {
         MatIconModule,
         RouterLink,
         RouterLinkActive,
+        HeaderAuthMenuComponent,
         HeaderSearchBarComponent,
         HeaderLocaleSelectorComponent,
     ],

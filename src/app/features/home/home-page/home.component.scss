@@ -10,10 +10,6 @@
     padding-bottom: var(--space-10);
 }
 
-.opening-carousel {
-    --carousel-columns: 3;
-}
-
 .tonight-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

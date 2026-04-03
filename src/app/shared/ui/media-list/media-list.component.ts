@@ -19,6 +19,7 @@ export type MediaListRouteType = 'item' | 'movie' | 'tv';
 interface DisplayMediaListItem {
     readonly item: MediaListItem;
     readonly genreNames: string[];
+    readonly userRating: number | null;
 }
 
 @Component({
@@ -41,18 +42,24 @@ export class MediaListComponent implements OnChanges {
     @Input() descendingFrom: number | null = null;
     @Input() routeType: MediaListRouteType = 'item';
     @Input() genreMap: Map<number, string> = new Map();
+    @Input() userRatings: ReadonlyMap<number, number> = new Map();
 
     displayItems: DisplayMediaListItem[] = [];
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['state'] || changes['genreMap']) {
-            this.displayItems = this.toDisplayItems(this.state, this.genreMap);
+        if (changes['state'] || changes['genreMap'] || changes['userRatings']) {
+            this.displayItems = this.toDisplayItems(
+                this.state,
+                this.genreMap,
+                this.userRatings,
+            );
         }
     }
 
     private toDisplayItems(
         state: LoadableItems<MediaListItem>,
         genreMap: Map<number, string>,
+        userRatings: ReadonlyMap<number, number>,
     ): DisplayMediaListItem[] {
         if (state.type !== 'loaded' && state.type !== 'loading-more') {
             return [];
@@ -64,6 +71,7 @@ export class MediaListComponent implements OnChanges {
                 .map((genreId) => genreMap.get(genreId))
                 .filter((genreName): genreName is string => !!genreName)
                 .slice(0, 3),
+            userRating: userRatings.get(item.id) ?? null,
         }));
     }
 }

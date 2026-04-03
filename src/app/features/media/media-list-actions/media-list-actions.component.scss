@@ -1,0 +1,94 @@
+.media-list-actions {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--surface-panel) 84%, transparent);
+    overflow: hidden;
+}
+
+.media-list-actions__watchlist {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--control-height-lg);
+    padding-inline: var(--space-4) var(--space-5);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-primary);
+    box-shadow: none;
+    font: inherit;
+    cursor: pointer;
+    transition: var(--control-transition);
+}
+
+.media-list-actions__watchlist:hover:not(:disabled),
+.media-list-actions__menu:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--surface-panel-strong) 88%, transparent);
+}
+
+.media-list-actions__watchlist:focus-visible,
+.media-list-actions__menu:focus-visible {
+    outline: 2px solid var(--control-focus-outline);
+    outline-offset: -2px;
+}
+
+.media-list-actions__watchlist:disabled,
+.media-list-actions__menu:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.media-list-actions__icon {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    color: var(--text-accent);
+    transition: color var(--motion-fast);
+}
+
+.media-list-actions__label {
+    color: var(--text-primary);
+    font-size: var(--font-size-body-sm);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.media-list-actions__watchlist--active .media-list-actions__icon {
+    color: var(--color-brand);
+}
+
+.media-list-actions__watchlist--active:hover:not(:disabled)
+    .media-list-actions__icon {
+    color: var(--color-brand-hover);
+}
+
+.media-list-actions__watchlist--active:active:not(:disabled)
+    .media-list-actions__icon {
+    color: var(--color-brand-active);
+}
+
+.media-list-actions__menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: var(--control-height-lg);
+    padding-inline: var(--space-2);
+    border: 0;
+    border-left: 1px solid var(--color-border-subtle);
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    cursor: pointer;
+    transition: var(--control-transition);
+}
+
+@media (max-width: 640px) {
+    .media-list-actions__watchlist {
+        padding-inline: var(--space-3) var(--space-4);
+    }
+}

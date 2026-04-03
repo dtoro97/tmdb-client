@@ -5,6 +5,7 @@ import {
     Component,
     ContentChild,
     ElementRef,
+    HostBinding,
     Input,
     OnChanges,
     OnDestroy,
@@ -26,6 +27,12 @@ export class CarouselComponent
 {
     @Input() items: unknown[] = [];
     @Input() ariaLabel = 'Carousel';
+    @Input() columns: number | null = null;
+
+    @HostBinding('style.--carousel-columns')
+    get hostColumns(): number | null {
+        return this.columns;
+    }
 
     @ContentChild(TemplateRef) itemTemplate!: TemplateRef<HTMLElement>;
     @ViewChild('viewport') viewportEl!: ElementRef<HTMLElement>;

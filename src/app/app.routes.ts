@@ -5,21 +5,21 @@ export const routes: Routes = [
     {
         path: 'name',
         loadChildren: () =>
-            import('./features/person-detail/person-detail.routes').then(
+            import('./features/person/person-detail.routes').then(
                 (m) => m.personDetailRoutes,
             ),
     },
     {
         path: 'title',
         loadChildren: () =>
-            import('./features/media-detail/media.routes').then(
+            import('./features/media/media.routes').then(
                 (m) => m.mediaRoutes,
             ),
     },
     {
         path: 'collection',
         loadChildren: () =>
-            import('./features/collection-detail/collection.routes').then(
+            import('./features/collection/collection.routes').then(
                 (m) => m.collectionRoutes,
             ),
     },
@@ -35,6 +35,13 @@ export const routes: Routes = [
         loadChildren: () =>
             import('./features/search/search.routes').then(
                 (m) => m.searchRoutes,
+            ),
+    },
+    {
+        path: 'me',
+        loadChildren: () =>
+            import('./features/user/user-data.routes').then(
+                (m) => m.userDataRoutes,
             ),
     },
     {

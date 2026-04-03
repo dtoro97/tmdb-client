@@ -68,6 +68,7 @@ export interface VideoTrailerSeedItem {
     mediaType: MediaType;
     mediaTitle: string;
     mediaYear: string;
+    mediaOverview: string;
     mediaPosterPath: string | null;
     backdropPath: string | null;
 }

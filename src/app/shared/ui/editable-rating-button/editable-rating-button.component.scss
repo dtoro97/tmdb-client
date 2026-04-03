@@ -1,0 +1,59 @@
+.editable-rating-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-height: 2.5rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-brand) 30%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(
+        in srgb,
+        var(--color-brand) 8%,
+        var(--surface-panel-soft)
+    );
+    color: var(--color-brand);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px transparent;
+    transition:
+        transform var(--motion-fast),
+        border-color var(--motion-fast),
+        background-color var(--motion-fast),
+        box-shadow var(--motion-fast),
+        color var(--motion-fast);
+}
+
+.editable-rating-button:hover:not(:disabled),
+.editable-rating-button:focus-visible {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--color-brand) 72%, transparent);
+    background: color-mix(
+        in srgb,
+        var(--color-brand) 18%,
+        var(--surface-panel-strong)
+    );
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--color-brand) 28%, transparent),
+        0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.editable-rating-button:focus-visible {
+    outline: 2px solid var(--control-focus-outline);
+    outline-offset: 2px;
+}
+
+.editable-rating-button:disabled {
+    opacity: 0.72;
+    cursor: default;
+}
+
+.editable-rating-button__icon {
+    font-size: var(--text-sm);
+}
+
+.editable-rating-button__value {
+    font-variant-numeric: tabular-nums;
+}

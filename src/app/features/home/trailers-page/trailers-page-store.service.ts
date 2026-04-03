@@ -8,6 +8,7 @@ import {
     VideoCardItem,
     VideoTrailerSeedItem,
 } from '../../../shared';
+import type { SpotlightItem } from '../home-spotlight-models';
 import { TrailerDataStoreService } from '../trailer-data-store.service';
 
 interface TrailersPageState {
@@ -15,9 +16,14 @@ interface TrailersPageState {
     readonly pendingSeeds: readonly VideoTrailerSeedItem[];
 }
 
+interface FeaturedSpotlight {
+    readonly spotlight: SpotlightItem;
+    readonly videoUrl: string;
+}
+
 interface TrailersPageViewModel {
     readonly trailersState: LoadableItems<VideoCardItem>;
-    readonly featuredTrailer: VideoCardItem | null;
+    readonly featuredSpotlight: FeaturedSpotlight | null;
     readonly showMore: boolean;
 }
 
@@ -35,9 +41,25 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                 ? state.trailers.value
                 : [];
 
+        const featured = items[0] ?? null;
+
         return {
             trailersState: state.trailers,
-            featuredTrailer: items[0] ?? null,
+            featuredSpotlight: featured
+                ? {
+                      spotlight: {
+                          id: featured.mediaId,
+                          mediaType: featured.mediaType,
+                          title: featured.mediaTitle,
+                          overview: featured.mediaOverview ?? '',
+                          backdropPath: featured.backdropPath ?? null,
+                          rating: null,
+                          year: featured.mediaYear ?? '',
+                          mediaTypeLabel: '',
+                      },
+                      videoUrl: featured.videoUrl,
+                  }
+                : null,
             showMore: state.pendingSeeds.length > 0,
         };
     });

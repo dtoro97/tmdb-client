@@ -111,27 +111,6 @@
     }
 }
 
-@mixin hover-trailing-icon() {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    min-width: 1rem;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-0.35rem);
-    transition:
-        opacity var(--motion-base, var(--transition-base)),
-        transform var(--motion-base, var(--transition-base));
-
-    i {
-        font-size: 0.875rem;
-        line-height: 1;
-    }
-}
-
 @mixin lift-surface-hover($shadow-selector: null) {
     transition:
         transform var(--motion-base, var(--transition-base)),
@@ -159,24 +138,10 @@
 }
 
 @mixin list-row-hover(
-    $media-selector: null,
-    $trailing-selector: null,
     $hover-bg: var(--mat-sys-surface-container-low),
     $title-selector: null
 ) {
     transition: background-color var(--motion-base, var(--transition-base));
-
-    @if $media-selector != null {
-        #{$media-selector} {
-            transition: box-shadow var(--motion-base, var(--transition-base));
-        }
-    }
-
-    @if $trailing-selector != null {
-        #{$trailing-selector} {
-            @include hover-trailing-icon();
-        }
-    }
 
     &:is(:hover, :focus-within) {
         background: $hover-bg;
@@ -185,19 +150,6 @@
             #{$title-selector} {
                 transition: color var(--motion-base, var(--transition-base));
                 color: var(--text-accent);
-            }
-        }
-
-        @if $media-selector != null {
-            #{$media-selector} {
-                box-shadow: var(--shadow-sm);
-            }
-        }
-
-        @if $trailing-selector != null {
-            #{$trailing-selector} {
-                opacity: 1;
-                transform: translateX(0);
             }
         }
     }
@@ -209,6 +161,20 @@
     &:hover {
         transform: translateY($y);
         box-shadow: $shadow;
+    }
+}
+
+@mixin panel-card-hover($y: -2px) {
+    border: 1px solid transparent;
+    transition:
+        transform var(--motion-fast),
+        border-color var(--motion-fast),
+        background-color var(--motion-fast);
+
+    &:is(:hover, :focus-visible) {
+        transform: translateY($y);
+        border-color: var(--surface-panel-border);
+        background: var(--surface-panel-strong);
     }
 }
 

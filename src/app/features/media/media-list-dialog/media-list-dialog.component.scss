@@ -1,0 +1,92 @@
+.media-list-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    min-width: min(32rem, 100%);
+    padding: var(--space-6);
+    color: var(--text-primary);
+}
+
+.media-list-dialog__header,
+.media-list-dialog__signin-state,
+.media-list-dialog__list,
+.media-list-dialog__list-copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.media-list-dialog__header,
+.media-list-dialog__signin-state {
+    gap: var(--space-2);
+}
+
+.media-list-dialog__title,
+.media-list-dialog__subtitle,
+.media-list-dialog__state,
+.media-list-dialog__list-name,
+.media-list-dialog__list-meta {
+    margin: 0;
+}
+
+.media-list-dialog__eyebrow,
+.media-list-dialog__subtitle,
+.media-list-dialog__state,
+.media-list-dialog__list-meta {
+    color: var(--text-secondary);
+}
+
+.media-list-dialog__content,
+.media-list-dialog__footer {
+    margin: 0;
+    padding: 0;
+}
+
+.media-list-dialog__list {
+    gap: var(--space-2);
+}
+
+.media-list-dialog__list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--surface-panel-soft);
+    color: var(--text-primary);
+    font: inherit;
+    cursor: pointer;
+    transition:
+        border-color var(--motion-fast),
+        background-color var(--motion-fast),
+        color var(--motion-fast);
+}
+
+.media-list-dialog__list-item:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--brand-primary) 35%, transparent);
+    background: color-mix(in srgb, var(--brand-primary) 8%, var(--surface-panel-soft));
+}
+
+.media-list-dialog__list-item:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+}
+
+.media-list-dialog__list-item--create {
+    border-style: dashed;
+}
+
+.media-list-dialog__footer {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 0;
+}
+
+@media (max-width: 767px) {
+    .media-list-dialog {
+        min-width: 100%;
+        padding: var(--space-5);
+    }
+}

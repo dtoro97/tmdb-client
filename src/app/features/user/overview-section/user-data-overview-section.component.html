@@ -1,0 +1,292 @@
+@if (vm$ | async; as vm) {
+    <section class="user-data-overview page-container">
+        <app-hero-surface variant="compact" alt="Your TMDb profile">
+            <header class="user-data-overview__hero">
+                <div class="user-data-overview__identity">
+                    <div class="user-data-overview__avatar">
+                        @if (vm.profileState.type === "loading") {
+                            <app-skeleton
+                                class="user-data-overview__avatar-skeleton"
+                            />
+                        } @else {
+                            <app-user-avatar
+                                [name]="vm.profileDisplayName"
+                                [avatarPath]="
+                                    vm.profileState.type === 'loaded'
+                                        ? vm.profileState.value.avatarPath
+                                        : null
+                                "
+                                size="lg"
+                            />
+                        }
+                    </div>
+
+                    <div class="user-data-overview__identity-copy">
+                        <span class="page-kicker">TMDb account</span>
+                        @if (vm.profileState.type === "loading") {
+                            <div class="user-data-overview__identity-skeletons">
+                                <app-skeleton
+                                    class="user-data-overview__title-skeleton"
+                                />
+                                <app-skeleton
+                                    class="user-data-overview__handle-skeleton"
+                                />
+                                <app-skeleton
+                                    class="user-data-overview__subtitle-skeleton"
+                                />
+                            </div>
+                        } @else {
+                            <h1 class="page-title">
+                                {{ vm.profileDisplayName }}
+                            </h1>
+
+                            @if (vm.profileHandle) {
+                                <p
+                                    class="user-data-overview__handle text-body-sm"
+                                >
+                                    {{ vm.profileHandle }}
+                                </p>
+                            }
+
+                            <p class="page-subtitle">
+                                Your watchlist, ratings, and lists in one place.
+                            </p>
+                        }
+
+                        @if (vm.profileState.type === "loading") {
+                            <app-skeleton
+                                class="user-data-overview__meta-line-skeleton"
+                            />
+                        } @else if (vm.profileMetaLine) {
+                            <p
+                                class="user-data-overview__meta-line text-caption"
+                            >
+                                {{ vm.profileMetaLine }}
+                            </p>
+                        }
+                    </div>
+                </div>
+
+                <div class="user-data-overview__stats">
+                    @for (stat of vm.overviewStats; track stat.route) {
+                        <a
+                            class="user-data-overview__stat"
+                            [routerLink]="stat.route"
+                        >
+                            <span
+                                class="user-data-overview__stat-label text-caption"
+                            >
+                                {{ stat.label }}
+                            </span>
+                            <strong class="user-data-overview__stat-value">
+                                {{ stat.value }}
+                            </strong>
+                            <span
+                                class="user-data-overview__stat-description text-caption"
+                            >
+                                {{ stat.description }}
+                            </span>
+                        </a>
+                    }
+                </div>
+            </header>
+        </app-hero-surface>
+
+        <div class="page-main page-main--full-padding user-data-overview__main">
+            <div class="user-data-overview__sections">
+                <!-- Watchlist -->
+                <app-page-section
+                    title="Watchlist"
+                    subtitle="A quick look at what you want to watch next."
+                >
+                    <a
+                        section-controls
+                        class="user-data-overview__section-link text-body-sm"
+                        routerLink="/me/watchlists"
+                    >
+                        View all
+
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+
+                    @if (
+                        vm.watchlistPreviewCards.type === "loaded" &&
+                        vm.watchlistPreviewCards.value.length === 0
+                    ) {
+                        <div class="user-data-overview__empty-block">
+                            <app-empty-state
+                                iconClass="fa-regular fa-bookmark"
+                                title="No Watchlist yet"
+                                text="To track what you want to watch, browse a few titles and add them to your Watchlist."
+                            />
+                            @if (
+                                vm.trendingSuggestionsState.type === "loaded" &&
+                                vm.trendingSuggestionsState.value.length
+                            ) {
+                                <app-media-carousel-panel
+                                    [state]="vm.trendingSuggestionsState"
+                                    [showRating]="false"
+                                    [columns]="8"
+                                />
+                            }
+                            <div class="user-data-overview__browse-action">
+                                <a
+                                    class="user-data-overview__browse-link"
+                                    routerLink="/discover"
+                                >
+                                    Browse popular titles
+                                </a>
+                            </div>
+                        </div>
+                    } @else {
+                        <app-media-carousel-panel
+                            [state]="vm.watchlistPreviewCards"
+                            [showRating]="true"
+                        />
+                    }
+                </app-page-section>
+
+                <!-- Ratings -->
+                <app-page-section
+                    title="Ratings"
+                    subtitle="Recent movie and TV scores from your account."
+                >
+                    <a
+                        section-controls
+                        class="user-data-overview__section-link text-body-sm"
+                        routerLink="/me/ratings"
+                    >
+                        View all
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+
+                    @if (
+                        vm.ratingPreviewCards.type === "loaded" &&
+                        vm.ratingPreviewCards.value.length === 0
+                    ) {
+                        <div class="user-data-overview__empty-block">
+                            <app-empty-state
+                                iconClass="fa-regular fa-star"
+                                title="No ratings yet"
+                                text="Rate a few titles to start building your personal history."
+                            />
+                            @if (
+                                vm.trendingSuggestionsState.type === "loaded" &&
+                                vm.trendingSuggestionsState.value.length
+                            ) {
+                                <app-media-carousel-panel
+                                    [state]="vm.trendingSuggestionsState"
+                                    [showRating]="false"
+                                    [columns]="8"
+                                />
+                            }
+                            <div class="user-data-overview__browse-action">
+                                <a
+                                    class="user-data-overview__browse-link"
+                                    routerLink="/discover"
+                                >
+                                    Discover something to rate
+                                </a>
+                            </div>
+                        </div>
+                    } @else {
+                        <app-media-carousel-panel
+                            [state]="vm.ratingPreviewCards"
+                            [showRating]="true"
+                        />
+                    }
+                </app-page-section>
+
+                <!-- Lists -->
+                <app-page-section
+                    title="Lists"
+                    subtitle="Your custom TMDb collections and shortcuts."
+                >
+                    <a
+                        section-controls
+                        class="user-data-overview__section-link text-body-sm"
+                        routerLink="/me/lists"
+                    >
+                        View all
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+
+                    @if (
+                        vm.listPreviewState.type === "loading" ||
+                        vm.listPreviewState.type === "idle"
+                    ) {
+                        <div class="user-data-overview__list-grid">
+                            @for (
+                                placeholder of [1, 2, 3, 4];
+                                track placeholder
+                            ) {
+                                <article class="user-data-overview__list-card">
+                                    <app-skeleton
+                                        class="user-data-overview__list-poster-skeleton"
+                                    />
+                                    <div class="user-data-overview__list-copy">
+                                        <app-skeleton
+                                            class="user-data-overview__list-line user-data-overview__list-line--title"
+                                        />
+                                        <app-skeleton
+                                            class="user-data-overview__list-line user-data-overview__list-line--meta"
+                                        />
+                                        <app-skeleton
+                                            class="user-data-overview__list-line user-data-overview__list-line--body"
+                                        />
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    } @else if (
+                        vm.listPreviewState.type === "loaded" &&
+                        vm.listPreviewState.value.length
+                    ) {
+                        <div class="user-data-overview__list-grid">
+                            @for (
+                                item of vm.listPreviewState.value;
+                                track item.id
+                            ) {
+                                <article class="user-data-overview__list-card">
+                                    <app-image
+                                        class="user-data-overview__list-poster"
+                                        [src]="item.posterPath"
+                                        [alt]="item.name"
+                                        type="media"
+                                    />
+
+                                    <div class="user-data-overview__list-copy">
+                                        <span
+                                            class="user-data-overview__list-title text-body-sm"
+                                        >
+                                            {{ item.name }}
+                                        </span>
+                                        <span
+                                            class="user-data-overview__list-meta text-caption"
+                                        >
+                                            {{ item.metadata }}
+                                        </span>
+                                        <p
+                                            class="user-data-overview__list-description text-body-sm"
+                                        >
+                                            {{
+                                                item.description ||
+                                                    "A curated TMDb list from your account."
+                                            }}
+                                        </p>
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    } @else {
+                        <app-empty-state
+                            iconClass="fa-solid fa-list"
+                            title="No custom lists yet"
+                            text="Create a few themed collections and they will show up here."
+                        />
+                    }
+                </app-page-section>
+            </div>
+        </div>
+    </section>
+}
