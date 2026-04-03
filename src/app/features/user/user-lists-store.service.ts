@@ -6,9 +6,11 @@ import { forkJoin, map, Observable, tap } from 'rxjs';
 import { AccountListItem, AccountRestControllerService } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
+    CardItem,
     LoadableItems,
     MediaListItem,
     loaded,
+    mediaListItemToCardItem,
     toMediaListItem,
 } from '../../shared';
 import {
@@ -69,7 +71,9 @@ export interface UserListsVm {
     readonly hasFavoriteMovies: boolean;
     readonly hasFavoriteTv: boolean;
     readonly hasLists: boolean;
+    readonly favoritePreviewCards: LoadableItems<CardItem>;
     readonly listPreviewState: LoadableItems<UserDataOverviewListPreviewItem>;
+    readonly favoritesTotal: number;
     readonly favoriteMoviesTotal: number;
     readonly favoriteTvTotal: number;
     readonly listsTotal: number;
@@ -100,6 +104,19 @@ export class UserListsStore extends ComponentStore<UserListsState> {
             hasLists:
                 state.listsState.type === 'loaded' &&
                 state.listsState.value.length > 0,
+            favoritePreviewCards: combineLoadablePreviewItems(
+                [
+                    mapLoadableItems(
+                        state.favoriteMoviesState,
+                        mediaListItemToCardItem,
+                    ),
+                    mapLoadableItems(
+                        state.favoriteTvState,
+                        mediaListItemToCardItem,
+                    ),
+                ],
+                10,
+            ),
             listPreviewState: combineLoadablePreviewItems(
                 [
                     mapLoadableItems(state.listsState, (item) =>
@@ -108,6 +125,8 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 ],
                 4,
             ),
+            favoritesTotal:
+                state.favoriteMoviesTotal + state.favoriteTvTotal,
             favoriteMoviesTotal: state.favoriteMoviesTotal,
             favoriteTvTotal: state.favoriteTvTotal,
             listsTotal: state.listsTotal,

@@ -31,7 +31,9 @@ import {
 interface OverviewVm extends UserProfileVm {
     readonly overviewStats: readonly UserDataOverviewStat[];
     readonly watchlistPreviewCards: LoadableItems<CardItem>;
+    readonly favoritePreviewCards: LoadableItems<CardItem>;
     readonly ratingPreviewCards: LoadableItems<CardItem>;
+    readonly hasFavorites: boolean;
     readonly hasRatings: boolean;
     readonly hasRatedEpisodes: boolean;
     readonly recentRatings: readonly number[];
@@ -56,6 +58,11 @@ function toOverviewStats(
             label: 'Watchlist',
             value: watchlist.watchlistTotal,
             route: '/me/watchlists',
+        },
+        {
+            label: 'Favorites',
+            value: lists.favoritesTotal,
+            route: '/me/favorites',
         },
         {
             label: 'Lists',
@@ -95,7 +102,9 @@ export class UserDataOverviewSectionComponent {
                 ...profile,
                 overviewStats: toOverviewStats(watchlist, ratings, lists),
                 watchlistPreviewCards: watchlist.watchlistPreviewCards,
+                favoritePreviewCards: lists.favoritePreviewCards,
                 ratingPreviewCards: ratings.ratingPreviewCards,
+                hasFavorites: lists.hasFavoriteMovies || lists.hasFavoriteTv,
                 hasRatings: ratings.hasRatings,
                 hasRatedEpisodes: ratings.hasRatedEpisodes,
                 recentRatings: ratings.recentRatings,

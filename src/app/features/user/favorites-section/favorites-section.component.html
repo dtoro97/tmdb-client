@@ -1,0 +1,52 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Your Favorites"
+        subtitle="The movies and series you marked as favorites on TMDb."
+    />
+
+    <div class="page-main page-main--full-padding">
+        <app-browse-toolbar>
+            <app-pill-toggle
+                start
+                [options]="tabs"
+                [selectedValue]="selectedTab"
+                (selected)="onTabChange($event)"
+            />
+        </app-browse-toolbar>
+
+        <div class="favorites-section__list">
+            <div class="catalog-panel">
+                @if (selectedTab === "movies") {
+                    <app-media-list
+                        [state]="vm.favoriteMoviesState"
+                        routeType="movie"
+                    />
+
+                    @if (vm.favoriteMoviesState.type === "loaded" && !vm.hasFavoriteMovies) {
+                        <div class="empty-panel favorites-section__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-heart"
+                                title="No favorite movies yet"
+                                text="Mark a few movies as favorites and they will show up here."
+                            />
+                        </div>
+                    }
+                } @else {
+                    <app-media-list [state]="vm.favoriteTvState" routeType="tv" />
+
+                    @if (vm.favoriteTvState.type === "loaded" && !vm.hasFavoriteTv) {
+                        <div class="empty-panel favorites-section__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-heart"
+                                title="No favorite TV series yet"
+                                text="Mark a few series as favorites and they will show up here."
+                            />
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}

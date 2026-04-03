@@ -14,6 +14,7 @@ import {
     TmdbUserAccountService,
     UserSessionStoreService,
     loaded,
+    mediaListItemToCardItem,
     toMediaListItem,
 } from '../../shared';
 import {
@@ -34,19 +35,6 @@ interface UserWatchlistState {
     watchlistMoviesTotal: number;
     watchlistTvTotal: number;
     sortDirection: SortDirection;
-}
-
-function mediaListItemToCardItem(item: MediaListItem): CardItem {
-    return {
-        id: item.id,
-        mediaType: item.mediaType as 'movie' | 'tv',
-        title: item.title,
-        imagePath: item.thumb,
-        backdropPath: null,
-        rating: item.rating,
-        date: item.date,
-        overview: item.overview,
-    };
 }
 
 export interface UserWatchlistVm {

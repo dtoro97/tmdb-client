@@ -224,6 +224,17 @@ export const toCardItem = (
     };
 };
 
+export const mediaListItemToCardItem = (item: MediaListItem): CardItem => ({
+    id: item.id,
+    mediaType: item.mediaType as Extract<MediaType, 'movie' | 'tv'>,
+    title: item.title,
+    imagePath: item.thumb,
+    backdropPath: null,
+    rating: item.rating,
+    date: item.date,
+    overview: item.overview,
+});
+
 export const toVideoTrailerSeedItem = (
     item: MediaItemLike,
     mediaType: MediaType,

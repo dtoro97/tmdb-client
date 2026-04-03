@@ -27,13 +27,19 @@ import {
 } from '../../../shared';
 import { UserDataOverviewSectionComponent } from '../overview-section/user-data-overview-section.component';
 import { RatingsSectionComponent } from '../ratings-section/ratings-section.component';
+import { FavoritesSectionComponent } from '../favorites-section/favorites-section.component';
 import { UserListsStore } from '../user-lists-store.service';
 import { UserProfileStore } from '../user-profile-store.service';
 import { UserRatingsStore } from '../user-ratings-store.service';
 import { UserWatchlistStore } from '../user-watchlist-store.service';
 import { WatchlistSectionComponent } from '../watchlist-section/watchlist-section.component';
 
-type UserDataSection = 'profile' | 'watchlists' | 'ratings' | 'lists';
+type UserDataSection =
+    | 'profile'
+    | 'watchlists'
+    | 'favorites'
+    | 'ratings'
+    | 'lists';
 
 interface UserDataSectionContent {
     readonly title: string;
@@ -58,17 +64,23 @@ const USER_DATA_SECTION_CONTENT: Record<
     },
     watchlists: {
         title: 'Your watchlists',
-        description:
-            'Movies and shows you want to watch later.',
+        description: 'Movies and shows you want to watch later.',
         emptyStateTitle: 'No watchlist items yet',
         emptyStateText:
             'Browse titles and add them to your watchlist to see them here.',
         iconClass: 'fa-solid fa-bookmark',
     },
+    favorites: {
+        title: 'Your favorites',
+        description: 'Movies and shows you marked as favorites.',
+        emptyStateTitle: 'No favorites yet',
+        emptyStateText:
+            'Browse titles and mark a few as favorites to see them here.',
+        iconClass: 'fa-solid fa-heart',
+    },
     ratings: {
         title: 'Your ratings',
-        description:
-            'Titles and episodes you have rated.',
+        description: 'Titles and episodes you have rated.',
         emptyStateTitle: 'No ratings yet',
         emptyStateText:
             'Rate a few titles to start building your personal scoring history.',
@@ -91,6 +103,7 @@ const USER_DATA_SECTION_CONTENT: Record<
         EmptyStateComponent,
         UserDataOverviewSectionComponent,
         WatchlistSectionComponent,
+        FavoritesSectionComponent,
         RatingsSectionComponent,
     ],
     templateUrl: './user-data-page.component.html',

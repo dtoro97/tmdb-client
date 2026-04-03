@@ -26,6 +26,14 @@ export const userDataRoutes: Routes = [
                 },
             },
             {
+                path: 'favorites',
+                component: UserDataPageComponent,
+                title: 'Your TMDb Favorites',
+                data: {
+                    section: 'favorites',
+                },
+            },
+            {
                 path: 'ratings',
                 component: UserDataPageComponent,
                 title: 'Your TMDb Ratings',

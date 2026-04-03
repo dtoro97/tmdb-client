@@ -131,6 +131,55 @@
                     }
                 </app-page-section>
 
+                <!-- Favorites -->
+                <app-page-section title="Favorites">
+                    <a
+                        section-controls
+                        class="user-data-overview__section-link text-body-sm"
+                        routerLink="/me/favorites"
+                    >
+                        View all
+
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+
+                    @if (
+                        vm.favoritePreviewCards.type === "loaded" &&
+                        !vm.hasFavorites
+                    ) {
+                        <div class="user-data-overview__empty-block">
+                            <app-empty-state
+                                iconClass="fa-solid fa-heart"
+                                title="No favorites yet"
+                                text="Mark the titles you love and they will show up here for quick access."
+                            />
+                            @if (
+                                vm.trendingSuggestionsState.type === "loaded" &&
+                                vm.trendingSuggestionsState.value.length
+                            ) {
+                                <app-media-carousel-panel
+                                    [state]="vm.trendingSuggestionsState"
+                                    [showRating]="false"
+                                    [columns]="8"
+                                />
+                            }
+                            <div class="user-data-overview__browse-action">
+                                <a
+                                    class="user-data-overview__browse-link"
+                                    routerLink="/discover"
+                                >
+                                    Find titles to favorite
+                                </a>
+                            </div>
+                        </div>
+                    } @else {
+                        <app-media-carousel-panel
+                            [state]="vm.favoritePreviewCards"
+                            [showRating]="true"
+                        />
+                    }
+                </app-page-section>
+
                 <!-- Ratings -->
                 <app-page-section title="Ratings">
                     <a
