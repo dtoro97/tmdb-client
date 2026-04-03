@@ -1,4 +1,8 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import {
+    provideHttpClient,
+    withFetch,
+    withInterceptors,
+} from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
@@ -14,6 +18,8 @@ import {
     provideClientHydration,
     withEventReplay,
 } from '@angular/platform-browser';
+import { delayInterceptor } from './shared/utils/delay-interceptor';
+import { localeInterceptor } from './shared/utils/locale-interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -26,7 +32,10 @@ export const appConfig: ApplicationConfig = {
             }),
         ),
         provideAnimationsAsync(),
-        provideHttpClient(withFetch()),
+        provideHttpClient(
+            withFetch(),
+            withInterceptors([localeInterceptor, delayInterceptor]),
+        ),
         provideApi({
             basePath: 'https://api.themoviedb.org/3',
             credentials: {

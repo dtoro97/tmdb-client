@@ -1,48 +1,104 @@
 @if (homeVM$ | async; as homeVM) {
-    <div class="inner-container flex flex-column pb-4 md:pt-4">
-        <div class="flex flex-column">
-            <div class="column-header ml-4 md:ml-6 mb-4">
-                <h2>Trending</h2>
-                <app-pill-toggle
-                    [options]="trendingOptions"
-                    [selectedValue]="homeVM.trendingTime"
-                    (selected)="changeTrending($event)"
-                ></app-pill-toggle>
-            </div>
-            <app-carousel
-                [items]="homeVM.trending"
-                [numVisible]="6"
-                [numScroll]="6"
-            >
-                <ng-template let-movie>
-                    <app-card
-                        [item]="movie"
-                        [type]="movie.media_type"
-                    ></app-card>
-                </ng-template>
-            </app-carousel>
-        </div>
-        <div class="flex flex-column">
-            <div class="column-header ml-4 md:ml-6 mb-4">
-                <h2>What's Popular</h2>
-                <app-pill-toggle
-                    [options]="popularOptions"
-                    [selectedValue]="homeVM.popularType"
-                    (selected)="changePopular($event)"
-                ></app-pill-toggle>
-            </div>
-            <app-carousel
-                [items]="homeVM.popular"
-                [numVisible]="6"
-                [numScroll]="6"
-            >
-                <ng-template let-movie>
-                    <app-card
-                        [item]="movie"
-                        [type]="homeVM.popularType"
-                    ></app-card>
-                </ng-template>
-            </app-carousel>
+    <div class="page-container">
+        <app-home-spotlight [state]="homeVM.spotlight" />
+
+        <div class="page-sections">
+            <app-page-section title="Now Trending">
+                <app-media-carousel-panel
+                    [state]="homeVM.trendingToday"
+                    variant="backdrop"
+                    [showRating]="true"
+                    [showDate]="true"
+                ></app-media-carousel-panel>
+            </app-page-section>
+
+            <app-page-section title="Worth Watching">
+                <app-home-top-picks [state]="homeVM.whatToWatch" />
+            </app-page-section>
+
+            <app-page-section title="New Episodes Today">
+                @if (homeVM.airingToday.type === "loaded") {
+                    <div class="tonight-grid">
+                        @for (
+                            item of homeVM.airingToday.value | slice: 0 : 12;
+                            track item.id
+                        ) {
+                            <a
+                                class="tonight-row"
+                                [routerLink]="[
+                                    '/title',
+                                    item.id,
+                                    item.mediaType,
+                                ]"
+                                [attr.aria-label]="item.title"
+                            >
+                                <app-image
+                                    class="tonight-row__poster"
+                                    [src]="item.imagePath"
+                                    [alt]="item.title"
+                                    type="media"
+                                />
+
+                                <div class="tonight-row__content">
+                                    <span
+                                        class="tonight-row__title text-body-sm u-truncate"
+                                    >
+                                        {{ item.title }}
+                                    </span>
+
+                                    <span
+                                        class="tonight-row__meta text-caption muted"
+                                    >
+                                        @if (item.rating) {
+                                            <app-rating
+                                                [value]="
+                                                    item.rating
+                                                        | number: '1.1-1'
+                                                "
+                                            />
+                                        }
+                                        @if (item.rating && item.date) {
+                                            <span>&middot;</span>
+                                        }
+                                        @if (item.date) {
+                                            {{ item.date | date: "yyyy" }}
+                                        }
+                                    </span>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </app-page-section>
+
+            <app-page-section title="Trending People">
+                <app-person-carousel-panel
+                    [state]="homeVM.popularPeople"
+                    [showRank]="true"
+                />
+            </app-page-section>
+
+            @if (homeVM.streamingProviders.length) {
+                <app-page-section title="Now Streaming">
+                    <app-pill-toggle
+                        section-controls
+                        [options]="homeVM.streamingProviders"
+                        [selectedValue]="homeVM.selectedStreamingProviderId"
+                        (selected)="onStreamingProviderSelected($event)"
+                    />
+                    <app-media-carousel-panel [state]="homeVM.streamingNow" />
+                </app-page-section>
+            }
+
+            <app-page-section title="Opening This Week">
+                <app-media-carousel-panel
+                    [state]="homeVM.inTheatres"
+                    [showRating]="false"
+                    [showDate]="true"
+                    dateFormat="dayMonth"
+                    variant="backdrop"
+                ></app-media-carousel-panel>
+            </app-page-section>
         </div>
     </div>
 }

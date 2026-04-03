@@ -1,0 +1,36 @@
+<a
+    class="backdrop-card"
+    [routerLink]="['/title', item.id, item.mediaType]"
+    [attr.aria-label]="item.title"
+>
+    <div class="backdrop-card__media">
+        <app-image
+            class="backdrop-card__image"
+            [src]="item.backdropPath ?? item.imagePath"
+            [alt]="item.title"
+            type="media"
+            params="w780"
+        />
+    </div>
+
+    <div class="backdrop-card__scrim"></div>
+
+    <div class="backdrop-card__content">
+        <span class="backdrop-card__title text-title">{{ item.title }}</span>
+
+        <div class="backdrop-card__meta text-caption">
+            @if (showRating && item.rating) {
+                <app-rating [value]="item.rating | number: '1.1-1'" />
+            }
+            @if ((showDate || dateFormat) && item.date) {
+                @if (item.rating) {
+                    <span class="muted">&middot;</span>
+                }
+                <span class="muted">{{
+                    item.date
+                        | date: (dateFormat === "dayMonth" ? "MMM d" : "yyyy")
+                }}</span>
+            }
+        </div>
+    </div>
+</a>

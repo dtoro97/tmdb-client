@@ -1,52 +1,117 @@
-@use "responsive.scss" as *;
+@use "breakpoints" as *;
 
-:host ::ng-deep {
-    .cast-crew-page {
-        background-color: var(--mat-sys-surface);
-        min-height: 100vh;
+:host {
+    display: block;
+}
 
-        .muted {
-            color: var(--mat-sys-on-surface-variant);
-        }
-    }
+.media-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-5);
+    padding-block: var(--space-6);
+}
 
-    .media-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 1.5rem;
-        padding-block: 1.5rem;
-        border-bottom: 1px solid var(--mat-sys-outline-variant);
+.media-poster {
+    width: 5rem;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.media-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.media-title {
+    margin: 0;
+}
+
+.media-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+}
+
+.media-genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.page-main {
+    padding-bottom: var(--space-10);
+}
+
+.credit-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+}
+
+.credit-row-skeleton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+}
+
+.credit-avatar-skeleton,
+.credit-title-skeleton,
+.credit-subtitle-skeleton {
+    display: block;
+}
+
+.credit-avatar-skeleton {
+    width: var(--media-square-sm);
+    height: var(--media-square-sm);
+    --skeleton-radius: var(--radius-full);
+}
+
+.credit-title-skeleton {
+    width: 160px;
+    height: 0.9rem;
+}
+
+.credit-subtitle-skeleton {
+    width: 120px;
+    height: 0.75rem;
+}
+
+.credit-panel > .text-title {
+    margin: 0;
+}
+
+.credit-skeleton-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.credit-skeleton-list > .credit-row-skeleton:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.credit-body-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+@include mobile() {
+    .page-main {
+        padding-bottom: var(--space-8);
     }
 
     .media-poster {
-        width: 80px;
-        flex-shrink: 0;
-        border-radius: 6px;
-        overflow: hidden;
-        aspect-ratio: 2 / 3;
+        width: 3.75rem;
     }
 
-    .media-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        padding-top: 0.25rem;
-    }
-
-    .media-title {
-        font-size: var(--font-size-xl);
-        font-weight: 700;
-        margin: 0 0 0.25rem;
-        line-height: 1.2;
-    }
-
-    @include mobile() {
-        .media-title {
-            font-size: var(--font-size-lg);
-        }
-
-        .media-poster {
-            width: 60px;
-        }
+    .credit-row-skeleton {
+        gap: var(--space-2);
+        padding: var(--space-2);
     }
 }
+

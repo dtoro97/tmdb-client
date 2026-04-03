@@ -1,33 +1,63 @@
 <footer class="footer">
-    <div class="footer-inner inner-container">
-        <nav class="footer-links">
-            <a href="https://github.com/dtoro97/tmdb-client" target="_blank">
-                Source Code
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
+    <div class="footer__inner inner-container">
+        <div class="footer__links">
+            <nav class="footer__group" aria-label="Project links">
+                <a
+                    class="footer__link text-caption"
+                    href="https://github.com/dtoro97/tmdb-client"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    <span>Source Code</span>
+                </a>
+                <a
+                    class="footer__link text-caption"
+                    href="https://github.com/dtoro97/tmdb-client/issues"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    <span>Report a Bug</span>
+                </a>
+            </nav>
+
+            <nav class="footer__group" aria-label="Technology links">
+                <a
+                    class="footer__link text-caption"
+                    href="https://angular.dev/"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    <span>Angular</span>
+                </a>
+                <a
+                    class="footer__link text-caption"
+                    href="https://material.angular.io/"
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    <span>Angular Material</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="footer__brand">
+            <span class="footer__brand-label text-caption">Powered by</span>
             <a
-                href="https://github.com/dtoro97/tmdb-client/issues"
+                class="footer__brand-link"
+                href="https://www.themoviedb.org/"
                 target="_blank"
+                rel="noreferrer"
             >
-                Report a Bug
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-        </nav>
-        <nav class="footer-links">
-            <a href="https://angular.dev/" target="_blank">
-                Angular <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-            <a href="https://material.angular.io/" target="_blank">
-                Angular Material
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-        </nav>
-        <div class="footer-brand">
-            <span>Powered by</span>
-            <a href="https://www.themoviedb.org/" target="_blank">
-                <img src="assets/tmdb-icon.svg" class="tmdb-logo" alt="TMDB" />
+                <img
+                    src="assets/tmdb-icon.svg"
+                    class="footer__logo"
+                    alt="TMDB"
+                />
             </a>
         </div>
-        <p class="footer-copyright">© 2025 Created by Dávid Törő</p>
+
+        <p class="footer__copyright text-overline">
+            © 2025 Created by Dávid Törő
+        </p>
     </div>
 </footer>

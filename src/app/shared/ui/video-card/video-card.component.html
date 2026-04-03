@@ -1,48 +1,38 @@
-<div
-    class="video-card"
-    [routerLink]="[
-        '/title',
-        item.mediaId,
-        item.mediaType,
-        'videos',
-        item.videoId,
-    ]"
->
-    <div class="video-art" [class.video-art-poster]="showParentMediaLogo">
-        @if (showParentMediaLogo && item.mediaPosterPath) {
-            <app-media-thumb
-                [src]="item.mediaPosterPath"
-                [alt]="item.mediaTitle"
-                [params]="'w342'"
-            />
-        } @else {
-            <img
-                [src]="youtubeThumbnail"
-                [alt]="item.videoName || item.mediaTitle"
-            />
-        }
+<article class="video-card aspect-poster">
+    <app-image
+        class="video-card__poster"
+        [src]="item.mediaPosterPath"
+        [alt]="item.mediaTitle"
+    />
 
-        <div class="video-play">
+    <button
+        type="button"
+        class="video-card__play-button"
+        [attr.aria-label]="item.openVideoLabel"
+        (click)="openVideo()"
+    >
+        <span class="video-card__play-icon" aria-hidden="true">
             <i class="fa-solid fa-play"></i>
-        </div>
-    </div>
+        </span>
+    </button>
 
-    <div class="video-info">
-        <p class="video-title">{{ item.videoName || item.mediaTitle }}</p>
-        <a
-            class="media-link"
-            [routerLink]="['/title', item.mediaId, item.mediaType]"
-            (click)="$event.stopPropagation()"
-        >
-            {{ item.mediaTitle }}
-            @if (item.mediaYear) {
-                ({{ item.mediaYear }})
-            }
-        </a>
-        @if (item.videoPublishedAt) {
-            <p class="video-date">
-                {{ item.videoPublishedAt | date: "mediumDate" }}
-            </p>
-        }
-    </div>
-</div>
+    <footer class="video-card__overlay">
+        <p class="video-card__title">
+            <a
+                class="video-card__media-link text-body-sm"
+                [routerLink]="item.mediaLink"
+            >
+                {{ item.mediaTitle }}
+                @if (item.mediaYear) {
+                    <span class="video-card__media-year text-caption">
+                        ({{ item.mediaYear }})
+                    </span>
+                }
+            </a>
+        </p>
+
+        <span class="video-card__video-type text-caption">
+            {{ item.videoTypeLabel }}
+        </span>
+    </footer>
+</article>

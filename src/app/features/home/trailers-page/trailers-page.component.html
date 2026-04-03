@@ -1,119 +1,205 @@
-<div class="trailers-page pb-8">
-    <div class="inner-container pt-4">
-        <h2 class="main-title">Watch movie & TV trailers</h2>
+<div class="page-container">
+    @if (vm$ | async; as vm) {
+        <main class="trailers-page">
+            @if (vm.featuredTrailer; as featured) {
+                <app-hero-surface
+                    variant="detail"
+                    [backdropPath]="featured.backdropPath ?? null"
+                    [alt]="featured.mediaTitle"
+                >
+                    <div class="trailers-hero">
+                        <div class="trailers-hero-layout">
+                            <div class="trailers-hero-content">
+                                <span class="trailers-featured text-overline">
+                                    Featured Trailer
+                                </span>
 
-        @if (vm$ | async; as vm) {
-            <mat-tab-group class="trailers-tabs" animationDuration="0ms">
-                <mat-tab label="Trending trailers">
-                    @if (vm.loading) {
-                        <div class="trailer-grid pt-4">
-                            @for (item of skeletonRows; track item) {
-                                <div class="trailer-skeleton-card">
-                                    <div class="trailer-skeleton-art">
-                                        <app-skeleton height="100%" radius="0" />
-                                    </div>
-                                    <div class="trailer-skeleton-info">
-                                        <app-skeleton
-                                            class="trailer-skeleton-line line-1"
-                                            height="1rem"
-                                        />
-                                        <app-skeleton
-                                            class="trailer-skeleton-line line-2"
-                                            height="0.95rem"
-                                        />
-                                        <app-skeleton
-                                            class="trailer-skeleton-line line-3"
-                                            height="0.8rem"
-                                        />
-                                    </div>
+                                <h1 class="trailers-hero-title text-hero-title">
+                                    {{ featured.mediaTitle }}
+                                </h1>
+
+                                <div class="trailers-hero-meta">
+                                    <span
+                                        class="trailers-hero-type text-overline"
+                                    >
+                                        {{ featured.videoTypeLabel }}
+                                    </span>
+                                    @if (featured.mediaYear) {
+                                        <span class="text-meta">
+                                            {{ featured.mediaYear }}
+                                        </span>
+                                    }
                                 </div>
-                            }
+                            </div>
+
+                            <div class="trailers-hero-actions">
+                                <button
+                                    matButton="filled"
+                                    type="button"
+                                    (click)="openTrailer(featured.videoUrl)"
+                                >
+                                    <i
+                                        class="fa-solid fa-play"
+                                        aria-hidden="true"
+                                    ></i>
+                                    Play Trailer
+                                </button>
+                                <button
+                                    mat-stroked-button
+                                    (click)="openMedia(featured.mediaLink)"
+                                >
+                                    More info
+                                </button>
+                            </div>
                         </div>
-                    } @else {
-                        <div class="trailer-grid pt-4">
+                    </div>
+                </app-hero-surface>
+            } @else {
+                <div class="trailers-hero-skeleton" aria-hidden="true">
+                    <div class="trailers-hero-skeleton-content">
+                        <div class="trailers-hero-skeleton-layout">
+                            <div class="trailers-hero-skeleton-copy-group">
+                                <div
+                                    class="trailers-hero-skeleton-badge skeleton"
+                                ></div>
+                                <div
+                                    class="trailers-hero-skeleton-title skeleton"
+                                ></div>
+                                <div
+                                    class="trailers-hero-skeleton-meta skeleton"
+                                ></div>
+                                <div
+                                    class="trailers-hero-skeleton-copy skeleton"
+                                ></div>
+                            </div>
+                            <div class="trailers-hero-actions">
+                                <div
+                                    class="trailers-hero-skeleton-button skeleton"
+                                ></div>
+                                <div
+                                    class="trailers-hero-skeleton-button skeleton"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="page-main">
+                <section class="trailers-page__content">
+                    @if (
+                        vm.trailersState.type === "idle" ||
+                        vm.trailersState.type === "loading"
+                    ) {
+                        <ul class="trailers-page__grid" aria-hidden="true">
+                            @for (i of skeletonCount | repeat; track i) {
+                                <li class="trailers-page__grid-item">
+                                    <div class="trailers-page__thumb-skeleton">
+                                        <div
+                                            class="trailers-page__thumb-skeleton-art-frame aspect-landscape"
+                                        >
+                                            <app-skeleton
+                                                class="trailers-page__thumb-skeleton-art"
+                                            />
+                                        </div>
+                                        <app-skeleton
+                                            class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--primary"
+                                        />
+                                        <app-skeleton
+                                            class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--secondary"
+                                        />
+                                        <app-skeleton
+                                            class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--tertiary"
+                                        />
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    } @else if (
+                        vm.trailersState.type === "loaded" ||
+                        vm.trailersState.type === "loading-more"
+                    ) {
+                        <ul class="trailers-page__grid" role="list">
                             @for (
-                                trailer of vm.trendingTrailers.slice(
-                                    0,
-                                    trendingVisibleCount
-                                );
-                                track trailer.videoId + trailer.mediaType
+                                trailer of vm.trailersState.value;
+                                track trailer.videoId + trailer.mediaType;
+                                let idx = $index
                             ) {
-                                <app-video-card
-                                    [item]="trailer"
-                                    [showParentMediaLogo]="true"
-                                />
+                                <li class="trailers-page__grid-item">
+                                    @if (trailer.video; as video) {
+                                        <app-youtube-video-card
+                                            class="trailers-page__card"
+                                            [video]="video"
+                                            [mediaTitle]="trailer.mediaTitle"
+                                            [mediaYear]="
+                                                trailer.mediaYear ?? ''
+                                            "
+                                            [mediaId]="trailer.mediaId"
+                                            [mediaType]="trailer.mediaType"
+                                            [linkToMedia]="true"
+                                            destination="youtube"
+                                            metaVariant="detailed"
+                                        />
+                                    }
+                                </li>
                             }
-                        </div>
+
+                            @if (vm.trailersState.type === "loading-more") {
+                                @for (
+                                    i of vm.trailersState.placeholderCount
+                                        | repeat;
+                                    track i
+                                ) {
+                                    <li class="trailers-page__grid-item">
+                                        <div
+                                            class="trailers-page__thumb-skeleton"
+                                        >
+                                            <div
+                                                class="trailers-page__thumb-skeleton-art-frame aspect-landscape"
+                                            >
+                                                <app-skeleton
+                                                    class="trailers-page__thumb-skeleton-art"
+                                                />
+                                            </div>
+                                            <app-skeleton
+                                                class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--primary"
+                                            />
+                                            <app-skeleton
+                                                class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--secondary"
+                                            />
+                                            <app-skeleton
+                                                class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--tertiary"
+                                            />
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+
                         @if (
-                            vm.trendingTrailers.length > trendingVisibleCount
+                            vm.showMore ||
+                            vm.trailersState.type === "loading-more"
                         ) {
-                            <div class="load-more-wrap">
+                            <footer class="trailers-page__footer">
                                 <button
                                     mat-stroked-button
                                     type="button"
-                                    (click)="showMoreTrending()"
+                                    [disabled]="
+                                        vm.trailersState.type === 'loading-more'
+                                    "
+                                    (click)="showMoreSelected()"
                                 >
-                                    Show more
+                                    {{
+                                        vm.trailersState.type === "loading-more"
+                                            ? "Loading more"
+                                            : "Show more"
+                                    }}
                                 </button>
-                            </div>
+                            </footer>
                         }
                     }
-                </mat-tab>
-
-                <mat-tab label="Most popular">
-                    @if (vm.loading) {
-                        <div class="trailer-grid pt-4">
-                            @for (item of skeletonRows; track item) {
-                                <div class="trailer-skeleton-card">
-                                    <div class="trailer-skeleton-art">
-                                        <app-skeleton height="100%" radius="0" />
-                                    </div>
-                                    <div class="trailer-skeleton-info">
-                                        <app-skeleton
-                                            class="trailer-skeleton-line line-1"
-                                            height="1rem"
-                                        />
-                                        <app-skeleton
-                                            class="trailer-skeleton-line line-2"
-                                            height="0.95rem"
-                                        />
-                                        <app-skeleton
-                                            class="trailer-skeleton-line line-3"
-                                            height="0.8rem"
-                                        />
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    } @else {
-                        <div class="trailer-grid pt-4">
-                            @for (
-                                trailer of vm.popularTrailers.slice(
-                                    0,
-                                    popularVisibleCount
-                                );
-                                track trailer.videoId + trailer.mediaType
-                            ) {
-                                <app-video-card
-                                    [item]="trailer"
-                                    [showParentMediaLogo]="true"
-                                />
-                            }
-                        </div>
-                        @if (vm.popularTrailers.length > popularVisibleCount) {
-                            <div class="load-more-wrap">
-                                <button
-                                    mat-stroked-button
-                                    type="button"
-                                    (click)="showMorePopular()"
-                                >
-                                    Show more
-                                </button>
-                            </div>
-                        }
-                    }
-                </mat-tab>
-            </mat-tab-group>
-        }
-    </div>
+                </section>
+            </div>
+        </main>
+    }
 </div>

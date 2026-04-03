@@ -1,229 +1,125 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable } from 'rxjs';
-import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, map, of, switchMap, tap } from 'rxjs';
 
+import { PAGE_SIZE } from '../../../constants';
 import {
-    MovieListItem,
-    MovieListRestControllerService,
-    MovieRestControllerService,
-    TrendingRestControllerService,
-    TvSeriesListItem,
-    TvSeriesListRestControllerService,
-    TvSeriesRestControllerService,
-    Video,
-} from '../../../api';
-import { isDefined, shuffle, VideoCardItem } from '../../../shared';
-
-interface TrailerSeed {
-    mediaId: number;
-    mediaType: 'movie' | 'tv';
-    mediaTitle: string;
-    mediaYear: string;
-    mediaPosterPath: string | null;
-}
+    LoadableItems,
+    VideoCardItem,
+    VideoTrailerSeedItem,
+} from '../../../shared';
+import { TrailerDataStoreService } from '../trailer-data-store.service';
 
 interface TrailersPageState {
-    loading: boolean;
-    trendingTrailers: VideoCardItem[];
-    popularTrailers: VideoCardItem[];
+    readonly trailers: LoadableItems<VideoCardItem>;
+    readonly pendingSeeds: readonly VideoTrailerSeedItem[];
+}
+
+interface TrailersPageViewModel {
+    readonly trailersState: LoadableItems<VideoCardItem>;
+    readonly featuredTrailer: VideoCardItem | null;
+    readonly showMore: boolean;
 }
 
 const INITIAL_STATE: TrailersPageState = {
-    loading: true,
-    trendingTrailers: [],
-    popularTrailers: [],
+    trailers: { type: 'idle' },
+    pendingSeeds: [],
 };
 
 @Injectable()
 export class TrailersPageStoreService extends ComponentStore<TrailersPageState> {
-    readonly vm$ = this.select((state) => ({
-        loading: state.loading,
-        trendingTrailers: state.trendingTrailers,
-        popularTrailers: state.popularTrailers,
-    }));
+    readonly vm$ = this.select((state): TrailersPageViewModel => {
+        const items =
+            state.trailers.type === 'loaded' ||
+            state.trailers.type === 'loading-more'
+                ? state.trailers.value
+                : [];
 
-    private readonly opts = { httpHeaderAccept: 'application/json' as const };
-    private readonly defaultRegion = 'US';
+        return {
+            trailersState: state.trailers,
+            featuredTrailer: items[0] ?? null,
+            showMore: state.pendingSeeds.length > 0,
+        };
+    });
 
-    constructor(
-        private trendingService: TrendingRestControllerService,
-        private movieListService: MovieListRestControllerService,
-        private tvListService: TvSeriesListRestControllerService,
-        private movieService: MovieRestControllerService,
-        private tvService: TvSeriesRestControllerService,
-    ) {
+    constructor(private readonly trailerDataStore: TrailerDataStoreService) {
         super(INITIAL_STATE);
-        this.load();
     }
 
-    private load(): void {
-        this.patchState({ loading: true });
-        forkJoin({
-            trendingMovies: this.trendingService.trendingMovies(
-                'week',
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
-            trendingTv: this.trendingService.trendingTv(
-                'week',
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
-            popularMovies: this.movieListService.moviePopularList(
-                undefined,
-                1,
-                this.defaultRegion,
-                'body',
-                undefined,
-                this.opts,
-            ),
-            popularTv: this.tvListService.tvSeriesPopularList(
-                undefined,
-                1,
-                'body',
-                undefined,
-                this.opts,
-            ),
-        })
-            .pipe(
-                switchMap(
-                    ({ trendingMovies, trendingTv, popularMovies, popularTv }) =>
-                        forkJoin({
-                            trendingTrailers: this.loadTrailersForSeeds(
-                                shuffle([
-                                    ...(trendingMovies.results ?? []).map((movie) =>
-                                        this.toMovieSeed(movie),
-                                    ),
-                                    ...(trendingTv.results ?? []).map((tv) =>
-                                        this.toTvSeed(tv),
-                                    ),
-                                ])
-                                    .filter((seed) => seed.mediaId > 0)
-                                    .slice(0, 56),
-                            ),
-                            popularTrailers: this.loadTrailersForSeeds(
-                                shuffle([
-                                    ...(popularMovies.results ?? []).map((movie) =>
-                                        this.toMovieSeed(movie),
-                                    ),
-                                    ...(popularTv.results ?? []).map((tv) =>
-                                        this.toTvSeed(tv),
-                                    ),
-                                ])
-                                    .filter((seed) => seed.mediaId > 0)
-                                    .slice(0, 56),
-                            ),
+    load$(): Observable<void> {
+        const { trailers } = this.get();
+
+        if (this.hasLoadedOrLoading(trailers)) {
+            return of(undefined);
+        }
+
+        this.patchState({
+            trailers: { type: 'loading' },
+            pendingSeeds: [],
+        });
+
+        return this.trailerDataStore.getTrendingTrailerSeeds$().pipe(
+            switchMap((trendingSeeds) => {
+                const initialSeeds = trendingSeeds.slice(0, PAGE_SIZE);
+
+                return this.trailerDataStore
+                    .loadVideoCardsForSeeds$(initialSeeds)
+                    .pipe(
+                        tap((nextTrailers) => {
+                            this.patchState({
+                                trailers: {
+                                    type: 'loaded',
+                                    value: nextTrailers,
+                                },
+                                pendingSeeds: trendingSeeds.slice(
+                                    initialSeeds.length,
+                                ),
+                            });
                         }),
-                ),
-                catchError(() =>
-                    of({
-                        trendingTrailers: [] as VideoCardItem[],
-                        popularTrailers: [] as VideoCardItem[],
-                    }),
-                ),
-                finalize(() => this.patchState({ loading: false })),
-            )
-            .subscribe(({ trendingTrailers, popularTrailers }) =>
-                this.patchState({ trendingTrailers, popularTrailers }),
-            );
-    }
-
-    private loadTrailersForSeeds(
-        seeds: TrailerSeed[],
-    ): Observable<VideoCardItem[]> {
-        if (!seeds.length) {
-            return of([]);
-        }
-
-        return forkJoin(
-            seeds.map((seed) =>
-                (seed.mediaType === 'movie'
-                    ? this.movieService.movieVideos(
-                          seed.mediaId,
-                          undefined,
-                          'body',
-                          undefined,
-                          this.opts,
-                      )
-                    : this.tvService.tvSeriesVideos(
-                          seed.mediaId,
-                          undefined,
-                          undefined,
-                          'body',
-                          undefined,
-                          this.opts,
-                      )
-                ).pipe(
-                    map((response) => ({
-                        seed,
-                        bestVideo: this.pickBestTrailer(response.results ?? []),
-                    })),
-                    catchError(() => of({ seed, bestVideo: null as Video | null })),
-                ),
-            ),
-        ).pipe(
-            map((pairs) =>
-                shuffle(
-                    pairs
-                        .map(({ seed, bestVideo }): VideoCardItem | null => {
-                            if (!bestVideo?.id || !bestVideo.key) {
-                                return null;
-                            }
-                            return {
-                                ...seed,
-                                videoId: bestVideo.id,
-                                videoKey: bestVideo.key,
-                                videoName: bestVideo.name ?? seed.mediaTitle,
-                                videoType: bestVideo.type,
-                                videoPublishedAt: bestVideo.published_at,
-                                videoOfficial: !!bestVideo.official,
-                            };
-                        })
-                        .filter(isDefined),
-                ),
-            ),
+                        map(() => undefined),
+                    );
+            }),
         );
     }
 
-    private pickBestTrailer(videos: Video[]): Video | null {
-        const candidates = videos.filter(
-            (video) =>
-                video.site === 'YouTube' &&
-                !!video.key &&
-                (video.type === 'Trailer' || video.type === 'Teaser'),
-        );
-        if (!candidates.length) {
-            return null;
+    showMoreSelected$(): Observable<void> {
+        const state = this.get();
+
+        if (state.trailers.type !== 'loaded' || !state.pendingSeeds.length) {
+            return of(undefined);
         }
 
+        const nextSeeds = state.pendingSeeds.slice(0, PAGE_SIZE);
+        const remainingSeeds = state.pendingSeeds.slice(nextSeeds.length);
+        const currentTrailers = state.trailers.value;
+
+        this.patchState({
+            trailers: {
+                type: 'loading-more',
+                value: currentTrailers,
+                placeholderCount: nextSeeds.length,
+            } as LoadableItems<VideoCardItem>,
+        });
+
+        return this.trailerDataStore.loadVideoCardsForSeeds$(nextSeeds).pipe(
+            tap((items) =>
+                this.patchState({
+                    trailers: {
+                        type: 'loaded',
+                        value: [...currentTrailers, ...items],
+                    } as LoadableItems<VideoCardItem>,
+                    pendingSeeds: remainingSeeds,
+                }),
+            ),
+            map(() => undefined),
+        );
+    }
+
+    private hasLoadedOrLoading<T>(state: LoadableItems<T>): boolean {
         return (
-            candidates.find((video) => video.type === 'Trailer' && video.official) ??
-            candidates[0]
+            state.type === 'loading' ||
+            state.type === 'loading-more' ||
+            state.type === 'loaded'
         );
-    }
-
-    private toMovieSeed(item: MovieListItem): TrailerSeed {
-        return {
-            mediaId: item.id ?? 0,
-            mediaType: 'movie',
-            mediaTitle: item.title ?? '',
-            mediaYear: item.release_date?.slice(0, 4) ?? '',
-            mediaPosterPath: item.poster_path ?? null,
-        };
-    }
-
-    private toTvSeed(item: TvSeriesListItem): TrailerSeed {
-        return {
-            mediaId: item.id ?? 0,
-            mediaType: 'tv',
-            mediaTitle: item.name ?? '',
-            mediaYear: item.first_air_date?.slice(0, 4) ?? '',
-            mediaPosterPath: item.poster_path ?? null,
-        };
     }
 }

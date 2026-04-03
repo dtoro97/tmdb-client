@@ -1,6 +1,6 @@
-<div class="cast-crew-page pb-8">
+<div class="page-container">
     @if (vm$ | async; as vm) {
-        <app-sub-page-banner
+        <app-sub-page-header
             [backdropPath]="vm.backdropPath"
             [parentTitle]="vm.title"
             [backLink]="['../']"
@@ -8,45 +8,97 @@
         />
 
         <div class="media-header inner-container">
-            <app-media-thumb
-                class="media-poster"
+            <app-image
+                class="media-poster aspect-poster"
                 [src]="vm.posterPath"
                 [alt]="vm.title"
                 params="w185"
             />
             <div class="media-info">
-                <h2 class="media-title">{{ vm.title }}</h2>
-                <div class="flex align-items-center gap-3 mb-2">
+                <h2 class="media-title text-headline">{{ vm.title }}</h2>
+                <div class="media-meta text-meta">
                     @if (vm.year) {
-                        <span class="muted">{{ vm.year }}</span>
+                        <span>{{ vm.year }}</span>
                     }
-                    @if (vm.mediaType === 'movie' && vm.runtime) {
-                        <span class="muted">{{ vm.runtime | m2h }}</span>
+                    @if (vm.mediaType === "movie" && vm.runtime) {
+                        <span>{{ vm.runtime | m2h }}</span>
                     }
-                    @if (vm.mediaType === 'tv' && vm.numberOfSeasons) {
-                        <span class="muted">
+                    @if (vm.mediaType === "tv" && vm.numberOfSeasons) {
+                        <span>
                             {{ vm.numberOfSeasons }}
-                            {{ vm.numberOfSeasons === 1 ? 'Season' : 'Seasons' }}
+                            {{
+                                vm.numberOfSeasons === 1 ? "Season" : "Seasons"
+                            }}
                         </span>
                     }
                     @if (vm.voteAverage) {
                         <app-rating [value]="vm.voteAverage" />
                     }
                 </div>
-                <div class="flex flex-wrap gap-2">
+                <div class="media-genres">
                     @for (genre of vm.genres; track genre.id) {
-                        <mat-chip>{{ genre.name }}</mat-chip>
+                        <mat-chip class="chip--accent">{{
+                            genre.name
+                        }}</mat-chip>
                     }
                 </div>
             </div>
         </div>
 
-        <div class="inner-container flex flex-column gap-6 mt-6">
+        <div class="page-main">
             @if (castCrew$ | async; as castCrew) {
-                <app-cast-crew-grid
-                    [cast]="castCrew.cast"
-                    [crew]="castCrew.crew"
-                />
+                @if (castState$ | async; as castState) {
+                    @if (crewState$ | async; as crewState) {
+                        @if (
+                            castState.type === "loading" ||
+                            castState.type === "idle" ||
+                            crewState.type === "loading" ||
+                            crewState.type === "idle"
+                        ) {
+                            <section class="credit-panel surface-panel">
+                                <h2 class="text-title">Cast</h2>
+                                <div class="credit-skeleton-list">
+                                    @for (row of [0, 1, 2, 3, 4]; track row) {
+                                        <div class="credit-row-skeleton">
+                                            <app-skeleton
+                                                class="credit-avatar-skeleton"
+                                            />
+                                            <div class="credit-body-skeleton">
+                                                <app-skeleton
+                                                    class="credit-title-skeleton"
+                                                />
+                                                <app-skeleton
+                                                    class="credit-subtitle-skeleton"
+                                                />
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </section>
+                        } @else if (
+                            castState.type === "loaded" &&
+                            crewState.type === "loaded" &&
+                            !castCrew.cast.length &&
+                            !castCrew.crew.length
+                        ) {
+                            <div class="empty-panel">
+                                <app-empty-state
+                                    iconClass="fa-solid fa-users-slash"
+                                    text="No cast or crew information is available for this title."
+                                />
+                            </div>
+                        } @else {
+                            @if (groupedCrew$ | async; as groupedCrew) {
+                                <section class="credit-panel surface-panel">
+                                    <app-cast-crew-grid
+                                        [cast]="castCrew.cast"
+                                        [groupedCrew]="groupedCrew"
+                                    />
+                                </section>
+                            }
+                        }
+                    }
+                }
             }
         </div>
     }

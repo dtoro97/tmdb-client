@@ -1,0 +1,37 @@
+@if (state.type === "loading") {
+    <ng-container
+        *ngTemplateOutlet="skeleton; context: { $implicit: skeletonCount }"
+    />
+} @else if (state.type === "loaded" || state.type === "loading-more") {
+    @for (person of state.value; track person.id; let idx = $index) {
+        <app-person-list-item
+            [person]="person"
+            [index]="showIndex ? indexStart + idx : null"
+        />
+    }
+    @if (state.type === "loading-more") {
+        <ng-container
+            *ngTemplateOutlet="
+                skeleton;
+                context: { $implicit: state.placeholderCount }
+            "
+        />
+    }
+}
+
+<ng-template #skeleton let-count>
+    @for (i of count | repeat; track i) {
+        <div class="person-list__skeleton-row">
+            @if (showIndex) {
+                <app-skeleton class="person-list__index-skeleton text-label" />
+            }
+            <app-skeleton class="person-list__avatar-skeleton" />
+            <div class="person-list__content-skeleton">
+                <app-skeleton class="person-list__title-skeleton text-body-sm" />
+                <app-skeleton
+                    class="person-list__known-for-skeleton text-caption"
+                />
+            </div>
+        </div>
+    }
+</ng-template>

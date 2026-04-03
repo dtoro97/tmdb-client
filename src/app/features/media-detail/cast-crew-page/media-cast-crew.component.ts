@@ -1,28 +1,34 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
-import { combineLatest, map, tap } from 'rxjs';
+import { filter, map, tap } from 'rxjs';
 
 import {
-    CastCrewGridComponent,
-    MediaThumbComponent,
+    EmptyStateComponent,
+    groupCrewMembers,
+    MediaDetails,
+    ImageComponent,
     RatingComponent,
-    SubPageBannerComponent,
+    SkeletonComponent,
+    SubPageHeaderComponent,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
+import { CastCrewGridComponent } from '../cast-crew-grid/cast-crew-grid.component';
 
 @Component({
     selector: 'app-media-cast-crew',
     imports: [
         AsyncPipe,
         MatChipsModule,
-        MediaThumbComponent,
+        ImageComponent,
         RatingComponent,
+        SkeletonComponent,
         CastCrewGridComponent,
-        SubPageBannerComponent,
+        EmptyStateComponent,
+        SubPageHeaderComponent,
         MinutesToHours,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,22 +36,26 @@ import { Title } from '@angular/platform-browser';
     styleUrl: './media-cast-crew.component.scss',
 })
 export class MediaCastCrewComponent {
-    readonly vm$ = this.mediaStoreService.viewModel$;
+    readonly vm$ = this.mediaStoreService.mediaDetails$.pipe(
+        filter((media): media is MediaDetails => !!media),
+    );
 
-    readonly castCrew$ = combineLatest([
-        this.mediaStoreService.cast$,
-        this.mediaStoreService.crew$,
-    ]).pipe(map(([cast, crew]) => ({ cast, crew })));
+    readonly castCrew$ = this.mediaStoreService.castCrew$;
+    readonly castState$ = this.mediaStoreService.castState$;
+    readonly crewState$ = this.mediaStoreService.crewState$;
+    readonly groupedCrew$ = this.mediaStoreService.crew$.pipe(
+        map((crew) => groupCrewMembers(crew)),
+    );
 
     constructor(
         public mediaStoreService: MediaDetailStoreService,
         private title: Title,
     ) {
-        this.mediaStoreService.viewModel$
+        this.mediaStoreService.title$
             .pipe(
                 takeUntilDestroyed(),
-                tap((vm) => {
-                    this.title.setTitle(`${vm.title} | Cast & Crew`);
+                tap((title) => {
+                    this.title.setTitle(`${title} | Cast & Crew`);
                 }),
             )
             .subscribe();

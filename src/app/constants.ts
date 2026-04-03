@@ -1,29 +1,23 @@
-export const MAX_LIST_PAGE_SIZE = 20;
+export const PAGE_SIZE = 20;
 export const MAX_PAGES = 500;
-export const CAROUSEL_BREAKPOINTS = [
-    {
-        breakpoint: '2000px',
-        numVisible: 6,
-        numScroll: 6,
-    },
-    {
-        breakpoint: '1600px',
-        numVisible: 5,
-        numScroll: 5,
-    },
-    {
-        breakpoint: '1500px',
-        numVisible: 4,
-        numScroll: 4,
-    },
-    {
-        breakpoint: '1400px',
-        numVisible: 4,
-        numScroll: 4,
-    },
-    {
-        breakpoint: '920px',
-        numVisible: 3,
-        numScroll: 3,
-    },
-];
+export const SMALL_LIST_COUNT = 5;
+
+export const MEDIUM_LIST_COUNT = 10;
+
+export const PHOTOS_GRID_FIRST_ROW = 3;
+export const GRID_COUNT = 4;
+export const MAX_VISIBLE_PHOTOS = 7;
+export const PHOTOS_BROWSER_BATCH = 18;
+
+export const VIDEOS_GRID_FEATURED_COUNT = 2;
+
+export const SEED_COUNT = 30;
+export const CAROUSEL_COUNT = 6;
+
+export const TRAILERS_PAGE_SEED_COUNT = 60;
+export const RELATED_COUNT = 12;
+export const PHOTOS_SKELETON_COUNT = 9;
+
+export const API_JSON_OPTIONS = {
+    httpHeaderAccept: 'application/json' as const,
+};

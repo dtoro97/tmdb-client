@@ -1,0 +1,17 @@
+<div class="photos-browser-skeleton">
+    <div class="photos-browser-skeleton__toolbar">
+        <div class="photos-browser-skeleton__toolbar-start">
+            <app-skeleton class="photos-browser-skeleton__count" />
+            <app-skeleton class="photos-browser-skeleton__filters" />
+        </div>
+        <app-skeleton class="photos-browser-skeleton__sort" />
+    </div>
+
+    <div class="photos-browser-skeleton__grid">
+        @for (i of skeletonCount | repeat; track i) {
+            <div class="photos-browser-skeleton__tile">
+                <app-skeleton class="photos-browser-skeleton__tile-fill" />
+            </div>
+        }
+    </div>
+</div>

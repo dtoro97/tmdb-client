@@ -1,199 +1,126 @@
-<div class="discover-container inner-container pb-8">
-    @if (store.categoryConfig$ | async; as config) {
-        <div class="browse-header">
-            <span class="browse-label">{{ config.label }}</span>
-            <h1 class="browse-title">{{ config.title }}</h1>
-            <p class="browse-subtitle">{{ config.subtitle }}</p>
+<div class="discover-page page-container">
+    @if (vm$ | async; as vm) {
+        <div class="discover-header inner-container">
+            <div class="discover-header-top">
+                <h1 class="discover-title">{{ vm.config?.title }}</h1>
+                @if (
+                    vm.resultsState.type === "loaded" ||
+                    vm.resultsState.type === "loading-more"
+                ) {
+                    <span class="discover-count text-caption muted">
+                        1 - {{ vm.visibleCount }} of {{ vm.totalResults }}
+                    </span>
+                }
+            </div>
 
-            @if ((store.browsingPeople$ | async) === false) {
-                <div class="browse-divider"></div>
-                <div class="sort-bar">
-                    <span class="sort-bar-count"
-                        >{{ (store.totalResults$ | async) ?? 0 }} Titles</span
-                    >
+            <app-browse-toolbar>
+                <app-pill-toggle
+                    start
+                    [options]="vm.categoryOptions"
+                    [selectedValue]="vm.category"
+                    (selected)="onCategoryChange($event)"
+                />
+
+                @if (!vm.browsingPeople) {
                     <app-sort-button
-                        [options]="(store.sortOptions$ | async) ?? []"
-                        [selectedValue]="store.sortField$ | async"
-                        [direction]="(store.sortDirection$ | async) ?? 'desc'"
+                        end
+                        [options]="vm.sortOptions"
+                        [selectedValue]="vm.sortField"
+                        [direction]="vm.sortDirection"
                         (sortChange)="onSortChange($event)"
                         (directionToggle)="toggleSortDirection()"
                     />
-                </div>
-            }
+                }
+            </app-browse-toolbar>
         </div>
 
-        @if (store.browseStartIndex$ | async; as startIndex) {
-            <div class="result-list">
-                @if (store.browsingPeople$ | async) {
-                    @for (
-                        person of store.browseResults$ | async;
-                        track person.id;
-                        let idx = $index
-                    ) {
-                        <app-person-list-item
-                            [person]="person"
-                            [index]="idx + 1"
-                        />
-                    }
-                } @else {
-                    @for (
-                        item of store.browseResults$ | async;
-                        track item.id;
-                        let idx = $index
-                    ) {
-                        <app-media-list-item
-                            [item]="item"
-                            [routerLink]="['/title', item.id, item.mediaType]"
-                            [index]="
-                                (store.sortDirection$ | async) === 'asc'
-                                    ? startIndex - idx
-                                    : startIndex + idx
-                            "
-                        />
-                    }
-                }
-            </div>
-        }
-        @if (store.browseHasMore$ | async) {
-            <button
-                mat-stroked-button
-                class="load-more-btn"
-                (click)="loadMoreBrowse()"
-            >
-                Show more
-            </button>
-        }
-    } @else {
-        @if (store.query$ | async; as query) {
-            <h1 class="discover-title">Search "{{ query }}"</h1>
-        }
+        <div class="discover-body inner-container">
+            @if (!vm.browsingPeople) {
+                <app-discover-filters
+                    [mediaType]="vm.type === 'person' ? 'movie' : vm.type"
+                    [genres]="vm.genreList"
+                    [selectedGenreIds]="vm.genreIds"
+                    [keywords]="vm.selectedKeywords"
+                    [keywordSuggestions]="vm.keywordSuggestions"
+                    [yearFrom]="vm.yearFrom"
+                    [yearTo]="vm.yearTo"
+                    [minRating]="vm.minRating"
+                    [ratingPlaceholder]="vm.ratingPlaceholder"
+                    [voteCountMin]="vm.voteCountMin"
+                    [runtimeMin]="vm.runtimeMin"
+                    [runtimeMax]="vm.runtimeMax"
+                    [certifications]="vm.certifications"
+                    [certificationOptions]="vm.certificationOptions"
+                    [originalLanguage]="vm.originalLanguage"
+                    [watchProviderIds]="vm.watchProviderIds"
+                    [watchProviderOptions]="vm.watchProviderOptions"
+                    [languageOptions]="vm.languageOptions"
+                    [activeFilterCount]="vm.activeFilterCount"
+                    (genreToggled)="onGenreToggle($event)"
+                    (keywordAdded)="onKeywordAdd($event)"
+                    (keywordRemoved)="onKeywordRemove($event)"
+                    (keywordSearchChanged)="onKeywordSearch($event)"
+                    (yearFromChanged)="onYearFromChange($event, vm.yearTo)"
+                    (yearToChanged)="onYearToChange($event, vm.yearFrom)"
+                    (minRatingChanged)="onMinRatingChange($event)"
+                    (voteCountChanged)="onVoteCountChange($event)"
+                    (runtimeMinChanged)="
+                        onRuntimeMinChange($event, vm.runtimeMax)
+                    "
+                    (runtimeMaxChanged)="
+                        onRuntimeMaxChange($event, vm.runtimeMin)
+                    "
+                    (certificationToggled)="onCertificationToggle($event)"
+                    (languageChanged)="onLanguageChange($event)"
+                    (watchProviderToggled)="onWatchProviderToggle($event)"
+                    (filtersCleared)="onClearFilters()"
+                />
+            }
 
-        <div class="discover-layout">
-            <div class="discover-main">
-                @if (store.movieResults$ | async; as movieResults) {
-                    @if (movieResults.length) {
-                        <section>
-                            <h2 class="section-title">Movies</h2>
-                            <div class="result-list">
-                                @for (
-                                    item of movieResults;
-                                    track item.id;
-                                    let idx = $index
-                                ) {
-                                    <app-media-list-item
-                                        [item]="item"
-                                        [routerLink]="[
-                                            '/title',
-                                            item.id,
-                                            'movie',
-                                        ]"
-                                        [index]="idx + 1"
-                                    />
-                                }
-                            </div>
-                            @if (store.movieHasMore$ | async) {
-                                <button
-                                    mat-stroked-button
-                                    class="load-more-btn"
-                                    (click)="loadMoreMovies()"
-                                >
-                                    Show more movies
-                                </button>
+            <div class="discover-results">
+                <div class="catalog-panel">
+                    @if (vm.showEmptyState) {
+                        <div class="empty-panel discover-empty-state">
+                            <app-empty-state
+                                iconClass="fa-solid fa-filter-circle-xmark"
+                                text="Try a different category or adjust the current filters."
+                            />
+                        </div>
+                    } @else {
+                        <div class="result-list">
+                            @if (vm.browsingPeople) {
+                                <app-person-list
+                                    [state]="vm.personState"
+                                    [skeletonCount]="browseSkeletonCount"
+                                    [showIndex]="true"
+                                    [indexStart]="vm.startIndex"
+                                />
+                            } @else {
+                                <app-media-list
+                                    [state]="vm.mediaState"
+                                    [genreMap]="vm.genreMap"
+                                    [skeletonCount]="browseSkeletonCount"
+                                    density="compact"
+                                    [showIndex]="true"
+                                    [indexStart]="vm.startIndex"
+                                    [descendingFrom]="vm.descendingFrom"
+                                />
                             }
-                        </section>
+                        </div>
                     }
-                }
 
-                @if (store.tvResults$ | async; as tvResults) {
-                    @if (tvResults.length) {
-                        <section class="mt-4">
-                            <h2 class="section-title">TV Shows</h2>
-                            <div class="result-list">
-                                @for (
-                                    item of tvResults;
-                                    track item.id;
-                                    let idx = $index
-                                ) {
-                                    <app-media-list-item
-                                        [item]="item"
-                                        [routerLink]="['/title', item.id, 'tv']"
-                                        [index]="idx + 1"
-                                    />
-                                }
-                            </div>
-                            @if (store.tvHasMore$ | async) {
-                                <button
-                                    mat-stroked-button
-                                    class="load-more-btn"
-                                    (click)="loadMoreTv()"
-                                >
-                                    Show more TV shows
-                                </button>
-                            }
-                        </section>
+                    @if (vm.hasMore) {
+                        <div class="catalog-panel-footer">
+                            <button mat-stroked-button (click)="loadMore()">
+                                Show more
+                            </button>
+                        </div>
                     }
-                }
-
-                @if (store.personResults$ | async; as personResults) {
-                    @if (personResults.length) {
-                        <section class="mt-4">
-                            <h2 class="section-title">People</h2>
-                            <div class="result-list">
-                                @for (
-                                    person of personResults;
-                                    track person.id;
-                                    let idx = $index
-                                ) {
-                                    <app-person-list-item
-                                        [person]="person"
-                                        [index]="idx + 1"
-                                    />
-                                }
-                            </div>
-                            @if (store.personHasMore$ | async) {
-                                <button
-                                    mat-stroked-button
-                                    class="load-more-btn"
-                                    (click)="loadMorePeople()"
-                                >
-                                    Show more people
-                                </button>
-                            }
-                        </section>
-                    }
-                }
-                @if (store.noSearchResults$ | async) {
-                    <p class="no-results">
-                        No results found. Try a different search term.
-                    </p>
-                }
-            </div>
-
-            <aside class="discover-sidebar">
-                <h3 class="sidebar-title">Filter results</h3>
-                @if (store.query$ | async; as query) {
-                    <p class="sidebar-subtitle">
-                        Search "{{ query }}" within...
-                    </p>
-                }
-                <div class="flex flex-wrap gap-2">
-                    <mat-chip
-                        [class.active-chip]="(store.type$ | async) === 'movie'"
-                        (click)="setType('movie')"
-                        >Movies</mat-chip
-                    >
-                    <mat-chip
-                        [class.active-chip]="(store.type$ | async) === 'tv'"
-                        (click)="setType('tv')"
-                        >TV Shows</mat-chip
-                    >
-                    <mat-chip
-                        [class.active-chip]="(store.type$ | async) === 'person'"
-                        (click)="setType('person')"
-                        >People</mat-chip
-                    >
                 </div>
-            </aside>
+            </div>
         </div>
     }
 </div>
+
+
+

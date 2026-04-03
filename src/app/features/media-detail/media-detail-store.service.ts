@@ -3,11 +3,11 @@ import {
     combineLatest,
     EMPTY,
     filter,
+    forkJoin,
     iif,
     map,
     Observable,
     of,
-    shareReplay,
     switchMap,
     tap,
 } from 'rxjs';
@@ -16,10 +16,11 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ComponentStore } from '@ngrx/component-store';
-import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 import {
     AggregateCredits,
+    AggregateCastMember,
+    AggregateCrewMember,
     CastMember,
     CollectionDetails,
     CollectionRestControllerService,
@@ -27,318 +28,959 @@ import {
     CrewMember,
     ExternalIds,
     ImageList,
-    ItemWithNameAndId,
     KeywordListItem,
-    Language,
     Movie,
+    MovieListItem,
     MovieRestControllerService,
-    Network,
-    TvCreator,
-    TvEpisode,
-    TvEpisodeCompact,
-    TvSeason,
+    Review,
+    ReviewPage,
     TvSeries,
-    TvSeasonRestControllerService,
+    TvSeriesListItem,
     TvSeriesRestControllerService,
-    Video,
 } from '../../api';
+import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
+    CardItem,
     ConfigStoreService,
-    isDefined,
-    loader,
+    ExternalLinks,
+    LoadableItems,
+    LoadableValue,
+    MediaDetails,
+    MediaType,
+    PersonCardItem,
     ViewerImage,
+    loadedItems,
+    isDefined,
+    getBrowserCountry,
+    toCastPersonCardItem,
+    toMediaDetails,
 } from '../../shared';
+import { MediaDetailVm } from './media-detail.models';
+import {
+    WatchProviderCategories,
+    buildMediaExternalLinks,
+    buildProviderPreview,
+    extractMovieCertification,
+    extractTvCertification,
+    rankRelatedMedia,
+    mapLoadableValue,
+    normalizeAllReviews,
+    pickWatchProviderCategories,
+    shouldShowCreditsPanel,
+    sortReviewsForPreview,
+    toCreditsLinkItems,
+    toLatestEpisodeState,
+    toTvYearLabel,
+} from './media-detail.store.utils';
 
-export type MediaEnriched = (Movie | TvSeries) & {
-    credits?: Credits;
-    aggregate_credits?: AggregateCredits;
-    videos?: { results?: Video[] };
-    similar?: { results?: unknown[] };
-    recommendations?: { results?: unknown[] };
-    external_ids?: ExternalIds;
-    images?: ImageList;
+type CastCreditWithEpisodes = CastMember & {
+    episode_count?: number;
 };
 
-export interface MediaViewModel {
-    id: number;
-    title: string;
-    year: string;
-    overview: string;
-    genres: ItemWithNameAndId[];
-    voteAverage: number;
-    posterPath: string | null;
-    backdropPath: string | null;
-    status?: string;
-    languages: string[];
-    mediaType: 'movie' | 'tv';
+type CrewCreditWithEpisodes = CrewMember & {
+    episode_count?: number;
+};
 
-    // Movie-only
-    releaseDate?: string;
-    runtime?: number;
-    budget?: number;
-    revenue?: number;
+const TOP_CAST_PREVIEW_COUNT = 20;
+const REVIEW_PREVIEW_COUNT = 3;
+const REVIEW_PREVIEW_MIN_CONTENT_LENGTH = 100;
 
-    // TV-only
-    firstAirDate?: string;
-    lastAirDate?: string;
-    creators?: TvCreator[];
-    numberOfSeasons?: number;
-    numberOfEpisodes?: number;
-    networks?: Network[];
-    nextEpisode?: TvEpisodeCompact;
-    voteCount: number;
+interface ReviewPaginationState {
+    page: number;
+    totalPages: number;
+    totalResults: number;
+    mediaId?: number;
+    mediaType?: MediaType;
 }
 
 export interface MediaState {
-    media?: MediaEnriched;
-    seasons: TvSeasonState[];
-    selectedSeason?: number;
-    type: string;
+    media: LoadableValue<Movie | TvSeries | null>;
+    type: MediaType | '';
+    cast: LoadableItems<CastCreditWithEpisodes>;
+    crew: LoadableItems<CrewCreditWithEpisodes>;
+    recommendations: LoadableItems<CardItem>;
+    photos: LoadableItems<ViewerImage>;
+    keywords: LoadableItems<KeywordListItem>;
+    collection: LoadableValue<CollectionDetails | null>;
+    externalLinks: ExternalLinks | null;
+    watchProviders: LoadableValue<WatchProviderCategories | null>;
+    certification: LoadableValue<string | null>;
+    reviews: LoadableItems<Review>;
+    reviewPagination: ReviewPaginationState;
 }
 
-export type SeasonLoadState = 'idle' | 'loading' | 'loaded';
-
-export type TvSeasonState = TvSeason & {
-    episode_count?: number;
-    loadState: SeasonLoadState;
+const INITIAL_STATE: MediaState = {
+    type: '',
+    media: { type: 'idle' },
+    cast: { type: 'idle' },
+    crew: { type: 'idle' },
+    recommendations: { type: 'idle' },
+    photos: { type: 'idle' },
+    keywords: { type: 'idle' },
+    collection: { type: 'idle' },
+    externalLinks: null,
+    watchProviders: { type: 'idle' },
+    certification: { type: 'idle' },
+    reviews: { type: 'idle' },
+    reviewPagination: {
+        page: 0,
+        totalPages: 0,
+        totalResults: 0,
+    },
 };
 
 @Injectable()
 export class MediaDetailStoreService extends ComponentStore<MediaState> {
-    media$ = this.select((state) => state.media).pipe(filter(isDefined));
+    private readonly rawMediaState$ = this.select((state) => state.media);
+    readonly rawMedia$ = this.rawMediaState$.pipe(
+        map((state) => (state.type === 'loaded' ? state.value : null)),
+    );
 
-    cast$: Observable<CastMember[]> = this.media$.pipe(
-        map((m) => {
-            if (m.aggregate_credits?.cast?.length) {
-                return m.aggregate_credits.cast.map((ac) => {
-                    const roles = (ac.roles ?? [])
-                        .map((r) => r.character)
-                        .filter(Boolean);
-                    const rest = roles.length - 1;
-                    const character = roles.length
-                        ? roles[0] + (rest > 0 ? ` +${rest} more` : '')
-                        : '';
-                    return { ...ac, character } as CastMember;
+    castState$ = this.select((state) => state.cast);
+    crewState$ = this.select((state) => state.crew);
+    private readonly topCastState$ = this.castState$.pipe(
+        map((state): LoadableItems<PersonCardItem> => {
+            if (state.type === 'idle' || state.type === 'loading') {
+                return state;
+            }
+
+            if (state.type === 'loading-more') {
+                return {
+                    type: 'loading-more',
+                    value: state.value
+                        .slice(0, TOP_CAST_PREVIEW_COUNT)
+                        .map((member) => toCastPersonCardItem(member)),
+                    placeholderCount: state.placeholderCount,
+                };
+            }
+
+            return {
+                type: 'loaded',
+                value: state.value
+                    .slice(0, TOP_CAST_PREVIEW_COUNT)
+                    .map((member) => toCastPersonCardItem(member)),
+            };
+        }),
+    );
+    recommendationsState$ = this.select((state) => state.recommendations);
+    photosState$ = this.select((state) => state.photos);
+    private readonly keywordsState$ = this.select((state) => state.keywords);
+    private readonly collectionState$ = this.select(
+        (state) => state.collection,
+    );
+    private readonly watchProvidersState$ = this.select(
+        (state) => state.watchProviders,
+    );
+    private readonly certificationState$ = this.select(
+        (state) => state.certification,
+    );
+    reviewsState$ = this.select((state) => state.reviews);
+
+    readonly cast$: Observable<CastCreditWithEpisodes[]> = this.castState$.pipe(
+        map((state) => loadedItems(state)),
+    );
+
+    readonly crew$: Observable<CrewCreditWithEpisodes[]> = this.crewState$.pipe(
+        map((state) => loadedItems(state)),
+    );
+
+    readonly castCrew$ = combineLatest([this.cast$, this.crew$]).pipe(
+        map(([cast, crew]) => ({ cast, crew })),
+    );
+
+    private readonly directors$: Observable<CrewCreditWithEpisodes[]> =
+        this.crew$.pipe(
+            map((crew) => {
+                const seen = new Set<number>();
+
+                return crew.filter((member) => {
+                    if (member.job !== 'Director' || seen.has(member.id!)) {
+                        return false;
+                    }
+
+                    seen.add(member.id!);
+                    return true;
                 });
-            }
-            return m.credits?.cast ?? [];
-        }),
+            }),
+        );
+
+    private readonly externalLinks$ = this.select(
+        (state) => state.externalLinks,
     );
 
-    crew$: Observable<CrewMember[]> = this.media$.pipe(
-        map((m) => (m.credits?.crew ?? []) as CrewMember[]),
+    readonly recommendations$ = this.recommendationsState$.pipe(
+        map((state) => loadedItems(state)),
     );
 
-    directors$: Observable<CrewMember[]> = this.media$.pipe(
-        map((m) => {
-            const crew = (m.credits?.crew ?? []) as CrewMember[];
-            const seen = new Set<number>();
-            return crew.filter((c) => {
-                if (c.job !== 'Director' || seen.has(c.id!)) return false;
-                seen.add(c.id!);
-                return true;
-            });
-        }),
-    );
-
-    socialLinks$ = this.media$.pipe(
-        map((m) => m.external_ids),
-        filter(isDefined),
-    );
-
-    recommendations$ = this.media$.pipe(
-        map((m) => {
-            const items = (m.similar?.results ?? []) as Record<
-                string,
-                unknown
-            >[];
-            return [...items].sort(
-                (a, b) =>
-                    ((b['vote_average'] as number) ?? 0) -
-                    ((a['vote_average'] as number) ?? 0),
-            );
-        }),
-    );
-
-    collection$: Observable<CollectionDetails | null> = this.media$.pipe(
-        switchMap((media) => {
-            const collection = (media as Movie).belongs_to_collection;
-            if (!collection?.id) return of(null);
-            return this.collectionRestControllerService
-                .collectionDetails(
-                    collection.id,
-                    undefined,
-                    undefined,
-                    undefined,
-                    { httpHeaderAccept: 'application/json' },
-                )
-                .pipe(catchError(() => of(null)));
-        }),
-        shareReplay(1),
-    );
-
-    allVideos$ = this.media$.pipe(
-        map((m) =>
-            (m.videos?.results ?? []).filter((v) => v.site === 'YouTube'),
-        ),
-    );
-
-    featuredVideos$ = this.allVideos$.pipe(map((vs) => vs.slice(0, 2)));
-    gridVideos$ = this.allVideos$.pipe(map((vs) => vs.slice(2, 6)));
-    youtubeVideosTotalCount$ = this.allVideos$.pipe(map((vs) => vs.length));
-
-    backdrop$ = this.media$.pipe(
-        map((media) => (media as Movie | TvSeries).backdrop_path),
-    );
-
-    keywords$ = combineLatest([this.media$, this.type$]).pipe(
-        switchMap(([media, type]) => {
-            if (type === 'tv') {
-                return this.tvSeriesRestControllerService
-                    .tvSeriesKeywords(
-                        media.id!,
-                        undefined,
-                        undefined,
-                        {
-                            httpHeaderAccept: 'application/json',
-                        },
-                    )
-                    .pipe(
-                        map((result) => result.results ?? []),
-                        catchError(() => of([])),
-                    );
-            }
-
-            return this.movieRestControllerService
-                .movieKeywords(String(media.id!), undefined, undefined, {
-                    httpHeaderAccept: 'application/json',
-                })
-                .pipe(
-                    map((result) => result.keywords ?? []),
-                    catchError(() => of([])),
-                );
-        }),
-        map((keywords) =>
-            keywords.filter(
-                (keyword): keyword is KeywordListItem =>
-                    !!keyword.id && !!keyword.name,
-            ),
-        ),
-        shareReplay(1),
-    );
-
-    selectedSeason$ = this.select((state) => state.selectedSeason);
-
-    seasonEpisodes$ = combineLatest([
-        this.select((state) => state.seasons),
-        this.selectedSeason$,
-    ]).pipe(
-        map(
-            ([seasons, selected]) =>
-                seasons.find((s) => s.season_number === selected)?.episodes ??
-                [],
-        ),
-    );
-
-    seasonEpisodesCount$ = this.seasonEpisodes$.pipe(
-        map((episodes) => episodes.length),
-    );
-
-    selectedSeasonEpisodeCount$ = combineLatest([
-        this.selectedSeason$,
-        this.select((state) => state.seasons),
-    ]).pipe(
-        map(([selectedSeason, seasons]) => {
-            const count =
-                seasons.find(
-                    (season) => season.season_number === selectedSeason,
-                )?.episode_count ?? 0;
-            return count > 0 ? count : 5;
-        }),
-    );
-
-    selectedSeasonLoading$ = combineLatest([
-        this.selectedSeason$,
-        this.select((state) => state.seasons),
-    ]).pipe(
-        map(
-            ([selectedSeason, seasons]) =>
-                seasons.find(
-                    (season) => season.season_number === selectedSeason,
-                )?.loadState === 'loading',
-        ),
-    );
-
-    latestSeason$ = this.select((state) => state.seasons).pipe(
-        map(
-            (seasons) =>
-                [...seasons]
-                    .filter((s) => (s.season_number ?? 0) > 0)
-                    .sort(
-                        (a, b) =>
-                            (b.season_number ?? 0) - (a.season_number ?? 0),
-                    )
-                    .find((season) => season.episodes?.length ?? 0 > 0) ?? null,
-        ),
-    );
-
-    latestSeasonPreviewEpisodes$ = this.latestSeason$.pipe(
-        map((season) =>
-            [...(season?.episodes ?? [])]
-                .sort(
-                    (a, b) => (b.episode_number ?? 0) - (a.episode_number ?? 0),
-                )
-                .slice(0, 3),
-        ),
-    );
-
-    seasonPillOptions$ = this.media$.pipe(
-        map((media) =>
-            ((media as TvSeries).seasons ?? [])
-                .filter((s) => (s.season_number ?? 0) > 0)
-                .map((s) => ({
-                    label: s.name ?? `Season ${s.season_number}`,
-                    value: s.season_number,
-                })),
-        ),
-    );
-
-    topRatedEpisode$ = this.select((state) => state.seasons).pipe(
-        map((seasons) =>
-            seasons
-                .flatMap((s) => s.episodes ?? [])
-                .reduce(
-                    (best, ep) =>
-                        (ep.vote_average ?? 0) > (best?.vote_average ?? 0)
-                            ? ep
-                            : best,
-                    null as TvEpisode | null,
-                ),
-        ),
-    );
-
-    latestEpisode$ = this.latestSeason$.pipe(
-        map(
-            (season) =>
-                [...(season?.episodes ?? [])].sort(
-                    (a, b) => (b.episode_number ?? 0) - (a.episode_number ?? 0),
-                )[0] ?? null,
-        ),
-    );
-
-    viewModel$: Observable<MediaViewModel> = combineLatest([
-        this.media$,
+    readonly mediaDetailsState$: Observable<
+        LoadableValue<MediaDetails | null>
+    > = combineLatest([
+        this.rawMediaState$,
         this.type$,
         this.configStoreService.languages$,
     ]).pipe(
-        map(([media, type, languages]) =>
-            this.toViewModel(media, type, languages),
+        map(([media, type, languages]): LoadableValue<MediaDetails | null> => {
+            if (media.type === 'idle' || media.type === 'loading') {
+                return media;
+            }
+
+            if (!media.value) {
+                return { type: 'loaded', value: null };
+            }
+            return {
+                type: 'loaded',
+                value: toMediaDetails(media.value, type, languages),
+            };
+        }),
+    );
+
+    readonly mediaDetails$: Observable<MediaDetails> =
+        this.mediaDetailsState$.pipe(
+            map((state) => (state.type === 'loaded' ? state.value : null)),
+            filter(isDefined),
+        );
+
+    readonly reviews$ = this.reviewsState$.pipe(
+        map((state) => loadedItems(state)),
+    );
+
+    readonly reviewTotalResults$ = this.select(
+        (state) => state.reviewPagination.totalResults,
+    );
+
+    readonly hasMoreReviews$ = this.select(
+        (state) =>
+            state.reviewPagination.page < state.reviewPagination.totalPages,
+    );
+
+    readonly title$ = this.mediaDetails$.pipe(map((media) => media.title));
+
+    readonly allPhotos$ = this.photosState$.pipe(
+        map((state) => loadedItems(state)),
+    );
+
+    readonly mediaDetailVm$: Observable<MediaDetailVm | null> = combineLatest({
+        mediaDetailsState: this.mediaDetailsState$,
+        topCastState: this.topCastState$,
+        castState: this.castState$,
+        crewState: this.crewState$,
+        directors: this.directors$,
+        externalLinks: this.externalLinks$,
+        certification: this.certificationState$,
+        watchProviders: this.watchProvidersState$,
+        collection: this.collectionState$,
+        photosState: this.photosState$,
+        reviewsState: this.reviewsState$,
+        reviewTotalResults: this.reviewTotalResults$,
+        hasMoreReviews: this.hasMoreReviews$,
+        recommendations: this.recommendationsState$,
+        keywords: this.keywordsState$,
+    }).pipe(
+        map(
+            ({
+                mediaDetailsState,
+                topCastState,
+                castState,
+                crewState,
+                directors,
+                externalLinks,
+                certification,
+                watchProviders,
+                collection,
+                photosState,
+                reviewsState,
+                reviewTotalResults,
+                hasMoreReviews,
+                recommendations,
+                keywords,
+            }) => {
+                if (
+                    mediaDetailsState.type !== 'loaded' ||
+                    !mediaDetailsState.value
+                ) {
+                    return null;
+                }
+
+                const media = mediaDetailsState.value;
+                const creators = media.creators ?? [];
+                const allPhotos = loadedItems(photosState);
+                const loadedReviews = loadedItems(reviewsState);
+
+                return {
+                    media,
+                    tvYearLabel: toTvYearLabel(media),
+                    externalLinks,
+                    certification,
+                    watchProviders: mapLoadableValue(
+                        watchProviders,
+                        (providers) => buildProviderPreview(providers),
+                    ),
+                    creditsPanel: {
+                        topCastState,
+                        castState,
+                        crewState,
+                        directors: toCreditsLinkItems(directors),
+                        creators,
+                        showPanel: shouldShowCreditsPanel(
+                            castState,
+                            crewState,
+                            creators.length,
+                        ),
+                    },
+                    collection,
+                    latestEpisode: toLatestEpisodeState(media.lastEpisode),
+                    photos: {
+                        state: photosState,
+                        allPhotos,
+                        totalCount: allPhotos.length,
+                    },
+                    reviews: {
+                        state: reviewsState,
+                        previewReviews: sortReviewsForPreview(
+                            loadedReviews.filter(
+                                (review) =>
+                                    (review.content?.trim().length ?? 0) >=
+                                    REVIEW_PREVIEW_MIN_CONTENT_LENGTH,
+                            ),
+                        ).slice(0, REVIEW_PREVIEW_COUNT),
+                        totalResults: reviewTotalResults,
+                        hasMore: hasMoreReviews,
+                    },
+                    recommendations,
+                    keywords,
+                } satisfies MediaDetailVm;
+            },
         ),
     );
-    title$ = this.viewModel$.pipe(map((vm) => vm.title));
 
-    allPhotos$: Observable<ViewerImage[]> = this.images$.pipe(
-        map((images) => [
+    constructor(
+        private movieRestControllerService: MovieRestControllerService,
+        private tvSeriesRestControllerService: TvSeriesRestControllerService,
+        private collectionRestControllerService: CollectionRestControllerService,
+        private configStoreService: ConfigStoreService,
+        private router: Router,
+    ) {
+        super(INITIAL_STATE);
+    }
+
+    resetState(): void {
+        this.setState(INITIAL_STATE);
+    }
+
+    getDetails$(id: number, type: MediaType) {
+        const mediaType = type === 'tv' ? 'tv' : 'movie';
+
+        this.patchState({
+            ...INITIAL_STATE,
+            type: mediaType,
+            cast: { type: 'loading' },
+            crew: { type: 'loading' },
+            recommendations: { type: 'loading' },
+            photos: { type: 'loading' },
+            keywords: { type: 'loading' },
+            collection: { type: 'loading' },
+            watchProviders: { type: 'loading' },
+            certification: { type: 'loading' },
+            reviews: { type: 'loading' },
+            reviewPagination: {
+                page: 0,
+                totalPages: 0,
+                totalResults: 0,
+                mediaId: id,
+                mediaType,
+            },
+        });
+
+        return this.detailsRequest$(id, mediaType).pipe(
+            catchError(() => {
+                this.router.navigate(['not-found']);
+                return EMPTY;
+            }),
+            tap((media) => {
+                const externalIds = (
+                    media as (Movie | TvSeries) & {
+                        external_ids?: ExternalIds;
+                    }
+                ).external_ids;
+                this.patchState({
+                    media: { type: 'loaded', value: media },
+                    externalLinks: buildMediaExternalLinks(
+                        externalIds ?? null,
+                        media.homepage ?? null,
+                    ),
+                });
+            }),
+            switchMap((media) =>
+                forkJoin([
+                    this.loadSupplementaryData$(id, mediaType),
+                    this.loadCollection$(media),
+                ]).pipe(map(() => media)),
+            ),
+        );
+    }
+
+    private get type$() {
+        return this.select((state) => state.type).pipe(
+            filter((type) => !!type),
+        );
+    }
+
+    private loadSupplementaryData$(id: number, type: MediaType) {
+        const browserCountry = getBrowserCountry();
+
+        return forkJoin([
+            this.loadCredits$(id, type),
+            this.loadRecommendations$(id, type),
+            this.loadPhotos$(id, type),
+            this.loadKeywords$(id, type),
+            this.loadWatchProviders$(id, type, browserCountry),
+            this.loadCertification$(id, type, browserCountry),
+            this.loadReviews$(id, type),
+        ]);
+    }
+
+    private loadCredits$(id: number, type: MediaType): Observable<void> {
+        if (type === 'tv') {
+            return this.tvSeriesRestControllerService
+                .tvSeriesAggregateCredits(
+                    id,
+                    undefined,
+                    undefined,
+                    undefined,
+                    API_JSON_OPTIONS,
+                )
+                .pipe(
+                    catchError(() =>
+                        of({ cast: [], crew: [] } as AggregateCredits),
+                    ),
+                    tap((credits) => {
+                        this.patchState({
+                            cast: {
+                                type: 'loaded',
+                                value: this.toCastFromAggregate(credits),
+                            },
+                            crew: {
+                                type: 'loaded',
+                                value: this.toCrewFromAggregate(credits),
+                            },
+                        });
+                    }),
+                    map(() => undefined),
+                );
+        }
+
+        return this.movieRestControllerService
+            .movieCredits(id, undefined, undefined, undefined, API_JSON_OPTIONS)
+            .pipe(
+                catchError(() => of({ cast: [], crew: [] } as Credits)),
+                tap((credits) => {
+                    this.patchState({
+                        cast: {
+                            type: 'loaded',
+                            value: (credits.cast ??
+                                []) as CastCreditWithEpisodes[],
+                        },
+                        crew: {
+                            type: 'loaded',
+                            value: (credits.crew ??
+                                []) as CrewCreditWithEpisodes[],
+                        },
+                    });
+                }),
+                map(() => undefined),
+            );
+    }
+
+    private loadRecommendations$(
+        id: number,
+        type: MediaType,
+    ): Observable<void> {
+        const mediaState = this.get().media;
+
+        if (mediaState.type !== 'loaded' || !mediaState.value) {
+            this.patchState({
+                recommendations: { type: 'loaded', value: [] },
+            });
+            return of(undefined);
+        }
+
+        const sourceMedia = mediaState.value;
+
+        if (type === 'tv') {
+            return forkJoin({
+                similar: this.tvSeriesRestControllerService
+                    .tvSeriesSimilar(
+                        String(id),
+                        undefined,
+                        1,
+                        undefined,
+                        undefined,
+                        API_JSON_OPTIONS,
+                    )
+                    .pipe(catchError(() => of({ results: [] }))),
+                recommendations: this.tvSeriesRestControllerService
+                    .tvSeriesRecommendations(
+                        id,
+                        undefined,
+                        1,
+                        undefined,
+                        undefined,
+                        API_JSON_OPTIONS,
+                    )
+                    .pipe(catchError(() => of({ results: [] }))),
+            }).pipe(
+                tap(({ similar, recommendations }) => {
+                    const rankedItems = rankRelatedMedia(
+                        sourceMedia,
+                        'tv',
+                        (similar.results ?? []) as TvSeriesListItem[],
+                        (recommendations.results ?? []) as TvSeriesListItem[],
+                        PAGE_SIZE,
+                    );
+
+                    this.patchState({
+                        recommendations: {
+                            type: 'loaded',
+                            value: this.toCardItems(rankedItems, 'tv'),
+                        },
+                    });
+                }),
+                map(() => undefined),
+            );
+        }
+
+        return forkJoin({
+            similar: this.movieRestControllerService
+                .movieSimilar(
+                    id,
+                    undefined,
+                    1,
+                    undefined,
+                    undefined,
+                    API_JSON_OPTIONS,
+                )
+                .pipe(catchError(() => of({ results: [] }))),
+            recommendations: this.movieRestControllerService
+                .movieRecommendations(
+                    id,
+                    undefined,
+                    1,
+                    undefined,
+                    undefined,
+                    API_JSON_OPTIONS,
+                )
+                .pipe(catchError(() => of({ results: [] }))),
+        }).pipe(
+            tap(({ similar, recommendations }) => {
+                const rankedItems = rankRelatedMedia(
+                    sourceMedia,
+                    'movie',
+                    (similar.results ?? []) as MovieListItem[],
+                    (recommendations.results ?? []) as MovieListItem[],
+                    PAGE_SIZE,
+                );
+
+                this.patchState({
+                    recommendations: {
+                        type: 'loaded',
+                        value: this.toCardItems(rankedItems, 'movie'),
+                    },
+                });
+            }),
+            map(() => undefined),
+        );
+    }
+
+    private loadPhotos$(id: number, type: MediaType): Observable<void> {
+        const request$ =
+            type === 'tv'
+                ? this.tvSeriesRestControllerService.tvSeriesImages(
+                      id,
+                      undefined,
+                      undefined,
+                      undefined,
+                      undefined,
+                      API_JSON_OPTIONS,
+                  )
+                : this.movieRestControllerService.movieImages(
+                      id,
+                      undefined,
+                      undefined,
+                      undefined,
+                      undefined,
+                      API_JSON_OPTIONS,
+                  );
+
+        return request$.pipe(
+            catchError(() => of({} as ImageList)),
+            tap((images) => {
+                this.patchState({
+                    photos: {
+                        type: 'loaded',
+                        value: this.toViewerImages(images),
+                    },
+                });
+            }),
+            map(() => undefined),
+        );
+    }
+
+    private loadKeywords$(id: number, type: MediaType): Observable<void> {
+        if (type === 'tv') {
+            return this.tvSeriesRestControllerService
+                .tvSeriesKeywords(id, undefined, undefined, API_JSON_OPTIONS)
+                .pipe(
+                    catchError(() => of({ results: [] })),
+                    tap((keywords) => {
+                        this.patchState({
+                            keywords: {
+                                type: 'loaded',
+                                value: (keywords.results ?? []).filter(
+                                    (keyword): keyword is KeywordListItem =>
+                                        !!keyword.id && !!keyword.name,
+                                ),
+                            },
+                        });
+                    }),
+                    map(() => undefined),
+                );
+        }
+
+        return this.movieRestControllerService
+            .movieKeywords(String(id), undefined, undefined, API_JSON_OPTIONS)
+            .pipe(
+                catchError(() => of({ keywords: [] })),
+                tap((keywords) => {
+                    this.patchState({
+                        keywords: {
+                            type: 'loaded',
+                            value: (keywords.keywords ?? []).filter(
+                                (keyword): keyword is KeywordListItem =>
+                                    !!keyword.id && !!keyword.name,
+                            ),
+                        },
+                    });
+                }),
+                map(() => undefined),
+            );
+    }
+
+    private loadWatchProviders$(
+        id: number,
+        type: MediaType,
+        browserCountry: string,
+    ): Observable<void> {
+        const request$ =
+            type === 'tv'
+                ? this.tvSeriesRestControllerService.tvSeriesWatchProviders(
+                      id,
+                      'body',
+                      false,
+                      API_JSON_OPTIONS,
+                  )
+                : this.movieRestControllerService.movieWatchProviders(
+                      id,
+                      'body',
+                      false,
+                      API_JSON_OPTIONS,
+                  );
+
+        return request$.pipe(
+            catchError(() => of(null)),
+            tap((providers) => {
+                this.patchState({
+                    watchProviders: {
+                        type: 'loaded',
+                        value: pickWatchProviderCategories(
+                            providers,
+                            browserCountry,
+                        ),
+                    },
+                });
+            }),
+            map(() => undefined),
+        );
+    }
+
+    private loadCertification$(
+        id: number,
+        type: MediaType,
+        browserCountry: string,
+    ): Observable<void> {
+        if (type === 'tv') {
+            return this.tvSeriesRestControllerService
+                .tvSeriesContentRatings(id, 'body', false, API_JSON_OPTIONS)
+                .pipe(
+                    catchError(() => of(null)),
+                    tap((ratings) => {
+                        this.patchState({
+                            certification: {
+                                type: 'loaded',
+                                value: extractTvCertification(
+                                    ratings,
+                                    browserCountry,
+                                ),
+                            },
+                        });
+                    }),
+                    map(() => undefined),
+                );
+        }
+
+        return this.movieRestControllerService
+            .movieReleaseDates(id, 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                catchError(() => of(null)),
+                tap((releaseDates) => {
+                    this.patchState({
+                        certification: {
+                            type: 'loaded',
+                            value: extractMovieCertification(
+                                releaseDates,
+                                browserCountry,
+                            ),
+                        },
+                    });
+                }),
+                map(() => undefined),
+            );
+    }
+
+    private loadReviews$(id: number, type: MediaType): Observable<void> {
+        return this.fetchReviewsPage$(id, type, 1).pipe(
+            tap((reviewPage) => {
+                this.patchState(
+                    this.toInitialReviewsState(reviewPage, id, type),
+                );
+            }),
+            map(() => undefined),
+        );
+    }
+
+    loadMoreReviews$(): Observable<void> {
+        const { reviewPagination, reviews } = this.get();
+        const currentReviews =
+            reviews.type === 'loaded' || reviews.type === 'loading-more'
+                ? reviews.value
+                : [];
+
+        if (
+            !reviewPagination.mediaId ||
+            !reviewPagination.mediaType ||
+            reviewPagination.page >= reviewPagination.totalPages ||
+            reviews.type === 'loading-more'
+        ) {
+            return of(undefined);
+        }
+
+        this.patchState({
+            reviews: {
+                type: 'loading-more',
+                value: currentReviews,
+                placeholderCount: PAGE_SIZE,
+            },
+        });
+
+        return this.fetchReviewsPage$(
+            reviewPagination.mediaId,
+            reviewPagination.mediaType,
+            reviewPagination.page + 1,
+        ).pipe(
+            tap((reviewPage) => {
+                const normalizedReviews = normalizeAllReviews(reviewPage);
+                this.patchState({
+                    reviews: {
+                        type: 'loaded',
+                        value: [...currentReviews, ...normalizedReviews],
+                    },
+                    reviewPagination: {
+                        ...reviewPagination,
+                        page: reviewPage?.page ?? reviewPagination.page + 1,
+                        totalPages:
+                            reviewPage?.total_pages ??
+                            reviewPagination.totalPages,
+                        totalResults:
+                            reviewPage?.total_results ??
+                            reviewPagination.totalResults,
+                    },
+                });
+            }),
+            map(() => undefined),
+            catchError(() => {
+                this.patchState({
+                    reviews: {
+                        type: 'loaded',
+                        value: currentReviews,
+                    },
+                });
+                return EMPTY;
+            }),
+        );
+    }
+
+    private toInitialReviewsState(
+        reviewPage: ReviewPage | null | undefined,
+        mediaId: number,
+        mediaType: MediaType,
+    ): Pick<MediaState, 'reviews' | 'reviewPagination'> {
+        return {
+            reviews: {
+                type: 'loaded',
+                value: normalizeAllReviews(reviewPage),
+            },
+            reviewPagination: {
+                page: reviewPage?.page ?? 1,
+                totalPages: reviewPage?.total_pages ?? 1,
+                totalResults: reviewPage?.total_results ?? 0,
+                mediaId,
+                mediaType,
+            },
+        };
+    }
+
+    private fetchReviewsPage$(
+        id: number,
+        type: MediaType,
+        page: number,
+    ): Observable<ReviewPage | null> {
+        return type === 'tv'
+            ? this.tvSeriesRestControllerService
+                  .tvSeriesReviews(
+                      id,
+                      undefined,
+                      page,
+                      'body',
+                      false,
+                      API_JSON_OPTIONS,
+                  )
+                  .pipe(catchError(() => of(null)))
+            : this.movieRestControllerService
+                  .movieReviews(
+                      id,
+                      undefined,
+                      page,
+                      'body',
+                      false,
+                      API_JSON_OPTIONS,
+                  )
+                  .pipe(catchError(() => of(null)));
+    }
+
+    private toCastFromAggregate(
+        aggregateCredits: AggregateCredits,
+    ): CastCreditWithEpisodes[] {
+        return (aggregateCredits.cast ?? []).map((member) => ({
+            ...member,
+            character: this.toPrimaryLabel(
+                (member.roles ?? [])
+                    .map((role) => role.character)
+                    .filter((character): character is string => !!character),
+            ),
+            episode_count: this.toAggregateEpisodeCount(member),
+        })) as CastCreditWithEpisodes[];
+    }
+
+    private toCrewFromAggregate(
+        aggregateCredits: AggregateCredits,
+    ): CrewCreditWithEpisodes[] {
+        return (aggregateCredits.crew ?? []).map((member) => {
+            const jobs = [
+                ...new Set(
+                    (member.jobs ?? [])
+                        .map((job) => job.job)
+                        .filter((job): job is string => !!job),
+                ),
+            ];
+            return {
+                ...member,
+                job: this.toPrimaryLabel(jobs),
+                episode_count: this.toAggregateEpisodeCount(member),
+            } as CrewCreditWithEpisodes;
+        });
+    }
+
+    private toAggregateEpisodeCount(
+        member: AggregateCastMember | AggregateCrewMember,
+    ): number | undefined {
+        if (typeof member.total_episode_count === 'number') {
+            return member.total_episode_count;
+        }
+
+        return undefined;
+    }
+
+    private toPrimaryLabel(values: string[]): string {
+        if (!values.length) {
+            return '';
+        }
+        return (
+            values[0] + (values.length > 1 ? ` +${values.length - 1} more` : '')
+        );
+    }
+
+    private loadCollection$(media: Movie | TvSeries): Observable<void> {
+        const collectionId = (media as Movie).belongs_to_collection?.id;
+
+        if (!collectionId) {
+            this.patchState({
+                collection: { type: 'loaded', value: null },
+            });
+            return of(undefined);
+        }
+
+        return this.collectionRestControllerService
+            .collectionDetails(
+                collectionId,
+                undefined,
+                undefined,
+                undefined,
+                API_JSON_OPTIONS,
+            )
+            .pipe(
+                tap((collection) => {
+                    this.patchState({
+                        collection: {
+                            type: 'loaded',
+                            value: collection,
+                        },
+                    });
+                }),
+                catchError(() => {
+                    this.patchState({
+                        collection: { type: 'loaded', value: null },
+                    });
+                    return of(undefined);
+                }),
+                map(() => undefined),
+            );
+    }
+
+    private toCardItems(
+        items: Array<MovieListItem | TvSeriesListItem>,
+        mediaType: MediaType,
+    ): CardItem[] {
+        return items
+            .map((item) => ({
+                id: item.id ?? 0,
+                mediaType,
+                title:
+                    mediaType === 'movie'
+                        ? ((item as MovieListItem).title ?? '')
+                        : ((item as TvSeriesListItem).name ?? ''),
+                imagePath: item.poster_path ?? null,
+                backdropPath: item.backdrop_path ?? null,
+                rating: item.vote_average ?? null,
+                date:
+                    mediaType === 'movie'
+                        ? ((item as MovieListItem).release_date ?? '')
+                        : ((item as TvSeriesListItem).first_air_date ?? ''),
+                overview: item.overview ?? '',
+            }))
+            .slice(0, PAGE_SIZE);
+    }
+
+    private toViewerImages(images: ImageList): ViewerImage[] {
+        return [
             ...(images.backdrops ?? []).map((image) => ({
                 ...image,
                 photoType: 'backdrop',
@@ -347,250 +989,32 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                 ...image,
                 photoType: 'poster',
             })),
-            ...(images.logos ?? []).map((image) => ({
-                ...image,
-                photoType: 'logo',
-            })),
-        ]),
-    );
-
-    featuredPhotos$ = this.allPhotos$.pipe(map((photos) => photos.slice(0, 7)));
-    photosTotalCount$ = this.allPhotos$.pipe(
-        map((allPhotos) => allPhotos.length),
-    );
-
-    constructor(
-        private movieRestControllerService: MovieRestControllerService,
-        private tvSeriesRestControllerService: TvSeriesRestControllerService,
-        private tvSeasonRestControllerService: TvSeasonRestControllerService,
-        private collectionRestControllerService: CollectionRestControllerService,
-        private ngxUiLoaderService: NgxUiLoaderService,
-        private configStoreService: ConfigStoreService,
-        private router: Router,
-    ) {
-        super({
-            seasons: [],
-            type: '',
-        });
-    }
-
-    updateSelectedSeason(seasonNumber: number): void {
-        this.patchState({ selectedSeason: seasonNumber });
-    }
-
-    loadSeasonIfNeeded$(
-        seriesId: number,
-        seasonNumber: number,
-    ): Observable<TvSeason | null> {
-        const existing = this.get().seasons.find(
-            (season) => season.season_number === seasonNumber,
-        );
-        if (existing?.loadState === 'loaded') {
-            return of(existing);
-        }
-
-        if (existing?.loadState === 'loading') {
-            return of(null);
-        }
-
-        this.upsertSeasonStub(seasonNumber, 'loading');
-        return this.fetchSeason$(seriesId, seasonNumber).pipe(
-            tap((season) => this.upsertSeason(season)),
-            catchError(() => {
-                this.upsertSeasonStub(seasonNumber, 'idle');
-                return of(null);
-            }),
-        );
-    }
-
-    getDetails$(id: number, type: string) {
-        this.patchState({
-            type,
-            seasons: [],
-            selectedSeason: type === 'tv' ? 1 : undefined,
-        });
-
-        return this.detailsRequest$(id, type).pipe(
-            loader(this.ngxUiLoaderService),
-            catchError(() => {
-                this.router.navigate(['not-found']);
-                return EMPTY;
-            }),
-            tap((data) => this.patchState({ media: data as MediaEnriched })),
-            switchMap((data) => {
-                if (type !== 'tv') {
-                    return of(null);
-                }
-
-                const tvSeries = data as TvSeries;
-                this.patchState({
-                    seasons: this.toSeasonStubs(tvSeries),
-                });
-                const latestSeasonNumber = this.getLatestSeasonNumber(tvSeries);
-                if (!latestSeasonNumber) {
-                    return of(null);
-                }
-
-                return this.loadSeasonIfNeeded$(
-                    tvSeries.id!,
-                    latestSeasonNumber,
-                );
-            }),
-        );
-    }
-
-    private get images$() {
-        return this.media$.pipe(
-            map((m) => m.images),
-            filter(isDefined),
-        );
-    }
-
-    private get type$() {
-        return this.select((state) => state.type);
-    }
-
-    private toViewModel(
-        media: Movie | TvSeries,
-        type: string,
-        languages: Language[],
-    ): MediaViewModel {
-        const isTV = type === 'tv';
-        const tv = isTV ? (media as TvSeries) : undefined;
-        const movie = isTV ? undefined : (media as Movie);
-
-        const langCodes = isTV
-            ? (tv!.languages ?? [])
-            : [movie!.original_language ?? ''].filter(Boolean);
-
-        const resolvedLanguages = languages.length
-            ? langCodes.map(
-                  (code) =>
-                      languages.find((l) => l.iso_639_1 === code)
-                          ?.english_name ?? code,
-              )
-            : langCodes;
-
-        const dateStr = isTV ? tv!.first_air_date : movie!.release_date;
-        return {
-            id: media.id!,
-            title: isTV ? (tv!.name ?? '') : (movie!.title ?? ''),
-            year: dateStr ? dateStr.substring(0, 4) : '',
-            overview: media.overview ?? '',
-            genres: media.genres ?? [],
-            voteAverage: media.vote_average ?? 0,
-            posterPath: media.poster_path ?? null,
-            backdropPath: media.backdrop_path ?? null,
-            status: media.status,
-            languages: resolvedLanguages,
-            mediaType: isTV ? 'tv' : 'movie',
-
-            releaseDate: movie?.release_date,
-            runtime: movie?.runtime,
-            budget: movie?.budget,
-            revenue: movie?.revenue,
-
-            firstAirDate: tv?.first_air_date,
-            lastAirDate: tv?.last_air_date,
-            creators: tv?.created_by,
-            numberOfSeasons: tv?.number_of_seasons,
-            numberOfEpisodes: tv?.number_of_episodes,
-            networks: tv?.networks,
-            nextEpisode: tv?.next_episode_to_air,
-            voteCount: media.vote_count ?? 0,
-        };
-    }
-
-    private fetchSeason$(seriesId: number, seasonNumber: number) {
-        return this.tvSeasonRestControllerService.tvSeasonDetails(
-            seriesId,
-            seasonNumber,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            { httpHeaderAccept: 'application/json' },
-        );
+        ];
     }
 
     private detailsRequest$(
         id: number,
-        type: string,
+        type: MediaType,
     ): Observable<Movie | TvSeries> {
         return iif(
             () => type === 'tv',
             this.tvSeriesRestControllerService.tvSeriesDetails(
                 id,
-                'credits,videos,similar,external_ids,images,aggregate_credits',
+                'external_ids',
                 undefined,
                 undefined,
                 undefined,
-                { httpHeaderAccept: 'application/json' },
+                API_JSON_OPTIONS,
             ),
             this.movieRestControllerService.movieDetails(
                 id,
-                'credits,videos,similar,external_ids,images',
+                'external_ids',
                 undefined,
                 undefined,
                 undefined,
-                { httpHeaderAccept: 'application/json' },
+                API_JSON_OPTIONS,
             ),
         );
     }
-
-    private upsertSeason(season: TvSeason): void {
-        this.patchState((state) => ({
-            seasons: [
-                ...state.seasons.filter(
-                    (s) => s.season_number !== season.season_number,
-                ),
-                { ...season, loadState: 'loaded' },
-            ],
-        }));
-    }
-
-    private getLatestSeasonNumber(tvSeries: TvSeries): number | null {
-        return (
-            [...(tvSeries.seasons ?? [])]
-                .map((season) => season.season_number ?? 0)
-                .filter((seasonNumber) => seasonNumber > 0)
-                .sort((a, b) => b - a)[0] ?? null
-        );
-    }
-
-    private upsertSeasonStub(
-        seasonNumber: number,
-        loadState: SeasonLoadState,
-    ): void {
-        this.patchState((state) => {
-            const existing = state.seasons.find(
-                (season) => season.season_number === seasonNumber,
-            );
-            const stub: TvSeasonState = {
-                ...(existing ?? {
-                    season_number: seasonNumber,
-                    name: `Season ${seasonNumber}`,
-                    episodes: [],
-                }),
-                loadState,
-            };
-
-            return {
-                seasons: [
-                    ...state.seasons.filter(
-                        (season) => season.season_number !== seasonNumber,
-                    ),
-                    stub,
-                ],
-            };
-        });
-    }
-
-    private toSeasonStubs(tvSeries: TvSeries): TvSeasonState[] {
-        return (tvSeries.seasons ?? []).map((season) => ({
-            ...season,
-            episodes: [],
-            loadState: 'idle' as const,
-        }));
-    }
 }
+

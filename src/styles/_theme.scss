@@ -1,0 +1,37 @@
+:root {
+    color-scheme: dark;
+
+    --mat-sys-primary: var(--color-brand);
+    --mat-sys-on-primary: #ffffff;
+
+    --mat-sys-surface: var(--surface-page);
+    --mat-sys-surface-dim: var(--color-surface-dim);
+    --mat-sys-surface-container-lowest: var(--surface-page);
+    --mat-sys-surface-container-low: #1f1f22;
+    --mat-sys-surface-container: var(--surface-panel);
+    --mat-sys-surface-container-high: var(--surface-panel-strong);
+    --mat-sys-surface-container-highest: #3f3f46;
+
+    --mat-sys-on-surface: var(--text-primary);
+    --mat-sys-on-surface-variant: var(--text-muted);
+    --mat-sys-outline: var(--color-border);
+    --mat-sys-outline-variant: var(--color-border-subtle);
+
+    --mat-sys-corner-full: var(--radius-pill);
+}
+
+.photo-viewer-panel {
+    .mat-mdc-dialog-container,
+    .mdc-dialog__surface {
+        background: rgba(0, 0, 0, 0.95) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-height: 100vh !important;
+    }
+}
+ngx-mat-select-search.locale-select-search {
+    .mat-select-search-no-entries-found {
+        padding-top: 20px;
+    }
+}

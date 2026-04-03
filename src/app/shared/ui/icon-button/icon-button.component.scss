@@ -1,0 +1,38 @@
+@use "mixins" as *;
+
+:host {
+    display: inline-flex;
+}
+
+.icon-button {
+    inline-size: var(--icon-button-size);
+    block-size: var(--icon-button-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: var(--icon-button-radius);
+    background: var(--control-subtle-surface);
+    color: var(--control-subtle-text);
+    cursor: pointer;
+    transition:
+        var(--control-transition);
+    @include focus-ring();
+
+    &:hover:not(:disabled) {
+        background: var(--control-subtle-surface-hover);
+        border-color: transparent;
+        color: var(--control-subtle-text-hover);
+    }
+
+    &:disabled {
+        opacity: var(--icon-button-disabled-opacity);
+        cursor: default;
+        pointer-events: none;
+    }
+}
+
+.icon-button :is(mat-icon, i) {
+    @include icon-size(var(--icon-button-icon-size));
+}

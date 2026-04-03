@@ -1,28 +1,43 @@
-<div class="carousel-wrapper">
-    <div class="carousel-viewport" #viewport>
-        <div class="carousel-track">
+<div class="carousel-wrapper" role="region" [attr.aria-label]="ariaLabel">
+    <div
+        class="carousel-viewport"
+        #viewport
+        tabindex="0"
+        (keydown)="onViewportKeydown($event)"
+    >
+        <div class="carousel-track" #track>
             @for (item of items; track $index) {
-                <div
-                    class="carousel-item"
-                    [style.width.%]="100 / activeNumVisible"
-                >
+                <div class="carousel-item">
                     <ng-container
                         [ngTemplateOutlet]="itemTemplate"
-                        [ngTemplateOutletContext]="{ $implicit: item }"
+                        [ngTemplateOutletContext]="{
+                            $implicit: item,
+                            index: $index,
+                        }"
                     ></ng-container>
                 </div>
             }
         </div>
     </div>
 
-    @if (canPrev) {
-        <button class="nav-btn prev-btn" (click)="prev()">
+    @if (hasOverflow) {
+        <app-icon-button
+            class="carousel__nav carousel__nav--prev"
+            ariaLabel="Scroll carousel backward"
+            [disabled]="!canPrev"
+            (onClick)="prev()"
+        >
             <i class="fa-solid fa-chevron-left"></i>
-        </button>
+        </app-icon-button>
     }
-    @if (canNext) {
-        <button class="nav-btn next-btn" (click)="next()">
+    @if (hasOverflow) {
+        <app-icon-button
+            class="carousel__nav carousel__nav--next"
+            ariaLabel="Scroll carousel forward"
+            [disabled]="!canNext"
+            (onClick)="next()"
+        >
             <i class="fa-solid fa-chevron-right"></i>
-        </button>
+        </app-icon-button>
     }
 </div>

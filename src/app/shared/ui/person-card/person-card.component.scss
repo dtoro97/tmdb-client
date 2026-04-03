@@ -1,53 +1,65 @@
-@use "responsive.scss" as *;
+@use "breakpoints" as *;
+@use "mixins" as *;
 
 .person-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
     text-align: center;
-    transition: opacity 0.2s ease;
-
-    &:hover {
-        opacity: 0.8;
-        .name {
-            color: var(--mat-sys-primary);
-        }
-    }
+    gap: var(--space-2);
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    @include lift-surface-hover(".person-card__photo");
 }
 
-.photo-wrap {
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 2px solid transparent;
-    transition: border-color 0.25s ease;
+.person-card__photo-shell {
+    width: 100%;
+    max-width: var(--person-photo-size);
+}
 
-    app-media-thumb {
+.person-card__photo {
+    max-width: var(--person-photo-size);
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--mat-sys-outline-variant);
+
+    app-image {
         width: 100%;
         height: 100%;
         display: block;
     }
 }
 
-.name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin: 8px 0 0;
-    color: var(--mat-sys-on-surface);
+.person-card__rank-badge {
+    min-height: 1.5rem;
+    margin-top: auto;
 }
 
-.character {
-    font-size: 0.78rem;
-    color: var(--mat-sys-on-surface-variant);
-    margin: 3px 0 0;
+.person-card__name {
+    @include line-clamp(2);
+    color: var(--text-primary);
+    font-weight: var(--weight-semibold);
+    line-height: var(--lh-tight);
+    transition: color var(--transition-fast);
+}
+
+.person-card__department {
+    color: var(--text-muted);
+    line-height: var(--lh-normal);
+    min-height: calc(1em * var(--lh-normal));
 }
 
 @include mobile() {
-    .photo-wrap {
-        width: 120px;
-        height: 120px;
+    .person-card {
+        gap: var(--space-1);
+
+        &__name {
+            min-height: calc(2 * 1em * var(--lh-tight));
+        }
     }
 }

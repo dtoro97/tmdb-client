@@ -1,0 +1,48 @@
+@use "breakpoints" as *;
+@use "mixins" as *;
+
+:host {
+    display: block;
+}
+
+.not-found {
+    width: min(100%, 42rem);
+    margin: var(--space-8) auto 0;
+    align-items: center;
+    text-align: center;
+}
+
+.not-found__eyebrow {
+    color: var(--text-accent);
+}
+
+.not-found__title,
+.not-found__eyebrow,
+.not-found__text {
+    margin: 0;
+}
+
+.not-found__text {
+    max-width: 34rem;
+}
+
+.not-found__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-content: center;
+    @include text-link(inherit);
+    @include focus-ring();
+
+    &:is(:hover, :focus-visible) {
+        text-decoration: underline;
+    }
+}
+
+@include mobile() {
+    .not-found {
+        width: auto;
+        margin-right: var(--space-4);
+        margin-left: var(--space-4);
+    }
+}

@@ -7,8 +7,7 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
-
-export type SortDirection = 'asc' | 'desc';
+import { SortDirection } from '../../utils';
 
 @Component({
     selector: 'app-sort-button',

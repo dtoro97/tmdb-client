@@ -1,0 +1,79 @@
+@use "mixins" as *;
+
+.locale-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--icon-button-size);
+    block-size: var(--icon-button-size);
+    padding: 0;
+    border: none;
+    border-radius: var(--icon-button-radius);
+    background: var(--control-subtle-surface);
+    color: var(--control-subtle-text);
+    cursor: pointer;
+    transition: var(--control-transition);
+
+    &:is(:hover, :focus-visible) {
+        background: var(--control-subtle-surface-hover);
+        color: var(--control-subtle-text-hover);
+    }
+
+    @include focus-ring();
+}
+
+.locale-button-icon {
+    @include icon-size(var(--icon-button-icon-size));
+}
+
+.locale-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    min-width: 240px;
+}
+
+.locale-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.locale-label {
+    color: var(--text-muted);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.locale-select-shell {
+    display: flex;
+    align-items: center;
+    min-height: var(--control-height-sm);
+    padding-inline: var(--space-3);
+    border: 1px solid var(--control-border);
+    border-radius: var(--control-radius);
+    background: var(--control-surface);
+    transition: var(--control-transition);
+
+    &:hover {
+        background: var(--control-surface-hover);
+        border-color: var(--control-border-hover);
+    }
+
+    &:focus-within {
+        border-color: var(--control-focus-border);
+    }
+}
+
+.locale-select {
+    --mat-select-trigger-text-size: var(--text-sm);
+    --mat-select-trigger-text-weight: var(--weight-medium);
+    --mat-select-enabled-trigger-text-color: var(--text-primary);
+    --mat-select-focused-arrow-color: var(--text-secondary);
+    --mat-select-enabled-arrow-color: var(--text-secondary);
+    --mat-select-placeholder-text-color: var(--text-muted);
+
+    width: 100%;
+}

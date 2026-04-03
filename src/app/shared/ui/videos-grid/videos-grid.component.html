@@ -1,0 +1,59 @@
+@if (state.type === "loading") {
+    <div class="videos-grid__featured">
+        @for (index of featuredSkeletonItems; track index) {
+            <div class="videos-grid__skeleton-card">
+                <app-skeleton
+                    class="videos-grid__skeleton-art aspect-landscape"
+                />
+                <app-skeleton
+                    class="videos-grid__skeleton-line videos-grid__skeleton-line--title"
+                />
+                <app-skeleton
+                    class="videos-grid__skeleton-line videos-grid__skeleton-line--short"
+                />
+            </div>
+        }
+    </div>
+
+    <div class="videos-grid__list">
+        @for (index of gridSkeletonItems; track index) {
+            <div class="videos-grid__skeleton-card">
+                <app-skeleton
+                    class="videos-grid__skeleton-art aspect-landscape"
+                />
+                <app-skeleton
+                    class="videos-grid__skeleton-line videos-grid__skeleton-line--title"
+                />
+                <app-skeleton
+                    class="videos-grid__skeleton-line videos-grid__skeleton-line--short"
+                />
+            </div>
+        }
+    </div>
+} @else if (state.type === "loaded" || state.type === "loading-more") {
+    @if (featuredVideos.length || gridVideos.length) {
+        @if (featuredVideos.length) {
+            <div class="videos-grid__featured">
+                @for (video of featuredVideos; track video.id) {
+                    <app-youtube-video [video]="video" />
+                }
+            </div>
+        }
+
+        @if (gridVideos.length) {
+            <div class="videos-grid__list">
+                @for (video of gridVideos; track video.id) {
+                    <app-youtube-video-card
+                        [video]="video"
+                        [mediaTitle]="mediaTitle"
+                        [mediaYear]="mediaYear"
+                        [mediaId]="mediaId"
+                        [mediaType]="mediaType"
+                        [destination]="cardDestination"
+                        [metaVariant]="cardMetaVariant"
+                    />
+                }
+            </div>
+        }
+    }
+}

@@ -1,0 +1,38 @@
+<app-hero-surface
+    variant="compact"
+    [backdropPath]="backdropPath"
+    [alt]="pageTitle || parentTitle || ''"
+>
+    <header class="sub-page-header">
+        @if (backLink) {
+            <a
+                class="sub-page-header__back-link text-caption"
+                [routerLink]="backLink"
+            >
+                <i
+                    class="sub-page-header__back-icon fa-solid fa-chevron-left"
+                    aria-hidden="true"
+                ></i>
+                @if (parentTitle) {
+                    Back to {{ parentTitle }}
+                } @else {
+                    Back
+                }
+            </a>
+        }
+
+        <div class="sub-page-header__heading">
+            @if (pageTitle) {
+                <h1 class="sub-page-header__title text-headline">
+                    {{ pageTitle }}
+                </h1>
+            }
+
+            @if (subtitle) {
+                <p class="sub-page-header__subtitle text-body-sm">
+                    {{ subtitle }}
+                </p>
+            }
+        </div>
+    </header>
+</app-hero-surface>

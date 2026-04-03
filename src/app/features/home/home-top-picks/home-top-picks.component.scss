@@ -1,0 +1,268 @@
+@use "breakpoints" as *;
+@use "mixins" as *;
+
+:host {
+    display: block;
+}
+
+.home-top-picks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.home-top-picks__featured {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.home-top-picks__feature {
+    min-width: 0;
+}
+
+.home-top-picks__feature-link {
+    @include surface-panel(var(--surface-panel));
+    display: grid;
+    grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+    min-height: 100%;
+    padding: var(--space-3);
+    color: inherit;
+    text-decoration: none;
+    @include lift-surface-hover();
+}
+
+.home-top-picks__feature-media,
+.home-top-picks__tile-card-skeleton {
+    position: relative;
+    aspect-ratio: var(--poster-ratio);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface-panel-strong);
+}
+
+.home-top-picks__feature-media {
+    align-self: start;
+    box-shadow: var(--shadow-md);
+
+    app-image {
+        @include absolute-fill;
+    }
+}
+
+.home-top-picks__feature-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    min-width: 0;
+    padding-block: var(--space-1);
+}
+
+.home-top-picks__rank-badge,
+.home-top-picks__tile-rank-skeleton,
+.home-top-picks__rank-badge-skeleton {
+    min-height: 1.6rem;
+}
+
+.home-top-picks__rank-badge--featured {
+    margin-bottom: var(--space-1);
+}
+
+.home-top-picks__rank-badge--tile {
+    min-width: 2.75rem;
+}
+
+.home-top-picks__feature-title {
+    @include line-clamp(2);
+}
+
+.home-top-picks__feature-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    min-height: 1.5rem;
+    color: var(--color-on-surface-60);
+}
+
+.home-top-picks__feature-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.home-top-picks__feature-overview {
+    display: -webkit-box;
+    max-width: 26ch;
+    @include line-clamp(4);
+}
+
+.home-top-picks__grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.home-top-picks__tile {
+    position: relative;
+    min-width: 0;
+}
+
+.home-top-picks__tile .home-top-picks__rank-badge,
+.home-top-picks__tile-rank-skeleton {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: 3;
+}
+
+.home-top-picks__tile-card {
+    display: block;
+}
+
+.home-top-picks__feature--skeleton {
+    @include surface-panel(var(--surface-panel));
+    display: grid;
+    grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3);
+    align-items: start;
+}
+
+.home-top-picks__feature-media-skeleton,
+.home-top-picks__tile-card-fill-skeleton {
+    @include absolute-fill;
+    --skeleton-radius: 0;
+}
+
+.home-top-picks__rank-badge-skeleton,
+.home-top-picks__tile-rank-skeleton {
+    width: 3.15rem;
+    --skeleton-height: 1.6rem;
+    --skeleton-radius: var(--radius-sm);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 0.45rem) 100%, 0 100%);
+}
+
+.home-top-picks__feature-title-skeleton {
+    width: 78%;
+    --skeleton-height: 1.95rem;
+}
+
+.home-top-picks__feature-meta-skeleton {
+    width: 2.75rem;
+    --skeleton-height: 1rem;
+}
+
+.home-top-picks__feature-meta-skeleton--badge {
+    width: 3.25rem;
+    --skeleton-height: 1rem;
+    --skeleton-radius: var(--radius-sm);
+}
+
+.home-top-picks__feature-copy-skeleton {
+    width: 100%;
+    --skeleton-height: 0.875rem;
+}
+
+.home-top-picks__feature-copy-skeleton--short {
+    width: 82%;
+}
+
+.home-top-picks__tile-content-skeleton {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-8) var(--space-3) var(--space-3);
+    background: linear-gradient(
+        transparent,
+        color-mix(
+                in srgb,
+                var(--mat-sys-surface-container-lowest) 90%,
+                transparent
+            )
+            40%
+    );
+}
+
+.home-top-picks__tile-title-skeleton {
+    width: 72%;
+    --skeleton-height: 1rem;
+}
+
+.home-top-picks__tile-meta-skeleton {
+    width: 38%;
+    --skeleton-height: 0.75rem;
+}
+
+@include content-md() {
+    .home-top-picks__featured {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-top-picks__grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@include tablet() {
+    .home-top-picks__featured {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .home-top-picks__grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@include content-sm() {
+    .home-top-picks__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@include mobile() {
+    .home-top-picks {
+        gap: var(--space-3);
+    }
+
+    .home-top-picks__feature-link,
+    .home-top-picks__feature--skeleton {
+        grid-template-columns: 6.75rem minmax(0, 1fr);
+        gap: var(--space-2);
+        padding: var(--space-2);
+    }
+
+    .home-top-picks__feature-media,
+    .home-top-picks__feature-media-skeleton {
+        width: 6.75rem;
+    }
+
+    .home-top-picks__feature-body {
+        gap: var(--space-1);
+        padding-block: 0;
+    }
+
+    .home-top-picks__tile-rank-skeleton,
+    .home-top-picks__rank-badge-skeleton {
+        min-height: 1.5rem;
+    }
+
+    .home-top-picks__feature-overview {
+        @include line-clamp(3);
+    }
+
+    .home-top-picks__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-2);
+    }
+
+    .home-top-picks__tile-content-skeleton {
+        padding: var(--space-8) var(--space-2) var(--space-2);
+    }
+}

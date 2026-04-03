@@ -1,298 +1,137 @@
-@use "responsive.scss" as *;
+@use "breakpoints" as *;
+@use "mixins" as *;
 
-:host ::ng-deep {
-    .details-container {
-        background-color: var(--mat-sys-surface);
+.person-hero {
+    display: grid;
+    grid-template-columns: var(--person-photo-size) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-8);
+    width: 100%;
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-12);
+}
 
-        .muted {
-            color: var(--mat-sys-on-surface-variant);
-        }
+.person-hero--animate {
+    @include fade-up();
+}
 
-        .inner-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
+.person-hero__portrait {
+    --image-placeholder-icon-size: 65%;
 
-        .section-title {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin: 0 0 1rem;
-            padding-left: 0.75rem;
-            border-left: 3px solid var(--primary-color);
-        }
+    flex-shrink: 0;
+    width: var(--person-photo-size);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+}
 
-        .section-count {
-            font-size: var(--font-size-base);
-            font-weight: 400;
-            color: var(--mat-sys-on-surface-variant);
-            margin-left: 0.4rem;
-        }
+.person-hero__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
 
-        .browse-link {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: var(--font-size-base);
-            white-space: nowrap;
+.person-hero__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-6);
+}
 
-            &:hover {
-                text-decoration: underline;
-            }
-        }
+.person-hero__title-block {
+    min-width: 0;
+}
 
-        .hero {
-            position: relative;
-            overflow: hidden;
-            min-height: 520px;
-            display: flex;
-            align-items: flex-end;
-            background: var(--hero-fallback-bg);
-        }
+.person-hero__name {
+    text-wrap: balance;
+}
 
-        .hero-backdrop {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center top;
-            display: block;
-            opacity: var(--hero-backdrop-opacity);
-        }
+.person-hero__socials {
+    color: var(--text-muted);
+    margin-top: var(--space-1);
+}
 
-        .hero-scrim {
-            position: absolute;
-            inset: 0;
-            background: var(--hero-scrim-color);
-        }
+.person-hero__biography-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 72ch;
+    gap: var(--space-2);
+}
 
-        .hero-solid {
-            position: absolute;
-            inset: 0;
-            background: var(--hero-fallback-bg);
-        }
+.person-hero__biography--collapsed {
+    @include line-clamp(4);
+}
 
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            display: flex;
-            align-items: flex-end;
-            gap: 2.5rem;
-            padding-top: 5rem;
-            padding-block-end: 2.5rem;
-        }
+.person-hero__biography--empty {
+    color: var(--text-muted);
+}
 
-        .person-portrait {
-            flex-shrink: 0;
-            width: 240px;
-            aspect-ratio: 2 / 3;
-        }
+.person-hero__bio-toggle {
+    @include text-link();
 
-        .person-info {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            align-self: stretch;
-        }
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
 
-        .person-name {
-            margin: 0;
-            line-height: 1.2;
-        }
+.person-details__browse-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    @include text-link(inherit);
+    @include focus-ring();
 
-        .biography-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: 600px;
-            gap: 0.4rem;
-        }
+    &:is(:hover, :focus-visible) {
+        text-decoration: underline;
+    }
+}
 
-        .biography {
-            font-size: var(--font-size-base);
-        }
+.person-facts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-        .biography-collapsed {
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            line-clamp: 4;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+.person-facts__item {
+    display: grid;
+    grid-template-columns: minmax(8rem, 10rem) minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+}
 
-        .bio-toggle {
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            color: var(--primary-color);
-            font-size: var(--font-size-base);
-            font-family: inherit;
+.person-facts__item + .person-facts__item {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--mat-sys-outline-variant);
+}
 
-            &:hover {
-                text-decoration: underline;
-            }
-        }
+.person-facts__value {
+    min-width: 0;
+}
 
-        .person-footer {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            margin-top: auto;
-        }
+@include mobile() {
+    .person-hero {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+        padding-top: var(--space-1);
+        padding-bottom: var(--space-8);
+    }
 
-        .details-list {
-            border-top: 1px solid var(--mat-sys-outline-variant);
-        }
+    .person-hero__header {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
 
-        .details-row {
-            display: flex;
-            align-items: baseline;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--mat-sys-outline-variant);
-            line-height: 1.5;
-        }
+    .person-hero__name {
+        font-size: var(--text-3xl);
+    }
 
-        .details-label {
-            width: 120px;
-            flex-shrink: 0;
-            color: var(--mat-sys-on-surface-variant);
-            font-size: var(--font-size-sm);
-        }
-
-        .credits-dept {
-            margin-bottom: 1.5rem;
-        }
-
-        .credits-dept-heading {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin: 0 0 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--mat-sys-outline-variant);
-        }
-
-        .credit-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 0.6rem 0;
-            border-bottom: 1px solid var(--mat-sys-outline-variant);
-            text-decoration: none;
-            color: inherit;
-            cursor: pointer;
-
-            &:hover .credit-title {
-                color: var(--primary-color);
-            }
-        }
-
-        .credit-thumb {
-            flex-shrink: 0;
-            width: 65px;
-            aspect-ratio: 2 / 3;
-            object-fit: cover;
-            border-radius: 3px;
-            background: var(--mat-sys-surface-variant);
-        }
-
-        .credit-body {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-        }
-
-        .credit-title {
-            font-size: var(--font-size-base);
-            font-weight: 600;
-            transition: color 0.15s ease;
-        }
-
-        .credit-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .credit-role {
-            font-size: var(--font-size-sm);
-            color: var(--mat-sys-on-surface-variant);
-        }
-
-        .credit-year {
-            font-size: var(--font-size-sm);
-            text-align: right;
-            white-space: nowrap;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 0.15rem;
-        }
-
-        .credit-episodes {
-            color: var(--primary-color);
-            font-size: var(--font-size-sm);
-        }
-
-        @include mobile() {
-            .hero {
-                min-height: auto;
-                display: block;
-            }
-
-            .hero-backdrop {
-                position: relative;
-                inset: unset;
-                height: 220px;
-            }
-
-            .hero-scrim {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 220px;
-                background: var(--hero-scrim-color);
-            }
-
-            .hero-solid {
-                position: relative;
-                height: 220px;
-            }
-
-            .hero-content {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-                padding-top: 1rem;
-                padding-block-end: 1.5rem;
-            }
-
-            .person-portrait {
-                width: 160px;
-                margin-top: -3.5rem;
-            }
-
-            .person-info {
-                width: 100%;
-            }
-
-            .details-label {
-                width: 90px;
-            }
-
-            .photos-stat {
-                width: 70px;
-                height: 70px;
-            }
-        }
+    .person-facts__item {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
     }
 }

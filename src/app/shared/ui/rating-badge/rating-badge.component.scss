@@ -1,0 +1,48 @@
+:host {
+    --rating-badge-gap: var(--space-1);
+    --rating-badge-padding-block: var(--space-1);
+    --rating-badge-padding-inline: var(--space-2);
+    --rating-badge-radius: var(--radius-pill);
+    --rating-badge-font-size: var(--text-2xs);
+    --rating-badge-font-weight: var(--weight-semibold);
+    --rating-badge-background: color-mix(
+        in srgb,
+        var(--surface-panel-strong) 88%,
+        transparent
+    );
+    --rating-badge-border: var(--color-border-subtle);
+    --rating-badge-shadow: none;
+    --rating-badge-color: var(--color-rating);
+    --rating-badge-icon-color: currentColor;
+    --rating-badge-backdrop-filter: none;
+
+    display: inline-flex;
+}
+
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rating-badge-gap);
+    border-radius: var(--rating-badge-radius);
+    font-size: var(--rating-badge-font-size);
+    font-weight: var(--rating-badge-font-weight);
+    white-space: nowrap;
+    line-height: 1;
+    background: var(--rating-badge-background);
+    border: 1px solid var(--rating-badge-border);
+    box-shadow: var(--rating-badge-shadow);
+    backdrop-filter: var(--rating-badge-backdrop-filter);
+    color: var(--rating-badge-color);
+    padding: var(--rating-badge-padding-block) var(--rating-badge-padding-inline);
+}
+
+.rating-badge__icon {
+    font-size: 1em;
+    line-height: 1;
+    color: var(--rating-badge-icon-color);
+}
+
+.rating-badge__value {
+    line-height: 1;
+}
+

@@ -1,0 +1,76 @@
+@use "breakpoints" as *;
+
+:host {
+    display: block;
+}
+
+.media-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.media-list__skeleton-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    min-width: 0;
+    border-radius: var(--radius-md);
+}
+
+.media-list__index-skeleton {
+    flex-shrink: 0;
+    width: 28px;
+    height: 0.75rem;
+    margin-top: calc(var(--space-1) + 2px);
+}
+
+.media-list__poster-skeleton {
+    width: 80px;
+    height: 120px;
+    flex-shrink: 0;
+    --skeleton-radius: var(--radius-sm);
+}
+
+.media-list__content-skeleton {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.media-list__line--title {
+    width: 30%;
+    height: 1rem;
+}
+
+.media-list__line--meta {
+    width: 34%;
+    height: 0.72rem;
+}
+
+.media-list__line--body {
+    width: 92%;
+    height: 0.78rem;
+}
+
+.media-list__line--body-short {
+    width: 72%;
+    height: 0.78rem;
+}
+
+.media-list__line--cast {
+    width: 42%;
+    height: 0.78rem;
+}
+
+.media-list__skeleton-row:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+@include mobile() {
+    .media-list__index-skeleton {
+        display: none;
+    }
+}

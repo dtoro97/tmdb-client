@@ -1,0 +1,32 @@
+<app-carousel
+    [class.media-carousel-panel--backdrop]="variant === 'backdrop'"
+    [items]="
+        state.type === 'loading'
+            ? (skeletonCount | repeat)
+            : state.type === 'loaded' || state.type === 'loading-more'
+              ? state.value
+              : []
+    "
+>
+    <ng-template let-item>
+        @if (state.type === "loading") {
+            <div class="media-carousel-panel__skeleton-media">
+                <app-skeleton class="media-carousel-panel__skeleton-fill" />
+            </div>
+        } @else {
+            @if (variant === "card") {
+                <app-card
+                    [item]="item"
+                    [showRating]="showRating"
+                    [dateFormat]="dateFormat"
+                />
+            } @else {
+                <app-backdrop-card
+                    [item]="item"
+                    [showRating]="showRating"
+                    [dateFormat]="dateFormat"
+                ></app-backdrop-card>
+            }
+        }
+    </ng-template>
+</app-carousel>

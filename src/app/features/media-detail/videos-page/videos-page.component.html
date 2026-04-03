@@ -1,44 +1,119 @@
-<div class="videos-page pb-8">
-    @if (mediaStoreService.viewModel$ | async; as vm) {
-        <app-sub-page-banner
-            [backdropPath]="vm.backdropPath"
-            [parentTitle]="vm.title"
+<div class="page-container">
+    @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+        <app-sub-page-header
+            [backdropPath]="
+                mediaState.type === 'loaded'
+                    ? mediaState.value?.backdropPath
+                    : undefined
+            "
+            [parentTitle]="
+                mediaState.type === 'loaded'
+                    ? mediaState.value?.title
+                    : undefined
+            "
             [backLink]="['../']"
             pageTitle="Videos"
         />
 
-        <div class="inner-container pt-5">
-            @if (videos$ | async; as videos) {
-                <div class="sort-bar mb-5">
-                    <span class="sort-bar-count muted">{{
-                        (countLabel$ | async) ?? ""
-                    }}</span>
-                    <app-sort-button
-                        [options]="sortOptions"
-                        [selectedValue]="sortField$ | async"
-                        [direction]="(sortDirection$ | async) ?? 'desc'"
-                        (sortChange)="setSortField($event)"
-                        (directionToggle)="toggleSortDirection()"
-                    />
-                </div>
+        <main class="page-main page-main--full-padding">
+            @if (videosState$ | async; as videosState) {
+                @if (
+                    videosState.type === "loading" ||
+                    videosState.type === "idle"
+                ) {
+                    <section class="media-videos-page__content">
+                        <app-browse-toolbar class="media-videos-page__toolbar">
+                            <app-skeleton
+                                start
+                                class="media-videos-page__count-skeleton"
+                            />
+                            <app-skeleton
+                                end
+                                class="media-videos-page__sort-skeleton"
+                            />
+                        </app-browse-toolbar>
 
-                <div class="video-grid">
-                    @for (video of videos; track video.id) {
-                        <app-youtube-video
-                            [video]="video"
-                            [mediaTitle]="vm.title"
-                            [mediaYear]="vm.year"
-                            [mediaId]="vm.id"
-                            [mediaType]="vm.mediaType"
-                            [navigateToVideoDetail]="true"
-                            [showOfficialBadge]="true"
-                            [showPublishedDate]="true"
-                            [showQuality]="true"
-                            variant="card"
-                        />
+                        <div class="media-videos-page__grid">
+                            @for (i of skeletonCount | repeat; track i) {
+                                <div class="media-videos-page__card-skeleton">
+                                    <app-skeleton
+                                        class="media-videos-page__card-skeleton-media"
+                                    />
+                                    <app-skeleton
+                                        class="media-videos-page__card-skeleton-line media-videos-page__card-skeleton-line--title"
+                                    />
+                                    <app-skeleton
+                                        class="media-videos-page__card-skeleton-line media-videos-page__card-skeleton-line--meta"
+                                    />
+                                    <app-skeleton
+                                        class="media-videos-page__card-skeleton-line media-videos-page__card-skeleton-line--short"
+                                    />
+                                </div>
+                            }
+                        </div>
+                    </section>
+                } @else if (videosState.type === "loaded") {
+                    @if (videos$ | async; as videos) {
+                        @if (videos.length) {
+                            <section class="media-videos-page__content">
+                                <app-browse-toolbar class="media-videos-page__toolbar">
+                                    <span start class="text-caption">
+                                        1 - {{ videos.length }} of
+                                        {{ videos.length }}
+                                    </span>
+                                    <app-sort-button
+                                        end
+                                        [options]="sortOptions"
+                                        [selectedValue]="sortField$ | async"
+                                        [direction]="
+                                            (sortDirection$ | async) ?? 'desc'
+                                        "
+                                        (sortChange)="setSortField($event)"
+                                        (directionToggle)="toggleSortDirection()"
+                                    />
+                                </app-browse-toolbar>
+
+                                <div class="media-videos-page__grid">
+                                    @for (video of videos; track video.id) {
+                                        <app-youtube-video-card
+                                            [video]="video"
+                                            [mediaTitle]="
+                                                mediaState.type === 'loaded'
+                                                    ? mediaState.value?.title
+                                                    : undefined
+                                            "
+                                            [mediaYear]="
+                                                mediaState.type === 'loaded'
+                                                    ? mediaState.value?.year
+                                                    : undefined
+                                            "
+                                            [mediaId]="
+                                                mediaState.type === 'loaded'
+                                                    ? mediaState.value?.id
+                                                    : undefined
+                                            "
+                                            [mediaType]="
+                                                mediaState.type === 'loaded'
+                                                    ? mediaState.value?.mediaType
+                                                    : undefined
+                                            "
+                                            destination="detail"
+                                            metaVariant="detailed"
+                                        />
+                                    }
+                                </div>
+                            </section>
+                        } @else {
+                            <section class="media-videos-page__empty">
+                                <app-empty-state
+                                    iconClass="fa-regular fa-circle-play"
+                                    text="No videos available for this title."
+                                />
+                            </section>
+                        }
                     }
-                </div>
+                }
             }
-        </div>
+        </main>
     }
 </div>

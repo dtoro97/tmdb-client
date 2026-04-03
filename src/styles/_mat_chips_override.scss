@@ -1,0 +1,93 @@
+:root {
+    --mat-chip-elevated-container-color: var(--chip-primary-bg);
+    --mat-chip-container-shape-radius: var(--chip-radius);
+    --mat-chip-label-text-size: var(--text-xs);
+    --mat-chip-label-text-weight: var(--weight-semibold);
+    --mat-chip-label-text-tracking: 0.04em;
+    --mat-chip-container-height: var(--chip-height);
+    --mat-chip-outline-width: 1px;
+    --mat-chip-label-text-color: var(--chip-primary-text);
+    --mat-chip-hover-state-layer-color: #ffffff;
+    --mat-chip-hover-state-layer-opacity: var(
+        --mat-button-filled-hover-state-layer-opacity
+    );
+    --mat-chip-focus-state-layer-opacity: 0;
+    --mat-chip-selected-hover-state-layer-color: #ffffff;
+    --mat-chip-selected-hover-state-layer-opacity: var(
+        --mat-button-filled-hover-state-layer-opacity
+    );
+    --mat-chip-selected-focus-state-layer-opacity: 0;
+}
+
+.mat-mdc-standard-chip {
+    --tmdb-chip-bg: var(--chip-primary-bg);
+    --tmdb-chip-text: var(--chip-primary-text);
+    --tmdb-chip-border: var(--chip-primary-border);
+    --mat-chip-elevated-container-color: var(--tmdb-chip-bg);
+    --mat-chip-label-text-color: var(--tmdb-chip-text);
+    --mat-chip-container-shape-radius: var(--chip-radius);
+    --mat-chip-outline-color: var(--tmdb-chip-border);
+}
+
+.mat-mdc-standard-chip .mdc-evolution-chip__text-label {
+    color: inherit;
+    text-transform: uppercase;
+}
+
+.mat-mdc-standard-chip .mat-mdc-chip-action {
+    cursor: inherit !important;
+}
+
+.mat-mdc-standard-chip.chip--accent {
+    --tmdb-chip-bg: var(--chip-primary-bg);
+    --tmdb-chip-text: var(--chip-primary-text);
+}
+
+.mat-mdc-standard-chip.chip--muted {
+    --tmdb-chip-bg: var(--chip-muted-bg);
+    --tmdb-chip-text: var(--chip-muted-text);
+    --tmdb-chip-border: var(--chip-muted-border);
+}
+
+.mat-mdc-standard-chip.chip--link {
+    cursor: pointer;
+}
+
+.mat-mdc-standard-chip .mat-mdc-chip-remove {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    opacity: 0.7;
+    cursor: pointer !important;
+    transition: opacity var(--motion-fast);
+
+    .mat-icon {
+        width: 14px;
+        height: 14px;
+        font-size: 14px;
+    }
+
+    // Kill Material's oversized hover state layer circle
+    .mat-mdc-chip-action-label,
+    .mdc-evolution-chip__ripple,
+    &::before,
+    &::after {
+        display: none !important;
+    }
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.mat-mdc-standard-chip.chip--wide {
+    min-width: 5.5rem;
+
+    .mdc-evolution-chip__cell,
+    .mdc-evolution-chip__action,
+    .mdc-evolution-chip__text-label {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+}

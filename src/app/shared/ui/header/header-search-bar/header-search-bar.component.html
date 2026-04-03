@@ -1,99 +1,73 @@
-<div class="search-container" [class.search-open]="searchOpen">
-    <div class="search-wrap">
-        <mat-form-field
-            class="filter-field"
-            appearance="outline"
-            subscriptSizing="dynamic"
-        >
-            <mat-select
-                [(value)]="searchFilter"
-                (selectionChange)="setFilter(searchFilter)"
+@if (vm$ | async; as vm) {
+    <div
+        class="header-search"
+        role="search"
+        [class.header-search--open]="vm.searchOpen"
+        [cdkTrapFocus]="vm.searchOpen"
+        [cdkTrapFocusAutoCapture]="vm.searchOpen"
+    >
+        <div class="header-search__bar">
+            <mat-form-field
+                class="header-search__filter-field mat-mdc-form-field--borderless"
+                appearance="outline"
+                subscriptSizing="dynamic"
             >
-                @for (opt of filterOptions; track opt.value) {
-                    <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
-                }
-            </mat-select>
-        </mat-form-field>
+                <mat-select
+                    [value]="vm.searchFilter"
+                    (selectionChange)="setFilter($event.value)"
+                >
+                    @for (opt of filterOptions; track opt.value) {
+                        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
 
-        <mat-form-field
-            class="search-field"
-            appearance="outline"
-            subscriptSizing="dynamic"
-        >
-            <input
-                cdkTrapFocus
-                [cdkTrapFocusAutoCapture]="true"
-                matInput
-                [formControl]="searchControl"
-                (focus)="onSearchFocus()"
-                (input)="search(searchControl.value)"
-                (keydown.enter)="navigateToDiscover()"
-                placeholder="Search movies, TV shows, people…"
-                autocomplete="off"
-            />
-            <mat-icon matSuffix>search</mat-icon>
-            <button
-                matSuffix
-                mat-icon-button
-                class="search-close-btn"
-                (click)="closeSearch()"
-                aria-label="Close"
+            <mat-form-field
+                class="header-search__input-field mat-mdc-form-field--borderless"
+                appearance="outline"
+                subscriptSizing="dynamic"
             >
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
+                <input
+                    matInput
+                    [formControl]="searchControl"
+                    (focus)="onSearchFocus()"
+                    (keydown.enter)="navigateToSearch(vm.searchFilter)"
+                    placeholder="Search movies, TV shows, people..."
+                />
+                <mat-icon
+                    class="header-search__suffix header-search__search-icon"
+                    matSuffix
+                    >search</mat-icon
+                >
+                <button
+                    matSuffix
+                    mat-icon-button
+                    class="header-search__suffix header-search__close-button"
+                    (click)="closeSearch()"
+                    aria-label="Close"
+                >
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
+
+        @if (vm.showSearchDropdown) {
+            <div class="header-search__dropdown">
+                <app-header-search-results
+                    [state]="vm.searchResultsState"
+                    (resultSelected)="navigateToResult($event)"
+                />
+            </div>
+        }
     </div>
 
-    @if (showSearchDropdown && searchResults.length) {
-        <div class="search-dropdown">
-            @for (item of searchResults; track item.id) {
-                <div class="search-result" (click)="navigateToResult(item)">
-                    <app-media-thumb
-                        class="result-thumb"
-                        [src]="item.thumb"
-                        [type]="
-                            item.mediaType === 'person' ? 'person' : 'media'
-                        "
-                        [alt]="item.title"
-                    />
-                    <div class="result-info">
-                        <div class="result-meta">
-                            <mat-chip>{{ item.mediaType }}</mat-chip>
-                            @if (item.year) {
-                                <span class="result-year">{{ item.year }}</span>
-                            }
-                            @if (item.rating && item.rating > 0) {
-                                <app-rating [value]="item.rating" />
-                            }
-                            @if (item.department) {
-                                <span class="result-dept">{{
-                                    item.department
-                                }}</span>
-                            }
-                        </div>
-                        <span class="result-title">{{ item.title }}</span>
-                        @if (item.overview) {
-                            <span class="result-overview">{{
-                                item.overview
-                            }}</span>
-                        }
-                        @if (item.mediaType === "person" && searchResults) {
-                            <span class="result-known-for">
-                                {{ item.known_for }}
-                            </span>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-    }
-</div>
+    <button
+        mat-icon-button
+        class="header-search__toggle-button"
+        (click)="toggleSearch()"
+        aria-label="Search"
+    >
+        <mat-icon>search</mat-icon>
+    </button>
+}
 
-<button
-    mat-icon-button
-    class="search-toggle-btn"
-    (click)="searchOpen = !searchOpen"
-    aria-label="Search"
->
-    <mat-icon>search</mat-icon>
-</button>

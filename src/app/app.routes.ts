@@ -31,17 +31,10 @@ export const routes: Routes = [
             ),
     },
     {
-        path: 'network',
+        path: 'search',
         loadChildren: () =>
-            import('./features/network-detail/network.routes').then(
-                (m) => m.networkRoutes,
-            ),
-    },
-    {
-        path: 'keyword',
-        loadChildren: () =>
-            import('./features/keyword-detail/keyword.routes').then(
-                (m) => m.keywordRoutes,
+            import('./features/search/search.routes').then(
+                (m) => m.searchRoutes,
             ),
     },
     {

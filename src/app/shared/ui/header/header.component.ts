@@ -6,111 +6,111 @@ import {
     HostListener,
     ViewChild,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { IsActiveMatchOptions, RouterLink, RouterLinkActive } from '@angular/router';
 
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { HeaderSearchBarComponent } from './header-search-bar/header-search-bar.component';
+import { HeaderLocaleSelectorComponent } from './header-locale-selector/header-locale-selector.component';
 
-interface NavItem {
-    label: string;
-    routerLink: string;
-    queryParams?: Record<string, unknown>;
+interface NavLink {
+    readonly label: string;
+    readonly routerLink: string;
+    readonly queryParams?: Record<string, string>;
+    readonly activeOptions: IsActiveMatchOptions;
 }
 
 @Component({
     selector: 'app-header',
     imports: [
-        MatButtonModule,
         MatIconModule,
         RouterLink,
+        RouterLinkActive,
         HeaderSearchBarComponent,
+        HeaderLocaleSelectorComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
+    readonly navLinks: ReadonlyArray<NavLink> = [
+        {
+            label: 'Movies',
+            routerLink: '/discover',
+            queryParams: { type: 'movie' },
+            activeOptions: {
+                paths: 'exact',
+                queryParams: 'subset',
+                fragment: 'ignored',
+                matrixParams: 'ignored',
+            },
+        },
+        {
+            label: 'TV Shows',
+            routerLink: '/discover',
+            queryParams: { type: 'tv' },
+            activeOptions: {
+                paths: 'exact',
+                queryParams: 'subset',
+                fragment: 'ignored',
+                matrixParams: 'ignored',
+            },
+        },
+        {
+            label: 'People',
+            routerLink: '/discover',
+            queryParams: { type: 'person' },
+            activeOptions: {
+                paths: 'exact',
+                queryParams: 'subset',
+                fragment: 'ignored',
+                matrixParams: 'ignored',
+            },
+        },
+        {
+            label: 'Trailers',
+            routerLink: '/trailers',
+            activeOptions: {
+                paths: 'exact',
+                queryParams: 'ignored',
+                fragment: 'ignored',
+                matrixParams: 'ignored',
+            },
+        },
+    ];
+
     menuOpen = false;
 
-    @ViewChild('navbarEl') navbarEl!: ElementRef;
+    @ViewChild('headerEl') headerEl!: ElementRef<HTMLElement>;
 
-    movieItems: NavItem[] = [
-        {
-            label: 'Popular',
-            routerLink: '/discover',
-            queryParams: { category: 'popular', type: 'movie' },
-        },
-        {
-            label: 'Now Playing',
-            routerLink: '/discover',
-            queryParams: { category: 'now_playing', type: 'movie' },
-        },
-        {
-            label: 'Upcoming',
-            routerLink: '/discover',
-            queryParams: { category: 'upcoming', type: 'movie' },
-        },
-        {
-            label: 'Top Rated',
-            routerLink: '/discover',
-            queryParams: { category: 'top_rated', type: 'movie' },
-        },
-    ];
-
-    tvItems: NavItem[] = [
-        {
-            label: 'Popular',
-            routerLink: '/discover',
-            queryParams: { category: 'popular', type: 'tv' },
-        },
-        {
-            label: 'Airing Today',
-            routerLink: '/discover',
-            queryParams: { category: 'airing_today', type: 'tv' },
-        },
-        {
-            label: 'On The Air',
-            routerLink: '/discover',
-            queryParams: { category: 'on_the_air', type: 'tv' },
-        },
-        {
-            label: 'Top Rated',
-            routerLink: '/discover',
-            queryParams: { category: 'top_rated', type: 'tv' },
-        },
-    ];
-
-    personItem: NavItem = {
-        label: 'Popular',
-        routerLink: '/discover',
-        queryParams: { category: 'popular', type: 'person' },
-    };
-
-    videoItem: NavItem = {
-        label: 'What to watch',
-        routerLink: '/trailers',
-    };
-
-    constructor(private cdr: ChangeDetectorRef) {}
+    constructor(private readonly cdr: ChangeDetectorRef) {}
 
     @HostListener('document:click', ['$event'])
-    onDocumentClick(event: MouseEvent) {
+    onDocumentClick(event: MouseEvent): void {
         if (
-            this.navbarEl &&
-            !this.navbarEl.nativeElement.contains(event.target)
+            this.headerEl &&
+            !this.headerEl.nativeElement.contains(event.target as Node)
         ) {
-            this.menuOpen = false;
-            this.cdr.markForCheck();
+            this.closeMenu();
         }
     }
 
-    toggleMenu() {
+    toggleMenu(): void {
         this.menuOpen = !this.menuOpen;
+        this.cdr.markForCheck();
     }
 
-    onNavLinkClick() {
+    onNavLinkClick(): void {
+        this.closeMenu();
+    }
+
+    closeMenu(): void {
+        if (!this.menuOpen) {
+            return;
+        }
+
         this.menuOpen = false;
+        this.cdr.markForCheck();
     }
 }

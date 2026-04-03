@@ -1,0 +1,47 @@
+@use "breakpoints" as *;
+
+.videos-grid__featured {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.videos-grid__list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+}
+
+.videos-grid__skeleton-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.videos-grid__skeleton-art {
+    --skeleton-height: auto;
+    --skeleton-radius: var(--radius-md);
+    border-radius: var(--radius-md);
+}
+
+.videos-grid__skeleton-line {
+    --skeleton-height: 0.95rem;
+    --skeleton-radius: var(--radius-sm);
+}
+
+.videos-grid__skeleton-line--title {
+    width: 100%;
+}
+
+.videos-grid__skeleton-line--short {
+    width: 72%;
+}
+
+@include mobile() {
+    .videos-grid__featured,
+    .videos-grid__list {
+        grid-template-columns: 1fr;
+    }
+}
+

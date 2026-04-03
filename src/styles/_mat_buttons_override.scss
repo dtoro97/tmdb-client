@@ -1,0 +1,57 @@
+:root {
+    --mat-button-filled-container-shape: var(--control-radius);
+    --mat-button-filled-container-color: var(--control-accent-surface);
+    --mat-button-filled-label-text-color: var(--control-accent-text);
+    --mat-button-filled-state-layer-color: var(--control-accent-text);
+    --mat-button-filled-hover-state-layer-opacity: 0.2;
+    --mat-button-filled-focus-state-layer-opacity: 0;
+    --mat-button-filled-pressed-state-layer-opacity: 0.12;
+    --mat-button-filled-ripple-color: var(--control-accent-ripple);
+    --mat-button-filled-label-text-weight: var(--weight-semibold);
+    --mat-button-filled-label-text-tracking: 0.02em;
+
+    --mat-button-outlined-container-shape: var(--control-radius);
+    --mat-button-outlined-outline-color: var(--control-accent-border);
+    --mat-button-outlined-label-text-color: var(--control-accent-border);
+    --mat-button-outlined-state-layer-color: var(--control-accent-border);
+    --mat-button-outlined-hover-state-layer-opacity: 0;
+    --mat-button-outlined-focus-state-layer-opacity: 0;
+    --mat-button-outlined-pressed-state-layer-opacity: 0.2;
+    --mat-button-outlined-ripple-color: var(--control-accent-ripple);
+    --mat-button-outlined-label-text-weight: var(--weight-medium);
+    --mat-button-outlined-label-text-tracking: 0.02em;
+
+    --mat-button-text-container-shape: var(--control-radius);
+    --mat-button-text-label-text-color: var(--text-primary);
+    --mat-button-text-state-layer-color: var(--control-accent-border);
+    --mat-button-text-ripple-color: var(--control-accent-ripple);
+}
+
+.mat-mdc-button-persistent-ripple::before {
+    transition: opacity var(--motion-base) !important;
+}
+
+.mat-mdc-unelevated-button:not(:disabled),
+.mat-mdc-filled-button:not(:disabled) {
+    &:focus-visible {
+        outline: 2px solid var(--control-focus-outline);
+        outline-offset: 2px;
+    }
+}
+
+.mat-mdc-outlined-button:not(:disabled) {
+    transition: var(--control-transition);
+    background-color: transparent;
+
+    &:hover {
+        color: var(--control-accent-text);
+        background-color: var(--control-accent-surface-hover);
+        border-color: var(--control-accent-border-hover);
+    }
+
+    &:focus-visible {
+        background-color: transparent;
+        outline: 2px solid var(--control-focus-outline);
+        outline-offset: 2px;
+    }
+}

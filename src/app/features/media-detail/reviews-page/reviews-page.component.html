@@ -1,0 +1,144 @@
+<div class="page-container">
+    @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+        <app-sub-page-header
+            [backdropPath]="
+                mediaState.type === 'loaded'
+                    ? mediaState.value?.backdropPath
+                    : undefined
+            "
+            [parentTitle]="
+                mediaState.type === 'loaded'
+                    ? mediaState.value?.title
+                    : undefined
+            "
+            [backLink]="['../']"
+            pageTitle="Reviews"
+        />
+
+        <main class="page-main page-main--full-padding">
+            @if (mediaStoreService.reviewsState$ | async; as reviewsState) {
+                @if (
+                    reviewsState.type === "loading" ||
+                    reviewsState.type === "idle"
+                ) {
+                    <section class="media-reviews-page__content">
+                        <div class="media-reviews-page__toolbar">
+                            <app-skeleton
+                                class="media-reviews-page__toolbar-count-skeleton"
+                            />
+                        </div>
+
+                        <div class="media-reviews-page__list">
+                            <ng-container
+                                *ngTemplateOutlet="
+                                    reviewSkeletonList;
+                                    context: { count: skeletonCount }
+                                "
+                            />
+                        </div>
+                    </section>
+                } @else if (
+                    reviewsState.type === "loaded" ||
+                    reviewsState.type === "loading-more"
+                ) {
+                    @if (reviewsState.value.length) {
+                        <section class="media-reviews-page__content">
+                            <div class="media-reviews-page__toolbar">
+                                @if (
+                                    mediaStoreService.reviewTotalResults$ | async;
+                                    as reviewTotalResults
+                                ) {
+                                    <span class="text-caption">
+                                        1-{{ reviewsState.value.length }} of
+                                        {{
+                                            reviewTotalResults ||
+                                                reviewsState.value.length
+                                        }}
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="media-reviews-page__list">
+                                @for (
+                                    review of reviewsState.value;
+                                    track review.id
+                                ) {
+                                    <app-review-card [review]="review" />
+                                }
+
+                                @if (reviewsState.type === "loading-more") {
+                                    <ng-container
+                                        *ngTemplateOutlet="
+                                            reviewSkeletonList;
+                                            context: {
+                                                count: reviewsState.placeholderCount,
+                                            }
+                                        "
+                                    />
+                                }
+                            </div>
+
+                            @if (mediaStoreService.hasMoreReviews$ | async) {
+                                <div class="media-reviews-page__actions">
+                                    <button
+                                        mat-stroked-button
+                                        type="button"
+                                        (click)="loadMore()"
+                                    >
+                                        Show more reviews
+                                    </button>
+                                </div>
+                            }
+                        </section>
+                    } @else {
+                        <section class="media-reviews-page__empty">
+                            <app-empty-state
+                                iconClass="fa-regular fa-comment-dots"
+                                text="No reviews available yet"
+                            />
+                        </section>
+                    }
+                }
+            }
+        </main>
+    }
+</div>
+
+<ng-template #reviewSkeletonList let-count="count">
+    @for (i of count | repeat; track i) {
+        <article class="media-reviews-page__review-skeleton">
+            <div class="media-reviews-page__review-skeleton-header">
+                <app-skeleton
+                    class="media-reviews-page__review-skeleton-avatar"
+                />
+                <div class="media-reviews-page__review-skeleton-meta">
+                    <app-skeleton
+                        class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--author"
+                    />
+                    <app-skeleton
+                        class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--meta"
+                    />
+                </div>
+            </div>
+            <div class="media-reviews-page__review-skeleton-body">
+                <app-skeleton
+                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--full"
+                />
+                <app-skeleton
+                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--wide"
+                />
+                <app-skeleton
+                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--medium"
+                />
+                <app-skeleton
+                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--short"
+                />
+            </div>
+            <div class="media-reviews-page__review-skeleton-footer">
+                <app-skeleton
+                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--footer"
+                />
+            </div>
+        </article>
+    }
+</ng-template>

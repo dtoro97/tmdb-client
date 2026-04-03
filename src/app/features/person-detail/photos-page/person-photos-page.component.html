@@ -1,17 +1,27 @@
-<div class="photos-page pb-8">
-    @if (personDetailStore.person$ | async; as person) {
-        <app-sub-page-banner
-            [backdropPath]="personDetailStore.heroBackdrop$ | async"
-            [parentTitle]="person.name ?? ''"
+<div class="page-container">
+    @if (personDetailStore.personDetailVm$ | async; as vm) {
+        <app-sub-page-header
+            [parentTitle]="
+                (vm.person.type === 'loaded'
+                    ? vm.person.value?.name
+                    : undefined) ?? ''
+            "
             [backLink]="['../']"
             pageTitle="Photos"
         />
-    }
 
-    <div class="inner-container pt-5">
-        <app-photos-browser
-            [images]="personDetailStore.allPhotos$ | async"
-            (photoSelect)="openPhotoViewer($event)"
-        />
-    </div>
+        <div class="page-main">
+            @if (vm.photos.type === "loading" || vm.photos.type === "idle") {
+                <app-photos-browser-skeleton></app-photos-browser-skeleton>
+            } @else if (vm.photos.type === "loaded") {
+                <app-photos-browser
+                    [images]="vm.photos.value"
+                    (photoSelect)="openPhotoViewer($event)"
+                />
+            }
+        </div>
+    }
 </div>
+
+
+

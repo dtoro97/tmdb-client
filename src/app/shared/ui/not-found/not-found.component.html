@@ -1,7 +1,10 @@
-<div
-  class="w-full h-full flex flex-column justify-content-center align-items-center mt-8"
->
-  <h1>Page not found</h1>
-  <p>Looks like the requested URL doesn't exist on this site.</p>
-  <p>Back to <a [routerLink]="['/']">home</a></p>
-</div>
+<section class="not-found surface-panel">
+    <p class="not-found__eyebrow text-overline">404</p>
+    <h1 class="not-found__title text-display">Page not found</h1>
+    <p class="not-found__text text-body">
+        Looks like the requested URL doesn't exist on this site.
+    </p>
+    <a class="not-found__link" [routerLink]="['/']">
+        Back to home
+    </a>
+</section>

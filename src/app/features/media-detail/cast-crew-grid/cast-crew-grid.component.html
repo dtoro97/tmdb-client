@@ -1,0 +1,69 @@
+@if (cast.length) {
+    <section class="credit-section">
+        <h2 class="credit-section__title text-title">Cast</h2>
+        <div class="credit-list">
+            @for (member of cast; track member.id) {
+                <a class="credit-row" [routerLink]="['/name', member.id]">
+                    <app-image
+                        class="credit-row__thumb"
+                        [src]="member.profile_path ?? null"
+                        [alt]="member.name"
+                        type="person"
+                    />
+                    <div class="credit-row__body">
+                        <span class="credit-row__name text-body-sm">{{
+                            member.name
+                        }}</span>
+                        @if (member.character) {
+                            <span class="credit-row__meta text-caption">{{
+                                member.character
+                            }}</span>
+                        }
+                    </div>
+                    @if (member.episode_count) {
+                        <span class="credit-row__count text-caption">
+                            {{ member.episode_count }} ep
+                        </span>
+                    }
+                    <span class="credit-row__trailing-icon" aria-hidden="true">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </span>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+@for (group of groupedCrew; track group.department) {
+    <section class="credit-section">
+        <h2 class="credit-section__title text-title">{{ group.department }}</h2>
+        <div class="credit-list">
+            @for (member of group.members; track member.id) {
+                <a class="credit-row" [routerLink]="['/name', member.id]">
+                    <app-image
+                        class="credit-row__thumb"
+                        [src]="member.profile_path ?? null"
+                        [alt]="member.name"
+                        type="person"
+                    />
+                    <div class="credit-row__body">
+                        <span class="credit-row__name text-body-sm">{{
+                            member.name
+                        }}</span>
+                        <span class="credit-row__meta text-caption">{{
+                            member.job
+                        }}</span>
+                    </div>
+                    @if (member.episode_count) {
+                        <span class="credit-row__count text-caption">
+                            {{ member.episode_count }} ep
+                        </span>
+                    }
+                    <span class="credit-row__trailing-icon" aria-hidden="true">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </span>
+                </a>
+            }
+        </div>
+    </section>
+}

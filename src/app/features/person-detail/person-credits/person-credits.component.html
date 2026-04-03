@@ -1,0 +1,160 @@
+@if (state.type === "loading") {
+    <app-skeleton class="person-credits__toolbar-skeleton" />
+    <div class="person-credits__skeleton-list">
+        @for (row of 8 | repeat; track row) {
+            <div class="person-credits__skeleton-row">
+                <app-skeleton class="person-credits__skeleton-thumb" />
+                <div class="person-credits__skeleton-lines">
+                    <app-skeleton
+                        class="person-credits__skeleton-line person-credits__skeleton-line--title"
+                    />
+                    <app-skeleton
+                        class="person-credits__skeleton-line person-credits__skeleton-line--meta"
+                    />
+                </div>
+            </div>
+        }
+    </div>
+} @else {
+    <app-browse-toolbar>
+        <app-pill-toggle
+            start
+            [options]="sectionOptions"
+            variant="subtle"
+            [selectedValue]="section"
+            (selected)="onSectionChange($event)"
+        />
+        <mat-divider start [vertical]="true"></mat-divider>
+        <app-pill-toggle
+            start
+            [options]="mediaOptions"
+            variant="subtle"
+            [selectedValue]="mediaType"
+            (selected)="onMediaTypeChange($event)"
+        />
+        <app-sort-button
+            end
+            [options]="sortOptions"
+            [selectedValue]="sortBy"
+            [direction]="sortDirection"
+            (sortChange)="onSortByChange($event)"
+            (directionToggle)="sortDirectionToggle.emit()"
+        />
+    </app-browse-toolbar>
+    @if (state.type === "loaded" && state.value.totalCount) {
+        <cdk-accordion class="person-credits__groups" multi>
+            @for (
+                group of state.value.groups;
+                track group.year;
+                let i = $index
+            ) {
+                <cdk-accordion-item
+                    #item="cdkAccordionItem"
+                    class="accordion-section"
+                    [expanded]="i < defaultExpandedCount"
+                >
+                    <button
+                        class="accordion-header"
+                        (click)="item.toggle()"
+                    >
+                        <span class="person-credits__group-label">
+                            <h3 class="text-meta">
+                                {{ group.year }}
+                            </h3>
+                            <span
+                                class="person-credits__group-count text-caption"
+                            >
+                                {{ group.items.length }}
+                            </span>
+                        </span>
+                        <i
+                            class="fa-solid fa-chevron-down accordion-chevron"
+                            [class.accordion-chevron--collapsed]="
+                                !item.expanded
+                            "
+                        ></i>
+                    </button>
+                    @if (item.expanded) {
+                        <div class="accordion-body">
+                            @for (
+                                credit of group.items;
+                                track credit.id;
+                                let last = $last
+                            ) {
+                                <a
+                                    class="person-credits__row"
+                                    [class.person-credits__row--last]="last"
+                                    [routerLink]="[
+                                        '/title',
+                                        credit.id,
+                                        credit.mediaType,
+                                    ]"
+                                >
+                                    <app-image
+                                        class="person-credits__thumb aspect-poster"
+                                        [src]="credit.posterPath"
+                                        [alt]="credit.title"
+                                        type="media"
+                                    />
+
+                                    <div class="person-credits__body">
+                                        <div class="person-credits__primary">
+                                            <span
+                                                class="person-credits__title text-body-sm"
+                                            >
+                                                {{ credit.title }}
+                                            </span>
+                                            @if (credit.roleLabel) {
+                                                <span
+                                                    class="person-credits__role text-caption"
+                                                >
+                                                    &mdash;
+                                                    {{ credit.roleLabel }}
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="person-credits__secondary">
+                                            @if (credit.rating) {
+                                                <app-rating
+                                                    [value]="credit.rating"
+                                                />
+                                            }
+                                            <span
+                                                class="person-credits__meta"
+                                            >
+                                                @if (credit.episodeLabel) {
+                                                    <span
+                                                        class="person-credits__episodes text-caption"
+                                                    >
+                                                        {{
+                                                            credit.episodeLabel
+                                                        }}
+                                                    </span>
+                                                }
+                                                <mat-chip
+                                                    class="chip--accent chip--wide"
+                                                >
+                                                    {{
+                                                        credit.mediaTypeLabel
+                                                    }}
+                                                </mat-chip>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                </cdk-accordion-item>
+            }
+        </cdk-accordion>
+    } @else {
+        <div class="empty-panel">
+            <app-empty-state
+                iconClass="fa-regular fa-folder-open"
+                title="No credits found"
+                text="Try a different filter combination."
+            />
+        </div>
+    }
+}

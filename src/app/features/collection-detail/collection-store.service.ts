@@ -2,66 +2,92 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ComponentStore } from '@ngrx/component-store';
-import { NgxUiLoaderService } from 'ngx-ui-loader';
 import {
     catchError,
     EMPTY,
     filter,
+    forkJoin,
     map,
     Observable,
+    of,
+    switchMap,
     tap,
 } from 'rxjs';
 
 import {
     CollectionDetails,
-    CollectionPart,
     CollectionRestControllerService,
+    MovieRestControllerService,
 } from '../../api';
-import { isDefined, loader, MediaListItem } from '../../shared';
+import { API_JSON_OPTIONS } from '../../constants';
+import {
+    isDefined,
+    LoadableItems,
+    LoadableValue,
+    MediaListItem,
+    PersonLink,
+    sortByDate,
+    toCollectionPartMediaListItem,
+} from '../../shared';
 
 interface CollectionState {
-    collection?: CollectionDetails;
+    collection: LoadableValue<CollectionDetails | null>;
+    parts: LoadableItems<MediaListItem>;
 }
 
 @Injectable()
 export class CollectionStoreService extends ComponentStore<CollectionState> {
-    collection$ = this.select((state) => state.collection).pipe(
-        filter(isDefined),
+    private readonly opts = API_JSON_OPTIONS;
+
+    collection$ = this.select((state) => state.collection);
+
+    collectionValue$ = this.collection$.pipe(
+        filter(
+            (
+                state,
+            ): state is { type: 'loaded'; value: CollectionDetails | null } =>
+                state.type === 'loaded' && isDefined(state.value),
+        ),
+        map((state) => state.value),
     );
 
-    parts$: Observable<CollectionPart[]> = this.collection$.pipe(
-        map((c) =>
-            [...(c.parts ?? [])].sort((a, b) =>
-                (a.release_date ?? '').localeCompare(b.release_date ?? ''),
-            ),
+    mappedPartsState$ = this.select((state) => state.parts);
+
+    partsCount$ = this.select((state) =>
+        state.parts.type === 'loaded' ? state.parts.value.length : 0,
+    );
+
+    backdropPath$ = this.collection$.pipe(
+        map((state) =>
+            state.type === 'loaded' && state.value
+                ? state.value.backdrop_path
+                : null,
         ),
     );
 
-    mappedParts$: Observable<MediaListItem[]> = this.parts$.pipe(
-        map((parts) =>
-            parts.map((p) => ({
-                id: p.id!,
-                thumb: p.poster_path ?? null,
-                title: p.title ?? '',
-                overview: p.overview ?? '',
-                rating: p.vote_average ?? null,
-                date: p.release_date ?? '',
-                mediaType: 'movie',
-                voteCount: p.vote_count ?? 0,
-            })),
-        ),
+    posterPath$ = this.collection$.pipe(
+        map((state) => {
+            if (state.type !== 'loaded' || !state.value) {
+                return null;
+            }
+
+            return (
+                state.value.poster_path ??
+                state.value.parts?.find((part) => !!part.poster_path)
+                    ?.poster_path ??
+                null
+            );
+        }),
     );
 
-    partsCount$ = this.parts$.pipe(map((parts) => parts.length));
-
-    backdropPath$ = this.collection$.pipe(map((c) => c.backdrop_path));
-
-    averageRating$ = this.parts$.pipe(
+    averageRating$ = this.select((state) => state.parts).pipe(
         map((parts) => {
-            const rated = parts.filter((p) => (p.vote_average ?? 0) > 0);
+            if (parts.type !== 'loaded') return 0;
+
+            const rated = parts.value.filter((p) => (p.rating ?? 0) > 0);
             if (!rated.length) return 0;
             return (
-                rated.reduce((sum, p) => sum + (p.vote_average ?? 0), 0) /
+                rated.reduce((sum, p) => sum + (p.rating ?? 0), 0) /
                 rated.length
             );
         }),
@@ -69,24 +95,86 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
     constructor(
         private collectionRestControllerService: CollectionRestControllerService,
-        private ngxUiLoaderService: NgxUiLoaderService,
+        private movieRestControllerService: MovieRestControllerService,
         private router: Router,
     ) {
-        super({});
+        super({
+            collection: { type: 'idle' },
+            parts: { type: 'loading' },
+        });
     }
 
     getCollection$(id: number) {
+        this.patchState({
+            collection: { type: 'loading' },
+            parts: { type: 'loading' },
+        });
         return this.collectionRestControllerService
-            .collectionDetails(id, undefined, undefined, undefined, {
-                httpHeaderAccept: 'application/json',
-            })
+            .collectionDetails(id, undefined, undefined, undefined, this.opts)
             .pipe(
-                tap((collection) => this.patchState({ collection })),
-                loader(this.ngxUiLoaderService),
+                switchMap((collection) => {
+                    const mappedItems = sortByDate(
+                        collection.parts ?? [],
+                        (part) => part.release_date,
+                    ).map((part) => toCollectionPartMediaListItem(part, 'year'));
+
+                    return this.enrichCastLinks$(mappedItems).pipe(
+                        map((items) => ({ collection, items })),
+                    );
+                }),
+                tap(({ collection, items }) =>
+                    this.patchState({
+                        collection: { type: 'loaded', value: collection },
+                        parts: {
+                            type: 'loaded',
+                            value: items,
+                        },
+                    }),
+                ),
                 catchError(() => {
+                    this.patchState({
+                        collection: { type: 'loaded', value: null },
+                        parts: { type: 'loaded', value: [] },
+                    });
                     this.router.navigate(['not-found']);
                     return EMPTY;
                 }),
+            );
+    }
+
+    private enrichCastLinks$(
+        items: MediaListItem[],
+    ): Observable<MediaListItem[]> {
+        if (!items.length) {
+            return of([]);
+        }
+
+        return forkJoin(
+            items.map((item) =>
+                this.fetchTopCast$(item.id).pipe(
+                    map((castLinks) => ({ ...item, castLinks })),
+                    catchError(() => of({ ...item, castLinks: [] })),
+                ),
+            ),
+        );
+    }
+
+    private fetchTopCast$(mediaId: number): Observable<PersonLink[]> {
+        return this.movieRestControllerService
+            .movieCredits(mediaId, undefined, undefined, undefined, this.opts)
+            .pipe(
+                map((credits) =>
+                    (credits.cast ?? [])
+                        .filter(
+                            (person): person is { id: number; name: string } =>
+                                !!person.id && !!person.name,
+                        )
+                        .slice(0, 3)
+                        .map((person) => ({
+                            id: person.id,
+                            name: person.name,
+                        })),
+                ),
             );
     }
 }

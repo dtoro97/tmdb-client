@@ -1,0 +1,427 @@
+<aside class="discover-filters">
+    <div
+        class="discover-filters__header"
+        (click)="mobileCollapsed = !mobileCollapsed"
+    >
+        <h2 class="discover-filters__title">
+            Filters
+            @if (activeFilterCount > 0) {
+                <span class="discover-filters__count">{{ activeFilterCount }}</span>
+            }
+        </h2>
+        @if (activeFilterCount > 0) {
+            <button
+                class="discover-filters__clear"
+                type="button"
+                (click)="onClearFilters($event)"
+            >
+                Clear all
+            </button>
+        }
+        <i
+            class="fa-solid fa-chevron-down discover-filters__mobile-chevron"
+            [class.discover-filters__mobile-chevron--open]="!mobileCollapsed"
+        ></i>
+    </div>
+
+    <cdk-accordion
+        class="discover-filters__body"
+        [class.discover-filters__body--collapsed]="mobileCollapsed"
+        multi
+    >
+        <cdk-accordion-item
+            #genresItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="selectedGenreIds.length > 0"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="genresItem.toggle()"
+            >
+                <span>Genres</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!genresItem.expanded"
+                ></i>
+            </button>
+            @if (genresItem.expanded) {
+                <div class="accordion-body">
+                    <div class="discover-filters__chips">
+                        @for (genre of genres; track genre.id) {
+                            <mat-chip
+                                class="chip--link"
+                                [class.chip--accent]="selectedGenreIds.includes(genre.id)"
+                                [class.chip--muted]="!selectedGenreIds.includes(genre.id)"
+                                (click)="onGenreToggle(genre.id)"
+                            >
+                                {{ genre.name }}
+                            </mat-chip>
+                        }
+                    </div>
+                </div>
+            }
+        </cdk-accordion-item>
+
+        <cdk-accordion-item
+            #keywordsItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="keywords.length > 0"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="keywordsItem.toggle()"
+            >
+                <span>Keywords</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!keywordsItem.expanded"
+                ></i>
+            </button>
+            @if (keywordsItem.expanded) {
+                <div class="accordion-body">
+                    <mat-form-field
+                        class="discover-filters__keyword-field"
+                        appearance="outline"
+                    >
+                        <input
+                            #keywordInput
+                            matInput
+                            placeholder="Search keywords"
+                            [value]="keywordSearchText"
+                            (input)="onKeywordSearch($event)"
+                            (keydown)="onKeywordInputKeydown($event)"
+                            [matAutocomplete]="keywordAuto"
+                        />
+                        <mat-autocomplete
+                            #keywordAuto="matAutocomplete"
+                            (optionSelected)="
+                                onKeywordSelected($event.option.value)
+                            "
+                        >
+                            @for (
+                                suggestion of keywordSuggestions;
+                                track suggestion.id
+                            ) {
+                                <mat-option [value]="suggestion">{{
+                                    suggestion.name
+                                }}</mat-option>
+                            }
+                        </mat-autocomplete>
+                    </mat-form-field>
+                    @if (keywords.length) {
+                        <div class="discover-filters__chips">
+                            @for (keyword of keywords; track keyword.id) {
+                                <mat-chip class="chip--accent">
+                                    {{ keyword.name }}
+                                    <button
+                                        matChipRemove
+                                        type="button"
+                                        aria-label="Remove keyword"
+                                        (click)="onKeywordRemove(keyword.id)"
+                                    >
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </cdk-accordion-item>
+
+        <cdk-accordion-item
+            #yearItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="yearFrom !== null || yearTo !== null"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="yearItem.toggle()"
+            >
+                <span>Year range</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!yearItem.expanded"
+                ></i>
+            </button>
+            @if (yearItem.expanded) {
+                <div class="accordion-body">
+                    <div class="discover-filters__range-row">
+                        <app-stepper-input
+                            [value]="yearFrom"
+                            [step]="1"
+                            [min]="1900"
+                            [max]="2050"
+                            placeholder="From"
+                            (valueChanged)="yearFromChanged.emit($event)"
+                        />
+                        <span class="discover-filters__range-separator">to</span>
+                        <app-stepper-input
+                            [value]="yearTo"
+                            [step]="1"
+                            [min]="1900"
+                            [max]="2050"
+                            placeholder="To"
+                            (valueChanged)="yearToChanged.emit($event)"
+                        />
+                    </div>
+                </div>
+            }
+        </cdk-accordion-item>
+
+        <cdk-accordion-item
+            #voteCountItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="voteCountMin !== null && voteCountMin > 0"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="voteCountItem.toggle()"
+            >
+                <span>Vote count</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!voteCountItem.expanded"
+                ></i>
+            </button>
+            @if (voteCountItem.expanded) {
+                <div class="accordion-body">
+                    <app-stepper-input
+                        [value]="voteCountMin"
+                        [step]="100"
+                        [min]="0"
+                        [max]="100000"
+                        placeholder="Min votes"
+                        [wide]="true"
+                        (valueChanged)="voteCountChanged.emit($event)"
+                    />
+                </div>
+            }
+        </cdk-accordion-item>
+
+        <cdk-accordion-item
+            #ratingItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="minRating !== null && minRating > 0"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="ratingItem.toggle()"
+            >
+                <span>Minimum rating</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!ratingItem.expanded"
+                ></i>
+            </button>
+            @if (ratingItem.expanded) {
+                <div class="accordion-body">
+                    <div class="discover-filters__rating-row">
+                        <mat-slider
+                            class="discover-filters__rating-slider"
+                            [min]="0"
+                            [max]="10"
+                            [step]="0.5"
+                            [displayWith]="formatRatingLabel"
+                            discrete
+                        >
+                            <input
+                                matSliderThumb
+                                [value]="minRating ?? 0"
+                                (valueChange)="onRatingChange($event)"
+                            />
+                        </mat-slider>
+                        <span class="discover-filters__rating-value">{{
+                            minRating ?? 0
+                        }}</span>
+                    </div>
+                    @if (
+                        ratingPlaceholder !== null &&
+                        (minRating === null || minRating === 0)
+                    ) {
+                        <span class="discover-filters__preset-hint"
+                            >Default: {{ ratingPlaceholder }}</span
+                        >
+                    }
+                </div>
+            }
+        </cdk-accordion-item>
+
+        <cdk-accordion-item
+            #runtimeItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="runtimeMin !== null || runtimeMax !== null"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="runtimeItem.toggle()"
+            >
+                <span>Runtime</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!runtimeItem.expanded"
+                ></i>
+            </button>
+            @if (runtimeItem.expanded) {
+                <div class="accordion-body">
+                    <div class="discover-filters__range-row">
+                        <app-stepper-input
+                            [value]="runtimeMin"
+                            [step]="15"
+                            [min]="0"
+                            [max]="600"
+                            placeholder="Min"
+                            (valueChanged)="runtimeMinChanged.emit($event)"
+                        />
+                        <span class="discover-filters__range-separator">to</span>
+                        <app-stepper-input
+                            [value]="runtimeMax"
+                            [step]="15"
+                            [min]="0"
+                            [max]="600"
+                            placeholder="Max"
+                            (valueChanged)="runtimeMaxChanged.emit($event)"
+                        />
+                        <span class="discover-filters__range-unit">min</span>
+                    </div>
+                </div>
+            }
+        </cdk-accordion-item>
+
+        @if (mediaType === "movie") {
+            <cdk-accordion-item
+                #certsItem="cdkAccordionItem"
+                class="accordion-section"
+                [expanded]="certifications.length > 0"
+            >
+                <button
+                    class="accordion-header"
+                    type="button"
+                    (click)="certsItem.toggle()"
+                >
+                    <span>Certification</span>
+                    <i
+                        class="fa-solid fa-chevron-down accordion-chevron"
+                        [class.accordion-chevron--collapsed]="!certsItem.expanded"
+                    ></i>
+                </button>
+                @if (certsItem.expanded) {
+                    <div class="accordion-body">
+                        <div class="discover-filters__chips">
+                            @for (cert of certificationOptions; track cert) {
+                                <mat-chip
+                                    class="chip--link"
+                                    [class.chip--accent]="certifications.includes(cert)"
+                                    [class.chip--muted]="!certifications.includes(cert)"
+                                    (click)="onCertificationToggle(cert)"
+                                >
+                                    {{ cert }}
+                                </mat-chip>
+                            }
+                        </div>
+                    </div>
+                }
+            </cdk-accordion-item>
+        }
+
+        <cdk-accordion-item
+            #languageItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="originalLanguage !== null"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="languageItem.toggle()"
+            >
+                <span>Language</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!languageItem.expanded"
+                ></i>
+            </button>
+            @if (languageItem.expanded) {
+                <div class="accordion-body">
+                    <div class="discover-filters__language-select">
+                        <mat-form-field
+                            class="discover-filters__language-field"
+                            appearance="outline"
+                        >
+                            <mat-select
+                                class="discover-filters__select"
+                                placeholder="Any language"
+                                [value]="originalLanguage"
+                                (selectionChange)="
+                                    onLanguageChange($event.value)
+                                "
+                            >
+                                <mat-option>
+                                    <ngx-mat-select-search
+                                        placeholderLabel="Search"
+                                        noEntriesFoundLabel="No language found"
+                                        ngModel
+                                        (ngModelChange)="
+                                            updateLanguageFilter($event)
+                                        "
+                                    >
+                                    </ngx-mat-select-search>
+                                </mat-option>
+                                <mat-option [value]="null"
+                                    >Any language</mat-option
+                                >
+                                @for (opt of filteredLanguageOptions; track opt.value) {
+                                    <mat-option [value]="opt.value">{{
+                                        opt.label
+                                    }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+            }
+        </cdk-accordion-item>
+
+        <cdk-accordion-item
+            #providersItem="cdkAccordionItem"
+            class="accordion-section"
+            [expanded]="watchProviderIds.length > 0"
+        >
+            <button
+                class="accordion-header"
+                type="button"
+                (click)="providersItem.toggle()"
+            >
+                <span>Watch providers</span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!providersItem.expanded"
+                ></i>
+            </button>
+            @if (providersItem.expanded) {
+                <div class="accordion-body">
+                    <div class="discover-filters__chips">
+                        @for (
+                            provider of watchProviderOptions;
+                            track provider.id
+                        ) {
+                            <mat-chip
+                                class="chip--link"
+                                [class.chip--accent]="watchProviderIds.includes(provider.id)"
+                                [class.chip--muted]="!watchProviderIds.includes(provider.id)"
+                                (click)="onWatchProviderToggle(provider.id)"
+                            >
+                                {{ provider.name }}
+                            </mat-chip>
+                        }
+                    </div>
+                </div>
+            }
+        </cdk-accordion-item>
+    </cdk-accordion>
+</aside>

@@ -1,28 +1,35 @@
 @if (item) {
-    <div class="card" [routerLink]="['/title', item.id, type]">
-        <app-media-thumb
-            [src]="item.poster_path || item.profile_path"
-            [alt]="item.title || item.name"
-        />
+    <a class="card" [routerLink]="['/title', item.id, item.mediaType]">
+        <div class="card__media">
+            <app-image
+                class="card__image"
+                [src]="item.imagePath"
+                [alt]="item.title"
+            />
 
-        @if (item.vote_average) {
-            <div class="rating-badge">
-                <i class="fa-solid fa-star"></i>
-                {{ item.vote_average | number: "1.1-1" }}
-            </div>
-        }
-
-        <div class="card-info">
-            <span class="title">{{ item.title || item.name }}</span>
-            <span class="year">{{
-                item.release_date || item.first_air_date | date: "yyyy"
-            }}</span>
-            @if (role) {
-                <span class="role">{{ role }}</span>
+            @if (showRating && item.rating) {
+                <app-rating-badge class="card__rating" [value]="item.rating" />
             }
-            <div class="hover-details">
-                <p class="overview">{{ item.overview }}</p>
-            </div>
         </div>
-    </div>
+
+        <div class="card__content">
+            <span class="card__title text-body-sm">{{ item.title }}</span>
+
+            @if (item.date) {
+                <span class="card__meta text-caption">
+                    {{
+                        item.date
+                            | date
+                                : (dateFormat === "dayMonth"
+                                      ? "dd MMM"
+                                      : "yyyy")
+                    }}
+                </span>
+            }
+
+            @if (item.role) {
+                <span class="card__role text-caption">{{ item.role }}</span>
+            }
+        </div>
+    </a>
 }

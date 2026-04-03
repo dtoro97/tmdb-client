@@ -1,0 +1,88 @@
+@if (state.type === 'loading') {
+    <ul class="header-search-results" aria-hidden="true">
+        @for (_ of skeletonRows; track $index) {
+            <li class="header-search-results__row">
+                <div class="header-search-results__item">
+                    <div
+                        class="header-search-results__thumb header-search-results__thumb--skeleton skeleton"
+                    ></div>
+                    <div class="header-search-results__content">
+                        <div class="header-search-results__meta">
+                            <span
+                                class="header-search-results__skeleton-chip skeleton"
+                            ></span>
+                            <span
+                                class="header-search-results__skeleton-line header-search-results__skeleton-line--xs skeleton"
+                            ></span>
+                        </div>
+                        <span
+                            class="header-search-results__title header-search-results__skeleton-line header-search-results__skeleton-line--title skeleton"
+                        ></span>
+                        <span
+                            class="header-search-results__overview header-search-results__skeleton-line header-search-results__skeleton-line--md skeleton"
+                        ></span>
+                        <span
+                            class="header-search-results__overview header-search-results__skeleton-line header-search-results__skeleton-line--sm skeleton"
+                        ></span>
+                    </div>
+                </div>
+            </li>
+        }
+    </ul>
+} @else if (state.type === 'loaded') {
+    <ul class="header-search-results">
+        @for (item of state.value; track item.id) {
+            <li class="header-search-results__row">
+                <button
+                    type="button"
+                    class="header-search-results__item header-search-results__action"
+                    (click)="selectResult(item)"
+                >
+                    <app-image
+                        class="header-search-results__thumb"
+                        [src]="item.thumb"
+                        [type]="item.mediaType === 'person' ? 'person' : 'media'"
+                        [alt]="item.title"
+                    />
+                    <div class="header-search-results__content">
+                        <div class="header-search-results__meta">
+                            <span
+                                class="header-search-results__type text-overline u-nowrap"
+                            >
+                                {{ item.mediaType }}
+                            </span>
+                            @if (item.year) {
+                                <span class="text-caption">{{ item.year }}</span>
+                            }
+                            @if (item.rating && item.rating > 0) {
+                                <app-rating [value]="item.rating" />
+                            }
+                            @if (item.department) {
+                                <span class="text-caption">
+                                    {{ item.department }}
+                                </span>
+                            }
+                        </div>
+                        <p class="header-search-results__title text-body-sm">
+                            {{ item.title }}
+                        </p>
+                        @if (item.overview) {
+                            <p
+                                class="header-search-results__overview text-caption"
+                            >
+                                {{ item.overview }}
+                            </p>
+                        }
+                        @if (item.mediaType === 'person' && item.known_for) {
+                            <p
+                                class="header-search-results__known-for text-caption"
+                            >
+                                {{ item.known_for }}
+                            </p>
+                        }
+                    </div>
+                </button>
+            </li>
+        }
+    </ul>
+}

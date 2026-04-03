@@ -1,44 +1,54 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTabsModule } from '@angular/material/tabs';
+import { Router } from '@angular/router';
 
+import { PAGE_SIZE } from '../../../constants';
 import {
+    HeroSurfaceComponent,
+    MediaType,
     SkeletonComponent,
-    SubPageBannerComponent,
-    VideoCardComponent,
+    YoutubeVideoCardComponent,
 } from '../../../shared';
+import { RepeatPipe } from '../../../shared/pipes/repeat.pipe';
 import { TrailersPageStoreService } from './trailers-page-store.service';
 
 @Component({
     selector: 'app-trailers-page',
     imports: [
         AsyncPipe,
-        MatTabsModule,
+        HeroSurfaceComponent,
         MatButtonModule,
-        SubPageBannerComponent,
-        VideoCardComponent,
+        YoutubeVideoCardComponent,
         SkeletonComponent,
+        RepeatPipe,
     ],
-    providers: [TrailersPageStoreService],
     templateUrl: './trailers-page.component.html',
     styleUrl: './trailers-page.component.scss',
+    providers: [TrailersPageStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrailersPageComponent {
     readonly vm$ = this.store.vm$;
-    readonly skeletonRows = Array.from({ length: 12 }, (_, i) => i);
-    readonly pageSize = 20;
-    trendingVisibleCount = this.pageSize;
-    popularVisibleCount = this.pageSize;
+    readonly skeletonCount = PAGE_SIZE;
 
-    constructor(private store: TrailersPageStoreService) {}
-
-    showMoreTrending(): void {
-        this.trendingVisibleCount += this.pageSize;
+    constructor(
+        public readonly store: TrailersPageStoreService,
+        private router: Router,
+    ) {
+        this.store.load$().pipe(takeUntilDestroyed()).subscribe();
     }
 
-    showMorePopular(): void {
-        this.popularVisibleCount += this.pageSize;
+    openTrailer(url: string) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    openMedia(mediaLink: [string, number, MediaType]) {
+        this.router.navigate(mediaLink);
+    }
+
+    showMoreSelected() {
+        this.store.showMoreSelected$().subscribe();
     }
 }

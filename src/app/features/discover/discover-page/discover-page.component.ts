@@ -1,26 +1,24 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Title } from '@angular/platform-browser';
-
-import { switchMap, tap } from 'rxjs';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
+
+import { PAGE_SIZE } from '../../../constants';
 import {
-    BrowseCategory,
-    BrowseMediaType,
-    DiscoverStoreService,
-    DiscoverType,
-    SortDirection,
-} from '../discover-store.service';
-import {
-    MediaListItemComponent,
-    PersonListItemComponent,
+    BrowseToolbarComponent,
+    EmptyStateComponent,
+    MediaListComponent,
+    PersonListComponent,
+    PillToggleComponent,
     SortButtonComponent,
-    parseCsvParam,
 } from '../../../shared';
+import {
+    DiscoverFiltersComponent,
+    KeywordChip,
+} from '../discover-filters/discover-filters.component';
+import { DiscoverStoreService } from '../discover-store.service';
 
 @Component({
     selector: 'app-discover-page',
@@ -28,118 +26,102 @@ import {
     styleUrl: './discover-page.component.scss',
     imports: [
         AsyncPipe,
-        RouterLink,
         MatButtonModule,
-        MatChipsModule,
-        MediaListItemComponent,
-        PersonListItemComponent,
+        DiscoverFiltersComponent,
+        EmptyStateComponent,
+        MediaListComponent,
+        PersonListComponent,
+        PillToggleComponent,
         SortButtonComponent,
+        BrowseToolbarComponent,
     ],
     providers: [DiscoverStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiscoverPageComponent {
+    readonly browseSkeletonCount = PAGE_SIZE;
+    readonly vm$ = this.store.vm$;
+
     constructor(
-        public store: DiscoverStoreService,
-        private route: ActivatedRoute,
-        private titleService: Title,
+        private readonly route: ActivatedRoute,
+        private readonly store: DiscoverStoreService,
     ) {
         this.route.queryParamMap
-            .pipe(
-                switchMap((params) => {
-                    const category = params.get(
-                        'category',
-                    ) as BrowseCategory | null;
-                    const type = (params.get('type') as DiscoverType) || 'all';
-                    const keywords = parseCsvParam(params.get('keywords'));
-                    const sortField = params.get('sortField') || undefined;
-                    const sortDirection =
-                        (params.get('sortDirection') as SortDirection) ||
-                        undefined;
-
-                    if (
-                        category &&
-                        (type === 'movie' || type === 'tv' || type === 'person')
-                    ) {
-                        return this.store.browse$(
-                            category,
-                            type as BrowseMediaType,
-                            sortField,
-                            sortDirection,
-                            keywords,
-                        );
-                    }
-
-                    if (
-                        keywords.length &&
-                        (type === 'movie' || type === 'tv')
-                    ) {
-                        return this.store.browse$(
-                            'popular',
-                            type as BrowseMediaType,
-                            sortField,
-                            sortDirection,
-                            keywords,
-                        );
-                    }
-
-                    const query = params.get('query') ?? '';
-
-                    return this.store.search$(query, type);
-                }),
-                takeUntilDestroyed(),
-            )
-            .subscribe();
-
-        this.store.categoryConfig$
-            .pipe(
-                tap((config) => {
-                    if (config) {
-                        console.log(config.title);
-                        this.titleService.setTitle(config.title);
-                    }
-                }),
-                takeUntilDestroyed(),
-            )
-            .subscribe();
-
-        this.store.query$
-            .pipe(
-                tap((q) => {
-                    if (q) {
-                        this.titleService.setTitle(`Search "${q}"`);
-                    }
-                }),
-                takeUntilDestroyed(),
-            )
-            .subscribe();
+            .pipe(takeUntilDestroyed())
+            .subscribe((params) => {
+                this.store.applyQueryParams(params);
+            });
     }
 
-    loadMoreBrowse() {
-        this.store.loadMoreBrowse$().subscribe();
+    loadMore(): void {
+        this.store.loadMore();
     }
 
-    onSortChange(sortField: unknown) {
-        this.store.updateSort(sortField as string);
+    onCategoryChange(category: unknown): void {
+        this.store.setCategory(category as string);
     }
 
-    toggleSortDirection() {
+    onSortChange(sortField: unknown): void {
+        this.store.setSort(sortField as string);
+    }
+
+    toggleSortDirection(): void {
         this.store.toggleSortDirection();
     }
 
-    loadMoreMovies() {
-        this.store.loadMoreMovies$().subscribe();
+    onGenreToggle(genreId: number): void {
+        this.store.toggleGenre(genreId);
     }
 
-    loadMoreTv() {
-        this.store.loadMoreTv$().subscribe();
+    onKeywordSearch(query: string): void {
+        this.store.searchKeywords(query);
     }
 
-    loadMorePeople() {
-        this.store.loadMorePeople$().subscribe();
+    onKeywordAdd(keyword: KeywordChip): void {
+        this.store.addKeyword(keyword);
     }
 
-    setType(type: DiscoverType) {
-        this.store.updateType(type);
+    onKeywordRemove(keywordId: number): void {
+        this.store.removeKeyword(keywordId);
+    }
+
+    onYearFromChange(value: number | null, yearTo: number | null): void {
+        this.store.setYearRange(value, yearTo);
+    }
+
+    onYearToChange(value: number | null, yearFrom: number | null): void {
+        this.store.setYearRange(yearFrom, value);
+    }
+
+    onMinRatingChange(value: number | null): void {
+        this.store.setMinRating(value);
+    }
+
+    onClearFilters(): void {
+        this.store.clearFilters();
+    }
+
+    onVoteCountChange(value: number | null): void {
+        this.store.setVoteCount(value);
+    }
+
+    onRuntimeMinChange(value: number | null, runtimeMax: number | null): void {
+        this.store.setRuntime(value, runtimeMax);
+    }
+
+    onRuntimeMaxChange(value: number | null, runtimeMin: number | null): void {
+        this.store.setRuntime(runtimeMin, value);
+    }
+
+    onCertificationToggle(cert: string): void {
+        this.store.toggleCertification(cert);
+    }
+
+    onLanguageChange(language: string | null): void {
+        this.store.setLanguage(language);
+    }
+
+    onWatchProviderToggle(providerId: number): void {
+        this.store.toggleWatchProvider(providerId);
     }
 }

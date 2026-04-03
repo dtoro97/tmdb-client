@@ -1,0 +1,147 @@
+<div class="home-top-picks">
+    @if (state.type === "loading") {
+        <div class="home-top-picks__featured">
+            @for (item of featuredSkeletonItems; track item) {
+                <article
+                    class="home-top-picks__feature home-top-picks__feature--skeleton"
+                >
+                    <div class="home-top-picks__feature-media">
+                        <app-skeleton
+                            class="home-top-picks__feature-media-skeleton"
+                        />
+                    </div>
+
+                    <div class="home-top-picks__feature-body">
+                        <app-skeleton
+                            class="home-top-picks__rank-badge-skeleton"
+                        />
+                        <app-skeleton
+                            class="home-top-picks__feature-title-skeleton"
+                        />
+
+                        <div class="home-top-picks__feature-meta">
+                            <app-skeleton
+                                class="home-top-picks__feature-meta-skeleton"
+                            />
+                            <app-skeleton
+                                class="home-top-picks__feature-meta-skeleton home-top-picks__feature-meta-skeleton--badge"
+                            />
+                        </div>
+
+                        <app-skeleton
+                            class="home-top-picks__feature-copy-skeleton"
+                        />
+                        <app-skeleton
+                            class="home-top-picks__feature-copy-skeleton home-top-picks__feature-copy-skeleton--short"
+                        />
+                    </div>
+                </article>
+            }
+        </div>
+
+        <div class="home-top-picks__grid">
+            @for (item of secondarySkeletonItems; track item) {
+                <article class="home-top-picks__tile">
+                    <app-skeleton class="home-top-picks__tile-rank-skeleton" />
+
+                    <div class="home-top-picks__tile-card-skeleton">
+                        <app-skeleton
+                            class="home-top-picks__tile-card-fill-skeleton"
+                        />
+
+                        <div class="home-top-picks__tile-content-skeleton">
+                            <app-skeleton
+                                class="home-top-picks__tile-title-skeleton"
+                            />
+                            <app-skeleton
+                                class="home-top-picks__tile-meta-skeleton"
+                            />
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    } @else {
+        @if (featuredItems.length) {
+            <div class="home-top-picks__featured">
+                @for (entry of featuredItems; track entry.item.id) {
+                    <article class="home-top-picks__feature">
+                        <a
+                            class="home-top-picks__feature-link"
+                            [routerLink]="[
+                                '/title',
+                                entry.item.id,
+                                entry.item.mediaType,
+                            ]"
+                        >
+                            <div class="home-top-picks__feature-media">
+                                <app-image
+                                    [src]="entry.item.imagePath"
+                                    [alt]="entry.item.title"
+                                />
+                            </div>
+
+                            <div class="home-top-picks__feature-body">
+                                <app-badge
+                                    class="home-top-picks__rank-badge home-top-picks__rank-badge--featured"
+                                    [label]="'#' + entry.rank"
+                                    variant="rank"
+                                />
+
+                                <span
+                                    class="home-top-picks__feature-title text-title"
+                                >
+                                    {{ entry.item.title }}
+                                </span>
+
+                                <div class="home-top-picks__feature-meta">
+                                    @if (entry.item.date) {
+                                        <span
+                                            class="home-top-picks__feature-meta-item text-meta"
+                                        >
+                                            {{ entry.item.date | date: "yyyy" }}
+                                        </span>
+                                    }
+
+                                    @if (entry.item.rating !== null) {
+                                        <app-rating-badge
+                                            [value]="entry.item.rating"
+                                        />
+                                    }
+                                </div>
+
+                                @if (entry.item.overview) {
+                                    <p
+                                        class="home-top-picks__feature-overview text-body-sm"
+                                    >
+                                        {{ entry.item.overview }}
+                                    </p>
+                                }
+                            </div>
+                        </a>
+                    </article>
+                }
+            </div>
+        }
+
+        @if (secondaryItems.length) {
+            <div class="home-top-picks__grid">
+                @for (entry of secondaryItems; track entry.item.id) {
+                    <article class="home-top-picks__tile">
+                        <app-badge
+                            class="home-top-picks__rank-badge home-top-picks__rank-badge--tile"
+                            [label]="'#' + entry.rank"
+                            variant="rank"
+                        />
+
+                        <app-card
+                            class="home-top-picks__tile-card"
+                            [item]="entry.item"
+                            [showRating]="false"
+                        />
+                    </article>
+                }
+            </div>
+        }
+    }
+</div>

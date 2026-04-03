@@ -1,0 +1,10 @@
+.mat-mdc-menu-panel {
+    --mat-menu-container-shape: var(--radius-xl);
+    --mat-menu-container-color: var(--mat-sys-surface-dim);
+
+    border: 1px solid var(--surface-panel-border);
+    box-shadow: var(--shadow-lg);
+    .mat-divider {
+        border-top-color: var(--mat-sys-outline-variant);
+    }
+}

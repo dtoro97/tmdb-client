@@ -1,0 +1,38 @@
+import {
+    ItemWithNameAndId,
+    Network,
+    TvCreator,
+    TvEpisodeCompact,
+} from '../../api';
+import type { MediaType } from '../types';
+
+export interface MediaDetails {
+    id: number;
+    title: string;
+    year: string;
+    overview: string;
+    genres: ItemWithNameAndId[];
+    voteAverage: number;
+    posterPath: string | null;
+    backdropPath: string | null;
+    status?: string;
+    languages: string[];
+    mediaType: MediaType;
+    homepage?: string;
+    tagline?: string;
+
+    releaseDate?: string;
+    runtime?: number;
+    budget?: number;
+    revenue?: number;
+
+    firstAirDate?: string;
+    lastAirDate?: string;
+    creators?: TvCreator[];
+    numberOfSeasons?: number;
+    numberOfEpisodes?: number;
+    networks?: Network[];
+    nextEpisode?: TvEpisodeCompact;
+    lastEpisode?: TvEpisodeCompact;
+    voteCount: number;
+}

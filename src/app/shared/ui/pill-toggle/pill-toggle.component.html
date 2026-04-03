@@ -1,16 +1,18 @@
-<div class="pill-toggle">
-    @for (option of options; track option.value) {
-        <button
-            type="button"
-            class="pill-btn"
-            [class.active]="
-                multiple
-                    ? selectedValues.includes(option.value)
-                    : selectedValue === option.value
-            "
-            (click)="onClick(option.value)"
-        >
-            {{ option.label }}
-        </button>
-    }
-</div>
+@if (viewOptions.length) {
+    <div
+        class="pill-toggle"
+        [class.pill-toggle--subtle]="variant === 'subtle'"
+    >
+        @for (option of viewOptions; track option.value) {
+            <button
+                type="button"
+                class="pill-toggle__button text-meta"
+                [attr.aria-pressed]="option.selected"
+                [class.pill-toggle__button--active]="option.selected"
+                (click)="onClick(option.value)"
+            >
+                {{ option.label }}
+            </button>
+        }
+    </div>
+}

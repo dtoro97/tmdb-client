@@ -1,0 +1,113 @@
+<app-person-carousel-panel
+    [state]="data.topCastState"
+    [showRank]="false"
+/>
+
+@if (data.castState.type === "loading" || data.crewState.type === "loading") {
+    <div
+        class="media-credits-panel__list media-credits-panel__list--loading"
+    >
+        <div
+            class="media-credits-panel__row media-credits-panel__row--skeleton"
+        >
+            <app-skeleton class="media-credits-panel__label-skeleton" />
+            <app-skeleton class="media-credits-panel__value-skeleton" />
+        </div>
+        <div
+            class="media-credits-panel__row media-credits-panel__row--skeleton"
+        >
+            <app-skeleton class="media-credits-panel__label-skeleton" />
+            <app-skeleton class="media-credits-panel__value-skeleton" />
+        </div>
+        <div
+            class="media-credits-panel__row media-credits-panel__row--skeleton media-credits-panel__row--all"
+        >
+            <app-skeleton class="media-credits-panel__all-skeleton" />
+            <app-skeleton class="media-credits-panel__chevron-skeleton" />
+        </div>
+    </div>
+} @else {
+    @if (data.directors.length || data.creators.length) {
+        <div class="media-credits-panel__list">
+            @if (data.directors.length) {
+                <div class="media-credits-panel__row">
+                    <span class="media-credits-panel__label text-caption">
+                        Director{{ data.directors.length > 1 ? "s" : "" }}
+                    </span>
+
+                    <span class="media-credits-panel__names text-body-sm">
+                        @for (
+                            person of data.directors.slice(0, 5);
+                            track person.id;
+                            let i = $index
+                        ) {
+                            <a
+                                class="media-credits-panel__link"
+                                [routerLink]="['/name', person.id]"
+                            >
+                                {{ person.name }}
+                            </a>
+                            @if (
+                                i <
+                                (data.directors.length > 5
+                                    ? 4
+                                    : data.directors.length - 1)
+                            ) {
+                                <span class="media-credits-panel__separator">
+                                    &#x2022;
+                                </span>
+                            }
+                        }
+
+                        @if (data.directors.length > 5) {
+                            <span class="media-credits-panel__separator">
+                                &#x2022;
+                            </span>
+                            <span class="text-caption">
+                                +{{ data.directors.length - 5 }} more
+                            </span>
+                        }
+                    </span>
+                </div>
+            }
+
+            @if (data.creators.length) {
+                <div class="media-credits-panel__row">
+                    <span class="media-credits-panel__label text-caption">
+                        Creator{{ data.creators.length > 1 ? "s" : "" }}
+                    </span>
+
+                    <span class="media-credits-panel__names text-body-sm">
+                        @for (
+                            creator of data.creators;
+                            track creator.id;
+                            let i = $index
+                        ) {
+                            <a
+                                class="media-credits-panel__link"
+                                [routerLink]="['/name', creator.id]"
+                            >
+                                {{ creator.name }}
+                            </a>
+                            @if (i < data.creators.length - 1) {
+                                <span class="media-credits-panel__separator">
+                                    &#x2022;
+                                </span>
+                            }
+                        }
+                    </span>
+                </div>
+            }
+        </div>
+    }
+
+    <a
+        class="media-credits-panel__row media-credits-panel__row--all"
+        [routerLink]="['cast']"
+    >
+        <span class="media-credits-panel__label text-body-sm">
+            All cast & crew
+        </span>
+        <i class="fa-solid fa-chevron-right media-credits-panel__chevron"></i>
+    </a>
+}

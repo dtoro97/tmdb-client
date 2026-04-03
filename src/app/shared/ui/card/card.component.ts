@@ -1,31 +1,22 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { MediaThumbComponent } from '../media-thumb/media-thumb.component';
+import { CardItem } from '../../models';
+import { ImageComponent } from '../image/image.component';
+import { RatingBadgeComponent } from '../rating-badge/rating-badge.component';
 
-export interface CardItem {
-    id?: number;
-    title?: string;
-    name?: string;
-    poster_path?: string | null;
-    profile_path?: string | null;
-    vote_average?: number;
-    release_date?: string;
-    first_air_date?: string;
-    overview?: string;
-    media_type?: string;
-}
+export type CardDateFormat = 'year' | 'dayMonth';
 
 @Component({
     selector: 'app-card',
     templateUrl: './card.component.html',
-    imports: [DatePipe, DecimalPipe, RouterLink, MediaThumbComponent],
+    imports: [DatePipe, RouterLink, ImageComponent, RatingBadgeComponent],
     styleUrl: './card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-    @Input() public item: CardItem;
-    @Input() public type: string;
-    @Input() public role?: string;
+    @Input() item?: CardItem;
+    @Input() dateFormat: CardDateFormat = 'year';
+    @Input() showRating = true;
 }

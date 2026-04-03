@@ -1,0 +1,125 @@
+@use "breakpoints" as *;
+
+:host {
+    --rating-distribution-background: color-mix(
+        in srgb,
+        var(--surface-panel) 82%,
+        transparent
+    );
+    --rating-distribution-border: var(--color-border-subtle);
+    --rating-distribution-chart-height: 4.75rem;
+    --rating-distribution-bar-radius: var(--radius-sm);
+
+    display: block;
+}
+
+.rating-distribution {
+    display: grid;
+    grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+    gap: var(--space-4);
+}
+
+.rating-distribution__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--rating-distribution-background);
+    border: 1px solid var(--rating-distribution-border);
+}
+
+.rating-distribution__section--tmdb {
+    min-height: 100%;
+}
+
+.rating-distribution__section--reviews {
+    justify-content: space-between;
+}
+
+.rating-distribution__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.rating-distribution__section-body {
+    min-width: 0;
+}
+
+.rating-distribution__summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.rating-distribution__score-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.rating-distribution__votes {
+    display: block;
+}
+
+.rating-distribution__score-icon {
+    flex-shrink: 0;
+    color: var(--color-rating);
+    font-size: var(--text-xs);
+    line-height: 1;
+    transform: translateY(-0.3rem);
+}
+
+.rating-distribution__value {
+    color: var(--color-rating);
+    line-height: 0.92;
+}
+
+.rating-distribution__bars {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: var(--space-2);
+    align-items: end;
+    height: var(--rating-distribution-chart-height);
+}
+
+.rating-distribution__bar-group {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    row-gap: var(--space-2);
+    height: 100%;
+}
+
+.rating-distribution__bar {
+    width: 100%;
+    min-height: 0.2rem;
+    align-self: end;
+    border-radius: var(--rating-distribution-bar-radius);
+    background: var(--color-rating-bar);
+}
+
+.rating-distribution__bar-label {
+    text-align: center;
+}
+
+.rating-distribution__empty {
+    margin: 0;
+    padding: var(--space-4) 0;
+}
+
+@include mobile() {
+    .rating-distribution {
+        grid-template-columns: 1fr;
+    }
+
+    .rating-distribution__bars {
+        gap: var(--space-1);
+        height: 4rem;
+    }
+}

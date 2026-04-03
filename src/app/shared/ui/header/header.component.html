@@ -1,90 +1,79 @@
-<nav class="navbar" #navbarEl>
-    <div class="navbar-inner inner-container">
-        <a class="logo" routerLink="/">
-            <mat-icon class="logo-icon">movie</mat-icon>
-            <span class="logo-text">TMDB</span>
-        </a>
+<header class="header" #headerEl>
+    <nav aria-label="Primary">
+        <div class="header-inner inner-container">
+            <a class="header-brand" routerLink="/">
+                <mat-icon class="header-brand-icon">movie</mat-icon>
+                <span class="header-brand-text">TMDB</span>
+            </a>
 
-        <button class="menu-btn" (click)="toggleMenu()">
-            <mat-icon>menu</mat-icon>
-            <span class="menu-label">Menu</span>
-        </button>
+            <ul class="header-nav">
+                @for (link of navLinks; track link.label) {
+                    <li>
+                        <a
+                            class="header-nav-link text-body-sm"
+                            [routerLink]="link.routerLink"
+                            [queryParams]="link.queryParams"
+                            routerLinkActive="header-nav-link--active"
+                            [routerLinkActiveOptions]="link.activeOptions"
+                            [attr.aria-current]="rla.isActive ? 'page' : null"
+                            #rla="routerLinkActive"
+                        >
+                            {{ link.label }}
+                        </a>
+                    </li>
+                }
+            </ul>
 
-        <div class="spacer"></div>
-
-        <div class="navbar-actions">
-            <app-header-search-bar />
-        </div>
-    </div>
-
-    @if (menuOpen) {
-        <div class="mega-menu">
-            <div class="mega-inner inner-container">
-                <div class="mega-col">
-                    <h4 class="mega-heading">MOVIES</h4>
-                    <ul>
-                        @for (item of movieItems; track item.label) {
-                            <li>
-                                <a
-                                    [routerLink]="item.routerLink"
-                                    [queryParams]="item.queryParams"
-                                    (click)="onNavLinkClick()"
-                                    >{{ item.label }}</a
-                                >
-                            </li>
-                        }
-                    </ul>
-                </div>
-
-                <div class="mega-col">
-                    <h4 class="mega-heading">TV SHOWS</h4>
-                    <ul>
-                        @for (item of tvItems; track item.label) {
-                            <li>
-                                <a
-                                    [routerLink]="item.routerLink"
-                                    [queryParams]="item.queryParams"
-                                    (click)="onNavLinkClick()"
-                                    >{{ item.label }}</a
-                                >
-                            </li>
-                        }
-                    </ul>
-                </div>
-
-                <div class="mega-col">
-                    <h4 class="mega-heading">PEOPLE</h4>
-                    <ul>
-                        <li>
-                            <a
-                                [routerLink]="personItem.routerLink"
-                                [queryParams]="personItem.queryParams"
-                                (click)="onNavLinkClick()"
-                                >{{ personItem.label }}</a
-                            >
-                        </li>
-                    </ul>
-                </div>
-                <div class="mega-col">
-                    <h4 class="mega-heading">VIDEOS</h4>
-                    <ul>
-                        <li>
-                            <a
-                                [routerLink]="videoItem.routerLink"
-                                (click)="onNavLinkClick()"
-                                >{{ videoItem.label }}</a
-                            >
-                        </li>
-                    </ul>
-                </div>
+            <div class="header-search">
+                <app-header-search-bar />
             </div>
 
-            <div class="mega-footer">
-                <a routerLink="/" (click)="onNavLinkClick()">
-                    <mat-icon>home</mat-icon>
-                    Home
-                </a>
+            <app-header-locale-selector />
+
+            <button
+                class="header-menu-button"
+                type="button"
+                aria-haspopup="true"
+                [attr.aria-expanded]="menuOpen"
+                (click)="toggleMenu()"
+            >
+                <mat-icon class="header-menu-button-icon">menu</mat-icon>
+            </button>
+        </div>
+    </nav>
+
+    @if (menuOpen) {
+        <div class="header-mobile-menu" role="group" aria-label="Navigation">
+            <div class="header-mobile-menu-inner inner-container">
+                <ul class="header-mobile-menu-list">
+                    <li>
+                        <a
+                            class="header-mobile-menu-link text-body-sm"
+                            routerLink="/"
+                            (click)="onNavLinkClick()"
+                        >
+                            <mat-icon>home</mat-icon>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    @for (link of navLinks; track link.label) {
+                        <li>
+                            <a
+                                class="header-mobile-menu-link text-body-sm"
+                                [routerLink]="link.routerLink"
+                                [queryParams]="link.queryParams"
+                                routerLinkActive="header-mobile-menu-link--active"
+                                [routerLinkActiveOptions]="link.activeOptions"
+                                [attr.aria-current]="mobileRla.isActive ? 'page' : null"
+                                #mobileRla="routerLinkActive"
+                                (click)="onNavLinkClick()"
+                            >
+                                {{ link.label }}
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
     }
-</nav>
+</header>

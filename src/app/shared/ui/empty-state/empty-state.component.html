@@ -1,0 +1,11 @@
+<div class="empty-state">
+    <i class="empty-state__icon {{ iconClass }}" aria-hidden="true"></i>
+
+    <div class="empty-state__content">
+        @if (title) {
+            <p class="empty-state__title text-label">{{ title }}</p>
+        }
+
+        <p class="empty-state__text text-body-sm">{{ text }}</p>
+    </div>
+</div>

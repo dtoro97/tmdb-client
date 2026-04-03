@@ -1,39 +1,36 @@
-@if (activeImage$ | async; as image) {
+@if (activeImage(); as image) {
     <div class="container">
         <div class="topbar">
-            <span class="counter">{{ counter$ | async }}</span>
+            <span class="counter text-meta">{{ counter() }}</span>
             <div class="topbar-actions">
                 @if (data.photosLink) {
-                    <button
-                        class="photos-link-btn"
-                        mat-icon-button
-                        (click)="openPhotosPage()"
-                        aria-label="Open photos page"
+                    <app-icon-button
+                        class="photo-viewer__topbar-button photo-viewer__topbar-button--grid"
+                        (onClick)="openPhotosPage()"
+                        ariaLabel="Open photos page"
                     >
                         <mat-icon>grid_on</mat-icon>
-                    </button>
+                    </app-icon-button>
                 }
-                <button
-                    class="close"
-                    mat-icon-button
-                    (click)="close()"
-                    aria-label="Close"
+                <app-icon-button
+                    class="photo-viewer__topbar-button photo-viewer__topbar-button--close"
+                    (onClick)="close()"
+                    ariaLabel="Close"
                 >
                     <mat-icon>close</mat-icon>
-                </button>
+                </app-icon-button>
             </div>
         </div>
 
         <div class="main">
-            <button
-                class="nav-button left-button"
-                mat-icon-button
-                (click)="prev()"
-                [disabled]="!(hasPrev$ | async)"
-                aria-label="Previous photo"
+            <app-icon-button
+                class="photo-viewer__nav photo-viewer__nav--prev"
+                (onClick)="prev()"
+                [disabled]="!hasPrev()"
+                ariaLabel="Previous photo"
             >
                 <mat-icon>chevron_left</mat-icon>
-            </button>
+            </app-icon-button>
 
             <img
                 class="image"
@@ -41,27 +38,26 @@
                 alt=""
             />
 
-            <button
-                class="nav-button right-button"
-                mat-icon-button
-                (click)="next()"
-                [disabled]="!(hasNext$ | async)"
-                aria-label="Next photo"
+            <app-icon-button
+                class="photo-viewer__nav photo-viewer__nav--next"
+                (onClick)="next()"
+                [disabled]="!hasNext()"
+                ariaLabel="Next photo"
             >
                 <mat-icon>chevron_right</mat-icon>
-            </button>
+            </app-icon-button>
         </div>
 
-        <div class="meta">
+        <div class="meta text-caption">
             @if (image.caption) {
-                <span class="caption">{{ image.caption }}</span>
-                <span class="separator">·</span>
+                <span>{{ image.caption }}</span>
+                <span class="separator">&middot;</span>
             }
             @if (image.width && image.height) {
-                <span> {{ image.width }} × {{ image.height }} </span>
+                <span>{{ image.width }} &times; {{ image.height }}</span>
             }
             @if (image.vote_average && image.vote_average > 0) {
-                <span class="separator">·</span>
+                <span class="separator">&middot;</span>
                 <app-rating [value]="image.vote_average"></app-rating>
                 @if (image.vote_count && image.vote_count > 0) {
                     <span class="votes">({{ image.vote_count }})</span>

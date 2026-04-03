@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
     selector: 'app-skeleton',
@@ -7,7 +7,4 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkeletonComponent {
-    @Input() width = '100%';
-    @Input() height = '0.875rem';
-    @Input() radius = '4px';
 }

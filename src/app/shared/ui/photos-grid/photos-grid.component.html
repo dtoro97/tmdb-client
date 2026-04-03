@@ -1,37 +1,41 @@
-<div class="photos-grid">
-    <div class="grid-row">
-        @for (image of firstRow; track image.file_path; let i = $index) {
-            <button
-                class="photo-item"
-                [style.flex-grow]="getFlexGrow(image)"
-                (click)="photoClick.emit(i)"
-            >
-                <img [src]="image.file_path ?? '' | imgSrc" alt="" />
-            </button>
-        }
-    </div>
-    @if (secondRow.length) {
-        <div class="grid-row">
-            @for (
-                image of secondRow;
-                track image.file_path;
-                let i = $index;
-                let last = $last
-            ) {
-                <button
-                    class="photo-item"
-                    [class.mobile-hidden]="i === secondRow.length - 2"
-                    [style.flex-grow]="last ? 0.67 : getFlexGrow(image) * 0.6"
-                    (click)="photoClick.emit(firstRowCount + i)"
-                >
-                    <img [src]="image.file_path ?? '' | imgSrc" alt="" />
-                    @if (last && totalCount > images.length) {
-                        <div class="more">
-                            +{{ totalCount - (images.length - 1) }}
-                        </div>
-                    }
-                </button>
+@if (isLoading) {
+    <div class="photos-grid">
+        <div class="photos-grid__row photos-grid__row--skeleton">
+            @for (i of firstRowCount | repeat; track i) {
+                <app-skeleton
+                    class="photos-grid__skeleton-tile photos-grid__skeleton-tile--wide"
+                />
             }
         </div>
-    }
-</div>
+        <div class="photos-grid__row photos-grid__row--skeleton">
+            @for (i of skeletonSecondRowCount | repeat; track i) {
+                <app-skeleton class="photos-grid__skeleton-tile" />
+            }
+        </div>
+    </div>
+} @else if (gridItems.length) {
+    <div class="photos-grid">
+        @for (item of gridItems; track item.image.file_path) {
+            <button
+                type="button"
+                class="photos-grid__item"
+                [style.--photos-grid-aspect-ratio]="item.aspectRatio"
+                (click)="photoClick.emit(item.clickIndex)"
+            >
+                <img
+                    class="photos-grid__image"
+                    [src]="item.image.file_path ?? '' | imgSrc"
+                    alt=""
+                />
+                @if (item.moreCount; as moreCount) {
+                    <div class="photos-grid__more">
+                        +{{ moreCount > 99 ? 99 : moreCount }}
+                    </div>
+                }
+            </button>
+        }
+        <span class="photos-grid__spacer" aria-hidden="true"></span>
+        <span class="photos-grid__spacer" aria-hidden="true"></span>
+        <span class="photos-grid__spacer" aria-hidden="true"></span>
+    </div>
+}

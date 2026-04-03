@@ -6,129 +6,146 @@ import {
     ContentChild,
     ElementRef,
     Input,
+    OnChanges,
     OnDestroy,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { CAROUSEL_BREAKPOINTS } from '../../../constants';
-
-export interface CarouselBreakpoint {
-    breakpoint: string;
-    numVisible: number;
-    numScroll: number;
-}
+import { IconButtonComponent } from '../icon-button/icon-button.component';
 
 @Component({
     selector: 'app-carousel',
-    imports: [NgTemplateOutlet],
+    imports: [NgTemplateOutlet, IconButtonComponent],
     templateUrl: './carousel.component.html',
     styleUrl: './carousel.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CarouselComponent implements AfterViewInit, OnDestroy {
+export class CarouselComponent
+    implements AfterViewInit, OnChanges, OnDestroy
+{
     @Input() items: unknown[] = [];
-    @Input() numVisible = 5;
-    @Input() numScroll = 5;
+    @Input() ariaLabel = 'Carousel';
 
     @ContentChild(TemplateRef) itemTemplate!: TemplateRef<HTMLElement>;
     @ViewChild('viewport') viewportEl!: ElementRef<HTMLElement>;
+    @ViewChild('track') trackEl!: ElementRef<HTMLElement>;
 
-    currentIndex = 0;
-    activeNumVisible = 5;
-    activeNumScroll = 5;
-    readonly breakpoints = CAROUSEL_BREAKPOINTS;
+    private viewportElRef: HTMLElement | null = null;
+    private trackElRef: HTMLElement | null = null;
+    private pendingSyncFrame: number | null = null;
 
     private resizeObserver: ResizeObserver | null = null;
+    private removeScrollListener: (() => void) | null = null;
+
+    hasOverflow = false;
+    canPrev = false;
+    canNext = false;
 
     constructor(private cdr: ChangeDetectorRef) {}
 
+    ngOnChanges(): void {
+        this.scheduleSyncState();
+    }
+
     ngAfterViewInit(): void {
-        this.activeNumVisible = this.numVisible;
-        this.activeNumScroll = this.numScroll;
-        this.applyBreakpoint(window.innerWidth);
+        const viewport = this.viewportEl.nativeElement;
+        this.viewportElRef = viewport;
+        this.trackElRef = this.trackEl.nativeElement;
+
+        const onScroll = (): void => {
+            this.syncState();
+        };
+
+        viewport.addEventListener('scroll', onScroll, { passive: true });
+        this.removeScrollListener = () =>
+            viewport.removeEventListener('scroll', onScroll);
+
+        this.scheduleSyncState();
 
         this.resizeObserver = new ResizeObserver(() => {
-            this.applyBreakpoint(window.innerWidth);
-            this.cdr.markForCheck();
+            this.scheduleSyncState();
         });
-        this.resizeObserver.observe(document.body);
+        this.resizeObserver.observe(viewport);
+
+        if (this.trackElRef) {
+            this.resizeObserver.observe(this.trackElRef);
+        }
     }
 
     ngOnDestroy(): void {
         this.resizeObserver?.disconnect();
-    }
+        this.removeScrollListener?.();
 
-    get canPrev(): boolean {
-        return this.currentIndex > 0;
-    }
-
-    get canNext(): boolean {
-        return this.currentIndex + this.activeNumVisible < this.items.length;
+        if (this.pendingSyncFrame !== null) {
+            cancelAnimationFrame(this.pendingSyncFrame);
+        }
     }
 
     prev(): void {
-        this.currentIndex = Math.max(
-            0,
-            this.currentIndex - this.activeNumScroll,
-        );
-        this.scrollToIndex();
+        this.scrollByPage(-1);
     }
 
     next(): void {
-        const maxIndex = this.items.length - this.activeNumVisible;
-        this.currentIndex = Math.min(
-            maxIndex,
-            this.currentIndex + this.activeNumScroll,
-        );
-        this.scrollToIndex();
+        this.scrollByPage(1);
     }
 
-    private scrollToIndex(): void {
-        const el = this.viewportEl.nativeElement;
-        const itemWidth = el.scrollWidth / this.items.length;
-        el.scrollTo({
-            left: this.currentIndex * itemWidth,
-            behavior: 'smooth',
-        });
-        this.cdr.markForCheck();
-    }
-
-    private applyBreakpoint(width: number): void {
-        if (!this.breakpoints.length) {
-            this.activeNumVisible = this.numVisible;
-            this.activeNumScroll = this.numScroll;
+    onViewportKeydown(event: KeyboardEvent): void {
+        const el = this.viewportElRef;
+        if (!el) {
             return;
         }
 
-        const sorted = [...this.breakpoints].sort(
-            (a, b) => this.parsePx(a.breakpoint) - this.parsePx(b.breakpoint),
-        );
-
-        let matched: CarouselBreakpoint | null = null;
-        for (const option of sorted) {
-            if (width <= this.parsePx(option.breakpoint)) {
-                matched = option;
-                break;
-            }
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            this.prev();
         }
 
-        if (matched) {
-            this.activeNumVisible = matched.numVisible;
-            this.activeNumScroll = matched.numScroll;
-        } else {
-            this.activeNumVisible = this.numVisible;
-            this.activeNumScroll = this.numScroll;
-        }
-
-        const maxIndex = Math.max(0, this.items.length - this.activeNumVisible);
-        if (this.currentIndex > maxIndex) {
-            this.currentIndex = maxIndex;
-            this.scrollToIndex();
+        if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            this.next();
         }
     }
 
-    private parsePx(value: string): number {
-        return parseInt(value.replace('px', ''), 10);
+    private scrollByPage(direction: 1 | -1): void {
+        const el = this.viewportElRef;
+        if (!el) {
+            return;
+        }
+
+        const delta = Math.max(el.clientWidth - 48, 1) * direction;
+
+        el.scrollTo({
+            left: el.scrollLeft + delta,
+            behavior: 'smooth',
+        });
+    }
+
+    private scheduleSyncState(): void {
+        if (!this.viewportElRef) {
+            return;
+        }
+
+        if (this.pendingSyncFrame !== null) {
+            cancelAnimationFrame(this.pendingSyncFrame);
+        }
+
+        this.pendingSyncFrame = requestAnimationFrame(() => {
+            this.pendingSyncFrame = null;
+            this.syncState();
+        });
+    }
+
+    private syncState(): void {
+        const el = this.viewportElRef;
+        if (!el) {
+            return;
+        }
+
+        const maxScrollLeft = Math.max(el.scrollWidth - el.clientWidth, 0);
+        this.hasOverflow = maxScrollLeft > 1;
+        this.canPrev = el.scrollLeft > 1;
+        this.canNext = el.scrollLeft < maxScrollLeft - 1;
+        this.cdr.markForCheck();
     }
 }

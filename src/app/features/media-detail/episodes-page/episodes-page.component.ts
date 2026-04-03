@@ -1,82 +1,93 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import {
-    MediaThumbComponent,
+    BadgeComponent,
+    ImageComponent,
     PillToggleComponent,
-    RatingComponent,
     SkeletonComponent,
-    SubPageBannerComponent,
+    SubPageHeaderComponent,
+    RatingBadgeComponent,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { Title } from '@angular/platform-browser';
-import {
-    combineLatest,
-    distinctUntilChanged,
-    filter,
-    map,
-    switchMap,
-    tap,
-} from 'rxjs';
+import { filter, map, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TvSeries } from '../../../api';
+import { MediaSeasonsStoreService } from '../media-seasons-store.service';
+import { EpisodeListComponent } from '../episode-list/episode-list.component';
 
 @Component({
     selector: 'app-episodes-page',
     imports: [
         AsyncPipe,
+        BadgeComponent,
         DatePipe,
         RouterLink,
-        MediaThumbComponent,
+        ImageComponent,
         PillToggleComponent,
-        RatingComponent,
+        EpisodeListComponent,
+        SubPageHeaderComponent,
         SkeletonComponent,
-        SubPageBannerComponent,
+        RatingBadgeComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './episodes-page.component.html',
     styleUrl: './episodes-page.component.scss',
 })
 export class EpisodesPageComponent {
-    readonly skeletonRows$ = this.mediaStoreService.selectedSeasonEpisodeCount$.pipe(
-        map((count) => Array.from({ length: count }, (_, index) => index)),
-    );
+    readonly skeletonRows$ =
+        this.mediaSeasonsStoreService.selectedSeasonInfo$.pipe(
+            map((seasonInfo) =>
+                Array.from(
+                    { length: seasonInfo?.episodeCount ?? 5 },
+                    (_, index) => index,
+                ),
+            ),
+        );
 
     constructor(
         public mediaStoreService: MediaDetailStoreService,
+        public mediaSeasonsStoreService: MediaSeasonsStoreService,
+        private route: ActivatedRoute,
         private title: Title,
     ) {
-        this.mediaStoreService.viewModel$
+        this.mediaStoreService.title$
             .pipe(
                 takeUntilDestroyed(),
-                tap((vm) => {
-                    this.title.setTitle(`${vm.title} | Episodes`);
+                tap((title) => {
+                    this.title.setTitle(`${title} | Episodes`);
                 }),
             )
             .subscribe();
 
-        combineLatest([
-            this.mediaStoreService.viewModel$,
-            this.mediaStoreService.selectedSeason$,
-        ])
+        this.route.parent?.paramMap
             .pipe(
-                filter(([, seasonNumber]) => Number.isInteger(seasonNumber)),
-                distinctUntilChanged(
-                    ([prevVm, prevSeason], [nextVm, nextSeason]) =>
-                        prevVm.id === nextVm.id && prevSeason === nextSeason,
+                map((params) => Number(params.get('id'))),
+                filter((id) => Number.isInteger(id)),
+                tap((seriesId) => {
+                    this.mediaSeasonsStoreService.setSeriesId(seriesId);
+                }),
+                takeUntilDestroyed(),
+            )
+            .subscribe();
+
+        this.mediaStoreService.rawMedia$
+            .pipe(
+                filter(
+                    (media): media is TvSeries =>
+                        !!media && Array.isArray((media as TvSeries).seasons),
                 ),
-                switchMap(([vm, seasonNumber]) =>
-                    this.mediaStoreService.loadSeasonIfNeeded$(
-                        vm.id,
-                        seasonNumber as number,
-                    ),
-                ),
+                tap((series) => {
+                    this.mediaSeasonsStoreService.initializeFromSeries(series);
+                }),
                 takeUntilDestroyed(),
             )
             .subscribe();
     }
 
     changeSeason(value: unknown): void {
-        this.mediaStoreService.updateSelectedSeason(value as number);
+        this.mediaSeasonsStoreService.updateSelectedSeason(value as number);
     }
 }

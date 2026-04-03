@@ -1,0 +1,95 @@
+@if (externalLinks; as externalLinks) {
+    <div class="external-links" aria-label="External links">
+        @if (externalLinks.links?.facebook_id; as facebookId) {
+            <a
+                class="external-links__link"
+                [href]="'https://facebook.com/' + facebookId"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+            >
+                <i
+                    class="external-links__icon fa-brands fa-facebook"
+                    aria-hidden="true"
+                ></i>
+            </a>
+        }
+
+        @if (externalLinks.links?.imdb_id; as imdbId) {
+            <a
+                class="external-links__link"
+                [href]="
+                    'https://imdb.com/' +
+                    externalLinks.imdbType +
+                    '/' +
+                    imdbId
+                "
+                target="_blank"
+                rel="noreferrer"
+                aria-label="IMDb"
+            >
+                <i
+                    class="external-links__icon fa-brands fa-imdb"
+                    aria-hidden="true"
+                ></i>
+            </a>
+        }
+
+        @if (externalLinks.links?.instagram_id; as instagramId) {
+            <a
+                class="external-links__link"
+                [href]="'https://instagram.com/' + instagramId"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+            >
+                <i
+                    class="external-links__icon fa-brands fa-instagram"
+                    aria-hidden="true"
+                ></i>
+            </a>
+        }
+
+        @if (externalLinks.links?.twitter_id; as twitterId) {
+            <a
+                class="external-links__link"
+                [href]="'https://twitter.com/' + twitterId"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="X"
+            >
+                <i
+                    class="external-links__icon fa-brands fa-x-twitter"
+                    aria-hidden="true"
+                ></i>
+            </a>
+        }
+
+        @if (externalLinks.homepage; as homepageUrl) {
+            @if (
+                externalLinks.links?.facebook_id ||
+                externalLinks.links?.imdb_id ||
+                externalLinks.links?.instagram_id ||
+                externalLinks.links?.twitter_id
+            ) {
+                <mat-divider
+                    class="external-links__divider"
+                    [vertical]="true"
+                ></mat-divider>
+            }
+
+            <a
+                class="external-links__link"
+                [href]="homepageUrl"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Official website"
+            >
+                <i
+                    class="external-links__icon fa-solid fa-link"
+                    aria-hidden="true"
+                ></i>
+            </a>
+        }
+    </div>
+}

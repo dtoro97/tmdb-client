@@ -1,39 +1,47 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 
 import { combineLatest, switchMap, take, tap } from 'rxjs';
 
-import type { ViewerImage } from '../../../shared';
+import { ViewerImage } from '../../../shared';
 import {
-    CastCrewGridComponent,
-    MediaThumbComponent,
+    ImageComponent,
+    PageSectionComponent,
     PhotoViewerComponent,
     PhotosGridComponent,
     RatingComponent,
-    SubPageBannerComponent,
+    SkeletonComponent,
+    SubPageHeaderComponent,
+    VideosGridComponent,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
 import { MediaDetailStoreService } from '../media-detail-store.service';
+import { MediaSeasonsStoreService } from '../media-seasons-store.service';
 import { EpisodeDetailStoreService } from './episode-detail-store.service';
+import { CastCrewGridComponent } from '../cast-crew-grid/cast-crew-grid.component';
 
 @Component({
     selector: 'app-episode-detail',
     imports: [
         AsyncPipe,
         DatePipe,
+        RouterLink,
         MatChipsModule,
         MatDialogModule,
         CastCrewGridComponent,
-        MediaThumbComponent,
+        ImageComponent,
+        PageSectionComponent,
         PhotosGridComponent,
         RatingComponent,
+        SkeletonComponent,
         MinutesToHours,
-        SubPageBannerComponent,
+        SubPageHeaderComponent,
+        VideosGridComponent,
     ],
     providers: [EpisodeDetailStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,9 +49,12 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
     styleUrl: './episode-detail.component.scss',
 })
 export class EpisodeDetailComponent {
+    readonly vm$ = this.episodeStore.vm$;
+
     constructor(
         public episodeStore: EpisodeDetailStoreService,
-        public mediaStore: MediaDetailStoreService,
+        private mediaStore: MediaDetailStoreService,
+        public mediaSeasonsStore: MediaSeasonsStoreService,
         private route: ActivatedRoute,
         private titleService: Title,
         private dialog: MatDialog,
@@ -54,6 +65,8 @@ export class EpisodeDetailComponent {
                     const seriesId = Number(parentParams.get('id'));
                     const seasonNumber = Number(params.get('seasonNumber'));
                     const episodeNumber = Number(params.get('episodeNumber'));
+                    this.mediaSeasonsStore.setSeriesId(seriesId);
+                    this.mediaSeasonsStore.updateSelectedSeason(seasonNumber);
                     return this.episodeStore.getEpisodeDetails$(
                         seriesId,
                         seasonNumber,
@@ -63,10 +76,24 @@ export class EpisodeDetailComponent {
             )
             .subscribe();
 
-        this.episodeStore.episode$
+        this.mediaStore.rawMedia$
             .pipe(
-                tap((episode) => {
-                    this.titleService.setTitle(`${episode.name} | Episode`);
+                tap((media) => {
+                    if (media && 'seasons' in media) {
+                        this.mediaSeasonsStore.initializeFromSeries(media);
+                    }
+                }),
+            )
+            .subscribe();
+
+        this.vm$
+            .pipe(
+                tap((vm) => {
+                    if (vm.episode) {
+                        this.titleService.setTitle(
+                            `${vm.episode.name} | Episode`,
+                        );
+                    }
                 }),
             )
             .subscribe();

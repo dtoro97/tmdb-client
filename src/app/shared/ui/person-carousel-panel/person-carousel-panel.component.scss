@@ -1,0 +1,45 @@
+:host {
+    display: block;
+}
+
+.person-carousel-panel__skeleton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    width: 100%;
+    text-align: center;
+}
+
+.person-carousel-panel__photo {
+    position: relative;
+    width: min(100%, var(--person-photo-size));
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.person-carousel-panel__photo-fill {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    --skeleton-radius: 0;
+}
+
+.person-carousel-panel__rank {
+    width: 24%;
+    --skeleton-height: 1lh;
+}
+
+.person-carousel-panel__name {
+    width: 72%;
+    line-height: var(--lh-tight);
+    --skeleton-height: 1lh;
+}
+
+.person-carousel-panel__subtitle {
+    width: 52%;
+    --skeleton-height: 1lh;
+}

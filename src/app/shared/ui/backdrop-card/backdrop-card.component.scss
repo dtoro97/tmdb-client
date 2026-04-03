@@ -1,0 +1,65 @@
+@use "mixins" as *;
+
+:host {
+    display: block;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.backdrop-card {
+    position: relative;
+    display: block;
+    aspect-ratio: var(--backdrop-ratio);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    @include focus-ring();
+    @include media-surface-hover(".backdrop-card__media", ".backdrop-card__image");
+}
+
+.backdrop-card__media {
+    @include absolute-fill;
+    border-radius: var(--radius-lg);
+}
+
+.backdrop-card__image {
+    @include absolute-fill;
+}
+
+.backdrop-card__scrim {
+    @include absolute-fill;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.82) 0%,
+        rgba(0, 0, 0, 0.3) 40%,
+        transparent 72%
+    );
+}
+
+.backdrop-card__content {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+}
+
+.backdrop-card__title {
+    color: var(--text-primary);
+    text-shadow: var(--shadow-text-hero);
+    @include line-clamp(2);
+}
+
+.backdrop-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1-5);
+    text-shadow: var(--shadow-text-hero);
+}

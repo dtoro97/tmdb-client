@@ -1,0 +1,85 @@
+<section class="rating-distribution" aria-label="Ratings overview">
+    <section
+        class="rating-distribution__section rating-distribution__section--tmdb"
+        aria-label="TMDb rating"
+    >
+        <div class="rating-distribution__section-header text-overline">
+            TMDb rating
+        </div>
+
+        <div class="rating-distribution__section-body">
+            <div class="rating-distribution__summary">
+                <i
+                    class="rating-distribution__score-icon fa-solid fa-star"
+                    aria-hidden="true"
+                ></i>
+
+                <div class="rating-distribution__score-copy">
+                    <span class="rating-distribution__value text-display">
+                        @if (tmdbAverage !== null) {
+                            {{ tmdbAverage | number: "1.1-1" }}
+                        } @else {
+                            -
+                        }
+                    </span>
+
+                    <span class="rating-distribution__votes text-meta">
+                        @if (tmdbVoteCount > 0) {
+                            {{ tmdbVoteCount | voteCount }} votes
+                        } @else {
+                            No TMDb votes yet
+                        }
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section
+        class="rating-distribution__section rating-distribution__section--reviews"
+        aria-label="Review ratings"
+    >
+        <div class="rating-distribution__section-header text-overline">
+            <span>Review ratings</span>
+            <span>{{ reviewRatedCount }} rated</span>
+        </div>
+
+        <div class="rating-distribution__section-body">
+            @if (hasReviewRatings) {
+                <div
+                    class="rating-distribution__bars"
+                    aria-label="Review rating distribution"
+                >
+                    @for (bucket of buckets; track bucket.label) {
+                        <div class="rating-distribution__bar-group">
+                            <div
+                                class="rating-distribution__bar"
+                                [style.height.%]="bucket.height"
+                                [attr.aria-label]="
+                                    bucket.label +
+                                    ' star reviews: ' +
+                                    bucket.count
+                                "
+                                [attr.title]="
+                                    bucket.label +
+                                    ' star reviews: ' +
+                                    bucket.count
+                                "
+                            ></div>
+
+                            <span
+                                class="rating-distribution__bar-label text-overline"
+                            >
+                                {{ bucket.label }}
+                            </span>
+                        </div>
+                    }
+                </div>
+            } @else {
+                <p class="rating-distribution__empty text-caption">
+                    No numeric ratings in reviews.
+                </p>
+            }
+        </div>
+    </section>
+</section>

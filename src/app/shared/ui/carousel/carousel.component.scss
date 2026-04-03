@@ -1,14 +1,41 @@
-.carousel-wrapper {
-    position: relative;
+@use "breakpoints" as *;
 
-    &:hover .prev-btn {
-        opacity: 1;
+:host {
+    --carousel-columns: 6;
+    display: block;
+}
+
+@include carousel-md() {
+    :host {
+        --carousel-columns: 5;
     }
 }
 
+@include carousel-sm() {
+    :host {
+        --carousel-columns: 4;
+    }
+}
+
+@include carousel-xs() {
+    :host {
+        --carousel-columns: 3;
+    }
+}
+
+.carousel-wrapper {
+    position: relative;
+}
+
 .carousel-viewport {
-    overflow-x: scroll;
+    overflow-x: auto;
+    padding: var(--space-3) var(--space-1);
+    margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-1));
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-1);
+    overscroll-behavior-x: contain;
     scrollbar-width: none;
+    outline: none;
 
     &::-webkit-scrollbar {
         display: none;
@@ -16,47 +43,33 @@
 }
 
 .carousel-track {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc(
+        (100% - (var(--space-4) * (var(--carousel-columns) - 1))) /
+            var(--carousel-columns)
+    );
+    gap: var(--space-4);
 }
 
 .carousel-item {
-    flex: 0 0 auto;
-    padding: 0 6px;
-    box-sizing: border-box;
+    min-width: 0;
+    scroll-snap-align: start;
 }
 
-.nav-btn {
+.carousel__nav {
     position: absolute;
-    top: 40%;
+    top: 50%;
     transform: translateY(-50%);
-    z-index: 10;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.72);
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition:
-        background 0.2s ease,
-        opacity 0.2s ease;
-
-    &:hover {
-        background: rgba(0, 0, 0, 0.92);
-    }
+    z-index: 2;
+    transition: opacity var(--motion-base);
 }
 
-.prev-btn {
-    left: 0;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+.carousel__nav--prev {
+    left: calc(var(--space-1) * -1);
 }
 
-.next-btn {
-    right: 0;
+.carousel__nav--next {
+    right: calc(var(--space-1) * -1);
 }
+

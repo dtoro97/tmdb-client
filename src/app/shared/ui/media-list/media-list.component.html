@@ -1,0 +1,58 @@
+<div class="media-list">
+    @if (state.type === "loading") {
+        <ng-container
+            *ngTemplateOutlet="skeleton; context: { $implicit: skeletonCount }"
+        />
+    } @else if (state.type === "loaded" || state.type === "loading-more") {
+        @for (entry of displayItems; track entry.item.id; let idx = $index) {
+            <app-media-list-item
+                [item]="entry.item"
+                [genreNames]="entry.genreNames"
+                [routerLink]="[
+                    '/title',
+                    entry.item.id,
+                    routeType === 'item' ? entry.item.mediaType : routeType,
+                ]"
+                [index]="
+                    showIndex
+                        ? descendingFrom !== null
+                            ? descendingFrom - idx
+                            : indexStart + idx
+                        : null
+                "
+            />
+        }
+        @if (state.type === "loading-more") {
+            <ng-container
+                *ngTemplateOutlet="
+                    skeleton;
+                    context: { $implicit: state.placeholderCount }
+                "
+            />
+        }
+    }
+</div>
+
+<ng-template #skeleton let-count>
+    @for (i of count | repeat; track i) {
+        <div class="media-list__skeleton-row">
+            @if (showIndex) {
+                <app-skeleton class="media-list__index-skeleton" />
+            }
+            <app-skeleton class="media-list__poster-skeleton" />
+            <div class="media-list__content-skeleton">
+                <app-skeleton
+                    class="media-list__line media-list__line--title"
+                />
+                <app-skeleton class="media-list__line media-list__line--meta" />
+                <app-skeleton class="media-list__line media-list__line--body" />
+                <app-skeleton
+                    class="media-list__line media-list__line--body-short"
+                />
+                <app-skeleton
+                    class="media-list__line media-list__line--cast"
+                />
+            </div>
+        </div>
+    }
+</ng-template>

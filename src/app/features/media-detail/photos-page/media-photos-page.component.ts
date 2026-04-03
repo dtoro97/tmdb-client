@@ -10,13 +10,19 @@ import {
     PhotoViewerComponent,
     PhotosBrowserComponent,
     PhotosBrowserSelection,
-    SubPageBannerComponent,
+    SubPageHeaderComponent,
+    PhotosBrowserSkeletonComponent,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 
 @Component({
     selector: 'app-media-photos-page',
-    imports: [AsyncPipe, PhotosBrowserComponent, SubPageBannerComponent],
+    imports: [
+        AsyncPipe,
+        PhotosBrowserComponent,
+        SubPageHeaderComponent,
+        PhotosBrowserSkeletonComponent,
+    ],
     templateUrl: './media-photos-page.component.html',
     styleUrl: './media-photos-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,7 +35,9 @@ export class MediaPhotosPageComponent {
     ) {
         this.mediaStoreService.title$
             .pipe(
-                tap((mediaTitle) => this.title.setTitle(`${mediaTitle} | Photos`)),
+                tap((mediaTitle) =>
+                    this.title.setTitle(`${mediaTitle} | Photos`),
+                ),
                 takeUntilDestroyed(),
             )
             .subscribe();

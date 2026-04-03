@@ -1,0 +1,39 @@
+@use "breakpoints" as *;
+
+:host {
+    display: block;
+}
+
+.browse-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+
+    &__start {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    &__end {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+}
+
+@include mobile() {
+    .browse-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .browse-toolbar__end {
+        justify-content: flex-start;
+    }
+}
+

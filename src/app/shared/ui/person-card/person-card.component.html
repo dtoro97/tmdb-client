@@ -1,17 +1,26 @@
-<div
-    class="person-card"
-    [routerLink]="['/name', person.id]"
->
-    <div class="photo-wrap">
-        <app-media-thumb
-            [src]="person.profile_path"
-            type="person"
-            [alt]="person.name"
-        />
+<a class="person-card" [routerLink]="['/name', person.id]">
+    <div class="person-card__photo-shell">
+        <div class="person-card__photo">
+            <app-image
+                [src]="person.imagePath"
+                type="person"
+                [alt]="person.name"
+                params="w185"
+            />
+        </div>
     </div>
 
-    <p class="name">{{ person.name }}</p>
-    @if (person.character) {
-        <p class="character">{{ person.character }}</p>
+    <p class="person-card__name text-body-sm">{{ person.name }}</p>
+    @if (person.subtitle) {
+        <p class="person-card__department text-caption">
+            {{ person.subtitle }}
+        </p>
     }
-</div>
+    @if (rank) {
+        <app-badge
+            class="person-card__rank-badge"
+            [label]="'#' + rank"
+            variant="rank"
+        />
+    }
+</a>

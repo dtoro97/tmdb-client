@@ -1,0 +1,75 @@
+.app-badge {
+    --app-badge-slant-cut: 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 1.4rem;
+    padding-inline: var(--space-2);
+    border-radius: var(--chip-radius);
+    border: 1px solid var(--mat-sys-outline-variant);
+    background: var(--mat-sys-surface-container-low);
+    color: var(--mat-sys-on-surface);
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.app-badge--slant {
+    margin-right: var(--app-badge-slant-cut);
+    padding-inline: var(--space-2) calc(var(--space-2) + 0.2rem);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: -1px;
+        right: calc(var(--app-badge-slant-cut) * -1);
+        bottom: -1px;
+        width: calc(var(--app-badge-slant-cut) + 0.2rem);
+        background: inherit;
+        border-top: 1px solid currentColor;
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+        border-color: inherit;
+        clip-path: polygon(0 0, 100% 0, 64% 100%, 0 100%);
+    }
+}
+
+.app-badge--accent {
+    background: var(--color-brand);
+    color: var(--mat-sys-on-primary);
+    border-color: var(--chip-primary-border);
+}
+
+.app-badge--outline {
+    background: color-mix(in srgb, var(--color-brand) 12%, transparent);
+    color: var(--color-brand);
+    border-color: color-mix(
+        in srgb,
+        var(--color-brand) 58%,
+        var(--mat-sys-outline-variant)
+    );
+}
+
+.app-badge--rank {
+    min-height: 1.5rem;
+    padding-inline: var(--space-2) calc(var(--space-2) + 0.1rem);
+    border-radius: var(--radius-sm);
+    background: var(--color-rank);
+    color: var(--color-on-rank);
+    border-color: var(--color-rank-border);
+    font-weight: var(--weight-bold);
+}
+
+.app-badge--rank.app-badge--slant::after {
+    background: linear-gradient(
+        to bottom,
+        var(--color-rank) 0%,
+        var(--color-rank-cap) 100%
+    );
+    border-color: var(--color-rank-border);
+}

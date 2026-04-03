@@ -1,15 +1,17 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 
 import { switchMap, tap } from 'rxjs';
 
 import {
-    MediaListItemComponent,
-    MediaThumbComponent,
+    HeroSurfaceComponent,
+    MediaListComponent,
+    ImageComponent,
     RatingComponent,
+    SkeletonComponent,
 } from '../../../shared';
 import { CollectionStoreService } from '../collection-store.service';
 
@@ -19,10 +21,11 @@ import { CollectionStoreService } from '../collection-store.service';
     styleUrl: './collection-detail.component.scss',
     imports: [
         AsyncPipe,
-        RouterLink,
-        MediaThumbComponent,
+        HeroSurfaceComponent,
+        ImageComponent,
         RatingComponent,
-        MediaListItemComponent,
+        MediaListComponent,
+        SkeletonComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -45,9 +48,16 @@ export class CollectionDetailComponent {
 
         this.store.collection$
             .pipe(
-                tap((c) =>
-                    this.titleService.setTitle(`${c.name} | Collection`),
-                ),
+                tap((collectionState) => {
+                    if (
+                        collectionState.type === 'loaded' &&
+                        collectionState.value?.name
+                    ) {
+                        this.titleService.setTitle(
+                            `${collectionState.value.name} | Collection`,
+                        );
+                    }
+                }),
                 takeUntilDestroyed(),
             )
             .subscribe();

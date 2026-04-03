@@ -1,0 +1,19 @@
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import { HeroSurfaceComponent } from '../hero-surface/hero-surface.component';
+
+@Component({
+    selector: 'app-sub-page-header',
+    imports: [RouterLink, HeroSurfaceComponent],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './sub-page-header.component.html',
+    styleUrl: './sub-page-header.component.scss',
+})
+export class SubPageHeaderComponent {
+    @Input() backdropPath: string | null = null;
+    @Input() parentTitle: string | null = '';
+    @Input() backLink: string | readonly string[] | null = ['../'];
+    @Input() pageTitle: string | null = '';
+    @Input() subtitle: string | null = '';
+}

@@ -1,0 +1,27 @@
+:host {
+    --rating-gap: 0.2rem;
+    --rating-color: var(--text-muted);
+    --rating-icon-color: var(--color-rating);
+    --rating-font-weight: var(--weight-medium);
+    --rating-icon-shift: -0.5px;
+
+    display: inline-flex;
+    align-items: center;
+}
+
+.rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rating-gap);
+    color: var(--rating-color);
+    font-weight: var(--rating-font-weight);
+}
+
+.rating__icon {
+    width: 1em;
+    height: 1em;
+    font-size: 1em;
+    line-height: 1;
+    color: var(--rating-icon-color);
+    transform: translateY(var(--rating-icon-shift));
+}

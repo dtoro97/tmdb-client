@@ -1,0 +1,29 @@
+<section class="page-section">
+    @if (title || subtitle) {
+        <header class="page-section__header">
+            <div class="page-section__heading">
+                @if (title) {
+                    <h2 class="page-section__title">{{ title }}</h2>
+                }
+
+                @if (subtitle) {
+                    @if (title) {
+                        <p class="page-section__subtitle">{{ subtitle }}</p>
+                    } @else {
+                        <h2
+                            class="page-section__subtitle page-section__subtitle--standalone"
+                        >
+                            {{ subtitle }}
+                        </h2>
+                    }
+                }
+            </div>
+
+            <div class="page-section__controls">
+                <ng-content select="[section-controls]"></ng-content>
+            </div>
+        </header>
+    }
+
+    <ng-content></ng-content>
+</section>

@@ -3,8 +3,17 @@ import {
     Component,
     EventEmitter,
     Input,
+    OnChanges,
     Output,
 } from '@angular/core';
+
+interface PillToggleOption {
+    label: string;
+    value: unknown;
+    selected: boolean;
+}
+
+export type PillToggleVariant = 'default' | 'subtle';
 
 @Component({
     selector: 'app-pill-toggle',
@@ -12,14 +21,26 @@ import {
     styleUrl: './pill-toggle.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PillToggleComponent {
+export class PillToggleComponent implements OnChanges {
     @Input() options: { label: string; value: unknown }[] = [];
     @Input() selectedValue: unknown;
     @Input() selectedValues: unknown[] = [];
     @Input() multiple = false;
+    @Input() variant: PillToggleVariant = 'default';
     @Output() selected = new EventEmitter<unknown | unknown[]>();
 
-    onClick(value: unknown) {
+    viewOptions: PillToggleOption[] = [];
+
+    ngOnChanges(): void {
+        this.viewOptions = this.options.map((option) => ({
+            ...option,
+            selected: this.multiple
+                ? this.selectedValues.includes(option.value)
+                : this.selectedValue === option.value,
+        }));
+    }
+
+    onClick(value: unknown): void {
         if (!this.multiple) {
             this.selected.emit(value);
             return;

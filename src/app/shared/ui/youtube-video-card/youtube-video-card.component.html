@@ -1,0 +1,71 @@
+<article class="youtube-video-card">
+    <button
+        type="button"
+        class="youtube-video-card__thumb-button"
+        [attr.aria-label]="openLabel"
+        (click)="onOpen()"
+    >
+        <div class="youtube-video-card__thumb aspect-landscape">
+            <img [src]="thumbnailUrl" [alt]="video.name || mediaTitle || 'Video'" />
+
+            <div class="youtube-video-card__play">
+                <i class="fa-solid fa-play" aria-hidden="true"></i>
+            </div>
+
+            @if (video.type) {
+                <app-badge
+                    class="youtube-video-card__type-badge"
+                    [label]="video.type"
+                />
+            }
+
+            @if (showOfficialBadge) {
+                <app-badge
+                    class="youtube-video-card__official-badge"
+                    label="Official"
+                    variant="accent"
+                />
+            }
+        </div>
+    </button>
+
+    <div class="youtube-video-card__body">
+        <p class="youtube-video-card__title text-body-sm">
+            {{ video.name }}
+        </p>
+
+        @if (mediaTitle) {
+            @if (linkToMedia && mediaId && mediaType) {
+                <a
+                    class="youtube-video-card__context text-caption"
+                    [routerLink]="['/title', mediaId, mediaType]"
+                >
+                    {{ mediaTitle }}
+                    @if (mediaYear) {
+                        ({{ mediaYear }})
+                    }
+                </a>
+            } @else {
+                <p class="youtube-video-card__context text-caption">
+                    {{ mediaTitle }}
+                    @if (mediaYear) {
+                        ({{ mediaYear }})
+                    }
+                </p>
+            }
+        }
+
+        @if (showSupplementalMeta) {
+            <div class="youtube-video-card__meta text-caption">
+                @if (video.published_at) {
+                    <span>{{ video.published_at | date: "mediumDate" }}</span>
+                }
+                @if (video.size) {
+                    <span class="youtube-video-card__quality">
+                        {{ video.size }}p
+                    </span>
+                }
+            </div>
+        }
+    </div>
+</article>

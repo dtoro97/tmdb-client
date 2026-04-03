@@ -1,0 +1,74 @@
+@use "./breakpoints" as *;
+@use "./mixins" as *;
+
+.surface-panel,
+.section-panel {
+    @include surface-panel();
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6);
+}
+
+.section-panel--outlined {
+    background: var(--surface-panel);
+}
+
+.surface-panel > app-page-section + app-page-section,
+.section-panel > app-page-section + app-page-section {
+    margin-top: var(--space-2);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.empty-panel {
+    border-radius: var(--radius-2xl);
+    background: color-mix(
+        in srgb,
+        var(--mat-sys-surface-container-low) 38%,
+        transparent
+    );
+}
+
+.catalog-panel {
+    @include surface-panel();
+    overflow: hidden;
+}
+
+.catalog-panel-footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    border-top: 1px solid
+        color-mix(in srgb, var(--mat-sys-outline-variant) 70%, transparent);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--mat-sys-surface-container) 26%, transparent)
+            0%,
+        transparent 100%
+    );
+}
+
+@include mobile() {
+    .surface-panel,
+    .section-panel {
+        padding: var(--space-4);
+    }
+
+    .section-panel--outlined {
+        border-radius: var(--radius-2xl);
+    }
+
+    .surface-panel > app-page-section + app-page-section,
+    .section-panel > app-page-section + app-page-section {
+        padding-top: var(--space-5);
+    }
+
+    .catalog-panel {
+        border-radius: var(--radius-2xl);
+    }
+
+    .catalog-panel-footer {
+        padding-inline: var(--space-3);
+    }
+}
