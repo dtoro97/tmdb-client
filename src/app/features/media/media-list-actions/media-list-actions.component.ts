@@ -7,10 +7,9 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { EMPTY, catchError, of, switchMap, take } from 'rxjs';
 
@@ -31,7 +30,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-media-list-actions',
-    imports: [MatButtonModule, MatMenuModule, AsyncPipe],
+    imports: [AsyncPipe, MatTooltipModule],
     templateUrl: './media-list-actions.component.html',
     styleUrl: './media-list-actions.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +62,23 @@ export class MediaListActionsComponent {
                 take(1),
                 catchError((error) =>
                     this.showError(error, 'Could not update your watchlist.'),
+                ),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
+    }
+
+    toggleFavorite(): void {
+        const action$ =
+            this.userSessionStore.mode() === 'user'
+                ? this.mediaDetailActionsStore.toggleFavorite$()
+                : this.openDialog('sign-in', []);
+
+        action$
+            .pipe(
+                take(1),
+                catchError((error) =>
+                    this.showError(error, 'Could not update your favorites.'),
                 ),
                 takeUntilDestroyed(this.destroyRef),
             )

@@ -36,21 +36,32 @@
                                 />
                             </div>
                         } @else {
-                            <h1 class="page-title">
+                            <h1 class="page-title user-data-overview__name">
                                 {{ vm.profileDisplayName }}
                             </h1>
 
-                            @if (vm.profileHandle) {
-                                <p
-                                    class="user-data-overview__handle text-body-sm"
-                                >
-                                    {{ vm.profileHandle }}
-                                </p>
-                            }
-
-                            <p class="page-subtitle">
-                                Your watchlist, ratings, and lists in one place.
-                            </p>
+                            <nav class="user-data-overview__stats-line">
+                                @for (
+                                    stat of vm.overviewStats;
+                                    track stat.route;
+                                    let last = $last
+                                ) {
+                                    <a
+                                        class="user-data-overview__stat-link"
+                                        [routerLink]="stat.route"
+                                    >
+                                        <strong>{{ stat.value }}</strong>
+                                        {{ stat.label }}
+                                    </a>
+                                    @if (!last) {
+                                        <span
+                                            class="user-data-overview__stat-separator"
+                                            aria-hidden="true"
+                                            >·</span
+                                        >
+                                    }
+                                }
+                            </nav>
                         }
 
                         @if (vm.profileState.type === "loading") {
@@ -66,39 +77,13 @@
                         }
                     </div>
                 </div>
-
-                <div class="user-data-overview__stats">
-                    @for (stat of vm.overviewStats; track stat.route) {
-                        <a
-                            class="user-data-overview__stat"
-                            [routerLink]="stat.route"
-                        >
-                            <span
-                                class="user-data-overview__stat-label text-caption"
-                            >
-                                {{ stat.label }}
-                            </span>
-                            <strong class="user-data-overview__stat-value">
-                                {{ stat.value }}
-                            </strong>
-                            <span
-                                class="user-data-overview__stat-description text-caption"
-                            >
-                                {{ stat.description }}
-                            </span>
-                        </a>
-                    }
-                </div>
             </header>
         </app-hero-surface>
 
         <div class="page-main page-main--full-padding user-data-overview__main">
             <div class="user-data-overview__sections">
                 <!-- Watchlist -->
-                <app-page-section
-                    title="Watchlist"
-                    subtitle="A quick look at what you want to watch next."
-                >
+                <app-page-section title="Watchlist">
                     <a
                         section-controls
                         class="user-data-overview__section-link text-body-sm"
@@ -147,10 +132,7 @@
                 </app-page-section>
 
                 <!-- Ratings -->
-                <app-page-section
-                    title="Ratings"
-                    subtitle="Recent movie and TV scores from your account."
-                >
+                <app-page-section title="Ratings">
                     <a
                         section-controls
                         class="user-data-overview__section-link text-body-sm"
@@ -171,6 +153,8 @@
                                 text="Rate a few titles to start building your personal history."
                             />
                             @if (
+                                vm.watchlistPreviewCards.type === "loaded" &&
+                                vm.watchlistPreviewCards.value.length > 0 &&
                                 vm.trendingSuggestionsState.type === "loaded" &&
                                 vm.trendingSuggestionsState.value.length
                             ) {
@@ -198,10 +182,7 @@
                 </app-page-section>
 
                 <!-- Lists -->
-                <app-page-section
-                    title="Lists"
-                    subtitle="Your custom TMDb collections and shortcuts."
-                >
+                <app-page-section title="Lists">
                     <a
                         section-controls
                         class="user-data-overview__section-link text-body-sm"
@@ -266,14 +247,13 @@
                                         >
                                             {{ item.metadata }}
                                         </span>
-                                        <p
-                                            class="user-data-overview__list-description text-body-sm"
-                                        >
-                                            {{
-                                                item.description ||
-                                                    "A curated TMDb list from your account."
-                                            }}
-                                        </p>
+                                        @if (item.description) {
+                                            <p
+                                                class="user-data-overview__list-description text-body-sm"
+                                            >
+                                                {{ item.description }}
+                                            </p>
+                                        }
                                     </div>
                                 </article>
                             }

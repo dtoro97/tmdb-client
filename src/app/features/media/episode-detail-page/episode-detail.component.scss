@@ -226,7 +226,7 @@
 }
 
 .episode-crew-list a {
-    @include text-link(var(--text-secondary));
+    @include text-link-underline(var(--text-secondary));
     font-weight: var(--weight-medium);
 }
 
@@ -247,7 +247,7 @@
 }
 
 .episode-nav-link {
-    @include text-link();
+    @include text-link-underline();
     font-weight: var(--weight-medium);
 }
 

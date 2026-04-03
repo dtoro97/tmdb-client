@@ -4,20 +4,30 @@
     --carousel-columns: 6;
 }
 
+:host([data-columns="2"]) { --carousel-columns: 2; }
+:host([data-columns="3"]) { --carousel-columns: 3; }
+:host([data-columns="4"]) { --carousel-columns: 4; }
+:host([data-columns="5"]) { --carousel-columns: 5; }
+:host([data-columns="7"]) { --carousel-columns: 7; }
+:host([data-columns="8"]) { --carousel-columns: 8; }
+
 @include carousel-md() {
-    :host {
+    :host,
+    :host([data-columns]) {
         --carousel-columns: 5;
     }
 }
 
 @include carousel-sm() {
-    :host {
+    :host,
+    :host([data-columns]) {
         --carousel-columns: 4;
     }
 }
 
 @include carousel-xs() {
-    :host {
+    :host,
+    :host([data-columns]) {
         --carousel-columns: 3;
     }
 }

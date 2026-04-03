@@ -1,63 +1,155 @@
-@if (cast.length) {
-    <section class="credit-section">
-        <h2 class="credit-section__title text-title">Cast</h2>
-        <div class="credit-list">
-            @for (member of cast; track member.id) {
-                <a class="credit-row" [routerLink]="['/name', member.id]">
-                    <app-image
-                        class="credit-row__thumb"
-                        [src]="member.profile_path ?? null"
-                        [alt]="member.name"
-                        type="person"
-                    />
-                    <div class="credit-row__body">
-                        <span class="credit-row__name text-body-sm">{{
-                            member.name
-                        }}</span>
-                        @if (member.character) {
-                            <span class="credit-row__meta text-caption">{{
-                                member.character
-                            }}</span>
-                        }
-                    </div>
-                    @if (member.episode_count) {
-                        <span class="credit-row__count text-caption">
-                            {{ member.episode_count }} ep
-                        </span>
-                    }
-                </a>
-            }
-        </div>
-    </section>
-}
+<cdk-accordion class="credit-groups" multi>
+    @if (showCast && cast.length) {
+        <cdk-accordion-item
+            #castItem="cdkAccordionItem"
+            class="credit-section accordion-section credit-section--cast"
+            [expanded]="true"
+        >
+            <button
+                class="accordion-header credit-section__toggle"
+                aria-labelledby="cast-crew-grid-cast-title"
+                (click)="castItem.toggle()"
+            >
+                <span class="credit-section__group-label">
+                    <h2
+                        id="cast-crew-grid-cast-title"
+                        class="credit-section__title text-meta"
+                    >
+                        Cast
+                    </h2>
+                    <span class="credit-section__count text-caption">
+                        {{ cast.length }}
+                        {{ cast.length === 1 ? "person" : "people" }}
+                    </span>
+                </span>
+                <i
+                    class="fa-solid fa-chevron-down accordion-chevron"
+                    [class.accordion-chevron--collapsed]="!castItem.expanded"
+                    aria-hidden="true"
+                ></i>
+            </button>
 
-@for (group of groupedCrew; track group.department) {
-    <section class="credit-section">
-        <h2 class="credit-section__title text-title">{{ group.department }}</h2>
-        <div class="credit-list">
-            @for (member of group.members; track member.id) {
-                <a class="credit-row" [routerLink]="['/name', member.id]">
-                    <app-image
-                        class="credit-row__thumb"
-                        [src]="member.profile_path ?? null"
-                        [alt]="member.name"
-                        type="person"
-                    />
-                    <div class="credit-row__body">
-                        <span class="credit-row__name text-body-sm">{{
-                            member.name
-                        }}</span>
-                        <span class="credit-row__meta text-caption">{{
-                            member.job
-                        }}</span>
-                    </div>
-                    @if (member.episode_count) {
-                        <span class="credit-row__count text-caption">
-                            {{ member.episode_count }} ep
-                        </span>
-                    }
-                </a>
+            @if (castItem.expanded) {
+                <div class="accordion-body">
+                    <ul class="credit-list" role="list">
+                        @for (member of cast; track member.id) {
+                            <li class="credit-list__item">
+                                <a
+                                    class="credit-row"
+                                    [routerLink]="['/name', member.id]"
+                                >
+                                    <app-image
+                                        class="credit-row__thumb"
+                                        [src]="member.profile_path ?? null"
+                                        [alt]="member.name"
+                                        type="person"
+                                    />
+                                    <div class="credit-row__body">
+                                        <span
+                                            class="credit-row__name text-body"
+                                        >
+                                            {{ member.name }}
+                                        </span>
+                                        @if (member.character) {
+                                            <span
+                                                class="credit-row__meta text-meta"
+                                            >
+                                                as {{ member.character }}
+                                            </span>
+                                        }
+                                    </div>
+                                    @if (member.episode_count) {
+                                        <span
+                                            class="credit-row__count text-caption"
+                                        >
+                                            {{ member.episode_count }} ep
+                                        </span>
+                                    }
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
             }
-        </div>
-    </section>
-}
+        </cdk-accordion-item>
+    }
+
+    @if (showCrew) {
+        @for (
+            group of groupedCrew;
+            track group.department;
+            let i = $index
+        ) {
+            <cdk-accordion-item
+                #crewItem="cdkAccordionItem"
+                class="credit-section accordion-section"
+                [expanded]="i < defaultExpandedGroupCount"
+            >
+                <button
+                    class="accordion-header credit-section__toggle"
+                    (click)="crewItem.toggle()"
+                >
+                    <span class="credit-section__group-label">
+                        <h2 class="credit-section__title text-meta">
+                            {{ group.department }}
+                        </h2>
+                        <span class="credit-section__count text-caption">
+                            {{ group.members.length }}
+                            {{
+                                group.members.length === 1
+                                    ? "person"
+                                    : "people"
+                            }}
+                        </span>
+                    </span>
+                    <i
+                        class="fa-solid fa-chevron-down accordion-chevron"
+                        [class.accordion-chevron--collapsed]="!crewItem.expanded"
+                        aria-hidden="true"
+                    ></i>
+                </button>
+
+                @if (crewItem.expanded) {
+                    <div class="accordion-body">
+                        <ul class="credit-list" role="list">
+                            @for (member of group.members; track member.id) {
+                                <li class="credit-list__item">
+                                    <a
+                                        class="credit-row"
+                                        [routerLink]="['/name', member.id]"
+                                    >
+                                        <app-image
+                                            class="credit-row__thumb"
+                                            [src]="member.profile_path ?? null"
+                                            [alt]="member.name"
+                                            type="person"
+                                        />
+                                        <div class="credit-row__body">
+                                            <span
+                                                class="credit-row__name text-body"
+                                            >
+                                                {{ member.name }}
+                                            </span>
+                                            <span
+                                                class="credit-row__meta text-meta"
+                                            >
+                                                {{ member.job }}
+                                            </span>
+                                        </div>
+                                        @if (member.episode_count) {
+                                            <span
+                                                class="credit-row__count text-caption"
+                                            >
+                                                {{ member.episode_count }} ep
+                                            </span>
+                                        }
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </cdk-accordion-item>
+        }
+    }
+</cdk-accordion>

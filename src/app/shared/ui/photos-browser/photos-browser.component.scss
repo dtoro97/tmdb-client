@@ -45,8 +45,8 @@
     border-radius: var(--radius-pill);
     background: var(--mat-sys-surface-container-high);
     transition:
-        border-color var(--transition-fast),
-        background-color var(--transition-fast);
+        border-color var(--motion-fast),
+        background-color var(--motion-fast);
 
     &:hover {
         background: var(--mat-sys-surface-container-highest);

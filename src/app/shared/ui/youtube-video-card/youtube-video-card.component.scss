@@ -94,7 +94,7 @@
 }
 
 a.youtube-video-card__context {
-    @include text-link(var(--text-muted));
+    @include text-link-underline(var(--text-muted));
 }
 
 .youtube-video-card__meta {

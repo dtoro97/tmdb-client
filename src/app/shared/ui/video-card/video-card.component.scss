@@ -69,16 +69,8 @@
 }
 
 .video-card__media-link {
-    color: var(--text-primary);
-    text-decoration: none;
+    @include text-link-underline(var(--text-primary));
     @include line-clamp(1);
-    transition: var(--transition-color);
-
-    &:is(:hover, :focus-visible) {
-        outline: none;
-        color: var(--text-accent);
-        text-decoration: underline;
-    }
 }
 
 .video-card__media-year,

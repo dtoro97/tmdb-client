@@ -274,6 +274,15 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         }));
     }
 
+    resetCreditsFilters(): void {
+        this.patchState((state) => ({
+            ...state,
+            creditsUi: {
+                ...INITIAL_CREDITS_UI,
+            },
+        }));
+    }
+
     toggleCreditsSortDirection(): void {
         this.patchState((state) => ({
             ...state,

@@ -1,18 +1,18 @@
 <div class="media-rating-dialog">
     <header class="media-rating-dialog__header">
-        <p class="media-rating-dialog__eyebrow text-overline">Your Score</p>
+        <p class="media-rating-dialog__eyebrow text-overline">Your rating</p>
         <h2 class="media-rating-dialog__title text-title">
-            Rate {{ data.title }}
+            {{ data.title }}
         </h2>
-        <p class="media-rating-dialog__subtitle text-body-sm">
-            @if (data.authMode === "guest") {
-                This rating is tied to your guest session on this browser.
-            } @else if (data.authMode === "anonymous") {
-                Pick your score, then choose how to save it.
-            } @else {
-                This rating will be saved to your TMDb account.
-            }
-        </p>
+        @if (data.authMode === "anonymous") {
+            <p class="media-rating-dialog__subtitle text-body-sm">
+                Save as a guest, or sign in to keep it on your account.
+            </p>
+        } @else if (data.authMode === "guest") {
+            <p class="media-rating-dialog__subtitle text-body-sm">
+                Saved to this browser's guest session.
+            </p>
+        }
     </header>
 
     <div class="media-rating-dialog__content" mat-dialog-content>
@@ -20,27 +20,16 @@
             <span class="media-rating-dialog__value">
                 {{ value() | number: "1.1-1" }}
             </span>
-            <span class="media-rating-dialog__scale text-caption"
-                >out of 10</span
-            >
+            <span class="media-rating-dialog__scale text-caption">/ 10</span>
         </div>
 
         <div class="media-rating-dialog__controls">
-            <button
-                class="media-rating-dialog__stepper"
-                type="button"
-                (click)="adjust(-0.5)"
-            >
-                -0.5
-            </button>
-
             <mat-slider
                 class="media-rating-dialog__slider"
                 [min]="0.5"
                 [max]="10"
                 [step]="0.5"
                 discrete
-                showTickMarks
             >
                 <input
                     matSliderThumb
@@ -48,40 +37,38 @@
                     (ngModelChange)="updateValue($event)"
                 />
             </mat-slider>
-
-            <button
-                class="media-rating-dialog__stepper"
-                type="button"
-                (click)="adjust(0.5)"
-            >
-                +0.5
-            </button>
         </div>
     </div>
 
     @if (data.authMode === "anonymous") {
-        <div class="media-rating-dialog__footer-anon" mat-dialog-actions>
-            <button
-                class="media-rating-dialog__login-btn"
-                matButton="filled"
-                type="button"
-                (click)="loginToSave()"
-            >
-                Sign in with TMDb
-            </button>
-
-            <div class="media-rating-dialog__guest-alt">
-                <span class="media-rating-dialog__guest-alt-label text-body-sm">
-                    or
-                </span>
+        <div
+            class="media-rating-dialog__footer media-rating-dialog__footer--anonymous"
+            mat-dialog-actions
+        >
+            <div class="media-rating-dialog__footer-actions">
                 <button
-                    class="media-rating-dialog__guest-link"
+                    class="media-rating-dialog__cancel"
+                    type="button"
+                    mat-dialog-close
+                >
+                    Cancel
+                </button>
+                <button
+                    matButton="filled"
                     type="button"
                     (click)="saveAsGuest()"
                 >
-                    save as guest
+                    Save as guest
                 </button>
             </div>
+
+            <button
+                class="media-rating-dialog__login-link"
+                type="button"
+                (click)="loginToSave()"
+            >
+                Sign in to save it to your TMDb account
+            </button>
         </div>
     } @else {
         <div class="media-rating-dialog__footer" mat-dialog-actions>
@@ -96,11 +83,19 @@
             }
 
             <div class="media-rating-dialog__footer-actions">
-                <button mat-stroked-button mat-dialog-close type="button">
+                <button
+                    class="media-rating-dialog__cancel"
+                    type="button"
+                    mat-dialog-close
+                >
                     Cancel
                 </button>
                 <button matButton="filled" type="button" (click)="save()">
-                    Save rating
+                    @if (data.currentRating !== null) {
+                        Update
+                    } @else {
+                        Save rating
+                    }
                 </button>
             </div>
         </div>

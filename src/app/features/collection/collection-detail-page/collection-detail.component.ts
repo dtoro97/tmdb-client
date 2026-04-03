@@ -1,17 +1,20 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 
 import { switchMap, tap } from 'rxjs';
 
 import {
+    BadgeComponent,
     HeroSurfaceComponent,
     MediaListComponent,
     ImageComponent,
+    PageSectionComponent,
     RatingComponent,
     SkeletonComponent,
+    VoteCountPipe,
 } from '../../../shared';
 import { CollectionStoreService } from '../collection-store.service';
 
@@ -21,11 +24,15 @@ import { CollectionStoreService } from '../collection-store.service';
     styleUrl: './collection-detail.component.scss',
     imports: [
         AsyncPipe,
+        RouterLink,
+        BadgeComponent,
         HeroSurfaceComponent,
         ImageComponent,
         RatingComponent,
         MediaListComponent,
+        PageSectionComponent,
         SkeletonComponent,
+        VoteCountPipe,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

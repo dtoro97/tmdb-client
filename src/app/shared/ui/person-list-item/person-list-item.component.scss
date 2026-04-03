@@ -4,6 +4,8 @@
 :host {
     display: block;
     min-width: 0;
+    @include fade-up(0.35s, 12px);
+    animation-delay: calc(var(--item-index, 0) * 0.04s);
 }
 
 :host:not(:last-child) {
@@ -35,6 +37,14 @@
     height: 64px;
     border-radius: var(--radius-full);
     box-shadow: var(--shadow-sm);
+    transition:
+        filter var(--motion-base),
+        transform var(--motion-base);
+
+    .person-list-item:is(:hover, :focus-visible) & {
+        filter: brightness(var(--brightness-sm));
+        transform: scale(var(--scale-sm));
+    }
 }
 
 .person-list-item__content {
@@ -50,7 +60,7 @@
     min-width: 0;
     color: var(--mat-sys-on-surface);
     font-weight: var(--weight-bold);
-    transition: color var(--transition-fast);
+    transition: color var(--motion-fast);
     @include line-clamp(1);
 }
 
@@ -67,11 +77,26 @@
 }
 
 .person-list-item__known-for-link {
-    @include text-link(var(--text-muted));
+    @include text-link-underline(var(--text-muted));
 }
 
 .person-list-item__separator {
     color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :host {
+        animation: none;
+    }
+
+    .person-list-item__avatar {
+        transition: none;
+    }
+
+    .person-list-item:is(:hover, :focus-visible) .person-list-item__avatar {
+        filter: none;
+        transform: none;
+    }
 }
 
 @include mobile() {
@@ -111,5 +136,4 @@
         line-height: var(--lh-normal);
         @include line-clamp(2);
     }
-
 }

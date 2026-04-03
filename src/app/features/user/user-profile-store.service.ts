@@ -30,7 +30,6 @@ export interface UserProfileVm {
     readonly profileState: LoadableValue<UserAccountProfile>;
     readonly profileDisplayName: string;
     readonly profileAvatarInitials: string;
-    readonly profileHandle: string | null;
     readonly profileMetaLine: string | null;
     readonly trendingSuggestionsState: LoadableItems<CardItem>;
 }
@@ -71,18 +70,6 @@ const toAvatarInitials = (
     return initials.join('') || 'TM';
 };
 
-const toProfileHandle = (
-    profileState: LoadableValue<UserAccountProfile>,
-): string | null => {
-    if (profileState.type !== 'loaded') {
-        return null;
-    }
-
-    const username = profileState.value.username?.trim();
-
-    return username ? `@${username}` : null;
-};
-
 const toProfileMetaLine = (
     profileState: LoadableValue<UserAccountProfile>,
 ): string | null => {
@@ -121,7 +108,6 @@ export class UserProfileStore extends ComponentStore<UserProfileState> {
             profileState: state.profileState,
             profileDisplayName: toProfileDisplayName(state.profileState),
             profileAvatarInitials: toAvatarInitials(state.profileState),
-            profileHandle: toProfileHandle(state.profileState),
             profileMetaLine: toProfileMetaLine(state.profileState),
             trendingSuggestionsState: state.trendingSuggestionsState,
         }),

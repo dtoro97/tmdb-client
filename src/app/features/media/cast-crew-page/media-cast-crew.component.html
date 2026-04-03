@@ -56,7 +56,15 @@
                             crewState.type === "idle"
                         ) {
                             <section class="credit-panel surface-panel">
-                                <h2 class="text-title">Cast</h2>
+                                <app-skeleton class="credit-toolbar-skeleton" />
+                                <div class="credit-section-skeleton-header">
+                                    <app-skeleton
+                                        class="credit-section-title-skeleton"
+                                    />
+                                    <app-skeleton
+                                        class="credit-section-count-skeleton"
+                                    />
+                                </div>
                                 <div class="credit-skeleton-list">
                                     @for (row of [0, 1, 2, 3, 4]; track row) {
                                         <div class="credit-row-skeleton">
@@ -71,6 +79,9 @@
                                                     class="credit-subtitle-skeleton"
                                                 />
                                             </div>
+                                            <app-skeleton
+                                                class="credit-row-count-skeleton"
+                                            />
                                         </div>
                                     }
                                 </div>
@@ -81,20 +92,48 @@
                             !castCrew.cast.length &&
                             !castCrew.crew.length
                         ) {
-                            <div class="empty-panel">
-                                <app-empty-state
-                                    iconClass="fa-solid fa-users-slash"
-                                    text="No cast or crew information is available for this title."
-                                />
-                            </div>
+                            <app-empty-state
+                                class="credit-empty-state"
+                                iconClass="fa-solid fa-sliders"
+                                iconStyle="plain"
+                                text="No cast or crew information is available for this title."
+                            />
                         } @else {
                             @if (groupedCrew$ | async; as groupedCrew) {
-                                <section class="credit-panel surface-panel">
-                                    <app-cast-crew-grid
-                                        [cast]="castCrew.cast"
-                                        [groupedCrew]="groupedCrew"
-                                    />
-                                </section>
+                                @if (creditToolbar$ | async; as creditToolbar) {
+                                    <section class="credit-panel surface-panel">
+                                        <app-browse-toolbar
+                                            class="credit-panel__toolbar"
+                                        >
+                                            <app-pill-toggle
+                                                start
+                                                [options]="
+                                                    creditToolbar.filterOptions
+                                                "
+                                                [selectedValue]="
+                                                    visibleSection
+                                                "
+                                                variant="subtle"
+                                                (selected)="
+                                                    onVisibleSectionsChange(
+                                                        $event
+                                                    )
+                                                "
+                                            />
+                                        </app-browse-toolbar>
+
+                                        <app-cast-crew-grid
+                                            [cast]="castCrew.cast"
+                                            [groupedCrew]="groupedCrew"
+                                            [showCast]="
+                                                visibleSection !== 'crew'
+                                            "
+                                            [showCrew]="
+                                                visibleSection !== 'cast'
+                                            "
+                                        />
+                                    </section>
+                                }
                             }
                         }
                     }

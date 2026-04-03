@@ -135,6 +135,84 @@ export class TmdbListService {
         );
     }
 
+    getFavoriteState$(
+        mediaId: number,
+        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+    ): Observable<boolean> {
+        const sessionId = this.userSessionStore.sessionId();
+
+        if (!sessionId || this.userSessionStore.mode() !== 'user') {
+            return of(false);
+        }
+
+        const request$ =
+            mediaType === 'tv'
+                ? this.tvSeriesService.tvSeriesAccountStates(
+                      mediaId,
+                      sessionId,
+                      undefined,
+                      'body',
+                      false,
+                      API_JSON_OPTIONS,
+                  )
+                : this.movieService.movieAccountStates(
+                      mediaId,
+                      sessionId,
+                      undefined,
+                      'body',
+                      false,
+                      API_JSON_OPTIONS,
+                  );
+
+        return request$.pipe(map((accountStates) => !!accountStates.favorite));
+    }
+
+    updateFavorite$(
+        mediaId: number,
+        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+        favorite: boolean,
+    ): Observable<boolean> {
+        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
+            switchMap(({ accountId }) => {
+                const sessionId = this.userSessionStore.sessionId();
+
+                if (!sessionId) {
+                    return throwError(
+                        () =>
+                            new Error(
+                                'You need a TMDb user session to update your favorites.',
+                            ),
+                    );
+                }
+
+                return this.accountService
+                    .accountAddFavorite(
+                        accountId,
+                        sessionId,
+                        buildRawBody({
+                            media_type: mediaType,
+                            media_id: mediaId,
+                            favorite,
+                        }),
+                        'body',
+                        false,
+                        API_JSON_OPTIONS,
+                    )
+                    .pipe(
+                        tap((response) => {
+                            if ((response.status_code ?? 0) >= 400) {
+                                throw toStatusError(
+                                    'Unable to update your favorites.',
+                                    response,
+                                );
+                            }
+                        }),
+                        map(() => favorite),
+                    );
+            }),
+        );
+    }
+
     getUserLists$(): Observable<MediaUserListSummary[]> {
         return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
             switchMap(({ accountId }) => {

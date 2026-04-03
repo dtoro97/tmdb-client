@@ -1,75 +1,71 @@
 <div class="page-container">
     @if (vm$ | async; as vm) {
-        <app-sub-page-header
-            [backdropPath]="vm.backdropPath"
-            [backLink]="['../']"
-            parentTitle="all videos"
-            [pageTitle]="vm.title"
-            [subtitle]="vm.year ? '(' + vm.year + ')' : ''"
-        />
+        @if (videosState$ | async; as videosState) {
+            <div class="video-theater">
+                <div class="video-theater__inner">
+                    <nav class="video-theater__nav">
+                        <a
+                            class="video-theater__back text-caption"
+                            [routerLink]="['../']"
+                        >
+                            <i
+                                class="fa-solid fa-chevron-left"
+                                aria-hidden="true"
+                            ></i>
+                            All videos
+                        </a>
+                    </nav>
 
-        <main class="page-main page-main--full-padding video-detail-page__main">
-            @if (videosState$ | async; as videosState) {
-                @if (
-                    videosState.type === "loading" || videosState.type === "idle"
-                ) {
-                    <section class="video-detail-page__hero">
-                        <app-skeleton class="video-detail-page__embed-skeleton" />
+                    @if (
+                        videosState.type === "loading" ||
+                        videosState.type === "idle"
+                    ) {
+                        <div class="video-theater__stage">
+                            <app-skeleton
+                                class="video-theater__player-skeleton"
+                            />
+                        </div>
 
-                        <div class="video-detail-page__info">
-                            <div class="video-detail-page__summary">
+                        <div class="video-theater__info">
+                            <div class="video-theater__summary">
                                 <app-skeleton
-                                    class="video-detail-page__title-skeleton"
+                                    class="video-theater__title-skeleton"
                                 />
                                 <app-skeleton
-                                    class="video-detail-page__media-link-skeleton"
+                                    class="video-theater__media-link-skeleton"
                                 />
                             </div>
-                            <div class="video-detail-page__meta">
+                            <div class="video-theater__meta">
                                 <app-skeleton
-                                    class="video-detail-page__badge-skeleton"
+                                    class="video-theater__badge-skeleton"
                                 />
                                 <app-skeleton
-                                    class="video-detail-page__badge-skeleton video-detail-page__badge-skeleton--short"
+                                    class="video-theater__badge-skeleton video-theater__badge-skeleton--short"
                                 />
                                 <app-skeleton
-                                    class="video-detail-page__date-skeleton"
+                                    class="video-theater__date-skeleton"
                                 />
                             </div>
                         </div>
-                    </section>
+                    } @else if (selectedVideoMeta$ | async; as selected) {
+                        @if (selected.video; as selectedVideo) {
+                            <div class="video-theater__stage">
+                                <app-youtube-video
+                                    class="video-theater__player"
+                                    [video]="selectedVideo"
+                                    [showTypeBadge]="false"
+                                />
+                            </div>
 
-                    <ng-container
-                        *ngTemplateOutlet="
-                            videoCarouselSectionSkeleton;
-                            context: { subtitle: 'Other videos from this title' }
-                        "
-                    />
-
-                    <ng-container
-                        *ngTemplateOutlet="
-                            videoCarouselSectionSkeleton;
-                            context: { subtitle: 'Trailers from similar titles' }
-                        "
-                    />
-                } @else if (selectedVideoMeta$ | async; as selected) {
-                    @if (selected.video; as selectedVideo) {
-                        <section class="video-detail-page__hero">
-                            <app-youtube-video
-                                class="video-detail-page__player"
-                                [video]="selectedVideo"
-                                [showTypeBadge]="false"
-                            />
-
-                            <div class="video-detail-page__info">
-                                <div class="video-detail-page__summary">
+                            <div class="video-theater__info">
+                                <div class="video-theater__summary">
                                     <h1
-                                        class="video-detail-page__title text-headline"
+                                        class="video-theater__title text-headline"
                                     >
                                         {{ selectedVideo.name || vm.title }}
                                     </h1>
                                     <a
-                                        class="video-detail-page__media-link text-body-sm"
+                                        class="video-theater__media-link text-body-sm"
                                         [routerLink]="[
                                             '/title',
                                             vm.id,
@@ -83,61 +79,121 @@
                                     </a>
                                 </div>
 
-                                <div class="video-detail-page__meta">
-                                    @if (selectedVideo.type) {
-                                        <app-badge [label]="selectedVideo.type" />
-                                    }
-                                    @if (selectedVideo.official !== undefined) {
-                                        <app-badge
-                                            [label]="
-                                                selectedVideo.official
-                                                    ? 'Official'
-                                                    : 'Unofficial'
-                                            "
-                                            [variant]="
-                                                selectedVideo.official
-                                                    ? 'accent'
-                                                    : 'neutral'
-                                            "
-                                        />
-                                    }
-                                    @if (selectedVideo.size) {
-                                        <app-badge
-                                            [label]="selectedVideo.size + 'p'"
-                                        />
-                                    }
-                                    @if (selectedVideo.published_at) {
-                                        <span
-                                            class="video-detail-page__date text-caption"
-                                        >
-                                            <i
-                                                class="fa-regular fa-calendar"
-                                                aria-hidden="true"
-                                            ></i>
-                                            {{
-                                                selectedVideo.published_at
-                                                    | date: "mediumDate"
-                                            }}
-                                        </span>
-                                    }
-                                    @if (selected.languageName) {
-                                        <app-badge
-                                            [label]="selected.languageName"
-                                        />
-                                    }
+                                <div class="video-theater__meta">
+                                    <div class="video-theater__meta-primary">
+                                        @if (selectedVideo.type) {
+                                            <app-badge
+                                                [label]="selectedVideo.type"
+                                            />
+                                        }
+                                        @if (
+                                            selectedVideo.official !== undefined
+                                        ) {
+                                            <app-badge
+                                                [label]="
+                                                    selectedVideo.official
+                                                        ? 'Official'
+                                                        : 'Unofficial'
+                                                "
+                                                [variant]="
+                                                    selectedVideo.official
+                                                        ? 'accent'
+                                                        : 'neutral'
+                                                "
+                                            />
+                                        }
+                                    </div>
+
+                                    <span
+                                        class="video-theater__meta-separator"
+                                        aria-hidden="true"
+                                    ></span>
+
+                                    <div class="video-theater__meta-secondary">
+                                        @if (selectedVideo.published_at) {
+                                            <span
+                                                class="video-theater__date text-caption"
+                                            >
+                                                <i
+                                                    class="fa-regular fa-calendar"
+                                                    aria-hidden="true"
+                                                ></i>
+                                                {{
+                                                    selectedVideo.published_at
+                                                        | date: "mediumDate"
+                                                }}
+                                            </span>
+                                        }
+                                        @if (selectedVideo.size) {
+                                            <span
+                                                class="video-theater__quality text-caption"
+                                            >
+                                                {{ selectedVideo.size }}p
+                                            </span>
+                                        }
+                                        @if (selected.languageName) {
+                                            <span
+                                                class="video-theater__lang text-caption"
+                                            >
+                                                {{ selected.languageName }}
+                                            </span>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                        </section>
+                        } @else {
+                            <section class="video-theater__empty">
+                                <app-empty-state
+                                    iconClass="fa-regular fa-circle-play"
+                                    text="This video is no longer available."
+                                />
+                            </section>
+                        }
+                    }
+                </div>
+            </div>
 
-                        @if (relatedVideos$ | async; as relatedVideos) {
-                            @if (relatedVideos.length) {
+            @if (
+                videosState.type === "loading" || videosState.type === "idle"
+            ) {
+                <main class="video-detail-page__related">
+                    <section class="video-detail-page__related-section">
+                        <app-page-section subtitle="More from this title">
+                            <app-carousel [items]="5 | repeat" [columns]="5">
+                                <ng-template>
+                                    <div
+                                        class="video-detail-page__carousel-skeleton"
+                                    >
+                                        <app-skeleton
+                                            class="video-detail-page__carousel-skeleton-media"
+                                        />
+                                        <app-skeleton
+                                            class="video-detail-page__carousel-skeleton-title"
+                                        />
+                                        <app-skeleton
+                                            class="video-detail-page__carousel-skeleton-meta"
+                                        />
+                                    </div>
+                                </ng-template>
+                            </app-carousel>
+                        </app-page-section>
+                    </section>
+                </main>
+            } @else if (selectedVideoMeta$ | async; as selected) {
+                @if (selected.video) {
+                    @if (relatedVideos$ | async; as relatedVideos) {
+                        @if (relatedVideos.length) {
+                            <main class="video-detail-page__related">
                                 <section
-                                    class="video-detail-page__section section-panel section-panel--outlined"
+                                    class="video-detail-page__related-section"
                                 >
                                     <app-page-section
-                                        subtitle="Other videos from this title"
+                                        subtitle="More from this title"
                                     >
-                                        <app-carousel [items]="relatedVideos">
+                                        <app-carousel
+                                            [items]="relatedVideos"
+                                            [columns]="5"
+                                        >
                                             <ng-template let-video>
                                                 <app-youtube-video-card
                                                     [video]="video"
@@ -149,85 +205,11 @@
                                         </app-carousel>
                                     </app-page-section>
                                 </section>
-                            }
+                            </main>
                         }
-
-                        @if (recommendationsState$ | async; as recState) {
-                            @if (
-                                recState.type === "loading" ||
-                                recState.type === "idle"
-                            ) {
-                                <ng-container
-                                    *ngTemplateOutlet="
-                                        videoCarouselSectionSkeleton;
-                                        context: {
-                                            subtitle:
-                                                'Trailers from similar titles',
-                                        }
-                                    "
-                                />
-                            } @else if (
-                                similarMediaTrailers$ | async;
-                                as similarTrailers
-                            ) {
-                                @if (similarTrailers.length) {
-                                    <section
-                                        class="video-detail-page__section section-panel section-panel--outlined"
-                                    >
-                                        <app-page-section
-                                            subtitle="Trailers from similar titles"
-                                        >
-                                            <app-carousel [items]="similarTrailers">
-                                                <ng-template let-item>
-                                                    <app-youtube-video-card
-                                                        [video]="item.video"
-                                                        [mediaTitle]="
-                                                            item.mediaTitle
-                                                        "
-                                                        [mediaYear]="item.mediaYear"
-                                                        [mediaId]="item.mediaId"
-                                                        [mediaType]="item.mediaType"
-                                                        destination="detail"
-                                                    />
-                                                </ng-template>
-                                            </app-carousel>
-                                        </app-page-section>
-                                    </section>
-                                }
-                            }
-                        }
-                    } @else {
-                        <section class="video-detail-page__empty">
-                            <app-empty-state
-                                iconClass="fa-regular fa-circle-play"
-                                text="The selected video is not available for this title."
-                            />
-                        </section>
                     }
                 }
             }
-        </main>
+        }
     }
 </div>
-
-<ng-template #videoCarouselSectionSkeleton let-subtitle="subtitle">
-    <section class="video-detail-page__section section-panel section-panel--outlined">
-        <app-page-section [subtitle]="subtitle">
-            <app-carousel [items]="5 | repeat">
-                <ng-template>
-                    <div class="video-detail-page__carousel-skeleton">
-                        <app-skeleton
-                            class="video-detail-page__carousel-skeleton-media"
-                        />
-                        <app-skeleton
-                            class="video-detail-page__carousel-skeleton-title"
-                        />
-                        <app-skeleton
-                            class="video-detail-page__carousel-skeleton-meta"
-                        />
-                    </div>
-                </ng-template>
-            </app-carousel>
-        </app-page-section>
-    </section>
-</ng-template>

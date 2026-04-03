@@ -29,7 +29,7 @@ export class CarouselComponent
     @Input() ariaLabel = 'Carousel';
     @Input() columns: number | null = null;
 
-    @HostBinding('style.--carousel-columns')
+    @HostBinding('attr.data-columns')
     get hostColumns(): number | null {
         return this.columns;
     }

@@ -13,81 +13,112 @@
             "
             variant="detail"
         >
-            <div class="collection-detail__hero">
-                @if (store.posterPath$ | async; as posterPath) {
-                    <app-image
-                        class="collection-detail__poster"
-                        [src]="posterPath"
-                        type="media"
-                        [alt]="
-                            collectionState.type === 'loaded' &&
-                            collectionState.value
-                                ? collectionState.value.name
-                                : 'Collection poster'
-                        "
-                    />
+            <div class="collection-detail__hero-cinematic">
+                @if (
+                    collectionState.type === "loaded"
+                        ? collectionState.value
+                        : null;
+                    as collection
+                ) {
+                    <p class="collection-detail__hero-kicker text-overline">
+                        Collection
+                        @if (store.timelineLabel$ | async; as timelineLabel) {
+                            &#x2022; {{ timelineLabel }}
+                        }
+                    </p>
+                    <h1 class="collection-detail__hero-title text-hero-title">
+                        {{ collection.name }}
+                    </h1>
                 } @else {
                     <app-skeleton
-                        class="collection-detail__poster collection-detail__poster--skeleton"
+                        class="collection-detail__hero-kicker-skeleton"
+                    />
+                    <app-skeleton
+                        class="collection-detail__hero-title-skeleton"
                     />
                 }
+            </div>
+        </app-hero-surface>
 
-                <div class="collection-detail__hero-copy">
+        <div class="collection-detail__info-shelf">
+            <div class="collection-detail__info-shelf-inner inner-container">
+                <div class="collection-detail__poster-column">
+                    @if (store.posterPath$ | async; as posterPath) {
+                        <app-image
+                            class="collection-detail__poster"
+                            [src]="posterPath"
+                            type="media"
+                            [alt]="
+                                collectionState.type === 'loaded' &&
+                                collectionState.value
+                                    ? collectionState.value.name
+                                    : 'Collection poster'
+                            "
+                        />
+                    } @else {
+                        <app-skeleton
+                            class="collection-detail__poster collection-detail__poster--skeleton"
+                        />
+                    }
+                </div>
+
+                <div class="collection-detail__info-content">
                     @if (
                         collectionState.type === "loaded"
                             ? collectionState.value
                             : null;
                         as collection
                     ) {
-                        <h1 class="text-display">
-                            {{ collection.name }}
-                        </h1>
-                    } @else {
-                        <app-skeleton
-                            class="collection-detail__title-skeleton"
-                        />
-                    }
-
-                    @if (collectionState.type === "loaded") {
-                        <div class="collection-detail__meta">
+                        <div class="collection-detail__summary-row">
                             @if (store.averageRating$ | async; as rating) {
                                 @if (rating > 0) {
-                                    <app-rating [value]="rating" />
+                                    <span
+                                        class="collection-detail__summary-pill"
+                                    >
+                                        <app-rating [value]="rating" />
+                                    </span>
                                 }
                             }
+
                             @if (store.partsCount$ | async; as count) {
-                                <span class="muted">
+                                <span
+                                    class="collection-detail__summary-meta text-body-sm"
+                                >
                                     {{ count }}
-                                    {{ count === 1 ? "Movie" : "Movies" }}
+                                    {{ count === 1 ? "movie" : "movies" }}
+                                </span>
+                            }
+
+                            @if (
+                                store.timelineLabel$ | async;
+                                as timelineLabel
+                            ) {
+                                <span
+                                    class="collection-detail__summary-meta text-body-sm"
+                                >
+                                    {{ timelineLabel }}
                                 </span>
                             }
                         </div>
-                    } @else {
-                        <div class="collection-detail__meta-skeleton">
-                            <app-skeleton
-                                class="collection-detail__meta-skeleton-rating"
-                            />
-                            <app-skeleton
-                                class="collection-detail__meta-skeleton-count"
-                            />
-                        </div>
-                    }
 
-                    @if (
-                        collectionState.type === "loaded"
-                            ? collectionState.value
-                            : null;
-                        as collection
-                    ) {
                         <p
                             class="collection-detail__overview text-body"
                             [class.muted]="!collection.overview"
                         >
                             {{
-                                collection.overview || "No overview available."
+                                collection.overview ||
+                                    "We don't have an overview for this collection yet."
                             }}
                         </p>
                     } @else {
+                        <div class="collection-detail__summary-skeleton-row">
+                            <app-skeleton
+                                class="collection-detail__summary-pill-skeleton"
+                            />
+                            <app-skeleton
+                                class="collection-detail__summary-pill-skeleton collection-detail__summary-pill-skeleton--wide"
+                            />
+                        </div>
                         <div class="collection-detail__overview-skeleton">
                             <app-skeleton
                                 class="collection-detail__overview-line"
@@ -102,27 +133,137 @@
                     }
                 </div>
             </div>
-        </app-hero-surface>
+        </div>
 
-        <div class="page-main">
+        <div class="page-sections">
+            @if (store.arcEntries$ | async; as arcEntries) {
+                @if (arcEntries.length) {
+                    <app-page-section
+                        title="Collection Highlights"
+                        [subtitle]="
+                            (store.collectionArcSummary$ | async) ?? undefined
+                        "
+                    >
+                        <div class="collection-detail__arc-grid">
+                            @for (entry of arcEntries; track entry.id) {
+                                <a
+                                    class="collection-detail__arc-card"
+                                    [routerLink]="[
+                                        '/title',
+                                        entry.item.id,
+                                        entry.item.mediaType,
+                                    ]"
+                                >
+                                    <app-image
+                                        class="collection-detail__arc-poster"
+                                        [src]="entry.item.thumb"
+                                        [alt]="entry.item.title"
+                                        type="media"
+                                    />
+
+                                    <div class="collection-detail__arc-copy">
+                                        <div
+                                            class="collection-detail__arc-header"
+                                        >
+                                            <app-badge
+                                                class="collection-detail__arc-badge"
+                                                [label]="entry.label"
+                                                [variant]="
+                                                    entry.label === 'Top rated'
+                                                        ? 'accent'
+                                                        : 'neutral'
+                                                "
+                                            />
+
+                                            <h3
+                                                class="collection-detail__arc-title text-title"
+                                            >
+                                                {{ entry.item.title }}
+                                            </h3>
+                                            @if (
+                                                entry.item.date ||
+                                                entry.item.rating
+                                            ) {
+                                                <p
+                                                    class="collection-detail__arc-meta text-body-sm"
+                                                >
+                                                    @if (entry.item.date) {
+                                                        <span>{{
+                                                            entry.item.date
+                                                        }}</span>
+                                                    }
+                                                    @if (entry.item.rating) {
+                                                        @if (entry.item.date) {
+                                                            <span
+                                                                >&#x2022;</span
+                                                            >
+                                                        }
+                                                        <span
+                                                            class="collection-detail__arc-rating"
+                                                        >
+                                                            <app-rating
+                                                                [value]="
+                                                                    entry.item
+                                                                        .rating
+                                                                "
+                                                            />
+                                                            @if (
+                                                                entry.item.voteCount
+                                                            ) {
+                                                                <span
+                                                                    class="collection-detail__arc-vote-count text-caption"
+                                                                >
+                                                                    ({{
+                                                                        entry
+                                                                            .item
+                                                                            .voteCount
+                                                                            | voteCount
+                                                                    }})
+                                                                </span>
+                                                            }
+                                                        </span>
+                                                    }
+                                                </p>
+                                            }
+                                        </div>
+
+                                        <p
+                                            class="collection-detail__arc-overview text-body-sm"
+                                            [class.muted]="!entry.item.overview"
+                                        >
+                                            {{
+                                                entry.item.overview ||
+                                                    "No overview available yet."
+                                            }}
+                                        </p>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    </app-page-section>
+                }
+            }
+
             @if (store.mappedPartsState$ | async; as partsState) {
                 @if (
                     partsState.type === "loading" ||
                     (partsState.type === "loaded" && partsState.value.length)
                 ) {
-                    <section>
-                        <h2 class="section-title">
-                            Movies
-                            @if (partsState.type === "loaded") {
-                                <span class="section-count">{{
-                                    partsState.value.length
-                                }}</span>
-                            } @else {
+                    <app-page-section subtitle="Movies">
+                        @if (partsState.type === "loaded") {
+                            <span
+                                section-controls
+                                class="collection-detail__section-count text-body-sm"
+                            >
+                                {{ partsState.value.length }} total
+                            </span>
+                        } @else {
+                            <span section-controls>
                                 <app-skeleton
                                     class="collection-detail__section-count-skeleton"
                                 />
-                            }
-                        </h2>
+                            </span>
+                        }
 
                         <div class="catalog-panel">
                             <div class="result-list">
@@ -132,7 +273,7 @@
                                 />
                             </div>
                         </div>
-                    </section>
+                    </app-page-section>
                 } @else if (
                     partsState.type === "loaded" && !partsState.value.length
                 ) {

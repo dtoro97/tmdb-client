@@ -1,4 +1,5 @@
 @use "breakpoints" as *;
+@use "mixins" as *;
 
 :host {
     display: block;
@@ -42,20 +43,60 @@
 }
 
 .page-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
     padding-bottom: var(--space-10);
 }
 
 .credit-panel {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-4);
+    gap: var(--space-4);
+    padding: var(--space-5);
+    overflow: hidden;
+}
+
+.credit-panel__toolbar {
+    margin-bottom: var(--space-2);
+}
+
+.credit-toolbar-skeleton {
+    display: block;
+    width: min(12rem, 100%);
+    height: 2.25rem;
+}
+
+.credit-section-skeleton-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.credit-section-title-skeleton,
+.credit-section-count-skeleton,
+.credit-row-count-skeleton {
+    display: block;
+}
+
+.credit-section-title-skeleton {
+    width: 4.75rem;
+    height: 1.5rem;
+}
+
+.credit-section-count-skeleton {
+    width: 2.25rem;
+    height: 1rem;
 }
 
 .credit-row-skeleton {
-    display: flex;
+    display: grid;
+    grid-template-columns: var(--media-square-sm) minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--space-3);
+    column-gap: var(--space-3);
+    row-gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
 }
 
@@ -72,17 +113,13 @@
 }
 
 .credit-title-skeleton {
-    width: 160px;
+    width: min(12rem, 52vw);
     height: 0.9rem;
 }
 
 .credit-subtitle-skeleton {
-    width: 120px;
+    width: min(9rem, 38vw);
     height: 0.75rem;
-}
-
-.credit-panel > .text-title {
-    margin: 0;
 }
 
 .credit-skeleton-list {
@@ -98,9 +135,29 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+    min-width: 0;
+}
+
+.credit-row-count-skeleton {
+    width: 3rem;
+    height: 0.9rem;
+}
+
+app-empty-state {
+    padding-block: var(--space-2);
+}
+
+.credit-empty-state {
+    padding-block: var(--space-8);
 }
 
 @include mobile() {
+    .media-header {
+        gap: var(--space-4);
+        padding-block: var(--space-5);
+        padding-inline: var(--space-4);
+    }
+
     .page-main {
         padding-bottom: var(--space-8);
     }
@@ -109,9 +166,32 @@
         width: 3.75rem;
     }
 
+    .credit-panel {
+        gap: var(--space-3);
+        padding: var(--space-4);
+    }
+
     .credit-row-skeleton {
-        gap: var(--space-2);
+        grid-template-columns: var(--media-square-sm) minmax(0, 1fr);
+        grid-template-areas:
+            "avatar body"
+            "avatar count";
+        align-items: start;
+        column-gap: var(--space-2);
+        row-gap: var(--space-1-5);
         padding: var(--space-2);
+    }
+
+    .credit-avatar-skeleton {
+        grid-area: avatar;
+    }
+
+    .credit-body-skeleton {
+        grid-area: body;
+    }
+
+    .credit-row-count-skeleton {
+        grid-area: count;
     }
 }
 

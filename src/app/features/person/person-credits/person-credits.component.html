@@ -16,6 +16,13 @@
         }
     </div>
 } @else {
+    @if (summaryText) {
+        <div class="person-credits__intro">
+            <p class="person-credits__summary text-body-sm">
+                {{ summaryText }}
+            </p>
+        </div>
+    }
     <app-browse-toolbar>
         <app-pill-toggle
             start
@@ -55,16 +62,22 @@
                 >
                     <button
                         class="accordion-header"
+                        type="button"
                         (click)="item.toggle()"
                     >
                         <span class="person-credits__group-label">
-                            <h3 class="text-meta">
+                            <h3 class="person-credits__group-year text-meta">
                                 {{ group.year }}
                             </h3>
                             <span
                                 class="person-credits__group-count text-caption"
                             >
                                 {{ group.items.length }}
+                                {{
+                                    group.items.length === 1
+                                        ? "title"
+                                        : "titles"
+                                }}
                             </span>
                         </span>
                         <i
@@ -98,24 +111,22 @@
                                     />
 
                                     <div class="person-credits__body">
-                                        <div class="person-credits__primary">
+                                        <span
+                                            class="person-credits__title text-body-sm"
+                                        >
+                                            {{ credit.title }}
+                                        </span>
+                                        @if (credit.roleLabel) {
                                             <span
-                                                class="person-credits__title text-body-sm"
+                                                class="person-credits__role text-caption"
                                             >
-                                                {{ credit.title }}
+                                                {{ credit.roleLabel }}
                                             </span>
-                                            @if (credit.roleLabel) {
-                                                <span
-                                                    class="person-credits__role text-caption"
-                                                >
-                                                    &mdash;
-                                                    {{ credit.roleLabel }}
-                                                </span>
-                                            }
-                                        </div>
+                                        }
                                         <div class="person-credits__secondary">
                                             @if (credit.rating) {
                                                 <app-rating
+                                                    class="person-credits__rating"
                                                     [value]="credit.rating"
                                                 />
                                             }
@@ -149,12 +160,21 @@
             }
         </cdk-accordion>
     } @else {
-        <div class="empty-panel">
+        <div class="empty-panel person-credits__empty">
             <app-empty-state
-                iconClass="fa-regular fa-folder-open"
-                title="No credits found"
-                text="Try a different filter combination."
+                iconClass="fa-solid fa-sliders"
+                [title]="emptyStateTitle"
+                [text]="emptyStateText"
             />
+            @if (hasActiveFilters) {
+                <button
+                    class="person-credits__reset text-caption"
+                    type="button"
+                    (click)="onResetFilters()"
+                >
+                    Reset filters
+                </button>
+            }
         </div>
     }
 }

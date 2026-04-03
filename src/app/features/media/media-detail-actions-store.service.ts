@@ -34,12 +34,15 @@ interface MediaActionsState {
     userRating: LoadableValue<number | null>;
     ratingPending: boolean;
     watchlistState: LoadableValue<boolean>;
+    favoriteState: LoadableValue<boolean>;
 }
 
 export interface MediaActionsListVm {
     isInWatchlist: boolean;
+    isFavorite: boolean;
     pending: boolean;
     watchlistLabel: string;
+    favoriteLabel: string;
 }
 
 const INITIAL_STATE: MediaActionsState = {
@@ -47,12 +50,14 @@ const INITIAL_STATE: MediaActionsState = {
     userRating: { type: 'idle' },
     ratingPending: false,
     watchlistState: { type: 'idle' },
+    favoriteState: { type: 'idle' },
 };
 
 @Injectable()
 export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> implements RatingActions {
     readonly userRatingState$ = this.select((state) => state.userRating);
     readonly watchlistState$ = this.select((state) => state.watchlistState);
+    readonly favoriteState$ = this.select((state) => state.favoriteState);
 
     readonly ratingVm$ = this.select(
         this.userRatingState$,
@@ -66,14 +71,23 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
 
     readonly listActionsVm$ = this.select(
         this.watchlistState$,
-        (watchlistState): MediaActionsListVm => ({
+        this.favoriteState$,
+        (watchlistState, favoriteState): MediaActionsListVm => ({
             isInWatchlist:
                 watchlistState.type === 'loaded' ? watchlistState.value : false,
-            pending: watchlistState.type === 'loading',
+            isFavorite:
+                favoriteState.type === 'loaded' ? favoriteState.value : false,
+            pending:
+                watchlistState.type === 'loading' ||
+                favoriteState.type === 'loading',
             watchlistLabel:
                 watchlistState.type === 'loaded' && watchlistState.value
                     ? 'On Watchlist'
                     : 'Add to Watchlist',
+            favoriteLabel:
+                favoriteState.type === 'loaded' && favoriteState.value
+                    ? 'Favorited'
+                    : 'Add to Favorites',
         }),
     );
 
@@ -86,12 +100,14 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
                         userRating: { type: 'loading' },
                         ratingPending: false,
                         watchlistState: { type: 'loading' },
+                        favoriteState: { type: 'loading' },
                     });
                 }),
                 switchMap((context) =>
                     forkJoin([
                         this.fetchUserRating$(context),
                         this.fetchWatchlistState$(context),
+                        this.fetchFavoriteState$(context),
                     ]),
                 ),
             ),
@@ -217,6 +233,41 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
             );
     }
 
+    toggleFavorite$(): Observable<void> {
+        const context = this.requireContext();
+
+        if (context instanceof Error) {
+            return throwError(() => context);
+        }
+
+        const currentState = this.get().favoriteState;
+        const previousValue =
+            currentState.type === 'loaded' ? currentState.value : false;
+        const nextValue = !previousValue;
+
+        this.patchState({ favoriteState: { type: 'loading' } });
+
+        return this.tmdbListService
+            .updateFavorite$(context.id, context.type, nextValue)
+            .pipe(
+                tap((result) => {
+                    this.patchState({
+                        favoriteState: { type: 'loaded', value: result },
+                    });
+                }),
+                map(() => undefined),
+                catchError((error) => {
+                    this.patchState({
+                        favoriteState: {
+                            type: 'loaded',
+                            value: previousValue,
+                        },
+                    });
+                    return throwError(() => error);
+                }),
+            );
+    }
+
     addToList$(listId: number): Observable<void> {
         const context = this.requireContext();
 
@@ -271,6 +322,27 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
                 catchError(() => {
                     this.patchState({
                         watchlistState: { type: 'loaded', value: false },
+                    });
+                    return of(undefined);
+                }),
+            );
+    }
+
+    private fetchFavoriteState$(
+        context: MediaActionsContext,
+    ): Observable<void> {
+        return this.tmdbListService
+            .getFavoriteState$(context.id, context.type)
+            .pipe(
+                tap((favorite) => {
+                    this.patchState({
+                        favoriteState: { type: 'loaded', value: favorite },
+                    });
+                }),
+                map(() => undefined),
+                catchError(() => {
+                    this.patchState({
+                        favoriteState: { type: 'loaded', value: false },
                     });
                     return of(undefined);
                 }),

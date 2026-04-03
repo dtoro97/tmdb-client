@@ -43,19 +43,16 @@ function toOverviewStats(
     return [
         {
             label: 'Ratings',
-            description: 'Movies, shows, and episodes you have scored.',
             value: ratings.ratingsTotal,
             route: '/me/ratings',
         },
         {
             label: 'Watchlist',
-            description: 'Titles you want to come back to later.',
             value: watchlist.watchlistTotal,
             route: '/me/watchlists',
         },
         {
             label: 'Lists',
-            description: 'TMDb lists you have created and curated.',
             value: lists.listsTotal,
             route: '/me/lists',
         },

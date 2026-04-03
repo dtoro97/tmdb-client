@@ -10,6 +10,7 @@ import { BadgeComponent } from '../badge/badge.component';
     templateUrl: './person-list-item.component.html',
     styleUrl: './person-list-item.component.scss',
     imports: [RouterLink, ImageComponent, BadgeComponent],
+    host: { '[style.--item-index]': 'index' },
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonListItemComponent {

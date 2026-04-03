@@ -50,37 +50,37 @@ const USER_DATA_SECTION_CONTENT: Record<
     profile: {
         title: 'Your profile',
         description:
-            'Your TMDb account hub will live here, with profile details and shortcuts into your activity.',
-        emptyStateTitle: 'Profile tools are coming here',
+            'Your account overview, watchlist, ratings, and lists.',
+        emptyStateTitle: 'Your profile is on its way',
         emptyStateText:
-            'We have the route in place so the new header menu can take you here cleanly. The account surface itself is the next step.',
+            'Profile details and account settings will appear here soon.',
         iconClass: 'fa-solid fa-user',
     },
     watchlists: {
         title: 'Your watchlists',
         description:
-            'Keep track of the movies and shows you want to revisit, all from one personal watchlist view.',
-        emptyStateTitle: 'Watchlists will appear here',
+            'Movies and shows you want to watch later.',
+        emptyStateTitle: 'No watchlist items yet',
         emptyStateText:
-            'This section is ready for the dedicated watchlist experience once the account pages are expanded.',
+            'Browse titles and add them to your watchlist to see them here.',
         iconClass: 'fa-solid fa-bookmark',
     },
     ratings: {
         title: 'Your ratings',
         description:
-            'See the titles and episodes you have rated, with a focused view of your personal scoring history.',
-        emptyStateTitle: 'Ratings history will appear here',
+            'Titles and episodes you have rated.',
+        emptyStateTitle: 'No ratings yet',
         emptyStateText:
-            'The route is ready for the upcoming ratings page so the header menu can already point somewhere stable.',
+            'Rate a few titles to start building your personal scoring history.',
         iconClass: 'fa-solid fa-star',
     },
     lists: {
         title: 'Your lists',
         description:
-            'Custom TMDb lists will have their own space here, so you can jump back into the collections you curate.',
-        emptyStateTitle: 'Custom lists will appear here',
+            'Custom collections you have created on TMDb.',
+        emptyStateTitle: 'No custom lists yet',
         emptyStateText:
-            'This route is set up for the future lists experience while we keep the header account menu fully wired.',
+            'Create a themed collection on TMDb and it will show up here.',
         iconClass: 'fa-solid fa-list',
     },
 };

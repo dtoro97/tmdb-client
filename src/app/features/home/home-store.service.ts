@@ -72,6 +72,11 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             airingToday: state.airingToday,
             topRated: state.topRated,
             selectedStreamingProviderId: state.selectedStreamingProviderId,
+            selectedStreamingProviderLabel:
+                state.streamingProviders.find(
+                    (provider) =>
+                        provider.id === state.selectedStreamingProviderId,
+                )?.label ?? null,
             streamingProviders: state.streamingProviders.map((p) => ({
                 label: p.label,
                 value: p.id,

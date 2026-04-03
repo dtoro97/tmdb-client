@@ -35,15 +35,15 @@ export class MediaListItemComponent {
     @Input() genreNames: string[] = [];
     @Input() userRating: number | null = null;
 
-    onRowClick(event: MouseEvent) {
-        if (this.isNestedInteractiveEvent(event)) {
+    onRowClick(event: MouseEvent): void {
+        if (this.isNestedInteractiveTarget(event.target)) {
             return;
         }
 
         this.router.navigate(this.routerLink);
     }
 
-    onRowKeydown(event: KeyboardEvent) {
+    onRowKeydown(event: KeyboardEvent): void {
         if (this.isNestedInteractiveTarget(event.target)) {
             return;
         }
@@ -53,12 +53,7 @@ export class MediaListItemComponent {
         }
 
         event.preventDefault();
-
         this.router.navigate(this.routerLink);
-    }
-
-    private isNestedInteractiveEvent(event: MouseEvent): boolean {
-        return this.isNestedInteractiveTarget(event.target);
     }
 
     private isNestedInteractiveTarget(target: EventTarget | null): boolean {

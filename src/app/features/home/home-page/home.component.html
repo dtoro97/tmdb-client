@@ -4,15 +4,12 @@
             homeVM.spotlight.type === "loaded" && homeVM.spotlight.value;
             as spotlight
         ) {
-            <app-hero-spotlight
-                badge="Trending"
-                [spotlight]="spotlight"
-            >
+            <app-hero-spotlight badge="Trending now" [spotlight]="spotlight">
                 <a
                     matButton="filled"
                     [routerLink]="['/title', spotlight.id, spotlight.mediaType]"
                 >
-                    More Info
+                    View Details
                 </a>
             </app-hero-spotlight>
         } @else if (homeVM.spotlight.type === "loading") {
@@ -20,7 +17,10 @@
         }
 
         <div class="page-sections">
-            <app-page-section title="Now Trending">
+            <app-page-section
+                title="Now Trending"
+                subtitle="The titles movie and TV fans are opening first."
+            >
                 <app-media-carousel-panel
                     [state]="homeVM.trendingToday"
                     variant="backdrop"
@@ -29,66 +29,108 @@
                 ></app-media-carousel-panel>
             </app-page-section>
 
-            <app-page-section title="Worth Watching">
-                <app-home-top-picks [state]="homeVM.whatToWatch" />
-            </app-page-section>
+            <section class="home-page__feature-band">
+                <app-page-section
+                    title="Worth Watching"
+                    subtitle="Handpicked recommendations worth your time."
+                >
+                    <ng-container section-controls>
+                        <a
+                            class="home-page__section-link text-body-sm"
+                            routerLink="/discover"
+                            [queryParams]="{ type: 'movie' }"
+                        >
+                            Browse more titles
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </ng-container>
+                    <app-home-top-picks [state]="homeVM.whatToWatch" />
+                </app-page-section>
+            </section>
 
-            <app-page-section title="New Episodes Today">
-                @if (homeVM.airingToday.type === "loaded") {
-                    <div class="tonight-grid">
-                        @for (
-                            item of homeVM.airingToday.value | slice: 0 : 12;
-                            track item.id
-                        ) {
-                            <a
-                                class="tonight-row"
-                                [routerLink]="[
-                                    '/title',
-                                    item.id,
-                                    item.mediaType,
-                                ]"
-                                [attr.aria-label]="item.title"
-                            >
-                                <app-image
-                                    class="tonight-row__poster"
-                                    [src]="item.imagePath"
-                                    [alt]="item.title"
-                                    type="media"
-                                />
+            <section class="home-page__utility-band">
+                <app-page-section
+                    title="Tonight's TV"
+                    subtitle="Series airing fresh episodes today."
+                >
+                    <ng-container section-controls>
+                        <a
+                            class="home-page__section-link text-body-sm"
+                            routerLink="/discover"
+                            [queryParams]="{ type: 'tv' }"
+                        >
+                            Browse TV
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </ng-container>
+                    @if (homeVM.airingToday.type === "loaded") {
+                        <div class="tonight-grid">
+                            @for (
+                                item of homeVM.airingToday.value
+                                    | slice: 0 : 12;
+                                track item.id
+                            ) {
+                                <a
+                                    class="tonight-row"
+                                    [routerLink]="[
+                                        '/title',
+                                        item.id,
+                                        item.mediaType,
+                                    ]"
+                                    [attr.aria-label]="item.title"
+                                >
+                                    <app-image
+                                        class="tonight-row__poster"
+                                        [src]="item.imagePath"
+                                        [alt]="item.title"
+                                        type="media"
+                                    />
 
-                                <div class="tonight-row__content">
-                                    <span
-                                        class="tonight-row__title text-body-sm u-truncate"
-                                    >
-                                        {{ item.title }}
-                                    </span>
+                                    <div class="tonight-row__content">
+                                        <span
+                                            class="tonight-row__eyebrow text-overline"
+                                        >
+                                            Airing today
+                                        </span>
+                                        <span
+                                            class="tonight-row__title text-body-sm u-truncate"
+                                        >
+                                            {{ item.title }}
+                                        </span>
 
-                                    <span
-                                        class="tonight-row__meta text-caption muted"
-                                    >
-                                        @if (item.rating) {
-                                            <app-rating
-                                                [value]="
-                                                    item.rating
-                                                        | number: '1.1-1'
-                                                "
-                                            />
-                                        }
-                                        @if (item.rating && item.date) {
-                                            <span>&middot;</span>
-                                        }
-                                        @if (item.date) {
-                                            {{ item.date | date: "yyyy" }}
-                                        }
-                                    </span>
-                                </div>
-                            </a>
-                        }
-                    </div>
-                }
-            </app-page-section>
+                                        <span
+                                            class="tonight-row__meta text-caption muted"
+                                        >
+                                            @if (item.rating) {
+                                                <app-rating
+                                                    [value]="
+                                                        item.rating
+                                                            | number: '1.1-1'
+                                                    "
+                                                />
+                                            }
+                                        </span>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                </app-page-section>
+            </section>
 
-            <app-page-section title="Trending People">
+            <app-page-section
+                title="Trending People"
+                subtitle="Actors and creators driving conversation right now."
+            >
+                <a
+                    section-controls
+                    class="home-page__section-link text-body-sm"
+                    routerLink="/discover"
+                    [queryParams]="{ type: 'person' }"
+                >
+                    Browse people
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
                 <app-person-carousel-panel
                     [state]="homeVM.popularPeople"
                     [showRank]="true"
@@ -96,18 +138,54 @@
             </app-page-section>
 
             @if (homeVM.streamingProviders.length) {
-                <app-page-section title="Now Streaming">
-                    <app-pill-toggle
-                        section-controls
-                        [options]="homeVM.streamingProviders"
-                        [selectedValue]="homeVM.selectedStreamingProviderId"
-                        (selected)="onStreamingProviderSelected($event)"
-                    />
-                    <app-media-carousel-panel [state]="homeVM.streamingNow" />
-                </app-page-section>
+                <section class="home-page__streaming-band">
+                    <app-page-section
+                        title="Now Streaming"
+                        subtitle="What's new on your favorite streaming services."
+                    >
+                        <app-pill-toggle
+                            section-controls
+                            [options]="homeVM.streamingProviders"
+                            [selectedValue]="homeVM.selectedStreamingProviderId"
+                            (selected)="onStreamingProviderSelected($event)"
+                        />
+                        <app-media-carousel-panel
+                            [state]="homeVM.streamingNow"
+                        />
+                        @if (homeVM.selectedStreamingProviderLabel) {
+                            <div class="home-page__streaming-footer">
+                                <a
+                                    class="home-page__section-link text-body-sm"
+                                    routerLink="/discover"
+                                    [queryParams]="{
+                                        type: 'tv',
+                                        providers:
+                                            homeVM.selectedStreamingProviderId,
+                                    }"
+                                >
+                                    See more on
+                                    {{ homeVM.selectedStreamingProviderLabel }}
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        }
+                    </app-page-section>
+                </section>
             }
 
-            <app-page-section title="Opening This Week">
+            <app-page-section
+                title="Opening This Week"
+                subtitle="Fresh theatrical releases landing over the next 14 days."
+            >
+                <a
+                    section-controls
+                    class="home-page__section-link text-body-sm"
+                    routerLink="/discover"
+                    [queryParams]="{ type: 'movie' }"
+                >
+                    Browse movies
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
                 <app-media-carousel-panel
                     [state]="homeVM.inTheatres"
                     [showRating]="false"

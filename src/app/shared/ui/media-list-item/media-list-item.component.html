@@ -18,7 +18,7 @@
     />
 
     <div class="media-list-item__content">
-        <span class="media-list-item__title text-body">
+        <span class="media-list-item__title">
             {{ item.title }}
             @if (item.date) {
                 <span class="media-list-item__year"
@@ -35,13 +35,13 @@
             </div>
         }
 
-        <p class="media-list-item__overview text-meta">
+        <p class="media-list-item__overview">
             {{ item.overview }}
         </p>
 
         @if (item.castLinks; as castLinks) {
             @if (castLinks.length) {
-                <p class="media-list-item__cast text-meta">
+                <p class="media-list-item__cast">
                     @for (actor of castLinks; track actor.id; let i = $index) {
                         <a
                             class="media-list-item__actor-link"

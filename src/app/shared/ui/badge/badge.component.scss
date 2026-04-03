@@ -1,3 +1,8 @@
+:host {
+    display: inline-flex;
+    line-height: 1;
+}
+
 .app-badge {
     --app-badge-slant-cut: 0.45rem;
     display: inline-flex;

@@ -17,7 +17,11 @@
     --mat-sys-outline: var(--color-border);
     --mat-sys-outline-variant: var(--color-border-subtle);
 
+    --mat-sys-surface-bright: var(--surface-panel);
     --mat-sys-corner-full: var(--radius-pill);
+
+    --mat-sys-inverse-surface: var(--color-surface-raised-2);
+    --mat-sys-inverse-on-surface: var(--text-primary);
 }
 
 .photo-viewer-panel {

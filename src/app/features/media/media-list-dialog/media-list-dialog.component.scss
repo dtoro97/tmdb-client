@@ -10,13 +10,13 @@
 .media-list-dialog__header,
 .media-list-dialog__signin-state,
 .media-list-dialog__list,
-.media-list-dialog__list-copy {
+.media-list-dialog__list-copy,
+.media-list-dialog__signin-copy {
     display: flex;
     flex-direction: column;
 }
 
-.media-list-dialog__header,
-.media-list-dialog__signin-state {
+.media-list-dialog__header {
     gap: var(--space-2);
 }
 
@@ -26,6 +26,12 @@
 .media-list-dialog__list-name,
 .media-list-dialog__list-meta {
     margin: 0;
+}
+
+.media-list-dialog__list-name {
+    font-size: var(--font-size-body-sm);
+    font-weight: var(--weight-medium, 500);
+    line-height: 1.3;
 }
 
 .media-list-dialog__eyebrow,
@@ -39,49 +45,132 @@
 .media-list-dialog__footer {
     margin: 0;
     padding: 0;
+    overflow: visible;
 }
 
 .media-list-dialog__list {
-    gap: var(--space-2);
+    gap: var(--space-1);
 }
 
 .media-list-dialog__list-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-3);
     width: 100%;
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-lg);
-    background: var(--surface-panel-soft);
+    padding: var(--space-3) var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
     color: var(--text-primary);
     font: inherit;
     cursor: pointer;
     transition:
-        border-color var(--motion-fast),
         background-color var(--motion-fast),
         color var(--motion-fast);
 }
 
-.media-list-dialog__list-item:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--brand-primary) 35%, transparent);
-    background: color-mix(in srgb, var(--brand-primary) 8%, var(--surface-panel-soft));
+.media-list-dialog__list-item:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
 }
 
-.media-list-dialog__list-item:disabled {
-    cursor: not-allowed;
-    opacity: 0.72;
+.media-list-dialog__list-item:active {
+    background: color-mix(in srgb, var(--text-primary) 12%, transparent);
 }
 
-.media-list-dialog__list-item--create {
-    border-style: dashed;
+.media-list-dialog__list-item:focus-visible {
+    outline: 2px solid var(--control-focus-outline);
+    outline-offset: -2px;
+}
+
+.media-list-dialog__list-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    transition: color var(--motion-fast), background-color var(--motion-fast);
+}
+
+.media-list-dialog__list-item:hover .media-list-dialog__list-icon {
+    background: color-mix(in srgb, var(--brand-primary) 15%, transparent);
+    color: var(--brand-primary);
+}
+
+.media-list-dialog__signin-state {
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--surface-panel-soft);
+    text-align: center;
+}
+
+.media-list-dialog__signin-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+    color: var(--brand-primary);
+    font-size: 1.25rem;
+}
+
+.media-list-dialog__signin-copy {
+    gap: var(--space-1);
+}
+
+.media-list-dialog__signin-heading {
+    margin: 0;
+    font-size: var(--font-size-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-primary);
+}
+
+.media-list-dialog__signin-detail {
+    margin: 0;
+    color: var(--text-secondary);
+    max-width: 28ch;
+}
+
+.media-list-dialog__signin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
 }
 
 .media-list-dialog__footer {
     display: flex;
     justify-content: flex-end;
     min-height: 0;
+}
+
+.media-list-dialog__close {
+    padding: var(--space-1) 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--font-size-body-sm);
+    cursor: pointer;
+    transition: color var(--motion-fast);
+}
+
+.media-list-dialog__close:hover {
+    color: var(--text-primary);
+}
+
+.media-list-dialog__close:focus-visible {
+    outline: 2px solid var(--control-focus-outline);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
 @media (max-width: 767px) {

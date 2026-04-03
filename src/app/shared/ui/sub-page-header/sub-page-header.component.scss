@@ -13,17 +13,11 @@
 
 .sub-page-header__back-link {
     display: inline-flex;
+    align-self: flex-start;
     align-items: center;
     gap: var(--space-1);
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: var(--transition-color);
+    @include text-link-underline(var(--text-secondary));
     @include focus-ring();
-
-    &:is(:hover, :focus-visible) {
-        color: var(--text-accent);
-        text-decoration: underline;
-    }
 }
 
 .sub-page-header__back-icon {

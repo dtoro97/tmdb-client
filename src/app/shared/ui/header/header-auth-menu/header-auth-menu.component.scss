@@ -37,11 +37,41 @@
     width: auto;
     height: auto;
     padding: 0;
-    color: var(--text-primary);
+    color: var(--text-secondary);
+    transition: color var(--motion-fast);
 
     &:hover,
     &:focus-visible {
-        color: var(--color-brand-hover);
+        color: var(--color-brand-light);
+    }
+}
+
+.header-auth-menu__label {
+    position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 100%;
+        height: 1.5px;
+        background: var(--color-brand-light);
+        border-radius: 1px;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform var(--motion-base);
+    }
+
+    .header-auth-menu__trigger--anonymous:hover &::after,
+    .header-auth-menu__trigger--anonymous:focus-visible &::after {
+        transform: scaleX(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after {
+            transition: none;
+        }
     }
 }
 

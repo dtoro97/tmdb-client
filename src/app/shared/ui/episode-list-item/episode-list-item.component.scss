@@ -14,22 +14,24 @@
     background: var(--mat-sys-surface-container-lowest);
     color: inherit;
     min-width: 0;
+}
+
+.episode-list-item--navigable {
     cursor: pointer;
     @include list-row-hover($title-selector: ".episode-list-item__title");
     @include focus-ring();
-}
-
-.episode-list-item--title-hover {
-    transition: none;
+    transition:
+        background-color var(--motion-base),
+        border-color var(--motion-base);
 
     &:is(:hover, :focus-within) {
-        background: transparent;
+        border-color: var(--color-border);
     }
-}
 
-.episode-list-item--title-hover:is(:hover, :focus-within)
-    .episode-list-item__title {
-    color: var(--text-accent);
+    &:is(:hover, :focus-within) .episode-list-item__still {
+        filter: brightness(var(--brightness-sm));
+        transform: scale(var(--scale-sm));
+    }
 }
 
 .episode-list-item--loading {
@@ -39,8 +41,12 @@
 .episode-list-item__still {
     flex-shrink: 0;
     width: 200px;
+    aspect-ratio: var(--backdrop-ratio);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    transition:
+        filter var(--motion-base),
+        transform var(--motion-base);
 }
 
 .episode-list-item__still-skeleton {
@@ -72,9 +78,11 @@
 
 .episode-list-item__title {
     margin: 0;
+    font-size: var(--text-md);
     color: var(--text-primary);
     font-weight: var(--weight-bold);
-    transition: color var(--transition-base);
+    line-height: var(--lh-normal);
+    transition: color var(--motion-base);
 }
 
 .episode-list-item__meta {
@@ -82,11 +90,16 @@
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
 }
 
 .episode-list-item__overview {
-    margin: 0;
-    color: var(--text-muted);
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-regular);
+    line-height: var(--lh-relaxed);
+    color: var(--text-secondary);
     @include line-clamp(2);
 }
 
@@ -97,7 +110,7 @@
 }
 
 .episode-list-item__label-skeleton {
-    width: 7rem;
+    width: min(7rem, 50%);
     height: 0.75rem;
 }
 
@@ -153,7 +166,7 @@
     }
 
     .episode-list-item__meta {
-        gap: 0.125rem var(--space-2);
+        gap: var(--space-1) var(--space-2);
         line-height: var(--lh-normal);
     }
 
@@ -161,17 +174,18 @@
         line-height: var(--lh-normal);
         @include line-clamp(2);
     }
+}
 
-    .episode-list-item--flat {
-        gap: var(--space-2-5);
-        padding: var(--space-3);
+@media (prefers-reduced-motion: reduce) {
+    .episode-list-item--navigable,
+    .episode-list-item__still,
+    .episode-list-item__title {
+        transition: none;
     }
 
-    .episode-list-item--flat .episode-list-item__still {
-        width: 100px;
-    }
-
-    .episode-list-item--flat .episode-list-item__actions {
-        align-self: center;
+    .episode-list-item--navigable:is(:hover, :focus-within)
+        .episode-list-item__still {
+        filter: none;
+        transform: none;
     }
 }

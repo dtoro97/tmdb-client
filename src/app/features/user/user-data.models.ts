@@ -42,7 +42,6 @@ export interface UserRatedEpisodeItem {
 
 export interface UserDataOverviewStat {
     readonly label: string;
-    readonly description: string;
     readonly value: number;
     readonly route: string;
 }

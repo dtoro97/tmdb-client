@@ -1,15 +1,42 @@
 @if (vm$ | async; as vm) {
     <div class="media-list-actions">
         <button
-            mat-stroked-button
-            class="media-list-actions__watchlist"
-            [class.media-list-actions__watchlist--active]="vm.isInWatchlist"
+            class="media-list-actions__segment"
+            [class.media-list-actions__segment--active]="vm.isFavorite"
+            type="button"
+            [disabled]="vm.pending"
+            [attr.aria-label]="
+                vm.isFavorite
+                    ? title + ' is in your favorites'
+                    : 'Add ' + title + ' to favorites'
+            "
+            [matTooltip]="
+                vm.isFavorite ? 'Remove from favorites' : 'Add to favorites'
+            "
+            (click)="toggleFavorite()"
+        >
+            <i
+                [class.fa-solid]="vm.isFavorite"
+                [class.fa-regular]="!vm.isFavorite"
+                class="media-list-actions__icon fa-heart"
+                aria-hidden="true"
+            ></i>
+        </button>
+
+        <button
+            class="media-list-actions__segment"
+            [class.media-list-actions__segment--active]="vm.isInWatchlist"
             type="button"
             [disabled]="vm.pending"
             [attr.aria-label]="
                 vm.isInWatchlist
                     ? title + ' is on your watchlist'
                     : 'Add ' + title + ' to watchlist'
+            "
+            [matTooltip]="
+                vm.isInWatchlist
+                    ? 'Remove from watchlist'
+                    : 'Add to watchlist'
             "
             (click)="toggleWatchlist()"
         >
@@ -19,26 +46,20 @@
                 class="media-list-actions__icon fa-bookmark"
                 aria-hidden="true"
             ></i>
-
-            <span class="media-list-actions__label text-body-sm">
-                {{ vm.watchlistLabel }}
-            </span>
         </button>
 
         <button
-            class="media-list-actions__menu"
+            class="media-list-actions__segment"
             type="button"
             [disabled]="vm.pending"
-            [matMenuTriggerFor]="listActionsMenu"
-            [attr.aria-label]="'More list actions for ' + title"
+            [attr.aria-label]="'Add ' + title + ' to a list'"
+            matTooltip="Add to list"
+            (click)="openCustomListsDialog()"
         >
-            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            <i
+                class="media-list-actions__icon fa-solid fa-list"
+                aria-hidden="true"
+            ></i>
         </button>
     </div>
 }
-
-<mat-menu #listActionsMenu="matMenu" xPosition="before">
-    <button mat-menu-item type="button" (click)="openCustomListsDialog()">
-        Add to custom list
-    </button>
-</mat-menu>

@@ -24,6 +24,7 @@
 } @else if (item; as currentItem) {
     <div
         class="episode-list-item"
+        [class.episode-list-item--navigable]="currentItem.routeCommands"
         [attr.role]="currentItem.routeCommands ? 'link' : null"
         [attr.tabindex]="currentItem.routeCommands ? 0 : null"
         [attr.aria-label]="
@@ -57,7 +58,7 @@
                     {{ currentItem.subtitle }}
                 </span>
             }
-            <h3 class="episode-list-item__title text-body">
+            <h3 class="episode-list-item__title">
                 {{ currentItem.name }}
             </h3>
             <div class="episode-list-item__meta text-meta">
@@ -71,7 +72,7 @@
                     <app-rating [value]="currentItem.voteAverage" />
                 }
             </div>
-            <p class="episode-list-item__overview text-meta">
+            <p class="episode-list-item__overview">
                 {{ currentItem.overview || "No overview available." }}
             </p>
         </div>

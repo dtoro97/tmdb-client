@@ -40,6 +40,12 @@
                             type="media"
                             [alt]="media.title"
                         />
+                        @if (vm.externalLinks; as externalLinks) {
+                            <app-external-links
+                                class="media-detail-page__hero-links"
+                                [externalLinks]="externalLinks"
+                            />
+                        }
                     </div>
 
                     <div class="media-detail-page__info-content">
@@ -113,10 +119,7 @@
                                     aria-hidden="true"
                                 />
                             } @else if (vm.certification.type === "loaded") {
-                                @if (
-                                    vm.certification.value;
-                                    as certification
-                                ) {
+                                @if (vm.certification.value; as certification) {
                                     <span
                                         class="media-detail-page__hero-certification text-meta"
                                     >
@@ -160,15 +163,11 @@
                                 !media.overview
                             "
                         >
-                            {{ media.overview || "No overview available." }}
+                            {{
+                                media.overview ||
+                                    "We don\u2019t have an overview for this title yet."
+                            }}
                         </p>
-
-                        @if (vm.externalLinks; as externalLinks) {
-                            <app-external-links
-                                class="media-detail-page__hero-links"
-                                [externalLinks]="externalLinks"
-                            />
-                        }
 
                         @if (media.nextEpisode) {
                             <a
@@ -189,38 +188,33 @@
                             </a>
                         }
 
+                        <div class="media-detail-page__hero-actions">
+                            <app-media-list-actions
+                                class="media-detail-page__hero-list-actions"
+                                [title]="media.title"
+                            />
+                            @if (heroTrailerState$ | async; as trailerState) {
+                                @if (trailerState.loading) {
+                                    <app-skeleton
+                                        class="media-detail-page__hero-trailer-skeleton"
+                                        aria-hidden="true"
+                                    />
+                                } @else if (trailerState.key; as trailerKey) {
+                                    <button
+                                        matButton="filled"
+                                        type="button"
+                                        (click)="openTrailer(trailerKey)"
+                                    >
+                                        <i class="fa-solid fa-play"></i>
+                                        Play Trailer
+                                    </button>
+                                }
+                            }
+                        </div>
+
                         <div class="media-detail-page__hero-footer">
                             <div class="media-detail-page__hero-providers">
-                                @if (
-                                    vm.watchProviders.type === "loading" ||
-                                    vm.watchProviders.type === "idle"
-                                ) {
-                                    <div
-                                        class="media-detail-page__provider-preview media-detail-page__provider-preview--skeleton"
-                                    >
-                                        <div
-                                            class="media-detail-page__provider-container"
-                                        >
-                                            <app-skeleton
-                                                class="media-detail-page__provider-label-skeleton media-detail-page__provider-label-skeleton--title"
-                                            />
-                                            <app-skeleton
-                                                class="media-detail-page__provider-label-skeleton media-detail-page__provider-label-skeleton--meta"
-                                            />
-                                        </div>
-                                        <div
-                                            class="media-detail-page__provider-preview-logos"
-                                        >
-                                            @for (i of 3 | repeat; track i) {
-                                                <app-skeleton
-                                                    class="media-detail-page__provider-logo-skeleton"
-                                                />
-                                            }
-                                        </div>
-                                    </div>
-                                } @else if (
-                                    vm.watchProviders.type === "loaded"
-                                ) {
+                                @if (vm.watchProviders.type === "loaded") {
                                     @if (
                                         vm.watchProviders.value;
                                         as providers
@@ -306,51 +300,9 @@
                                                     }
                                                 </div>
                                             </div>
-                                        } @else {
-                                            <span
-                                                class="media-detail-page__provider-preview-spacer"
-                                                aria-hidden="true"
-                                            ></span>
                                         }
-                                    } @else {
-                                        <span
-                                            class="media-detail-page__provider-preview-spacer"
-                                            aria-hidden="true"
-                                        ></span>
                                     }
                                 }
-                            </div>
-
-                            <div class="media-detail-page__hero-actions">
-                                <div class="media-detail-page__hero-trailer">
-                                    @if (heroTrailerState$ | async; as trailerState) {
-                                        @if (trailerState.loading) {
-                                            <app-skeleton
-                                                class="media-detail-page__hero-trailer-skeleton"
-                                                aria-hidden="true"
-                                            />
-                                        } @else if (trailerState.key; as trailerKey) {
-                                            <button
-                                                matButton="filled"
-                                                type="button"
-                                                (click)="openTrailer(trailerKey)"
-                                            >
-                                                <i class="fa-solid fa-play"></i>
-                                                Play Trailer
-                                            </button>
-                                        } @else {
-                                            <app-skeleton
-                                                class="media-detail-page__hero-trailer-spacer"
-                                                aria-hidden="true"
-                                            />
-                                        }
-                                    }
-                                </div>
-
-                                <app-media-list-actions
-                                    class="media-detail-page__hero-list-actions"
-                                    [title]="media.title"
-                                />
                             </div>
                         </div>
                     </div>
@@ -445,12 +397,16 @@
                                             name: episode.name,
                                             subtitle: null,
                                             overview: episode.overview,
-                                            stillPath: episode.still_path ?? null,
-                                            seasonNumber: episode.season_number ?? null,
-                                            episodeNumber: episode.episode_number ?? null,
+                                            stillPath:
+                                                episode.still_path ?? null,
+                                            seasonNumber:
+                                                episode.season_number ?? null,
+                                            episodeNumber:
+                                                episode.episode_number ?? null,
                                             airDate: episode.air_date ?? null,
                                             runtime: episode.runtime ?? null,
-                                            voteAverage: episode.vote_average ?? null,
+                                            voteAverage:
+                                                episode.vote_average ?? null,
                                             routeCommands: [
                                                 '/title',
                                                 vm.media.id,
@@ -467,35 +423,27 @@
                     </app-page-section>
                 }
 
-                @if (
-                    mediaVideoStoreService.videosState$ | async;
-                    as videosState
-                ) {
+                @if (videosVm$ | async; as videosVm) {
                     @if (
-                        videosState.type === "loading" ||
-                        videosState.type === "idle" ||
-                        ((mediaVideoStoreService.youtubeVideosTotalCount$
-                            | async) ?? 0) > 0
+                        videosVm.state.type === "loading" ||
+                        videosVm.state.type === "idle" ||
+                        videosVm.totalCount > 0
                     ) {
                         <app-page-section subtitle="Videos">
-                            @if (
-                                ((mediaVideoStoreService.youtubeVideosTotalCount$
-                                    | async) ?? 0) > 0
-                            ) {
+                            @if (videosVm.totalCount > 0) {
                                 <a
                                     section-controls
                                     class="media-detail-page__section-link text-body-sm"
                                     [routerLink]="['videos']"
                                 >
                                     Browse all videos ({{
-                                        (mediaVideoStoreService.youtubeVideosTotalCount$
-                                            | async) ?? 0
+                                        videosVm.totalCount
                                     }})
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
                             }
 
-                            <app-videos-grid [state]="videosState" />
+                            <app-videos-grid [state]="videosVm.state" />
                         </app-page-section>
                     }
                 }
@@ -523,12 +471,18 @@
                     </app-page-section>
                 }
 
-                @if (mediaReviewsStoreService.reviewsState$ | async; as reviewsState) {
+                @if (
+                    mediaReviewsStoreService.reviewsState$ | async;
+                    as reviewsState
+                ) {
                     @if (
                         reviewsState.type === "loading" ||
                         reviewsState.type === "idle"
                     ) {
-                        <app-page-section subtitle="Reviews">
+                        <app-page-section
+                            class="media-detail-page__reviews-section"
+                            subtitle="Reviews"
+                        >
                             <div class="media-detail-page__reviews-snapshot">
                                 <div
                                     class="media-detail-page__reviews-distribution-skeleton"
@@ -563,7 +517,7 @@
                                 </div>
                             </div>
                             <div class="media-detail-page__reviews-list">
-                                @for (i of 3 | repeat; track i) {
+                                @for (i of 2 | repeat; track i) {
                                     <article
                                         class="media-detail-page__review-skeleton"
                                     >
@@ -615,13 +569,20 @@
                         reviewsState.type === "loaded" &&
                         reviewsState.value.length
                     ) {
-                        <app-page-section subtitle="Reviews">
+                        <app-page-section
+                            class="media-detail-page__reviews-section"
+                            subtitle="Reviews"
+                        >
                             <a
                                 section-controls
                                 class="media-detail-page__section-link text-body-sm"
                                 routerLink="reviews"
                             >
-                                @if (mediaReviewsStoreService.totalResults$ | async; as totalResults) {
+                                @if (
+                                    mediaReviewsStoreService.totalResults$
+                                        | async;
+                                    as totalResults
+                                ) {
                                     Browse all reviews ({{ totalResults }})
                                 }
                                 <i class="fa-solid fa-chevron-right"></i>
@@ -634,7 +595,8 @@
                             />
                             <div class="media-detail-page__reviews-list">
                                 @for (
-                                    review of (mediaReviewsStoreService.previewReviews$ | async) ?? [];
+                                    review of (mediaReviewsStoreService.previewReviews$
+                                        | async) ?? [];
                                     track review.id
                                 ) {
                                     <app-review-card [review]="review" />
@@ -648,14 +610,18 @@
                     vm.recommendations.type !== "loaded" ||
                     vm.recommendations.value.length
                 ) {
-                    <app-page-section title="More Like This">
-                        <app-media-carousel-panel
-                            [state]="vm.recommendations"
-                            variant="backdrop"
-                            [showRating]="true"
-                            [showDate]="true"
-                        ></app-media-carousel-panel>
-                    </app-page-section>
+                    <section class="media-detail-page__recommendations-band">
+                        <div class="media-detail-page__recommendations-inner">
+                            <app-page-section title="More Like This">
+                                <app-media-carousel-panel
+                                    [state]="vm.recommendations"
+                                    variant="backdrop"
+                                    [showRating]="true"
+                                    [showDate]="true"
+                                ></app-media-carousel-panel>
+                            </app-page-section>
+                        </div>
+                    </section>
                 }
 
                 @if (

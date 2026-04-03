@@ -10,4 +10,5 @@ export class EmptyStateComponent {
     @Input({ required: true }) iconClass = '';
     @Input({ required: true }) text = '';
     @Input() title?: string;
+    @Input() iconStyle: 'badge' | 'plain' = 'badge';
 }

@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -37,6 +37,7 @@ import { PersonCreditsComponent } from '../person-credits/person-credits.compone
     imports: [
         AsyncPipe,
         DatePipe,
+        SlicePipe,
         RouterLink,
         MatDialogModule,
         HeroSurfaceComponent,
@@ -56,6 +57,7 @@ export class PersonDetailsComponent {
     private readonly maxVisiblePhotos = MAX_VISIBLE_PHOTOS;
     readonly knownForSkeletonCount = [1, 2, 3, 4];
 
+    readonly aliasPreviewCount = 3;
     readonly bioPreviewThreshold = 300;
     bioExpanded = false;
 
@@ -139,6 +141,10 @@ export class PersonDetailsComponent {
 
     onCreditsSortByChange(value: PersonCreditsSortBy): void {
         this.personDetailStore.setCreditsSortBy(value);
+    }
+
+    resetCreditsFilters(): void {
+        this.personDetailStore.resetCreditsFilters();
     }
 
     toggleCreditsSortDirection(): void {

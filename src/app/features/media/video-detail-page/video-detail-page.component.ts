@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -12,7 +12,6 @@ import {
     EmptyStateComponent,
     PageSectionComponent,
     SkeletonComponent,
-    SubPageHeaderComponent,
     YoutubeVideoCardComponent,
     YoutubeVideoComponent,
     RepeatPipe,
@@ -26,9 +25,7 @@ import { MediaVideoStoreService } from '../media-video-store.service';
         AsyncPipe,
         BadgeComponent,
         DatePipe,
-        NgTemplateOutlet,
         RouterLink,
-        SubPageHeaderComponent,
         YoutubeVideoCardComponent,
         YoutubeVideoComponent,
         CarouselComponent,
@@ -48,14 +45,10 @@ export class VideoDetailPageComponent {
         this.mediaVideoStoreService.selectedVideoMeta$;
     readonly videosState$ = this.mediaVideoStoreService.videosState$;
     readonly relatedVideos$ = this.mediaVideoStoreService.relatedVideos$;
-    readonly recommendationsState$ =
-        this.mediaStoreService.recommendationsState$;
-    readonly similarMediaTrailers$ =
-        this.mediaVideoStoreService.similarMediaTrailers$;
 
     constructor(
-        public mediaStoreService: MediaDetailStoreService,
-        public mediaVideoStoreService: MediaVideoStoreService,
+        private mediaStoreService: MediaDetailStoreService,
+        private mediaVideoStoreService: MediaVideoStoreService,
         private route: ActivatedRoute,
         private title: Title,
     ) {

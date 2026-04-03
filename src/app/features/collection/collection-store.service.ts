@@ -35,6 +35,13 @@ interface CollectionState {
     parts: LoadableItems<MediaListItem>;
 }
 
+export interface CollectionArcEntry {
+    readonly id: string;
+    readonly label: string;
+    readonly description: string;
+    readonly item: MediaListItem;
+}
+
 @Injectable()
 export class CollectionStoreService extends ComponentStore<CollectionState> {
     private readonly opts = API_JSON_OPTIONS;
@@ -56,6 +63,80 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
     partsCount$ = this.select((state) =>
         state.parts.type === 'loaded' ? state.parts.value.length : 0,
     );
+
+    timelineLabel$ = this.select((state) => {
+        if (state.parts.type !== 'loaded' || !state.parts.value.length) {
+            return null;
+        }
+
+        const datedParts = state.parts.value.filter((part) => !!part.date);
+        if (!datedParts.length) {
+            return null;
+        }
+
+        const firstYear = datedParts[0].date;
+        const lastYear = datedParts[datedParts.length - 1].date;
+        return firstYear === lastYear ? firstYear : `${firstYear}-${lastYear}`;
+    });
+
+    collectionArcSummary$ = this.select((state) => {
+        if (state.parts.type !== 'loaded' || !state.parts.value.length) {
+            return null;
+        }
+
+        const highestRated = getHighestRatedPart(state.parts.value);
+        const latestReleased = getLatestReleasedPart(state.parts.value);
+
+        if (highestRated && latestReleased) {
+            if (highestRated.id === latestReleased.id) {
+                return `${highestRated.title} is both the highest rated and latest released entry.`;
+            }
+
+            return `${highestRated.title} leads on rating, while ${latestReleased.title} is the latest released chapter.`;
+        }
+
+        if (highestRated) {
+            return `${highestRated.title} is the highest rated entry in the collection.`;
+        }
+
+        if (latestReleased) {
+            return `${latestReleased.title} is the latest released entry in the collection.`;
+        }
+
+        return null;
+    });
+
+    arcEntries$ = this.select((state): CollectionArcEntry[] => {
+        if (state.parts.type !== 'loaded' || !state.parts.value.length) {
+            return [];
+        }
+
+        const highestRated = getHighestRatedPart(state.parts.value);
+        const latestReleased = getLatestReleasedPart(state.parts.value);
+        const entries: CollectionArcEntry[] = [];
+
+        if (highestRated) {
+            entries.push(
+                {
+                    id: `highest-rated-${highestRated.id}`,
+                    label: 'Top rated',
+                    description: 'The strongest-rated entry across the full collection.',
+                    item: highestRated,
+                },
+            );
+        }
+
+        if (latestReleased && !entries.some((entry) => entry.item.id === latestReleased.id)) {
+            entries.push({
+                id: `latest-released-${latestReleased.id}`,
+                label: 'Latest',
+                description: 'The newest chapter with a real release date.',
+                item: latestReleased,
+            });
+        }
+
+        return entries;
+    });
 
     backdropPath$ = this.collection$.pipe(
         map((state) =>
@@ -177,4 +258,48 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
                 ),
             );
     }
+}
+
+function getHighestRatedPart(items: MediaListItem[]): MediaListItem | null {
+    const ratedItems = items.filter((item) => (item.rating ?? 0) > 0);
+    if (!ratedItems.length) {
+        return null;
+    }
+
+    return ratedItems.reduce((best, current) => {
+        const currentRating = current.rating ?? 0;
+        const bestRating = best.rating ?? 0;
+
+        if (currentRating !== bestRating) {
+            return currentRating > bestRating ? current : best;
+        }
+
+        return (current.voteCount ?? 0) > (best.voteCount ?? 0) ? current : best;
+    });
+}
+
+function getLatestReleasedPart(items: MediaListItem[]): MediaListItem | null {
+    const now = Date.now();
+    const releasedItems = items.filter((item) => {
+        if (!item.date) {
+            return false;
+        }
+
+        const timestamp = Date.parse(item.date.length === 4 ? `${item.date}-01-01` : item.date);
+        return !Number.isNaN(timestamp) && timestamp <= now;
+    });
+
+    if (!releasedItems.length) {
+        return null;
+    }
+
+    return releasedItems.reduce((latest, current) => {
+        const latestTimestamp = Date.parse(
+            latest.date.length === 4 ? `${latest.date}-01-01` : latest.date,
+        );
+        const currentTimestamp = Date.parse(
+            current.date.length === 4 ? `${current.date}-01-01` : current.date,
+        );
+        return currentTimestamp > latestTimestamp ? current : latest;
+    });
 }

@@ -147,8 +147,8 @@
     min-height: var(--control-height-md) !important;
     color: var(--mat-sys-on-surface) !important;
     transition:
-        background-color var(--transition-fast),
-        color var(--transition-fast);
+        background-color var(--motion-fast),
+        color var(--motion-fast);
 
     &:hover,
     &.mdc-list-item--selected:hover,

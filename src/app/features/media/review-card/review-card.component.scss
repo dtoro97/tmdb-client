@@ -91,7 +91,7 @@
     padding: 0;
     cursor: pointer;
     color: var(--color-brand);
-    transition: color var(--transition-fast);
+    transition: color var(--motion-fast);
 
     &:is(:hover, :focus-visible) {
         color: var(--text-accent);

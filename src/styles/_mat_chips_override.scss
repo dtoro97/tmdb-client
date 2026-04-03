@@ -7,15 +7,13 @@
     --mat-chip-container-height: var(--chip-height);
     --mat-chip-outline-width: 1px;
     --mat-chip-label-text-color: var(--chip-primary-text);
-    --mat-chip-hover-state-layer-color: #ffffff;
-    --mat-chip-hover-state-layer-opacity: var(
-        --mat-button-filled-hover-state-layer-opacity
-    );
+    --mat-chip-hover-state-layer-color: var(--chip-primary-text);
+    --mat-chip-hover-state-layer-opacity: 0;
+    --mat-chip-focus-state-layer-color: var(--chip-primary-text);
     --mat-chip-focus-state-layer-opacity: 0;
-    --mat-chip-selected-hover-state-layer-color: #ffffff;
-    --mat-chip-selected-hover-state-layer-opacity: var(
-        --mat-button-filled-hover-state-layer-opacity
-    );
+    --mat-chip-selected-hover-state-layer-color: var(--chip-primary-text);
+    --mat-chip-selected-hover-state-layer-opacity: 0;
+    --mat-chip-selected-focus-state-layer-color: var(--chip-primary-text);
     --mat-chip-selected-focus-state-layer-opacity: 0;
 }
 
@@ -38,6 +36,13 @@
     cursor: inherit !important;
 }
 
+.mat-mdc-standard-chip .mat-mdc-chip-focus-overlay,
+.mat-mdc-standard-chip .mat-mdc-chip-remove::after {
+    transition:
+        opacity var(--motion-fast),
+        background-color var(--motion-fast);
+}
+
 .mat-mdc-standard-chip.chip--accent {
     --tmdb-chip-bg: var(--chip-primary-bg);
     --tmdb-chip-text: var(--chip-primary-text);
@@ -51,6 +56,12 @@
 
 .mat-mdc-standard-chip.chip--link {
     cursor: pointer;
+    --mat-chip-hover-state-layer-opacity: var(
+        --mat-button-filled-hover-state-layer-opacity
+    );
+    --mat-chip-selected-hover-state-layer-opacity: var(
+        --mat-button-filled-hover-state-layer-opacity
+    );
 }
 
 .mat-mdc-standard-chip .mat-mdc-chip-remove {
@@ -67,7 +78,6 @@
         font-size: 14px;
     }
 
-    // Kill Material's oversized hover state layer circle
     .mat-mdc-chip-action-label,
     .mdc-evolution-chip__ripple,
     &::before,

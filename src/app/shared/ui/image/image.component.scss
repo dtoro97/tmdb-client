@@ -11,6 +11,12 @@
     height: 100%;
     display: block;
     object-fit: cover;
+    opacity: 1;
+    transition: opacity var(--motion-slow, 0.3s ease-out);
+
+    @starting-style {
+        opacity: 0;
+    }
 }
 
 .image__placeholder {
@@ -26,4 +32,10 @@
     height: var(--image-placeholder-icon-size, 45%);
     color: var(--text-muted);
     opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .image {
+        transition: none;
+    }
 }

@@ -74,9 +74,9 @@ import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
 })
 export class MediaDetailsComponent {
     private readonly maxVisiblePhotos = MAX_VISIBLE_PHOTOS;
-    readonly recommendationsSkeletonCount = 4;
 
     readonly vm$ = this.mediaStoreService.mediaDetailVm$;
+
     readonly heroTrailerState$ = combineLatest({
         videosState: this.mediaVideoStoreService.videosState$,
         trailer: this.mediaVideoStoreService.trailer$,
@@ -88,11 +88,16 @@ export class MediaDetailsComponent {
         })),
     );
 
+    readonly videosVm$ = combineLatest({
+        state: this.mediaVideoStoreService.videosState$,
+        totalCount: this.mediaVideoStoreService.youtubeVideosTotalCount$,
+    });
+
     constructor(
         private mediaStoreService: MediaDetailStoreService,
         private mediaActionsStoreService: MediaDetailActionsStore,
         public mediaReviewsStoreService: MediaReviewsStoreService,
-        public mediaVideoStoreService: MediaVideoStoreService,
+        private mediaVideoStoreService: MediaVideoStoreService,
         private dialog: MatDialog,
         private title: Title,
         private router: Router,

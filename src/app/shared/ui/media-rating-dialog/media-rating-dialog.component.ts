@@ -45,10 +45,6 @@ export class MediaRatingDialogComponent {
         >,
     ) {}
 
-    adjust(delta: number): void {
-        this.value.update((current) => normalizeRatingValue(current + delta));
-    }
-
     removeRating(): void {
         this.dialogRef.close('remove');
     }
