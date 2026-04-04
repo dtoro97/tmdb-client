@@ -275,7 +275,26 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
             return throwError(() => context);
         }
 
-        return this.tmdbListService.addToList$(listId, context.id);
+        return this.tmdbListService.addToList$(
+            listId,
+            context.id,
+            context.type,
+        );
+    }
+
+    createListAndAdd$(name: string, description: string): Observable<void> {
+        const context = this.requireContext();
+
+        if (context instanceof Error) {
+            return throwError(() => context);
+        }
+
+        return this.tmdbListService.createListAndAdd$(
+            name,
+            description,
+            context.id,
+            context.type,
+        );
     }
 
     private reloadUserRating$(): Observable<void> {

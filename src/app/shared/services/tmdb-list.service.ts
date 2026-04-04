@@ -3,16 +3,22 @@ import { Injectable } from '@angular/core';
 import { Observable, map, of, switchMap, tap, throwError } from 'rxjs';
 
 import {
-    AccountListItem,
     AccountRestControllerService,
-    ListRestControllerService,
     MovieRestControllerService,
     StatusResponse,
     TvSeriesRestControllerService,
 } from '../../api';
+import {
+    AccountService as AccountV4Service,
+    ListService as ListV4Service,
+    V4CreateListRequest,
+    V4AccountListSummary,
+    V4StatusResponse,
+} from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import { MediaType } from '../types';
 import { buildRawBody } from '../utils/api-body';
+import { LocaleStoreService } from './locale-store.service';
 import { TmdbUserAccountService } from './tmdb-user-account.service';
 import { UserSessionStoreService } from './user-session-store.service';
 
@@ -25,37 +31,45 @@ export interface MediaUserListSummary {
     posterPath: string | null;
 }
 
-function toStatusError(prefix: string, response: StatusResponse): Error {
+function toStatusError(
+    prefix: string,
+    response: StatusResponse | V4StatusResponse,
+): Error {
     return new Error(response.status_message || prefix);
-}
-
-function toMediaUserListSummary(
-    list: AccountListItem,
-): MediaUserListSummary | null {
-    if (!list.id || !list.name?.trim()) {
-        return null;
-    }
-
-    return {
-        id: list.id,
-        name: list.name.trim(),
-        description: list.description?.trim() || null,
-        itemCount: list.item_count ?? 0,
-        favoriteCount: list.favorite_count ?? null,
-        posterPath: list.poster_path ?? null,
-    };
 }
 
 @Injectable({ providedIn: 'root' })
 export class TmdbListService {
     constructor(
         private readonly accountService: AccountRestControllerService,
-        private readonly listService: ListRestControllerService,
+        private readonly accountV4Service: AccountV4Service,
+        private readonly listV4Service: ListV4Service,
+        private readonly localeStore: LocaleStoreService,
         private readonly movieService: MovieRestControllerService,
         private readonly tmdbUserAccountService: TmdbUserAccountService,
         private readonly tvSeriesService: TvSeriesRestControllerService,
         private readonly userSessionStore: UserSessionStoreService,
     ) {}
+
+    private ensureV4ListAccess(): void {
+        if (!this.userSessionStore.v4AccessToken()) {
+            throw new Error(
+                'Please sign in to TMDb again to grant custom list access.',
+            );
+        }
+    }
+
+    private requireV4AccountId(): string {
+        const v4AccountId = this.userSessionStore.v4AccountId();
+
+        if (!v4AccountId) {
+            throw new Error(
+                'Please sign in to TMDb again to load your custom lists.',
+            );
+        }
+
+        return v4AccountId;
+    }
 
     getWatchlistState$(
         mediaId: number,
@@ -215,22 +229,13 @@ export class TmdbListService {
 
     getUserLists$(): Observable<MediaUserListSummary[]> {
         return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(({ accountId }) => {
-                const sessionId = this.userSessionStore.sessionId();
+            switchMap(() => {
+                this.ensureV4ListAccess();
+                const v4AccountId = this.requireV4AccountId();
 
-                if (!sessionId) {
-                    return throwError(
-                        () =>
-                            new Error(
-                                'You need a TMDb user session to access your lists.',
-                            ),
-                    );
-                }
-
-                return this.accountService.accountLists(
-                    accountId,
+                return this.accountV4Service.accountV4Lists(
+                    v4AccountId,
                     1,
-                    sessionId,
                     'body',
                     false,
                     API_JSON_OPTIONS,
@@ -238,34 +243,84 @@ export class TmdbListService {
             }),
             map((page) =>
                 (page.results ?? [])
-                    .map((list) => toMediaUserListSummary(list))
+                    .map((list) => {
+                        if (!list.id || !list.name?.trim()) {
+                            return null;
+                        }
+
+                        const summary: MediaUserListSummary = {
+                            id: list.id,
+                            name: list.name.trim(),
+                            description: list.description?.trim() || null,
+                            itemCount: list.number_of_items ?? 0,
+                            favoriteCount: null,
+                            posterPath: list.poster_path ?? null,
+                        };
+
+                        return summary;
+                    })
                     .filter(
                         (list): list is MediaUserListSummary => list !== null,
-                    )
-                    .slice(0, 5),
+                    ),
             ),
         );
     }
 
-    addToList$(listId: number, mediaId: number): Observable<void> {
+    createList$(name: string, description = ''): Observable<number> {
         return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
             switchMap(() => {
-                const sessionId = this.userSessionStore.sessionId();
+                this.ensureV4ListAccess();
 
-                if (!sessionId) {
-                    return throwError(
-                        () =>
-                            new Error(
-                                'You need a TMDb user session to add items to lists.',
-                            ),
+                const createListRequest = {
+                    name: name.trim(),
+                    description: description.trim(),
+                    iso_639_1: this.localeStore.language(),
+                } as V4CreateListRequest & { iso_639_1: string };
+
+                return this.listV4Service
+                    .listV4Create(
+                        createListRequest,
+                        'body',
+                        false,
+                        API_JSON_OPTIONS,
+                    )
+                    .pipe(
+                        map((response) => {
+                            if (
+                                !response.success ||
+                                (response.status_code ?? 0) >= 400 ||
+                                !response.list_id
+                            ) {
+                                throw toStatusError(
+                                    'Unable to create your list.',
+                                    response,
+                                );
+                            }
+
+                            return response.list_id;
+                        }),
                     );
-                }
+            }),
+        );
+    }
 
-                return this.listService
-                    .listAddMovie(
+    addToList$(
+        listId: number,
+        mediaId: number,
+        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+    ): Observable<void> {
+        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
+            switchMap(() => {
+                this.ensureV4ListAccess();
+
+                return this.listV4Service
+                    .listV4AddItems(
                         listId,
-                        sessionId,
-                        buildRawBody({ media_id: mediaId }),
+                        {
+                            items: [
+                                { media_id: mediaId, media_type: mediaType },
+                            ],
+                        },
                         'body',
                         false,
                         API_JSON_OPTIONS,
@@ -282,6 +337,17 @@ export class TmdbListService {
                         map(() => undefined),
                     );
             }),
+        );
+    }
+
+    createListAndAdd$(
+        name: string,
+        description: string,
+        mediaId: number,
+        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+    ): Observable<void> {
+        return this.createList$(name, description).pipe(
+            switchMap((listId) => this.addToList$(listId, mediaId, mediaType)),
         );
     }
 }

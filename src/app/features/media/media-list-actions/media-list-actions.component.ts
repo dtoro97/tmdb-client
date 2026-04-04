@@ -15,6 +15,7 @@ import { EMPTY, catchError, of, switchMap, take } from 'rxjs';
 
 import {
     MediaUserListSummary,
+    MediaType,
     TmdbListService,
     TmdbUserAuthService,
     UserSessionStoreService,
@@ -37,6 +38,7 @@ import { AsyncPipe } from '@angular/common';
 })
 export class MediaListActionsComponent {
     @Input({ required: true }) title = '';
+    @Input({ required: true }) mediaType!: Extract<MediaType, 'movie' | 'tv'>;
 
     readonly vm$ = this.mediaDetailActionsStore.listActionsVm$;
 
@@ -86,7 +88,10 @@ export class MediaListActionsComponent {
     }
 
     openCustomListsDialog(): void {
-        if (this.userSessionStore.mode() !== 'user') {
+        if (
+            this.userSessionStore.mode() !== 'user' ||
+            !this.userSessionStore.v4AccessToken()
+        ) {
             this.openDialog('sign-in', [])
                 .pipe(
                     take(1),
@@ -142,6 +147,13 @@ export class MediaListActionsComponent {
 
         if (result === 'login') {
             return this.tmdbUserAuthService.startLogin$(this.router.url);
+        }
+
+        if (result.kind === 'create-list') {
+            return this.mediaDetailActionsStore.createListAndAdd$(
+                result.name,
+                result.description,
+            );
         }
 
         return this.mediaDetailActionsStore.addToList$(result.listId);

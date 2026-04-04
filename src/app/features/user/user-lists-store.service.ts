@@ -1,14 +1,19 @@
 import { Injectable } from '@angular/core';
 
 import { ComponentStore } from '@ngrx/component-store';
-import { forkJoin, map, Observable, tap } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
 
-import { AccountListItem, AccountRestControllerService } from '../../api';
+import { AccountRestControllerService } from '../../api';
+import {
+    AccountService as AccountV4Service,
+    V4AccountListSummary,
+} from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
     CardItem,
     LoadableItems,
     MediaListItem,
+    UserSessionStoreService,
     loaded,
     mediaListItemToCardItem,
     toMediaListItem,
@@ -31,13 +36,13 @@ interface UserListsState {
     listsTotal: number;
 }
 
-function toUserListItem(item: AccountListItem): UserDataListItem {
+function toUserListItem(item: V4AccountListSummary): UserDataListItem {
     return {
         id: item.id ?? 0,
         name: item.name?.trim() || 'Untitled List',
         description: item.description?.trim() || '',
-        itemCount: item.item_count ?? 0,
-        favoriteCount: item.favorite_count ?? 0,
+        itemCount: item.number_of_items ?? 0,
+        favoriteCount: 0,
         posterPath: item.poster_path ?? null,
     };
 }
@@ -133,7 +138,11 @@ export class UserListsStore extends ComponentStore<UserListsState> {
         }),
     );
 
-    constructor(private readonly accountService: AccountRestControllerService) {
+    constructor(
+        private readonly accountService: AccountRestControllerService,
+        private readonly accountV4Service: AccountV4Service,
+        private readonly userSessionStore: UserSessionStoreService,
+    ) {
         super(INITIAL_STATE);
     }
 
@@ -141,12 +150,15 @@ export class UserListsStore extends ComponentStore<UserListsState> {
         sessionId: string,
         accountId: number,
         language: string,
+        includeCustomLists = true,
     ): Observable<void> {
         this.patchState({
             favoriteMoviesState: { type: 'loading' },
             favoriteTvState: { type: 'loading' },
             listsState: { type: 'loading' },
         });
+
+        const v4AccountId = this.userSessionStore.v4AccountId();
 
         return forkJoin({
             favoriteMovies: this.accountService.accountGetFavorites(
@@ -169,14 +181,30 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 false,
                 API_JSON_OPTIONS,
             ),
-            lists: this.accountService.accountLists(
-                accountId,
-                1,
-                sessionId,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            ),
+            lists: includeCustomLists
+                ? v4AccountId
+                  ? this.accountV4Service.accountV4Lists(
+                        v4AccountId,
+                        1,
+                        'body',
+                        false,
+                        API_JSON_OPTIONS,
+                    ).pipe(
+                        catchError(() =>
+                            of({
+                                results: [] as V4AccountListSummary[],
+                                total_results: 0,
+                            }),
+                        ),
+                    )
+                  : of({
+                        results: [] as V4AccountListSummary[],
+                        total_results: 0,
+                    })
+                : of({
+                      results: [] as V4AccountListSummary[],
+                      total_results: 0,
+                  }),
         }).pipe(
             tap((result) => {
                 this.patchState({

@@ -183,14 +183,23 @@ export class UserDataPageComponent {
                 const language = this.localeStore.language();
 
                 return forkJoin([
-                    this.userProfileStore.load$(),
+                    this.userProfileStore.load$().pipe(
+                        catchError(() => of(undefined)),
+                    ),
                     this.userWatchlistStore.load$(
                         sessionId,
                         accountId,
                         language,
+                    ).pipe(catchError(() => of(undefined))),
+                    this.userRatingsStore.load$(sessionId, accountId, language).pipe(
+                        catchError(() => of(undefined)),
                     ),
-                    this.userRatingsStore.load$(sessionId, accountId, language),
-                    this.userListsStore.load$(sessionId, accountId, language),
+                    this.userListsStore.load$(
+                        sessionId,
+                        accountId,
+                        language,
+                        !!this.userSessionStore.v4AccessToken(),
+                    ).pipe(catchError(() => of(undefined))),
                 ]);
             }),
             map(() => undefined),

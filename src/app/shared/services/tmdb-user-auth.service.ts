@@ -1,27 +1,70 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 
-import { Observable, catchError, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
+import {
+    Observable,
+    catchError,
+    finalize,
+    map,
+    of,
+    switchMap,
+    tap,
+    throwError,
+} from 'rxjs';
 
 import {
     AuthenticationRestControllerService,
     SessionResponse,
-    TokenResponse,
 } from '../../api';
+import {
+    AuthenticationService as AuthenticationV4Service,
+    V4AccessTokenResponse,
+    V4RequestTokenResponse,
+} from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import { buildRawBody } from '../utils/api-body';
+import { BrowserStorageService } from './browser-storage.service';
 import { TmdbUserAccountService } from './tmdb-user-account.service';
 import { UserSessionStoreService } from './user-session-store.service';
 
-function ensureRequestToken(tokenResponse: TokenResponse): string {
+const LAST_AUTH_ERROR_KEY = 'tmdb_last_auth_error';
+const PENDING_V4_REQUEST_TOKEN_KEY = 'tmdb_pending_v4_request_token';
+const PENDING_V4_REDIRECT_URL_KEY = 'tmdb_pending_v4_redirect_url';
+
+function ensureV4RequestToken(tokenResponse: V4RequestTokenResponse): string {
     const requestToken = tokenResponse.request_token?.trim();
 
     if (!requestToken) {
-        throw new Error('TMDb did not return a request token.');
+        throw new Error(
+            tokenResponse.status_message ||
+                'TMDb did not return a v4 request token.',
+        );
     }
 
     return requestToken;
+}
+
+function ensureV4AccessToken(tokenResponse: V4AccessTokenResponse): string {
+    const accessToken = tokenResponse.access_token?.trim();
+
+    if (!accessToken) {
+        throw new Error(
+            tokenResponse.status_message ||
+                'TMDb did not return a v4 access token.',
+        );
+    }
+
+    return accessToken;
+}
+
+function ensureV4AccountId(tokenResponse: V4AccessTokenResponse): string {
+    const accountId = tokenResponse.account_id?.trim();
+
+    if (!accountId) {
+        throw new Error('TMDb did not return a v4 account id.');
+    }
+
+    return accountId;
 }
 
 function ensureSessionId(sessionResponse: SessionResponse): string {
@@ -38,7 +81,8 @@ function ensureSessionId(sessionResponse: SessionResponse): string {
 export class TmdbUserAuthService {
     constructor(
         private readonly authenticationService: AuthenticationRestControllerService,
-        private readonly router: Router,
+        private readonly authenticationV4Service: AuthenticationV4Service,
+        private readonly browserStorage: BrowserStorageService,
         private readonly tmdbUserAccountService: TmdbUserAccountService,
         private readonly userSessionStore: UserSessionStoreService,
         @Inject(DOCUMENT) private readonly document: Document,
@@ -75,12 +119,20 @@ export class TmdbUserAuthService {
     }
 
     startLogin$(returnUrl: string): Observable<void> {
-        return this.authenticationService
-            .authenticationCreateRequestToken('body', false, API_JSON_OPTIONS)
+        const redirectTo = new URL(returnUrl, this.document.baseURI).toString();
+
+        return this.authenticationV4Service
+            .authenticationV4CreateRequestToken(
+                { redirect_to: redirectTo },
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            )
             .pipe(
                 tap((response) => {
-                    const requestToken = ensureRequestToken(response);
-                    this.navigateToTmdbApproval(requestToken, returnUrl);
+                    const requestToken = ensureV4RequestToken(response);
+                    this.storePendingLogin(requestToken, redirectTo);
+                    this.navigateToTmdbApproval(requestToken);
                 }),
                 map(() => undefined),
             );
@@ -92,7 +144,10 @@ export class TmdbUserAuthService {
     ): Observable<void> {
         if (!requestToken) {
             return throwError(
-                () => new Error('The TMDb callback did not include a request token.'),
+                () =>
+                    new Error(
+                        'The TMDb callback did not include a request token.',
+                    ),
             );
         }
 
@@ -102,21 +157,46 @@ export class TmdbUserAuthService {
             );
         }
 
-        return this.authenticationService
-            .authenticationCreateSession(
-                buildRawBody({ request_token: requestToken }),
+        return this.authenticationV4Service
+            .authenticationV4CreateAccessToken(
+                { request_token: requestToken },
                 'body',
                 false,
                 API_JSON_OPTIONS,
             )
             .pipe(
-                map((response) => ensureSessionId(response)),
-                tap((sessionId) => {
-                    this.userSessionStore.setUserSession(sessionId);
-                }),
-                switchMap((sessionId) =>
-                    this.tmdbUserAccountService.hydrateUserSession$(sessionId),
+                map((response) => ({
+                    v4AccessToken: ensureV4AccessToken(response),
+                    v4AccountId: ensureV4AccountId(response),
+                })),
+                switchMap(({ v4AccessToken, v4AccountId }) =>
+                    this.authenticationService
+                        .authenticationCreateSessionFromV4Token(
+                            buildRawBody({ access_token: v4AccessToken }),
+                            'body',
+                            false,
+                            API_JSON_OPTIONS,
+                        )
+                        .pipe(
+                            map((response) => ensureSessionId(response)),
+                            map((sessionId) => ({
+                                sessionId,
+                                v4AccessToken,
+                                v4AccountId,
+                            })),
+                        ),
                 ),
+                switchMap(({ sessionId, v4AccessToken, v4AccountId }) =>
+                    this.tmdbUserAccountService.hydrateUserSession$(
+                        sessionId,
+                        v4AccessToken,
+                        v4AccountId,
+                    ),
+                ),
+                catchError((error) => {
+                    this.userSessionStore.clearUserSession();
+                    return throwError(() => error);
+                }),
                 map(() => undefined),
             );
     }
@@ -153,32 +233,90 @@ export class TmdbUserAuthService {
         }
 
         const params = new URL(window.location.href).searchParams;
-        const requestToken = params.get('request_token');
-        const approved = params.get('approved') === 'true';
+        const requestToken =
+            params.get('request_token') ??
+            this.browserStorage.getItem(PENDING_V4_REQUEST_TOKEN_KEY);
+        const approvedParam = params.get('approved');
+        const pendingRedirectUrl = this.browserStorage.getItem(
+            PENDING_V4_REDIRECT_URL_KEY,
+        );
+        const isStoredCallbackReturn =
+            !!requestToken &&
+            !!pendingRedirectUrl &&
+            this.isSameCallbackTarget(window.location.href, pendingRedirectUrl);
 
-        if (!requestToken || !approved) {
+        if (!requestToken && !isStoredCallbackReturn) {
             return of(undefined);
         }
 
-        return this.completeLoginFromCallback$(requestToken, approved).pipe(
+        if (approvedParam === 'false') {
+            this.clearPendingLogin();
+            return of(undefined);
+        }
+
+        return this.completeLoginFromCallback$(requestToken, true).pipe(
             tap(() => {
+                this.clearPendingLogin();
+                window.localStorage.removeItem(LAST_AUTH_ERROR_KEY);
                 const url = new URL(window.location.href);
                 url.searchParams.delete('request_token');
-                url.searchParams.delete('approved');
-                window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+                if (approvedParam !== null) {
+                    url.searchParams.delete('approved');
+                }
+                window.history.replaceState(
+                    null,
+                    '',
+                    url.pathname + url.search + url.hash,
+                );
             }),
-            catchError(() => of(undefined)),
+            catchError((error) => {
+                this.clearPendingLogin();
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'TMDb sign-in could not be completed.';
+                window.localStorage.setItem(LAST_AUTH_ERROR_KEY, message);
+                window.alert(`TMDb sign-in failed:\n${message}`);
+                return of(undefined);
+            }),
         );
     }
 
-    private navigateToTmdbApproval(requestToken: string, returnUrl: string): void {
-        const redirectUrl = new URL(returnUrl, this.document.baseURI);
-        const approvalUrl = new URL(
-            `https://www.themoviedb.org/authenticate/${requestToken}`,
-        );
+    private navigateToTmdbApproval(requestToken: string): void {
+        const approvalUrl = new URL('https://www.themoviedb.org/auth/access');
 
-        approvalUrl.searchParams.set('redirect_to', redirectUrl.toString());
+        approvalUrl.searchParams.set('request_token', requestToken);
 
         this.document.defaultView?.location.assign(approvalUrl.toString());
+    }
+
+    private storePendingLogin(requestToken: string, redirectUrl: string): void {
+        this.browserStorage.writeItem(
+            PENDING_V4_REQUEST_TOKEN_KEY,
+            requestToken,
+        );
+        this.browserStorage.writeItem(
+            PENDING_V4_REDIRECT_URL_KEY,
+            redirectUrl,
+        );
+    }
+
+    private clearPendingLogin(): void {
+        this.browserStorage.removeItem(PENDING_V4_REQUEST_TOKEN_KEY);
+        this.browserStorage.removeItem(PENDING_V4_REDIRECT_URL_KEY);
+    }
+
+    private isSameCallbackTarget(
+        currentUrl: string,
+        pendingRedirectUrl: string,
+    ): boolean {
+        const current = new URL(currentUrl);
+        const pending = new URL(pendingRedirectUrl, this.document.baseURI);
+
+        return (
+            current.origin === pending.origin &&
+            current.pathname === pending.pathname &&
+            current.hash === pending.hash
+        );
     }
 }

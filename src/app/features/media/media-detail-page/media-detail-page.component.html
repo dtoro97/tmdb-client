@@ -192,6 +192,7 @@
                             <app-media-list-actions
                                 class="media-detail-page__hero-list-actions"
                                 [title]="media.title"
+                                [mediaType]="media.mediaType"
                             />
                             @if (heroTrailerState$ | async; as trailerState) {
                                 @if (trailerState.loading) {

@@ -42,7 +42,11 @@ export class TmdbUserAccountService {
         return this.hydrateUserSession$(sessionId);
     }
 
-    hydrateUserSession$(sessionId?: string): Observable<UserAccountIdentity> {
+    hydrateUserSession$(
+        sessionId?: string,
+        v4AccessToken?: string | null,
+        v4AccountId?: string | null,
+    ): Observable<UserAccountIdentity> {
         const resolvedSessionId =
             sessionId ?? this.userSessionStore.sessionId();
 
@@ -73,6 +77,8 @@ export class TmdbUserAccountService {
                         identity.username,
                         profile.avatarPath,
                         true,
+                        v4AccessToken,
+                        v4AccountId,
                     );
 
                     return identity;

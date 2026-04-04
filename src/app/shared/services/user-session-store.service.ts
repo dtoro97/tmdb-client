@@ -10,6 +10,8 @@ import { BrowserStorageService } from './browser-storage.service';
 const STORAGE_KEY_GUEST_SESSION_ID = 'tmdb_guest_session_id';
 const STORAGE_KEY_GUEST_SESSION_EXPIRES_AT = 'tmdb_guest_session_expires_at';
 const STORAGE_KEY_SESSION_ID = 'tmdb_user_session_id';
+const STORAGE_KEY_V4_ACCESS_TOKEN = 'tmdb_v4_access_token';
+const STORAGE_KEY_V4_ACCOUNT_ID = 'tmdb_v4_account_id';
 const STORAGE_KEY_ACCOUNT_ID = 'tmdb_user_account_id';
 const STORAGE_KEY_USERNAME = 'tmdb_username';
 const STORAGE_KEY_AVATAR_PATH = 'tmdb_avatar_path';
@@ -19,6 +21,8 @@ const INITIAL_SESSION_STATE: UserSessionState = {
     guestSessionId: null,
     guestSessionExpiresAt: null,
     sessionId: null,
+    v4AccessToken: null,
+    v4AccountId: null,
     accountId: null,
     username: null,
     avatarPath: null,
@@ -59,6 +63,14 @@ export class UserSessionStoreService {
         return this.state().sessionId;
     }
 
+    v4AccessToken(): string | null {
+        return this.state().v4AccessToken;
+    }
+
+    v4AccountId(): string | null {
+        return this.state().v4AccountId;
+    }
+
     accountId(): number | null {
         return this.state().accountId;
     }
@@ -91,11 +103,15 @@ export class UserSessionStoreService {
         username: string | null = null,
         avatarPath: string | null = null,
         accountDetailsHydrated = false,
+        v4AccessToken: string | null = this.state().v4AccessToken,
+        v4AccountId: string | null = this.state().v4AccountId,
     ): void {
         this.patchState({
             guestSessionId: null,
             guestSessionExpiresAt: null,
             sessionId,
+            v4AccessToken,
+            v4AccountId,
             accountId,
             username,
             avatarPath,
@@ -106,6 +122,8 @@ export class UserSessionStoreService {
     clearUserSession(): void {
         this.patchState({
             sessionId: null,
+            v4AccessToken: null,
+            v4AccountId: null,
             accountId: null,
             username: null,
             avatarPath: null,
@@ -158,6 +176,14 @@ export class UserSessionStoreService {
         );
         this.browserStorage.writeItem(STORAGE_KEY_SESSION_ID, state.sessionId);
         this.browserStorage.writeItem(
+            STORAGE_KEY_V4_ACCESS_TOKEN,
+            state.v4AccessToken,
+        );
+        this.browserStorage.writeItem(
+            STORAGE_KEY_V4_ACCOUNT_ID,
+            state.v4AccountId,
+        );
+        this.browserStorage.writeItem(
             STORAGE_KEY_ACCOUNT_ID,
             state.accountId !== null ? `${state.accountId}` : null,
         );
@@ -181,6 +207,10 @@ export class UserSessionStoreService {
             guestSessionId,
             guestSessionExpiresAt,
             sessionId: this.browserStorage.getItem(STORAGE_KEY_SESSION_ID),
+            v4AccessToken: this.browserStorage.getItem(
+                STORAGE_KEY_V4_ACCESS_TOKEN,
+            ),
+            v4AccountId: this.browserStorage.getItem(STORAGE_KEY_V4_ACCOUNT_ID),
             accountId: this.parseAccountId(
                 this.browserStorage.getItem(STORAGE_KEY_ACCOUNT_ID),
             ),
