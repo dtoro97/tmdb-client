@@ -171,8 +171,8 @@
 ) {
     transition: background-color var(--motion-base);
 
-    &:is(:hover, :focus-within) {
-        background: $hover-bg;
+    &:is(:hover, :focus-visible, :focus-within) {
+        background-color: $hover-bg;
 
         @if $title-selector != null {
             #{$title-selector} {

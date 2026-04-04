@@ -131,6 +131,7 @@ export class MediaListActionsComponent {
                 data: { title: this.title, mode, customLists },
                 autoFocus: false,
                 maxWidth: '32rem',
+                panelClass: 'media-list-dialog-panel',
                 width: '100%',
             })
             .afterClosed()

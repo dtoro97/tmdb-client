@@ -1,6 +1,7 @@
 :root {
     --mat-form-field-container-height: 36px;
     --mat-form-field-container-vertical-padding: 6px;
+    --mat-form-field-error-text-color: var(--color-danger-text);
     --mdc-outlined-text-field-label-text-size: 0.8rem;
 
     --mat-select-trigger-text-size: 0.8rem;
@@ -23,6 +24,7 @@
 }
 
 .mat-mdc-form-field {
+    --mat-form-field-error-text-color: var(--color-danger-text);
     --mdc-outlined-text-field-outline-color: transparent;
     --mdc-outlined-text-field-hover-outline-color: transparent;
     --mdc-outlined-text-field-focus-outline-color: transparent;
@@ -71,6 +73,20 @@
     .mdc-text-field {
         padding-left: var(--space-2);
         padding-right: var(--space-1);
+    }
+
+    .mat-mdc-form-field-error {
+        color: var(--color-danger-text);
+    }
+}
+
+.media-list-dialog-panel .media-list-dialog__field-control--textarea {
+    .mat-mdc-text-field-wrapper {
+        height: auto;
+    }
+
+    .mat-mdc-form-field-flex {
+        align-items: stretch;
     }
 }
 
