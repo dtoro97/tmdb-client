@@ -1,0 +1,79 @@
+<div class="user-list-edit-dialog">
+    <header class="user-list-edit-dialog__header">
+        <p class="user-list-edit-dialog__eyebrow text-overline">Edit list</p>
+        <h2 class="user-list-edit-dialog__title text-title">
+            Update your list details
+        </h2>
+        <p class="user-list-edit-dialog__subtitle text-body-sm">
+            Refine the title and description that appear on your list page.
+        </p>
+    </header>
+
+    <form
+        class="user-list-edit-dialog__form"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        mat-dialog-content
+    >
+        <label class="user-list-edit-dialog__field">
+            <span class="user-list-edit-dialog__field-label text-body-sm">
+                List name
+            </span>
+            <mat-form-field appearance="outline" subscriptSizing="fixed">
+                <input
+                    matInput
+                    type="text"
+                    formControlName="name"
+                    autocomplete="off"
+                    placeholder="Weekend picks"
+                />
+                @if (form.controls.name.touched && form.controls.name.hasError("required")) {
+                    <mat-error>Give your list a name.</mat-error>
+                } @else if (form.controls.name.hasError("maxlength")) {
+                    <mat-error>
+                        List names can be at most
+                        {{ data.maxNameLength ?? 100 }} characters.
+                    </mat-error>
+                }
+            </mat-form-field>
+        </label>
+
+        <label class="user-list-edit-dialog__field">
+            <span class="user-list-edit-dialog__field-label text-body-sm">
+                Description
+                <span class="text-caption">Optional</span>
+            </span>
+            <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="user-list-edit-dialog__description-field"
+            >
+                <textarea
+                    matInput
+                    rows="4"
+                    formControlName="description"
+                    placeholder="A place for titles worth revisiting."
+                ></textarea>
+                @if (form.controls.description.hasError("maxlength")) {
+                    <mat-error>
+                        Descriptions can be at most
+                        {{ data.maxDescriptionLength ?? 280 }} characters.
+                    </mat-error>
+                }
+            </mat-form-field>
+        </label>
+
+        <div class="user-list-edit-dialog__footer" mat-dialog-actions>
+            <button
+                class="user-list-edit-dialog__cancel"
+                type="button"
+                mat-dialog-close
+            >
+                Cancel
+            </button>
+            <button matButton="filled" type="submit">
+                Save changes
+            </button>
+        </div>
+    </form>
+</div>

@@ -25,11 +25,17 @@ import { V4ListDetails } from '../model/v4ListDetails';
 // @ts-ignore
 import { V4ListItemStatus } from '../model/v4ListItemStatus';
 // @ts-ignore
+import { V4ListItemUpdatesRequest } from '../model/v4ListItemUpdatesRequest';
+// @ts-ignore
 import { V4ListItemsRequest } from '../model/v4ListItemsRequest';
 // @ts-ignore
 import { V4ListMediaType } from '../model/v4ListMediaType';
 // @ts-ignore
+import { V4ListSortBy } from '../model/v4ListSortBy';
+// @ts-ignore
 import { V4StatusResponse } from '../model/v4StatusResponse';
+// @ts-ignore
+import { V4UpdateListRequest } from '../model/v4UpdateListRequest';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -319,20 +325,40 @@ export class ListService extends BaseService implements ListServiceInterface {
      * Retrieve a list by id.
      * @endpoint get /list/{list_id}
      * @param listId 
+     * @param language 
+     * @param sortBy 
      * @param page 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public listV4Details(listId: number, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4ListDetails>;
-    public listV4Details(listId: number, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4ListDetails>>;
-    public listV4Details(listId: number, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4ListDetails>>;
-    public listV4Details(listId: number, page?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listV4Details(listId: number, language?: string, sortBy?: V4ListSortBy, page?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4ListDetails>;
+    public listV4Details(listId: number, language?: string, sortBy?: V4ListSortBy, page?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4ListDetails>>;
+    public listV4Details(listId: number, language?: string, sortBy?: V4ListSortBy, page?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4ListDetails>>;
+    public listV4Details(listId: number, language?: string, sortBy?: V4ListSortBy, page?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (listId === null || listId === undefined) {
             throw new Error('Required parameter listId was null or undefined when calling listV4Details.');
         }
 
         let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'language',
+            <any>language,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'sort_by',
+            <any>sortBy,
+            QueryParamStyle.Form,
+            true,
+        );
+
 
         localVarQueryParameters = this.addToHttpParams(
             localVarQueryParameters,
@@ -540,6 +566,154 @@ export class ListService extends BaseService implements ListServiceInterface {
             {
                 context: localVarHttpContext,
                 body: v4ListItemsRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Update
+     * Update the details of a list.
+     * @endpoint put /list/{list_id}
+     * @param listId 
+     * @param v4UpdateListRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listV4Update(listId: number, v4UpdateListRequest: V4UpdateListRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4StatusResponse>;
+    public listV4Update(listId: number, v4UpdateListRequest: V4UpdateListRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4StatusResponse>>;
+    public listV4Update(listId: number, v4UpdateListRequest: V4UpdateListRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4StatusResponse>>;
+    public listV4Update(listId: number, v4UpdateListRequest: V4UpdateListRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (listId === null || listId === undefined) {
+            throw new Error('Required parameter listId was null or undefined when calling listV4Update.');
+        }
+        if (v4UpdateListRequest === null || v4UpdateListRequest === undefined) {
+            throw new Error('Required parameter v4UpdateListRequest was null or undefined when calling listV4Update.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/list/${this.configuration.encodeParam({name: "listId", value: listId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<V4StatusResponse>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: v4UpdateListRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Update Items
+     * Update an individual item on a list. Currently, only adding a comment is supported.
+     * @endpoint put /list/{list_id}/items
+     * @param listId 
+     * @param v4ListItemUpdatesRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public listV4UpdateItems(listId: number, v4ListItemUpdatesRequest: V4ListItemUpdatesRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4StatusResponse>;
+    public listV4UpdateItems(listId: number, v4ListItemUpdatesRequest: V4ListItemUpdatesRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4StatusResponse>>;
+    public listV4UpdateItems(listId: number, v4ListItemUpdatesRequest: V4ListItemUpdatesRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4StatusResponse>>;
+    public listV4UpdateItems(listId: number, v4ListItemUpdatesRequest: V4ListItemUpdatesRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (listId === null || listId === undefined) {
+            throw new Error('Required parameter listId was null or undefined when calling listV4UpdateItems.');
+        }
+        if (v4ListItemUpdatesRequest === null || v4ListItemUpdatesRequest === undefined) {
+            throw new Error('Required parameter v4ListItemUpdatesRequest was null or undefined when calling listV4UpdateItems.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/list/${this.configuration.encodeParam({name: "listId", value: listId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}/items`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<V4StatusResponse>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: v4ListItemUpdatesRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

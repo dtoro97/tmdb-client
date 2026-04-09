@@ -1,0 +1,313 @@
+@use "breakpoints" as *;
+@use "mixins" as *;
+
+:host {
+    display: block;
+}
+
+.user-list-detail__hero,
+.user-list-detail__items-heading {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-list-detail__hero {
+    gap: var(--space-3);
+    max-width: 46rem;
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-12);
+    text-shadow: var(--shadow-text-hero);
+}
+
+.user-list-detail__hero--loading {
+    align-items: flex-start;
+}
+
+.user-list-detail__back-link {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: var(--space-1);
+    @include text-link-underline(var(--text-secondary));
+    @include focus-ring();
+}
+
+.user-list-detail__back-icon {
+    font-size: var(--text-2xs);
+}
+
+.user-list-detail__title,
+.user-list-detail__subtitle,
+.user-list-detail__hero-meta,
+.user-list-detail__items-count {
+    margin: 0;
+}
+
+.user-list-detail__title {
+    max-width: none;
+    text-wrap: balance;
+}
+
+.user-list-detail__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.user-list-detail__title-chips {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.user-list-detail__hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-secondary);
+}
+
+.user-list-detail__hero-meta > span + span::before {
+    content: "\2022";
+    margin-right: var(--space-2);
+    color: var(--text-muted);
+}
+
+.user-list-detail__hero-meta strong {
+    color: var(--text-primary);
+    font-weight: var(--weight-semibold);
+}
+
+.user-list-detail__subtitle {
+    max-width: 60ch;
+    color: var(--text-secondary);
+    line-height: var(--lh-relaxed);
+}
+
+.user-list-detail__subtitle--placeholder {
+    color: var(--text-muted);
+}
+
+.user-list-detail__summary-shell {
+    position: relative;
+    margin-top: calc(-1 * var(--space-8));
+    z-index: var(--z-base);
+}
+
+.user-list-detail__summary-card {
+    align-items: start;
+    overflow: hidden;
+    gap: var(--space-4);
+}
+
+.user-list-detail__summary-copy,
+.user-list-detail__summary-copy {
+    display: grid;
+    grid-template-columns: auto;
+    gap: var(--space-4);
+    min-width: 0;
+    align-items: start;
+}
+
+.user-list-detail__actions-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.user-list-detail__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.user-list-detail__actions > * {
+    min-width: fit-content;
+}
+
+.user-list-detail__delete-button {
+    --mat-filled-button-container-color: var(--color-brand);
+    --mat-filled-button-label-text-color: #ffffff;
+}
+
+.user-list-detail__action-skeleton {
+    width: 8.5rem;
+    height: 2.5rem;
+    --skeleton-radius: var(--radius-pill);
+}
+
+.user-list-detail__items-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+}
+
+.user-list-detail__items-header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    align-items: end;
+}
+
+.user-list-detail__items-heading {
+    gap: var(--space-2);
+}
+
+.user-list-detail__items-heading .text-overline,
+.user-list-detail__items-heading .text-title {
+    margin: 0;
+}
+
+.user-list-detail__items-heading .text-overline {
+    color: var(--text-muted);
+}
+
+.user-list-detail__items-count {
+    color: var(--text-muted);
+}
+
+.user-list-detail__items-eyebrow-skeleton {
+    width: 6rem;
+    height: 0.9rem;
+}
+
+.user-list-detail__items-title-skeleton {
+    width: 8rem;
+    height: 1.8rem;
+}
+
+.user-list-detail__items-count-skeleton {
+    width: 5.25rem;
+    height: 1rem;
+}
+
+.user-list-detail__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+    transition: opacity var(--motion-fast);
+}
+
+.user-list-detail__card-skeleton {
+    position: relative;
+    display: block;
+    aspect-ratio: var(--backdrop-ratio);
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.user-list-detail__card-skeleton-media {
+    position: absolute;
+    inset: 0;
+    display: block;
+    --skeleton-height: 100%;
+    --skeleton-radius: 0;
+}
+
+.user-list-detail__card-skeleton-copy {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+}
+
+.user-list-detail__card-skeleton-title {
+    width: 72%;
+    height: 1.1rem;
+}
+
+.user-list-detail__card-skeleton-meta {
+    width: 42%;
+    height: 0.85rem;
+}
+
+.user-list-detail__footer {
+    display: flex;
+    justify-content: center;
+}
+
+.user-list-detail__empty-panel {
+    gap: var(--space-5);
+}
+
+.user-list-detail__back-link-skeleton {
+    width: 8.5rem;
+    height: 1rem;
+}
+
+.user-list-detail__eyebrow-skeleton {
+    width: 5rem;
+    height: 0.9rem;
+}
+
+.user-list-detail__title-skeleton {
+    width: min(24rem, 70vw);
+    height: 2.8rem;
+}
+
+.user-list-detail__subtitle-skeleton {
+    width: min(34rem, 88vw);
+    height: 1rem;
+}
+
+@include tablet() {
+    .user-list-detail__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@include mobile() {
+    .user-list-detail__hero {
+        gap: var(--space-2);
+        padding-top: var(--space-8);
+        padding-bottom: var(--space-10);
+    }
+
+    .user-list-detail__summary-shell {
+        margin-top: calc(-1 * var(--space-5));
+    }
+
+    .user-list-detail__summary-copy,
+    .user-list-detail__items-section {
+        gap: var(--space-4);
+    }
+
+    .user-list-detail__summary-copy {
+        grid-template-columns: 1fr;
+    }
+
+    .user-list-detail__title-row {
+        align-items: flex-start;
+    }
+
+    .user-list-detail__actions-block {
+        padding-top: var(--space-4);
+        min-width: 0;
+    }
+
+    .user-list-detail__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-list-detail__items-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-list-detail__actions > * {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+}

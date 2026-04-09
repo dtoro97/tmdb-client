@@ -4,14 +4,13 @@ import {
     DestroyRef,
     Input,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { EMPTY, catchError, of, switchMap, take } from 'rxjs';
+import { EMPTY, catchError, of, switchMap, take, tap } from 'rxjs';
 
 import {
     MediaUserListSummary,
@@ -43,7 +42,6 @@ export class MediaListActionsComponent {
     readonly vm$ = this.mediaDetailActionsStore.listActionsVm$;
 
     constructor(
-        private readonly destroyRef: DestroyRef,
         private readonly dialog: MatDialog,
         private readonly mediaDetailActionsStore: MediaDetailActionsStore,
         private readonly router: Router,
@@ -65,7 +63,6 @@ export class MediaListActionsComponent {
                 catchError((error) =>
                     this.showError(error, 'Could not update your watchlist.'),
                 ),
-                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
@@ -82,7 +79,6 @@ export class MediaListActionsComponent {
                 catchError((error) =>
                     this.showError(error, 'Could not update your favorites.'),
                 ),
-                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
@@ -98,7 +94,6 @@ export class MediaListActionsComponent {
                     catchError((error) =>
                         this.showError(error, 'Could not update your list.'),
                     ),
-                    takeUntilDestroyed(this.destroyRef),
                 )
                 .subscribe();
             return;
@@ -110,10 +105,10 @@ export class MediaListActionsComponent {
                 take(1),
                 catchError(() => of([] as MediaUserListSummary[])),
                 switchMap((lists) => this.openDialog('lists', lists)),
+                tap(() => this.showSuccess('Media added to your list.')),
                 catchError((error) =>
                     this.showError(error, 'Could not update your list.'),
                 ),
-                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
@@ -167,5 +162,12 @@ export class MediaListActionsComponent {
             { duration: 5000, panelClass: 'snackbar-error' },
         );
         return EMPTY;
+    }
+
+    private showSuccess(message: string): void {
+        this.snackBar.open(message, 'Dismiss', {
+            duration: 4000,
+            panelClass: 'snackbar-success',
+        });
     }
 }

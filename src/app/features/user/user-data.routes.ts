@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { authenticatedGuard } from '../../shared';
 import { UserDataPageComponent } from './user-data-page/user-data-page.component';
+import { UserListDetailPageComponent } from './user-list-detail-page/user-list-detail-page.component';
 
 export const userDataRoutes: Routes = [
     {
@@ -51,11 +52,8 @@ export const userDataRoutes: Routes = [
             },
             {
                 path: 'lists/:listId',
-                component: UserDataPageComponent,
+                component: UserListDetailPageComponent,
                 title: 'Your TMDb List',
-                data: {
-                    section: 'lists',
-                },
             },
         ],
     },

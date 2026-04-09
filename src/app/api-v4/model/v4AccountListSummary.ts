@@ -14,6 +14,7 @@ export interface V4AccountListSummary {
     id?: number;
     name?: string;
     description?: string;
+    'public'?: boolean;
     created_at?: string;
     updated_at?: string;
     number_of_items?: number;

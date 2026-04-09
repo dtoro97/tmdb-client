@@ -15,9 +15,12 @@ import { V4CreateListRequest } from '../model/models';
 import { V4CreateListResponse } from '../model/models';
 import { V4ListDetails } from '../model/models';
 import { V4ListItemStatus } from '../model/models';
+import { V4ListItemUpdatesRequest } from '../model/models';
 import { V4ListItemsRequest } from '../model/models';
 import { V4ListMediaType } from '../model/models';
+import { V4ListSortBy } from '../model/models';
 import { V4StatusResponse } from '../model/models';
+import { V4UpdateListRequest } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';
@@ -66,9 +69,11 @@ export interface ListServiceInterface {
      * Retrieve a list by id.
      * @endpoint get /list/{list_id}
      * @param listId 
+     * @param language 
+     * @param sortBy 
      * @param page 
      */
-    listV4Details(listId: number, page?: number, extraHttpRequestParams?: any): Observable<V4ListDetails>;
+    listV4Details(listId: number, language?: string, sortBy?: V4ListSortBy, page?: number, extraHttpRequestParams?: any): Observable<V4ListDetails>;
 
     /**
      * Item Status
@@ -88,5 +93,23 @@ export interface ListServiceInterface {
      * @param v4ListItemsRequest 
      */
     listV4RemoveItems(listId: number, v4ListItemsRequest: V4ListItemsRequest, extraHttpRequestParams?: any): Observable<V4StatusResponse>;
+
+    /**
+     * Update
+     * Update the details of a list.
+     * @endpoint put /list/{list_id}
+     * @param listId 
+     * @param v4UpdateListRequest 
+     */
+    listV4Update(listId: number, v4UpdateListRequest: V4UpdateListRequest, extraHttpRequestParams?: any): Observable<V4StatusResponse>;
+
+    /**
+     * Update Items
+     * Update an individual item on a list. Currently, only adding a comment is supported.
+     * @endpoint put /list/{list_id}/items
+     * @param listId 
+     * @param v4ListItemUpdatesRequest 
+     */
+    listV4UpdateItems(listId: number, v4ListItemUpdatesRequest: V4ListItemUpdatesRequest, extraHttpRequestParams?: any): Observable<V4StatusResponse>;
 
 }

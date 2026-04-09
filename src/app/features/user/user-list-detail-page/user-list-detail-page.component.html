@@ -1,0 +1,292 @@
+@if (vm$ | async; as vm) {
+    <div class="user-list-detail page-container">
+        @if (vm.header; as header) {
+            <app-hero-surface
+                variant="compact"
+                [backdropPath]="header.backdropPath"
+                [alt]="header.name"
+            >
+                <header class="user-list-detail__hero">
+                    <a
+                        class="user-list-detail__back-link text-caption"
+                        [routerLink]="backLink"
+                    >
+                        <i
+                            class="user-list-detail__back-icon fa-solid fa-chevron-left"
+                            aria-hidden="true"
+                        ></i>
+                        Back to your lists
+                    </a>
+
+                    <div class="user-list-detail__title-row">
+                        <h1 class="user-list-detail__title text-headline">
+                            {{ header.name }}
+                        </h1>
+
+                        <div class="user-list-detail__title-chips">
+                            <app-badge label="TMDB List" />
+                            @if (header.visibilityLabel) {
+                                <app-badge [label]="header.visibilityLabel" />
+                            }
+                        </div>
+                    </div>
+
+                    <p class="user-list-detail__hero-meta text-body-sm">
+                        @if (header.createdBy) {
+                            <span>
+                                Created by
+                                <strong>{{ header.createdBy }}</strong>
+                            </span>
+                        }
+                    </p>
+
+                    <p
+                        class="user-list-detail__subtitle text-body-sm"
+                        [class.user-list-detail__subtitle--placeholder]="
+                            !header.description
+                        "
+                    >
+                        {{
+                            header.description ||
+                                "This custom TMDb list does not have a description yet."
+                        }}
+                    </p>
+                </header>
+            </app-hero-surface>
+
+            <div class="page-main page-main--full-padding">
+                <section class="user-list-detail__summary-shell">
+                    @if (vm.canManage) {
+                        <article
+                            class="surface-panel user-list-detail__summary-card"
+                        >
+                            <div class="user-list-detail__summary-copy">
+                                <div class="user-list-detail__actions-block">
+                                    <div class="user-list-detail__actions">
+                                        <button
+                                            mat-stroked-button
+                                            type="button"
+                                            (click)="onEditDetails(header)"
+                                        >
+                                            Edit details
+                                        </button>
+                                        <button
+                                            mat-stroked-button
+                                            type="button"
+                                            (click)="onClearList()"
+                                        >
+                                            Clear list
+                                        </button>
+                                        <button
+                                            class="user-list-detail__delete-button"
+                                            matButton="filled"
+                                            type="button"
+                                            (click)="onDeleteList()"
+                                        >
+                                            Delete list
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </section>
+
+                <section class="user-list-detail__items-section">
+                    <div class="user-list-detail__items-header">
+                        <div class="user-list-detail__items-heading">
+                            <p class="text-overline">In this list</p>
+                            <h2 class="text-title">Titles</h2>
+                        </div>
+                        <p class="user-list-detail__items-count text-caption">
+                            {{ header.itemCountLabel }}
+                        </p>
+                    </div>
+
+                    @if (
+                        vm.itemsState.type === "loading" ||
+                        vm.itemsState.type === "idle"
+                    ) {
+                        <div class="user-list-detail__grid">
+                            @for (
+                                placeholder of initialSkeletonCount | repeat;
+                                track placeholder
+                            ) {
+                                <article
+                                    class="user-list-detail__card-skeleton surface-panel"
+                                >
+                                    <app-skeleton
+                                        class="user-list-detail__card-skeleton-media"
+                                    />
+                                    <div
+                                        class="user-list-detail__card-skeleton-copy"
+                                    >
+                                        <app-skeleton
+                                            class="user-list-detail__card-skeleton-title"
+                                        />
+                                        <app-skeleton
+                                            class="user-list-detail__card-skeleton-meta"
+                                        />
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    } @else if (
+                        vm.itemsState.type === "loaded" ||
+                        vm.itemsState.type === "loading-more"
+                    ) {
+                        @if (vm.itemsState.value.length) {
+                            <div class="user-list-detail__grid">
+                                @for (
+                                    item of vm.itemsState.value;
+                                    track item.key
+                                ) {
+                                    <app-user-list-detail-item-card
+                                        [item]="item"
+                                        [showRemove]="vm.canManage"
+                                        (remove)="onRemoveItem(item)"
+                                    />
+                                }
+
+                                @if (vm.itemsState.type === "loading-more") {
+                                    @for (
+                                        placeholder of loadingMoreSkeletonCount
+                                            | repeat;
+                                        track placeholder
+                                    ) {
+                                        <article
+                                            class="user-list-detail__card-skeleton surface-panel"
+                                        >
+                                            <app-skeleton
+                                                class="user-list-detail__card-skeleton-media"
+                                            />
+                                            <div
+                                                class="user-list-detail__card-skeleton-copy"
+                                            >
+                                                <app-skeleton
+                                                    class="user-list-detail__card-skeleton-title"
+                                                />
+                                                <app-skeleton
+                                                    class="user-list-detail__card-skeleton-meta"
+                                                />
+                                            </div>
+                                        </article>
+                                    }
+                                }
+                            </div>
+
+                            @if (vm.hasMore) {
+                                <footer class="user-list-detail__footer">
+                                    <button
+                                        mat-stroked-button
+                                        type="button"
+                                        [disabled]="
+                                            vm.itemsState.type ===
+                                            'loading-more'
+                                        "
+                                        (click)="onShowMore()"
+                                    >
+                                        {{
+                                            vm.itemsState.type ===
+                                            "loading-more"
+                                                ? "Loading more"
+                                                : "Show more"
+                                        }}
+                                    </button>
+                                </footer>
+                            }
+                        } @else {
+                            <div
+                                class="surface-panel empty-panel user-list-detail__empty-panel"
+                            >
+                                <app-empty-state
+                                    iconClass="fa-solid fa-list"
+                                    title="This list is empty"
+                                    text="Add more titles and they will appear here."
+                                />
+                            </div>
+                        }
+                    }
+                </section>
+            </div>
+        } @else {
+            <app-hero-surface variant="compact">
+                <div
+                    class="user-list-detail__hero user-list-detail__hero--loading"
+                >
+                    <app-skeleton
+                        class="user-list-detail__back-link-skeleton"
+                    />
+                    <app-skeleton class="user-list-detail__eyebrow-skeleton" />
+                    <app-skeleton class="user-list-detail__title-skeleton" />
+                    <app-skeleton class="user-list-detail__subtitle-skeleton" />
+                </div>
+            </app-hero-surface>
+
+            <div class="page-main page-main--full-padding">
+                <section class="user-list-detail__summary-shell">
+                    <article
+                        class="surface-panel user-list-detail__summary-card"
+                    >
+                        <div class="user-list-detail__summary-copy">
+                            <div class="user-list-detail__actions-block">
+                                <div class="user-list-detail__actions">
+                                    <app-skeleton
+                                        class="user-list-detail__action-skeleton"
+                                    />
+                                    <app-skeleton
+                                        class="user-list-detail__action-skeleton"
+                                    />
+                                    <app-skeleton
+                                        class="user-list-detail__action-skeleton"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="user-list-detail__items-section">
+                    <div class="user-list-detail__items-header">
+                        <div class="user-list-detail__items-heading">
+                            <app-skeleton
+                                class="user-list-detail__items-eyebrow-skeleton"
+                            />
+                            <app-skeleton
+                                class="user-list-detail__items-title-skeleton"
+                            />
+                        </div>
+                        <app-skeleton
+                            class="user-list-detail__items-count-skeleton"
+                        />
+                    </div>
+
+                    <div class="user-list-detail__grid">
+                        @for (
+                            placeholder of initialSkeletonCount | repeat;
+                            track placeholder
+                        ) {
+                            <article
+                                class="user-list-detail__card-skeleton surface-panel"
+                            >
+                                <app-skeleton
+                                    class="user-list-detail__card-skeleton-media"
+                                />
+                                <div
+                                    class="user-list-detail__card-skeleton-copy"
+                                >
+                                    <app-skeleton
+                                        class="user-list-detail__card-skeleton-title"
+                                    />
+                                    <app-skeleton
+                                        class="user-list-detail__card-skeleton-meta"
+                                    />
+                                </div>
+                            </article>
+                        }
+                    </div>
+                </section>
+            </div>
+        }
+    </div>
+}

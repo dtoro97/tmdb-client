@@ -12,8 +12,11 @@ import {
     AccountService as AccountV4Service,
     ListService as ListV4Service,
     V4CreateListRequest,
-    V4AccountListSummary,
+    V4ListDetails,
+    V4ListItemInput,
+    V4ListSortBy,
     V4StatusResponse,
+    V4UpdateListRequest,
 } from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import { MediaType } from '../types';
@@ -36,6 +39,15 @@ function toStatusError(
     response: StatusResponse | V4StatusResponse,
 ): Error {
     return new Error(response.status_message || prefix);
+}
+
+function ensureSuccessfulV4Status(
+    response: V4StatusResponse,
+    prefix: string,
+): void {
+    if (!response.success || (response.status_code ?? 0) >= 400) {
+        throw toStatusError(prefix, response);
+    }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -228,80 +240,87 @@ export class TmdbListService {
     }
 
     getUserLists$(): Observable<MediaUserListSummary[]> {
-        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(() => {
-                this.ensureV4ListAccess();
-                const v4AccountId = this.requireV4AccountId();
+        this.ensureV4ListAccess();
+        const v4AccountId = this.requireV4AccountId();
 
-                return this.accountV4Service.accountV4Lists(
-                    v4AccountId,
-                    1,
-                    'body',
-                    false,
-                    API_JSON_OPTIONS,
-                );
-            }),
-            map((page) =>
-                (page.results ?? [])
-                    .map((list) => {
-                        if (!list.id || !list.name?.trim()) {
-                            return null;
-                        }
+        return this.accountV4Service
+            .accountV4Lists(v4AccountId, 1, 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                map((page) =>
+                    (page.results ?? [])
+                        .map((list) => {
+                            if (!list.id || !list.name?.trim()) {
+                                return null;
+                            }
 
-                        const summary: MediaUserListSummary = {
-                            id: list.id,
-                            name: list.name.trim(),
-                            description: list.description?.trim() || null,
-                            itemCount: list.number_of_items ?? 0,
-                            favoriteCount: null,
-                            posterPath: list.poster_path ?? null,
-                        };
+                            const summary: MediaUserListSummary = {
+                                id: list.id,
+                                name: list.name.trim(),
+                                description: list.description?.trim() || null,
+                                itemCount: list.number_of_items ?? 0,
+                                favoriteCount: null,
+                                posterPath: list.poster_path ?? null,
+                            };
 
-                        return summary;
-                    })
-                    .filter(
-                        (list): list is MediaUserListSummary => list !== null,
-                    ),
-            ),
+                            return summary;
+                        })
+                        .filter(
+                            (list): list is MediaUserListSummary => list !== null,
+                        ),
+                ),
+            );
+    }
+
+    getListDetails$(
+        listId: number,
+        page = 1,
+        sortBy?: V4ListSortBy,
+    ): Observable<V4ListDetails> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service.listV4Details(
+            listId,
+            this.localeStore.language(),
+            sortBy,
+            page,
+            'body',
+            false,
+            API_JSON_OPTIONS,
         );
     }
 
     createList$(name: string, description = ''): Observable<number> {
-        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(() => {
-                this.ensureV4ListAccess();
+        this.ensureV4ListAccess();
 
-                const createListRequest = {
-                    name: name.trim(),
-                    description: description.trim(),
-                    iso_639_1: this.localeStore.language(),
-                } as V4CreateListRequest & { iso_639_1: string };
+        const createListRequest = {
+            name: name.trim(),
+            description: description.trim(),
+            iso_639_1: this.localeStore.language(),
+        } as V4CreateListRequest & { iso_639_1: string };
 
-                return this.listV4Service
-                    .listV4Create(
-                        createListRequest,
-                        'body',
-                        false,
-                        API_JSON_OPTIONS,
-                    )
-                    .pipe(
-                        map((response) => {
-                            if (
-                                !response.success ||
-                                (response.status_code ?? 0) >= 400 ||
-                                !response.list_id
-                            ) {
-                                throw toStatusError(
-                                    'Unable to create your list.',
-                                    response,
-                                );
-                            }
+        return this.listV4Service
+            .listV4Create(
+                createListRequest,
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            )
+            .pipe(
+                map((response) => {
+                    if (
+                        !response.success ||
+                        (response.status_code ?? 0) >= 400 ||
+                        !response.list_id
+                    ) {
+                        throw toStatusError(
+                            'Unable to create your list.',
+                            response,
+                        );
+                    }
 
-                            return response.list_id;
-                        }),
-                    );
-            }),
-        );
+                    return response.list_id;
+                }),
+            );
     }
 
     addToList$(
@@ -309,35 +328,105 @@ export class TmdbListService {
         mediaId: number,
         mediaType: Extract<MediaType, 'movie' | 'tv'>,
     ): Observable<void> {
-        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(() => {
-                this.ensureV4ListAccess();
+        this.ensureV4ListAccess();
 
-                return this.listV4Service
-                    .listV4AddItems(
-                        listId,
-                        {
-                            items: [
-                                { media_id: mediaId, media_type: mediaType },
-                            ],
-                        },
-                        'body',
-                        false,
-                        API_JSON_OPTIONS,
-                    )
-                    .pipe(
-                        tap((response) => {
-                            if ((response.status_code ?? 0) >= 400) {
-                                throw toStatusError(
-                                    'Unable to update your list.',
-                                    response,
-                                );
-                            }
-                        }),
-                        map(() => undefined),
-                    );
-            }),
-        );
+        return this.listV4Service
+            .listV4AddItems(
+                listId,
+                {
+                    items: [{ media_id: mediaId, media_type: mediaType }],
+                },
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            )
+            .pipe(
+                tap((response) => {
+                    if ((response.status_code ?? 0) >= 400) {
+                        throw toStatusError(
+                            'Unable to update your list.',
+                            response,
+                        );
+                    }
+                }),
+                map(() => undefined),
+            );
+    }
+
+    updateList$(
+        listId: number,
+        request: V4UpdateListRequest,
+    ): Observable<void> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service
+            .listV4Update(listId, request, 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                tap((response) =>
+                    ensureSuccessfulV4Status(
+                        response,
+                        'Unable to update your list.',
+                    ),
+                ),
+                map(() => undefined),
+            );
+    }
+
+    clearList$(listId: number): Observable<void> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service
+            .listV4Clear(listId, 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                tap((response) =>
+                    ensureSuccessfulV4Status(
+                        response,
+                        'Unable to clear your list.',
+                    ),
+                ),
+                map(() => undefined),
+            );
+    }
+
+    deleteList$(listId: number): Observable<void> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service
+            .listV4Delete(listId, 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                tap((response) =>
+                    ensureSuccessfulV4Status(
+                        response,
+                        'Unable to delete your list.',
+                    ),
+                ),
+                map(() => undefined),
+            );
+    }
+
+    removeItems$(
+        listId: number,
+        items: readonly V4ListItemInput[],
+    ): Observable<void> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service
+            .listV4RemoveItems(
+                listId,
+                { items: [...items] },
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            )
+            .pipe(
+                tap((response) =>
+                    ensureSuccessfulV4Status(
+                        response,
+                        'Unable to update your list.',
+                    ),
+                ),
+                map(() => undefined),
+            );
     }
 
     createListAndAdd$(

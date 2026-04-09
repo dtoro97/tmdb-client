@@ -21,9 +21,13 @@ import { V4AccessTokenRequest } from '../model/v4AccessTokenRequest';
 // @ts-ignore
 import { V4AccessTokenResponse } from '../model/v4AccessTokenResponse';
 // @ts-ignore
+import { V4DeleteAccessTokenRequest } from '../model/v4DeleteAccessTokenRequest';
+// @ts-ignore
 import { V4RequestTokenRequest } from '../model/v4RequestTokenRequest';
 // @ts-ignore
 import { V4RequestTokenResponse } from '../model/v4RequestTokenResponse';
+// @ts-ignore
+import { V4StatusResponse } from '../model/v4StatusResponse';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -174,6 +178,76 @@ export class AuthenticationService extends BaseService implements Authentication
             {
                 context: localVarHttpContext,
                 body: v4RequestTokenRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Logout
+     * Delete a TMDB v4 user access token.
+     * @endpoint delete /auth/access_token
+     * @param v4DeleteAccessTokenRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public authenticationV4DeleteAccessToken(v4DeleteAccessTokenRequest: V4DeleteAccessTokenRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4StatusResponse>;
+    public authenticationV4DeleteAccessToken(v4DeleteAccessTokenRequest: V4DeleteAccessTokenRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4StatusResponse>>;
+    public authenticationV4DeleteAccessToken(v4DeleteAccessTokenRequest: V4DeleteAccessTokenRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4StatusResponse>>;
+    public authenticationV4DeleteAccessToken(v4DeleteAccessTokenRequest: V4DeleteAccessTokenRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (v4DeleteAccessTokenRequest === null || v4DeleteAccessTokenRequest === undefined) {
+            throw new Error('Required parameter v4DeleteAccessTokenRequest was null or undefined when calling authenticationV4DeleteAccessToken.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/auth/access_token`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<V4StatusResponse>('delete', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: v4DeleteAccessTokenRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

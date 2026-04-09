@@ -1,0 +1,46 @@
+@use "mixins" as *;
+
+:host {
+    display: block;
+}
+
+.user-list-detail-item-card {
+    position: relative;
+}
+
+.user-list-detail-item-card__remove {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-button-size);
+    height: var(--icon-button-size);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: color-mix(
+        in srgb,
+        var(--color-surface-raised-2) 78%,
+        transparent
+    );
+    color: var(--text-primary);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+    transition:
+        transform var(--motion-fast),
+        background-color var(--motion-fast),
+        color var(--motion-fast);
+    @include focus-ring();
+
+    &:hover {
+        transform: translateY(-1px);
+        background: color-mix(
+            in srgb,
+            var(--color-brand) 18%,
+            var(--color-surface-raised-2)
+        );
+    }
+}

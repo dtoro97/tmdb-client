@@ -89,6 +89,36 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout",
+        "description": "Delete a TMDB v4 user access token.",
+        "operationId": "authentication-v4-delete-access-token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V4DeleteAccessTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4StatusResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/account/{account_object_id}/lists": {
@@ -194,6 +224,22 @@
             }
           },
           {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4ListSortBy"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "required": false,
@@ -211,6 +257,47 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/V4ListDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "List"
+        ],
+        "summary": "Update",
+        "description": "Update the details of a list.",
+        "operationId": "list-v4-update",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V4UpdateListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4StatusResponse"
                 }
               }
             }
@@ -291,6 +378,47 @@
           },
           "201": {
             "description": "201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4StatusResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "List"
+        ],
+        "summary": "Update Items",
+        "description": "Update an individual item on a list. Currently, only adding a comment is supported.",
+        "operationId": "list-v4-update-items",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V4ListItemUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
             "content": {
               "application/json": {
                 "schema": {
@@ -491,11 +619,35 @@
           }
         ]
       },
+      "V4DeleteAccessTokenRequest": {
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          }
+        }
+      },
       "V4ListMediaType": {
         "type": "string",
         "enum": [
           "movie",
           "tv"
+        ]
+      },
+      "V4ListSortBy": {
+        "type": "string",
+        "enum": [
+          "original_order.asc",
+          "original_order.desc",
+          "vote_average.asc",
+          "vote_average.desc",
+          "primary_release_date.asc",
+          "primary_release_date.desc",
+          "title.asc",
+          "title.desc"
         ]
       },
       "V4StatusResponse": {
@@ -525,10 +677,35 @@
           "description": {
             "type": "string"
           },
+          "public": {
+            "type": "boolean"
+          },
           "iso_639_1": {
             "type": "string",
             "description": "Language code used by TMDB when creating a v4 list.",
             "example": "en"
+          },
+          "iso_3166_1": {
+            "type": "string",
+            "description": "Country code used by TMDB when creating a v4 list.",
+            "example": "US"
+          }
+        }
+      },
+      "V4UpdateListRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "sort_by": {
+            "$ref": "#/components/schemas/V4ListSortBy"
           }
         }
       },
@@ -564,6 +741,26 @@
           }
         }
       },
+      "V4ListItemUpdateInput": {
+        "type": "object",
+        "required": [
+          "media_type",
+          "media_id",
+          "comment"
+        ],
+        "properties": {
+          "media_type": {
+            "$ref": "#/components/schemas/V4ListMediaType"
+          },
+          "media_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
       "V4ListItemsRequest": {
         "type": "object",
         "required": [
@@ -574,6 +771,20 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/V4ListItemInput"
+            }
+          }
+        }
+      },
+      "V4ListItemUpdatesRequest": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/V4ListItemUpdateInput"
             }
           }
         }
@@ -614,6 +825,9 @@
           },
           "description": {
             "type": "string"
+          },
+          "public": {
+            "type": "boolean"
           },
           "created_at": {
             "type": "string"
@@ -681,6 +895,9 @@
             "type": "string",
             "nullable": true
           },
+          "comment": {
+            "type": "string"
+          },
           "release_date": {
             "type": "string",
             "nullable": true
@@ -711,6 +928,18 @@
           },
           "created_by": {
             "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "sort_by": {
+            "$ref": "#/components/schemas/V4ListSortBy"
+          },
+          "public": {
+            "type": "boolean"
           },
           "favorite_count": {
             "type": "integer",

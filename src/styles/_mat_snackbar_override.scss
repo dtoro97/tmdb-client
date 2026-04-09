@@ -22,22 +22,19 @@
         padding: var(--space-3) var(--space-4);
     }
 
-    .mat-mdc-snack-bar-action {
-        .mat-mdc-button {
-            font-weight: var(--weight-semibold);
-            font-size: var(--text-sm);
-            letter-spacing: 0.02em;
-            min-width: auto;
-            padding-inline: var(--space-3);
+    .mat-mdc-button.mat-mdc-snack-bar-action {
+        font-weight: var(--weight-semibold);
+        font-size: var(--text-sm);
+        letter-spacing: 0.02em;
+        min-width: auto;
+        padding-inline: var(--space-3);
 
-            &:hover {
-                color: var(--text-primary);
-            }
+        &:hover {
+            color: var(--text-primary);
         }
     }
 }
 
-/* Error variant — applied via panelClass: 'snackbar-error' */
 .snackbar-error {
     --mat-snack-bar-container-color: color-mix(
         in srgb,
@@ -46,25 +43,44 @@
     );
 
     .mdc-snackbar__surface {
-        border-color: color-mix(
-            in srgb,
-            var(--color-brand) 32%,
-            transparent
-        );
+        border-color: color-mix(in srgb, var(--color-brand) 32%, transparent);
     }
 }
 
-/* Success variant — applied via panelClass: 'snackbar-success' */
-.snackbar-success {
-    --mat-snack-bar-container-color: color-mix(
-        in srgb,
-        #4caf50 14%,
-        var(--color-surface-raised-2)
-    );
+.mat-mdc-snack-bar-container.snackbar-success,
+.snackbar-success .mat-mdc-snack-bar-container {
+    --mat-snack-bar-container-color: var(--surface-success-soft);
+    --mat-snack-bar-button-color: var(--text-primary);
 
     .mdc-snackbar__surface {
-        border-color: color-mix(in srgb, #4caf50 28%, transparent);
+        border-color: var(--surface-success-soft-border);
     }
+}
+
+.mat-mdc-snack-bar-container.snackbar-success
+    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled),
+.snackbar-success
+    .mat-mdc-snack-bar-container
+    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
+    --mat-button-text-label-text-color: var(--text-primary);
+    --mat-button-text-state-layer-color: var(--color-success-light);
+    --mat-button-text-ripple-color: color-mix(
+        in srgb,
+        var(--color-success-light) 22%,
+        transparent
+    );
+
+    color: var(--text-primary);
+}
+
+.mat-mdc-snack-bar-container.snackbar-success
+    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled)
+    .mdc-button__label,
+.snackbar-success
+    .mat-mdc-snack-bar-container
+    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled)
+    .mdc-button__label {
+    color: inherit;
 }
 
 @include mobile() {

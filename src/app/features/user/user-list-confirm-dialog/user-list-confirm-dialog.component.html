@@ -1,0 +1,23 @@
+<div class="user-list-confirm-dialog">
+    <header class="user-list-confirm-dialog__header">
+        <h2 class="user-list-confirm-dialog__title text-title">
+            {{ data.title }}
+        </h2>
+        <p class="user-list-confirm-dialog__message text-body-sm">
+            {{ data.message }}
+        </p>
+    </header>
+
+    <div class="user-list-confirm-dialog__footer" mat-dialog-actions>
+        <button
+            class="user-list-confirm-dialog__cancel"
+            type="button"
+            mat-dialog-close
+        >
+            {{ data.cancelLabel ?? "Cancel" }}
+        </button>
+        <button matButton="filled" type="button" (click)="confirm()">
+            {{ data.confirmLabel }}
+        </button>
+    </div>
+</div>

@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { V4ListContentItem } from './v4ListContentItem';
+import { V4ListSortBy } from './v4ListSortBy';
 
 
 export interface V4ListDetails { 
@@ -15,6 +16,10 @@ export interface V4ListDetails {
     name?: string;
     description?: string;
     created_by?: string;
+    created_at?: string;
+    updated_at?: string;
+    sort_by?: V4ListSortBy;
+    'public'?: boolean;
     favorite_count?: number;
     item_count?: number;
     poster_path?: string | null;
@@ -23,4 +28,7 @@ export interface V4ListDetails {
     total_results?: number;
     results?: Array<V4ListContentItem>;
 }
+export namespace V4ListDetails {
+}
+
 

@@ -18,6 +18,7 @@ export interface V4ListContentItem {
     overview?: string;
     poster_path?: string | null;
     backdrop_path?: string | null;
+    comment?: string;
     release_date?: string | null;
     first_air_date?: string | null;
     vote_average?: number | null;

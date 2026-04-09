@@ -195,6 +195,11 @@
     --text-accent: var(--color-brand-light);
     --color-danger-text: var(--color-brand-300);
 
+    --color-success-300: #78d79f;
+    --color-success-500: #2f8f52;
+    --color-success: var(--color-success-500);
+    --color-success-light: var(--color-success-300);
+
     --color-rating: #f5c518;
     --color-rating-bar: var(--color-brand);
 
@@ -245,6 +250,18 @@
     --surface-brand-soft-border: color-mix(
         in srgb,
         var(--color-brand) 32%,
+        transparent
+    );
+
+    --surface-success-soft: color-mix(
+        in srgb,
+        var(--color-success) 14%,
+        var(--color-surface-raised-2)
+    );
+
+    --surface-success-soft-border: color-mix(
+        in srgb,
+        var(--color-success) 28%,
         transparent
     );
 
@@ -363,3 +380,4 @@
         --person-photo-size: 120px;
     }
 }
+

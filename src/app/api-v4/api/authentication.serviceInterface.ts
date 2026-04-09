@@ -13,8 +13,10 @@ import { Observable }                                        from 'rxjs';
 
 import { V4AccessTokenRequest } from '../model/models';
 import { V4AccessTokenResponse } from '../model/models';
+import { V4DeleteAccessTokenRequest } from '../model/models';
 import { V4RequestTokenRequest } from '../model/models';
 import { V4RequestTokenResponse } from '../model/models';
+import { V4StatusResponse } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';
@@ -40,5 +42,13 @@ export interface AuthenticationServiceInterface {
      * @param v4RequestTokenRequest 
      */
     authenticationV4CreateRequestToken(v4RequestTokenRequest: V4RequestTokenRequest, extraHttpRequestParams?: any): Observable<V4RequestTokenResponse>;
+
+    /**
+     * Logout
+     * Delete a TMDB v4 user access token.
+     * @endpoint delete /auth/access_token
+     * @param v4DeleteAccessTokenRequest 
+     */
+    authenticationV4DeleteAccessToken(v4DeleteAccessTokenRequest: V4DeleteAccessTokenRequest, extraHttpRequestParams?: any): Observable<V4StatusResponse>;
 
 }
