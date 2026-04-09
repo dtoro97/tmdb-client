@@ -57,7 +57,7 @@
                                         <span
                                             class="user-data-overview__stat-separator"
                                             aria-hidden="true"
-                                            >·</span
+                                            >&#183;</span
                                         >
                                     }
                                 }
@@ -82,7 +82,6 @@
 
         <div class="page-main page-main--full-padding user-data-overview__main">
             <div class="user-data-overview__sections">
-                <!-- Watchlist -->
                 <app-page-section title="Watchlist">
                     <a
                         section-controls
@@ -131,7 +130,6 @@
                     }
                 </app-page-section>
 
-                <!-- Favorites -->
                 <app-page-section title="Favorites">
                     <a
                         section-controls
@@ -180,7 +178,6 @@
                     }
                 </app-page-section>
 
-                <!-- Ratings -->
                 <app-page-section title="Ratings">
                     <a
                         section-controls
@@ -267,7 +264,6 @@
                     }
                 </app-page-section>
 
-                <!-- Lists -->
                 <app-page-section title="Lists">
                     <a
                         section-controls
@@ -284,25 +280,10 @@
                     ) {
                         <div class="user-data-overview__list-grid">
                             @for (
-                                placeholder of [1, 2, 3, 4];
+                                placeholder of 3 | repeat;
                                 track placeholder
                             ) {
-                                <article class="user-data-overview__list-card">
-                                    <app-skeleton
-                                        class="user-data-overview__list-poster-skeleton"
-                                    />
-                                    <div class="user-data-overview__list-copy">
-                                        <app-skeleton
-                                            class="user-data-overview__list-line user-data-overview__list-line--title"
-                                        />
-                                        <app-skeleton
-                                            class="user-data-overview__list-line user-data-overview__list-line--meta"
-                                        />
-                                        <app-skeleton
-                                            class="user-data-overview__list-line user-data-overview__list-line--body"
-                                        />
-                                    </div>
-                                </article>
+                                <app-user-list-card-skeleton />
                             }
                         </div>
                     } @else if (
@@ -314,34 +295,7 @@
                                 item of vm.listPreviewState.value;
                                 track item.id
                             ) {
-                                <article class="user-data-overview__list-card">
-                                    <app-image
-                                        class="user-data-overview__list-poster"
-                                        [src]="item.posterPath"
-                                        [alt]="item.name"
-                                        type="media"
-                                    />
-
-                                    <div class="user-data-overview__list-copy">
-                                        <span
-                                            class="user-data-overview__list-title text-body-sm"
-                                        >
-                                            {{ item.name }}
-                                        </span>
-                                        <span
-                                            class="user-data-overview__list-meta text-caption"
-                                        >
-                                            {{ item.metadata }}
-                                        </span>
-                                        @if (item.description) {
-                                            <p
-                                                class="user-data-overview__list-description text-body-sm"
-                                            >
-                                                {{ item.description }}
-                                            </p>
-                                        }
-                                    </div>
-                                </article>
+                                <app-user-list-card [item]="item" />
                             }
                         </div>
                     } @else {

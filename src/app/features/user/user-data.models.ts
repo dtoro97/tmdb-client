@@ -14,9 +14,10 @@ export interface UserDataSummary {
 export interface UserDataListItem {
     readonly id: number;
     readonly name: string;
-    readonly description: string;
+    readonly description: string | null;
     readonly itemCount: number;
-    readonly favoriteCount: number;
+    readonly metadata: string;
+    readonly updatedLabel: string | null;
     readonly posterPath: string | null;
 }
 
@@ -46,21 +47,4 @@ export interface UserDataOverviewStat {
     readonly label: string;
     readonly value: number;
     readonly route: string;
-}
-
-export interface UserDataOverviewRatingPreviewItem {
-    readonly id: string;
-    readonly title: string;
-    readonly subtitle: string;
-    readonly imagePath: string | null;
-    readonly routeLink: readonly (string | number)[];
-    readonly userRating: number | null;
-}
-
-export interface UserDataOverviewListPreviewItem {
-    readonly id: number;
-    readonly name: string;
-    readonly description: string;
-    readonly metadata: string;
-    readonly posterPath: string | null;
 }

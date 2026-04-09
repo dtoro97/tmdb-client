@@ -4,10 +4,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
 
 import { AccountRestControllerService } from '../../api';
-import {
-    AccountService as AccountV4Service,
-    V4AccountListSummary,
-} from '../../api-v4';
+import { AccountService as AccountV4Service, V4AccountListSummary } from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
     CardItem,
@@ -20,12 +17,10 @@ import {
 } from '../../shared';
 import {
     combineLoadablePreviewItems,
+    loadMorePaged$,
     mapLoadableItems,
 } from '../../shared/utils';
-import {
-    UserDataListItem,
-    UserDataOverviewListPreviewItem,
-} from './user-data.models';
+import { UserDataListItem } from './user-data.models';
 
 interface UserListsState {
     favoriteMoviesState: LoadableItems<MediaListItem>;
@@ -33,39 +28,85 @@ interface UserListsState {
     listsState: LoadableItems<UserDataListItem>;
     favoriteMoviesTotal: number;
     favoriteTvTotal: number;
+    listsPage: number;
+    listsTotalPages: number;
     listsTotal: number;
 }
 
+interface UserListsPageResult {
+    readonly items: readonly UserDataListItem[];
+    readonly page: number;
+    readonly totalPages: number;
+    readonly totalResults: number;
+}
+
+const LISTS_PLACEHOLDER_COUNT = 4;
+
+function toMetadata(itemCount: number): string {
+    return `${itemCount} item${itemCount === 1 ? '' : 's'}`;
+}
+
+function formatListUpdatedLabel(value: string | null | undefined): string | null {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    const normalizedValue = value.trim();
+
+    if (!normalizedValue) {
+        return null;
+    }
+
+    const timestamp = Date.parse(normalizedValue);
+
+    if (Number.isNaN(timestamp)) {
+        return null;
+    }
+
+    const diffMs = Date.now() - timestamp;
+
+    if (diffMs < 0) {
+        return `Updated ${new Intl.DateTimeFormat(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        }).format(timestamp)}`;
+    }
+
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    if (diffMinutes < 1) {
+        return 'Updated just now';
+    }
+
+    if (diffMinutes < 60) {
+        return `Updated ${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+    }
+
+    const diffHours = Math.floor(diffMinutes / 60);
+
+    if (diffHours < 24) {
+        return `Updated ${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    }
+
+    return `Updated ${new Intl.DateTimeFormat(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(timestamp)}`;
+}
+
 function toUserListItem(item: V4AccountListSummary): UserDataListItem {
+    const itemCount = item.number_of_items ?? 0;
+
     return {
         id: item.id ?? 0,
         name: item.name?.trim() || 'Untitled List',
-        description: item.description?.trim() || '',
-        itemCount: item.number_of_items ?? 0,
-        favoriteCount: 0,
+        description: item.description?.trim() || null,
+        itemCount,
+        metadata: toMetadata(itemCount),
+        updatedLabel: formatListUpdatedLabel(item.updated_at ?? item.created_at),
         posterPath: item.poster_path ?? null,
-    };
-}
-
-function toOverviewListPreviewItem(
-    item: UserDataListItem,
-): UserDataOverviewListPreviewItem {
-    const metadataParts = [
-        `${item.itemCount} item${item.itemCount === 1 ? '' : 's'}`,
-    ];
-
-    if (item.favoriteCount > 0) {
-        metadataParts.push(
-            `${item.favoriteCount} favorite${item.favoriteCount === 1 ? '' : 's'}`,
-        );
-    }
-
-    return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        metadata: metadataParts.join(' • '),
-        posterPath: item.posterPath,
     };
 }
 
@@ -76,8 +117,9 @@ export interface UserListsVm {
     readonly hasFavoriteMovies: boolean;
     readonly hasFavoriteTv: boolean;
     readonly hasLists: boolean;
+    readonly listsHasMore: boolean;
     readonly favoritePreviewCards: LoadableItems<CardItem>;
-    readonly listPreviewState: LoadableItems<UserDataOverviewListPreviewItem>;
+    readonly listPreviewState: LoadableItems<UserDataListItem>;
     readonly favoritesTotal: number;
     readonly favoriteMoviesTotal: number;
     readonly favoriteTvTotal: number;
@@ -90,6 +132,8 @@ const INITIAL_STATE: UserListsState = {
     listsState: { type: 'idle' },
     favoriteMoviesTotal: 0,
     favoriteTvTotal: 0,
+    listsPage: 1,
+    listsTotalPages: 1,
     listsTotal: 0,
 };
 
@@ -107,8 +151,10 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 state.favoriteTvState.type === 'loaded' &&
                 state.favoriteTvState.value.length > 0,
             hasLists:
-                state.listsState.type === 'loaded' &&
+                (state.listsState.type === 'loaded' ||
+                    state.listsState.type === 'loading-more') &&
                 state.listsState.value.length > 0,
+            listsHasMore: state.listsPage < state.listsTotalPages,
             favoritePreviewCards: combineLoadablePreviewItems(
                 [
                     mapLoadableItems(
@@ -122,16 +168,8 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 ],
                 10,
             ),
-            listPreviewState: combineLoadablePreviewItems(
-                [
-                    mapLoadableItems(state.listsState, (item) =>
-                        toOverviewListPreviewItem(item),
-                    ),
-                ],
-                4,
-            ),
-            favoritesTotal:
-                state.favoriteMoviesTotal + state.favoriteTvTotal,
+            listPreviewState: combineLoadablePreviewItems([state.listsState], 3),
+            favoritesTotal: state.favoriteMoviesTotal + state.favoriteTvTotal,
             favoriteMoviesTotal: state.favoriteMoviesTotal,
             favoriteTvTotal: state.favoriteTvTotal,
             listsTotal: state.listsTotal,
@@ -156,9 +194,10 @@ export class UserListsStore extends ComponentStore<UserListsState> {
             favoriteMoviesState: { type: 'loading' },
             favoriteTvState: { type: 'loading' },
             listsState: { type: 'loading' },
+            listsPage: 1,
+            listsTotalPages: 1,
+            listsTotal: 0,
         });
-
-        const v4AccountId = this.userSessionStore.v4AccountId();
 
         return forkJoin({
             favoriteMovies: this.accountService.accountGetFavorites(
@@ -181,30 +220,7 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 false,
                 API_JSON_OPTIONS,
             ),
-            lists: includeCustomLists
-                ? v4AccountId
-                  ? this.accountV4Service.accountV4Lists(
-                        v4AccountId,
-                        1,
-                        'body',
-                        false,
-                        API_JSON_OPTIONS,
-                    ).pipe(
-                        catchError(() =>
-                            of({
-                                results: [] as V4AccountListSummary[],
-                                total_results: 0,
-                            }),
-                        ),
-                    )
-                  : of({
-                        results: [] as V4AccountListSummary[],
-                        total_results: 0,
-                    })
-                : of({
-                      results: [] as V4AccountListSummary[],
-                      total_results: 0,
-                  }),
+            lists: this.fetchListsPage$(1, includeCustomLists),
         }).pipe(
             tap((result) => {
                 this.patchState({
@@ -218,15 +234,13 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                             toMediaListItem(item, 'tv'),
                         ),
                     ),
-                    listsState: loaded(
-                        (result.lists.results ?? []).map((item) =>
-                            toUserListItem(item),
-                        ),
-                    ),
+                    listsState: loaded([...result.lists.items]),
                     favoriteMoviesTotal:
                         result.favoriteMovies.total_results ?? 0,
                     favoriteTvTotal: result.favoriteTv.total_results ?? 0,
-                    listsTotal: result.lists.total_results ?? 0,
+                    listsPage: result.lists.page,
+                    listsTotalPages: result.lists.totalPages,
+                    listsTotal: result.lists.totalResults,
                 });
             }),
             map(() => undefined),
@@ -240,5 +254,92 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 },
             }),
         );
+    }
+
+    loadMoreLists$(): Observable<void> {
+        const state = this.get();
+
+        if (state.listsState.type !== 'loaded') {
+            return of(undefined);
+        }
+
+        return loadMorePaged$({
+            currentItems: state.listsState.value,
+            currentPage: state.listsPage,
+            totalPages: state.listsTotalPages,
+            placeholderCount: LISTS_PLACEHOLDER_COUNT,
+            setLoadingMore: (items) =>
+                this.patchState({
+                    listsState: {
+                        type: 'loading-more',
+                        value: items,
+                        placeholderCount: LISTS_PLACEHOLDER_COUNT,
+                    } as LoadableItems<UserDataListItem>,
+                }),
+            fetchPage: (nextPage) =>
+                this.fetchListsPage$(
+                    nextPage,
+                    !!this.userSessionStore.v4AccessToken(),
+                ).pipe(
+                    tap((result) => {
+                        this.patchState({
+                            listsTotalPages: result.totalPages,
+                            listsTotal: result.totalResults,
+                        });
+                    }),
+                    map((result) => [...result.items]),
+                ),
+            setLoaded: (items, page) =>
+                this.patchState({
+                    listsState: loaded(items),
+                    listsPage: page,
+                }),
+        });
+    }
+
+    private fetchListsPage$(
+        page: number,
+        includeCustomLists: boolean,
+    ): Observable<UserListsPageResult> {
+        const v4AccountId = this.userSessionStore.v4AccountId();
+
+        if (!includeCustomLists || !v4AccountId) {
+            return of({
+                items: [],
+                page: 1,
+                totalPages: 1,
+                totalResults: 0,
+            });
+        }
+
+        return this.accountV4Service
+            .accountV4Lists(
+                v4AccountId,
+                page,
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            )
+            .pipe(
+                map((result) => ({
+                    items: (result.results ?? [])
+                        .filter(
+                            (item): item is V4AccountListSummary =>
+                                !!item.id && !!item.name?.trim(),
+                        )
+                        .map((item) => toUserListItem(item)),
+                    page: result.page ?? 1,
+                    totalPages: result.total_pages ?? 1,
+                    totalResults: result.total_results ?? 0,
+                })),
+                catchError(() =>
+                    of({
+                        items: [],
+                        page: 1,
+                        totalPages: 1,
+                        totalResults: 0,
+                    }),
+                ),
+            );
     }
 }

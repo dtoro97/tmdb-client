@@ -36,6 +36,7 @@ export interface UserProfileVm {
 
 const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
 const languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
+const META_SEPARATOR = ' \u00B7 ';
 
 const toProfileDisplayName = (
     profileState: LoadableValue<UserAccountProfile>,
@@ -91,7 +92,7 @@ const toProfileMetaLine = (
         parts.push(`Region: ${resolved ?? region}`);
     }
 
-    return parts.length ? parts.join(' · ') : null;
+    return parts.length ? parts.join(META_SEPARATOR) : null;
 };
 
 const INITIAL_STATE: UserProfileState = {

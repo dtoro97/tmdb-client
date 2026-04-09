@@ -1,0 +1,46 @@
+<a
+    class="user-list-card"
+    [routerLink]="['/me/lists', item.id]"
+    [attr.aria-label]="'Open list ' + item.name"
+>
+    <div class="user-list-card__copy">
+        <div class="user-list-card__main">
+            <div class="user-list-card__title-row">
+                <h3 class="user-list-card__title text-title">
+                    {{ item.name }}
+                </h3>
+                <span class="user-list-card__meta text-caption">
+                    {{ item.metadata }}
+                </span>
+            </div>
+
+            <p
+                class="user-list-card__description text-body-sm"
+                [class.user-list-card__description--placeholder]="
+                    !item.description
+                "
+            >
+                {{ item.description || "No description yet." }}
+            </p>
+        </div>
+
+        <div class="user-list-card__footer">
+            @if (item.updatedLabel) {
+                <p class="user-list-card__timestamp text-caption">
+                    {{ item.updatedLabel }}
+                </p>
+            } @else {
+                <p class="user-list-card__timestamp text-caption">
+                    Custom TMDb list
+                </p>
+            }
+
+            <span class="user-list-card__action text-caption">
+                Open list
+                <i
+                    class="fa-solid fa-chevron-right user-list-card__action-icon"
+                ></i>
+            </span>
+        </div>
+    </div>
+</a>

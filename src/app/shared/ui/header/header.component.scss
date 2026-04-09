@@ -29,8 +29,10 @@
 }
 
 .header-brand-icon {
-    @include icon-size(var(--text-xl));
-    color: var(--color-brand);
+    inline-size: var(--space-6);
+    block-size: var(--space-6);
+    display: block;
+    flex-shrink: 0;
 }
 
 .header-brand-text {

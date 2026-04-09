@@ -48,16 +48,6 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
     collection$ = this.select((state) => state.collection);
 
-    collectionValue$ = this.collection$.pipe(
-        filter(
-            (
-                state,
-            ): state is { type: 'loaded'; value: CollectionDetails | null } =>
-                state.type === 'loaded' && isDefined(state.value),
-        ),
-        map((state) => state.value),
-    );
-
     mappedPartsState$ = this.select((state) => state.parts);
 
     partsCount$ = this.select((state) =>
@@ -116,17 +106,19 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         const entries: CollectionArcEntry[] = [];
 
         if (highestRated) {
-            entries.push(
-                {
-                    id: `highest-rated-${highestRated.id}`,
-                    label: 'Top rated',
-                    description: 'The strongest-rated entry across the full collection.',
-                    item: highestRated,
-                },
-            );
+            entries.push({
+                id: `highest-rated-${highestRated.id}`,
+                label: 'Top rated',
+                description:
+                    'The strongest-rated entry across the full collection.',
+                item: highestRated,
+            });
         }
 
-        if (latestReleased && !entries.some((entry) => entry.item.id === latestReleased.id)) {
+        if (
+            latestReleased &&
+            !entries.some((entry) => entry.item.id === latestReleased.id)
+        ) {
             entries.push({
                 id: `latest-released-${latestReleased.id}`,
                 label: 'Latest',
@@ -197,7 +189,9 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
                     const mappedItems = sortByDate(
                         collection.parts ?? [],
                         (part) => part.release_date,
-                    ).map((part) => toCollectionPartMediaListItem(part, 'year'));
+                    ).map((part) =>
+                        toCollectionPartMediaListItem(part, 'year'),
+                    );
 
                     return this.enrichCastLinks$(mappedItems).pipe(
                         map((items) => ({ collection, items })),
@@ -274,7 +268,9 @@ function getHighestRatedPart(items: MediaListItem[]): MediaListItem | null {
             return currentRating > bestRating ? current : best;
         }
 
-        return (current.voteCount ?? 0) > (best.voteCount ?? 0) ? current : best;
+        return (current.voteCount ?? 0) > (best.voteCount ?? 0)
+            ? current
+            : best;
     });
 }
 
@@ -285,7 +281,9 @@ function getLatestReleasedPart(items: MediaListItem[]): MediaListItem | null {
             return false;
         }
 
-        const timestamp = Date.parse(item.date.length === 4 ? `${item.date}-01-01` : item.date);
+        const timestamp = Date.parse(
+            item.date.length === 4 ? `${item.date}-01-01` : item.date,
+        );
         return !Number.isNaN(timestamp) && timestamp <= now;
     });
 

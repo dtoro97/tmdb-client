@@ -1,0 +1,85 @@
+@use "breakpoints" as *;
+@use "mixins" as *;
+
+:host {
+    display: block;
+    align-self: start;
+}
+
+.user-list-card-skeleton {
+    display: flex;
+    flex-direction: column;
+    min-height: 9.5rem;
+    padding: var(--space-4);
+    @include surface-panel(var(--surface-panel-soft));
+}
+
+.user-list-card-skeleton__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.user-list-card-skeleton__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.user-list-card-skeleton__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.user-list-card-skeleton__line--meta {
+    width: min(8.5rem, 100%);
+    height: 0.8rem;
+}
+
+.user-list-card-skeleton__line--count {
+    width: 3.75rem;
+    height: 0.8rem;
+}
+
+.user-list-card-skeleton__line--title {
+    width: min(11rem, 62%);
+    height: 1.5rem;
+}
+
+.user-list-card-skeleton__line--body {
+    width: min(14rem, 100%);
+    height: 1rem;
+}
+
+.user-list-card-skeleton__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: var(--space-2);
+    border-top: 1px solid color-mix(in srgb, var(--surface-panel-border) 72%, transparent);
+}
+
+.user-list-card-skeleton__line--action {
+    width: 5.5rem;
+    height: 0.8rem;
+}
+
+@include mobile() {
+    .user-list-card-skeleton {
+        padding: var(--space-3);
+        min-height: 9rem;
+    }
+
+    .user-list-card-skeleton__copy {
+        gap: var(--space-4);
+    }
+
+    .user-list-card-skeleton__main {
+        gap: var(--space-2);
+    }
+}

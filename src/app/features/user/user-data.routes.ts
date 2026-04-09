@@ -49,6 +49,14 @@ export const userDataRoutes: Routes = [
                     section: 'lists',
                 },
             },
+            {
+                path: 'lists/:listId',
+                component: UserDataPageComponent,
+                title: 'Your TMDb List',
+                data: {
+                    section: 'lists',
+                },
+            },
         ],
     },
 ];

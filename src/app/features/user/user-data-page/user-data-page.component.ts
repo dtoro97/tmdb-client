@@ -28,6 +28,7 @@ import {
 import { UserDataOverviewSectionComponent } from '../overview-section/user-data-overview-section.component';
 import { RatingsSectionComponent } from '../ratings-section/ratings-section.component';
 import { FavoritesSectionComponent } from '../favorites-section/favorites-section.component';
+import { ListsSectionComponent } from '../lists-section/lists-section.component';
 import { UserListsStore } from '../user-lists-store.service';
 import { UserProfileStore } from '../user-profile-store.service';
 import { UserRatingsStore } from '../user-ratings-store.service';
@@ -104,6 +105,7 @@ const USER_DATA_SECTION_CONTENT: Record<
         UserDataOverviewSectionComponent,
         WatchlistSectionComponent,
         FavoritesSectionComponent,
+        ListsSectionComponent,
         RatingsSectionComponent,
     ],
     templateUrl: './user-data-page.component.html',

@@ -8,18 +8,17 @@ import {
     CardItem,
     EmptyStateComponent,
     HeroSurfaceComponent,
-    ImageComponent,
     LoadableItems,
     MediaCarouselPanelComponent,
     PageSectionComponent,
     RatingDistributionComponent,
     SkeletonComponent,
     UserAvatarComponent,
+    RepeatPipe,
 } from '../../../shared';
-import {
-    UserDataOverviewListPreviewItem,
-    UserDataOverviewStat,
-} from '../user-data.models';
+import { UserDataListItem, UserDataOverviewStat } from '../user-data.models';
+import { UserListCardComponent } from '../user-list-card/user-list-card.component';
+import { UserListCardSkeletonComponent } from '../user-list-card-skeleton/user-list-card-skeleton.component';
 import { UserListsStore, UserListsVm } from '../user-lists-store.service';
 import { UserProfileStore, UserProfileVm } from '../user-profile-store.service';
 import { UserRatingsStore, UserRatingsVm } from '../user-ratings-store.service';
@@ -39,7 +38,7 @@ interface OverviewVm extends UserProfileVm {
     readonly recentRatings: readonly number[];
     readonly recentRatingsCount: number;
     readonly recentRatingsAverage: number | null;
-    readonly listPreviewState: LoadableItems<UserDataOverviewListPreviewItem>;
+    readonly listPreviewState: LoadableItems<UserDataListItem>;
     readonly hasLibraryContent: boolean;
 }
 
@@ -79,12 +78,14 @@ function toOverviewStats(
         RouterLink,
         EmptyStateComponent,
         HeroSurfaceComponent,
-        ImageComponent,
         MediaCarouselPanelComponent,
         PageSectionComponent,
         RatingDistributionComponent,
         SkeletonComponent,
         UserAvatarComponent,
+        UserListCardComponent,
+        UserListCardSkeletonComponent,
+        RepeatPipe,
     ],
     templateUrl: './user-data-overview-section.component.html',
     styleUrl: './user-data-overview-section.component.scss',
