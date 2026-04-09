@@ -615,6 +615,12 @@
           "description": {
             "type": "string"
           },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
           "number_of_items": {
             "type": "integer",
             "format": "int32"

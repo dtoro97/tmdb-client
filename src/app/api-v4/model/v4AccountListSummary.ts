@@ -14,6 +14,8 @@ export interface V4AccountListSummary {
     id?: number;
     name?: string;
     description?: string;
+    created_at?: string;
+    updated_at?: string;
     number_of_items?: number;
     poster_path?: string | null;
 }
