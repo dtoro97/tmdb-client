@@ -8,7 +8,6 @@
             <app-episode-list-item [item]="entry.episodeItem">
                 <app-rating
                     episode-list-item-actions
-                    class="episode-rating-list__score-badge"
                     [value]="entry.item.userRating | number: '1.1-1'"
                 />
             </app-episode-list-item>

@@ -2,6 +2,7 @@
 
 :host {
     display: block;
+    --person-photo-size: 190px;
 }
 
 .person-carousel-panel__skeleton {
@@ -50,6 +51,10 @@
 }
 
 @include mobile() {
+    :host {
+        --person-photo-size: 120px;
+    }
+
     .person-carousel-panel__skeleton {
         gap: var(--space-1);
     }

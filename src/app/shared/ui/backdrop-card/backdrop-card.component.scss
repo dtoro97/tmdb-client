@@ -31,12 +31,8 @@
     @include absolute-fill;
     z-index: 1;
     pointer-events: none;
-    background: linear-gradient(
-        to top,
-        var(--color-surface-overlay) 0%,
-        rgba(0, 0, 0, 0.3) 40%,
-        transparent 72%
-    );
+    background: var(--color-surface-overlay);
+    opacity: 0.72;
 }
 
 .backdrop-card__content {

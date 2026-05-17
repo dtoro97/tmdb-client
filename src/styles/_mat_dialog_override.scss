@@ -1,7 +1,7 @@
 .cdk-overlay-pane:not(.photo-viewer-panel) {
     .mat-mdc-dialog-container .mdc-dialog__surface {
         border-radius: var(--radius-2xl);
-        border: 1px solid var(--surface-panel-border);
+        border: 1px solid var(--color-border-subtle);
         box-shadow: var(--shadow-xl);
         padding: var(--space-6);
     }

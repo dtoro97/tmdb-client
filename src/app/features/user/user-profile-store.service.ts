@@ -12,7 +12,6 @@ import {
     LocaleStoreService,
     TmdbUserAccountService,
     UserAccountProfile,
-    UserSessionMode,
     UserSessionStoreService,
     loaded,
     toCardItem,
@@ -20,98 +19,38 @@ import {
 } from '../../shared';
 
 interface UserProfileState {
-    mode: UserSessionMode;
     profileState: LoadableValue<UserAccountProfile>;
     trendingSuggestionsState: LoadableItems<CardItem>;
 }
 
-export interface UserProfileVm {
-    readonly mode: UserSessionMode;
-    readonly profileState: LoadableValue<UserAccountProfile>;
-    readonly profileDisplayName: string;
-    readonly profileAvatarInitials: string;
-    readonly profileMetaLine: string | null;
-    readonly trendingSuggestionsState: LoadableItems<CardItem>;
-}
-
-const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-const languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
-const META_SEPARATOR = ' \u00B7 ';
-
-const toProfileDisplayName = (
-    profileState: LoadableValue<UserAccountProfile>,
-): string => {
-    if (profileState.type !== 'loaded') {
-        return 'TMDb Member';
-    }
-
-    return (
-        profileState.value.name ?? profileState.value.username ?? 'TMDb Member'
-    );
-};
-
-const toAvatarInitials = (
-    profileState: LoadableValue<UserAccountProfile>,
-): string => {
-    if (profileState.type !== 'loaded') {
-        return 'TM';
-    }
-
-    const source = (
-        profileState.value.name ??
-        profileState.value.username ??
-        'TMDb Member'
-    ).trim();
-
-    const words = source.split(/\s+/).filter(Boolean);
-    const initials = words
-        .slice(0, 2)
-        .map((word) => word[0]?.toUpperCase() ?? '');
-
-    return initials.join('') || 'TM';
-};
-
-const toProfileMetaLine = (
-    profileState: LoadableValue<UserAccountProfile>,
-): string | null => {
-    if (profileState.type !== 'loaded') {
-        return null;
-    }
-
-    const parts: string[] = [];
-    const lang = profileState.value.language?.trim();
-    const region = profileState.value.region?.trim().toUpperCase();
-
-    if (lang) {
-        const resolved = languageNames.of(lang);
-        parts.push(`Language: ${resolved ?? lang.toUpperCase()}`);
-    }
-
-    if (region) {
-        const resolved = regionNames.of(region);
-        parts.push(`Region: ${resolved ?? region}`);
-    }
-
-    return parts.length ? parts.join(META_SEPARATOR) : null;
-};
-
 const INITIAL_STATE: UserProfileState = {
-    mode: 'anonymous',
     profileState: { type: 'idle' },
     trendingSuggestionsState: { type: 'idle' },
 };
 
 @Injectable()
 export class UserProfileStore extends ComponentStore<UserProfileState> {
-    readonly vm$ = this.select(
-        (state): UserProfileVm => ({
-            mode: state.mode,
-            profileState: state.profileState,
-            profileDisplayName: toProfileDisplayName(state.profileState),
-            profileAvatarInitials: toAvatarInitials(state.profileState),
-            profileMetaLine: toProfileMetaLine(state.profileState),
-            trendingSuggestionsState: state.trendingSuggestionsState,
-        }),
+    readonly userProfileVm$ = this.select(
+        (state) => {
+            const displayName =
+                state.profileState.type === 'loaded'
+                    ? (state.profileState.value.name ??
+                      state.profileState.value.username ??
+                      'TMDb Member')
+                    : 'TMDb Member';
+
+            return {
+                profileState: state.profileState,
+                profileDisplayName: displayName,
+                profileAvatarInitials: displayName
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((word) => word[0]?.toUpperCase() ?? '')
+                    .join('') || 'TM',
+                trendingSuggestionsState: state.trendingSuggestionsState,
+            };
+        },
     );
 
     constructor(
@@ -127,15 +66,11 @@ export class UserProfileStore extends ComponentStore<UserProfileState> {
         const mode = this.userSessionStore.mode();
 
         if (mode !== 'user') {
-            this.patchState({
-                ...INITIAL_STATE,
-                mode,
-            });
+            this.patchState(INITIAL_STATE);
             return of(undefined);
         }
 
         this.patchState({
-            mode,
             profileState: { type: 'loading' },
             trendingSuggestionsState: { type: 'loading' },
         });
@@ -157,11 +92,11 @@ export class UserProfileStore extends ComponentStore<UserProfileState> {
                     trendingSuggestionsState: loaded(
                         (result.trending.results ?? [])
                             .filter(
-                                (item: MultiListItem) =>
+                                (item) =>
                                     item.media_type === 'movie' ||
                                     item.media_type === 'tv',
                             )
-                            .map((item: MultiListItem) =>
+                            .map((item) =>
                                 item.media_type === 'movie'
                                     ? toCardItem(item, 'movie')
                                     : toCardItem(item, 'tv'),

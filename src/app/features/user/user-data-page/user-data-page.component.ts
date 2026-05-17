@@ -1,6 +1,6 @@
+import { AsyncPipe } from '@angular/common';
 import {
     ChangeDetectionStrategy,
-    ChangeDetectorRef,
     Component,
     DestroyRef,
 } from '@angular/core';
@@ -15,11 +15,11 @@ import {
     map,
     Observable,
     of,
+    startWith,
     switchMap,
 } from 'rxjs';
 
 import {
-    EmptyStateComponent,
     LocaleStoreService,
     TmdbUserAccountService,
     UserSessionStoreService,
@@ -42,66 +42,10 @@ type UserDataSection =
     | 'ratings'
     | 'lists';
 
-interface UserDataSectionContent {
-    readonly title: string;
-    readonly description: string;
-    readonly emptyStateTitle: string;
-    readonly emptyStateText: string;
-    readonly iconClass: string;
-}
-
-const USER_DATA_SECTION_CONTENT: Record<
-    UserDataSection,
-    UserDataSectionContent
-> = {
-    profile: {
-        title: 'Your profile',
-        description:
-            'Your account overview, watchlist, ratings, and lists.',
-        emptyStateTitle: 'Your profile is on its way',
-        emptyStateText:
-            'Profile details and account settings will appear here soon.',
-        iconClass: 'fa-solid fa-user',
-    },
-    watchlists: {
-        title: 'Your watchlists',
-        description: 'Movies and shows you want to watch later.',
-        emptyStateTitle: 'No watchlist items yet',
-        emptyStateText:
-            'Browse titles and add them to your watchlist to see them here.',
-        iconClass: 'fa-solid fa-bookmark',
-    },
-    favorites: {
-        title: 'Your favorites',
-        description: 'Movies and shows you marked as favorites.',
-        emptyStateTitle: 'No favorites yet',
-        emptyStateText:
-            'Browse titles and mark a few as favorites to see them here.',
-        iconClass: 'fa-solid fa-heart',
-    },
-    ratings: {
-        title: 'Your ratings',
-        description: 'Titles and episodes you have rated.',
-        emptyStateTitle: 'No ratings yet',
-        emptyStateText:
-            'Rate a few titles to start building your personal scoring history.',
-        iconClass: 'fa-solid fa-star',
-    },
-    lists: {
-        title: 'Your lists',
-        description:
-            'Custom collections you have created on TMDb.',
-        emptyStateTitle: 'No custom lists yet',
-        emptyStateText:
-            'Create a themed collection on TMDb and it will show up here.',
-        iconClass: 'fa-solid fa-list',
-    },
-};
-
 @Component({
     selector: 'app-user-data-page',
     imports: [
-        EmptyStateComponent,
+        AsyncPipe,
         UserDataOverviewSectionComponent,
         WatchlistSectionComponent,
         FavoritesSectionComponent,
@@ -119,18 +63,19 @@ const USER_DATA_SECTION_CONTENT: Record<
     ],
 })
 export class UserDataPageComponent {
-    sectionContent =
-        USER_DATA_SECTION_CONTENT[
+    readonly currentSection$ = this.route.data.pipe(
+        map(
+            (data) =>
+                (data['section'] as UserDataSection | undefined) ?? 'profile',
+        ),
+        startWith(
             (this.route.snapshot.data['section'] as
                 | UserDataSection
-                | undefined) ?? 'profile'
-        ];
-    currentSection: UserDataSection =
-        (this.route.snapshot.data['section'] as UserDataSection | undefined) ??
-        'profile';
+                | undefined) ?? 'profile',
+        ),
+    );
 
     constructor(
-        private readonly cdr: ChangeDetectorRef,
         private readonly destroyRef: DestroyRef,
         private readonly localeStore: LocaleStoreService,
         private readonly route: ActivatedRoute,
@@ -158,25 +103,13 @@ export class UserDataPageComponent {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-
-        this.route.data
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((data) => {
-                const section =
-                    (data['section'] as UserDataSection | undefined) ??
-                    'profile';
-                this.currentSection = section;
-                this.sectionContent = USER_DATA_SECTION_CONTENT[section];
-                this.cdr.markForCheck();
-            });
     }
 
     private loadAllStores$(): Observable<void> {
         const mode = this.userSessionStore.mode();
 
         if (mode !== 'user') {
-            this.userProfileStore.load$().subscribe();
-            return of(undefined);
+            return this.userProfileStore.load$();
         }
 
         return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(

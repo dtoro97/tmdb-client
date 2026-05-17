@@ -45,7 +45,7 @@
     .mat-mdc-text-field-wrapper {
         height: var(--mat-form-field-container-height);
         padding: 0;
-        border: 1px solid var(--surface-panel-border);
+        border: 1px solid var(--color-border-subtle);
         border-radius: var(--radius-md);
         transition: border-color var(--motion-fast);
     }
@@ -151,11 +151,7 @@
     padding-block: var(--space-1) !important;
     border: 1px solid var(--mat-sys-outline-variant) !important;
     border-radius: var(--radius-lg) !important;
-    background: color-mix(
-        in srgb,
-        var(--mat-sys-surface-container) 94%,
-        var(--mat-sys-surface)
-    ) !important;
+    background: var(--surface-panel) !important;
     box-shadow: var(--shadow-lg) !important;
 }
 

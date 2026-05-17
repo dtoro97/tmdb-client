@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { UserDataListItem } from '../user-data.models';
+import { UserDataListItem } from '../user-lists-store.service';
 
 @Component({
     selector: 'app-user-list-card',

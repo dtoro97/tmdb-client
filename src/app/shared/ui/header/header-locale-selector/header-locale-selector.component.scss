@@ -1,29 +1,11 @@
 @use "mixins" as *;
 
 .locale-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: var(--icon-button-size);
-    block-size: var(--icon-button-size);
-    padding: 0;
-    border: none;
-    border-radius: var(--icon-button-radius);
-    background: var(--control-subtle-surface);
-    color: var(--control-subtle-text);
-    cursor: pointer;
-    transition: var(--control-transition);
-
-    &:is(:hover, :focus-visible) {
-        background: var(--control-subtle-surface-hover);
-        color: var(--control-subtle-text-hover);
-    }
-
-    @include focus-ring();
+    @include icon-button-shell();
 }
 
 .locale-button-icon {
-    @include icon-size(var(--icon-button-icon-size));
+    @include icon-size(1rem);
 }
 
 .locale-panel {

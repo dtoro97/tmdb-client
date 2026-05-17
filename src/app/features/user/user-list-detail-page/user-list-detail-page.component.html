@@ -1,10 +1,10 @@
 @if (vm$ | async; as vm) {
     <div class="user-list-detail page-container">
-        @if (vm.header; as header) {
+        @if (vm.headerState.type === "loaded") {
             <app-hero-surface
                 variant="compact"
-                [backdropPath]="header.backdropPath"
-                [alt]="header.name"
+                [backdropPath]="vm.headerState.value.backdropPath"
+                [alt]="vm.headerState.value.name"
             >
                 <header class="user-list-detail__hero">
                     <a
@@ -20,36 +20,27 @@
 
                     <div class="user-list-detail__title-row">
                         <h1 class="user-list-detail__title text-headline">
-                            {{ header.name }}
+                            {{ vm.headerState.value.name }}
                         </h1>
-
-                        <div class="user-list-detail__title-chips">
-                            @if (header.visibilityLabel) {
-                                <app-badge [label]="header.visibilityLabel" />
-                            }
-                        </div>
                     </div>
 
                     <p class="user-list-detail__hero-meta text-body-sm">
-                        @if (header.createdBy) {
+                        @if (vm.headerState.value.createdBy) {
                             <span>
                                 Created by
-                                <strong>{{ header.createdBy }}</strong>
+                                <strong>{{ vm.headerState.value.createdBy }}</strong>
                             </span>
-                        }
-                        @if (header.updatedLabel) {
-                            <span>{{ header.updatedLabel }}</span>
                         }
                     </p>
 
                     <p
                         class="user-list-detail__subtitle text-body-sm"
                         [class.user-list-detail__subtitle--placeholder]="
-                            !header.description
+                            !vm.headerState.value.description
                         "
                     >
                         {{
-                            header.description ||
+                            vm.headerState.value.description ||
                                 "This custom TMDb list does not have a description yet."
                         }}
                     </p>
@@ -58,7 +49,7 @@
 
             <div class="page-main">
                 <section class="user-list-detail__summary-shell">
-                    @if (vm.canManage) {
+                    @if (vm.isOwnedByCurrentUser) {
                         <article
                             class="surface-panel user-list-detail__summary-card"
                         >
@@ -68,7 +59,7 @@
                                         <button
                                             mat-stroked-button
                                             type="button"
-                                            (click)="onEditDetails(header)"
+                                            (click)="onEditDetails(vm.headerState.value, vm.isPublic)"
                                         >
                                             Edit details
                                         </button>
@@ -103,7 +94,13 @@
                             <p
                                 class="user-list-detail__items-count text-caption"
                             >
-                                {{ header.itemCountLabel }}
+                                {{
+                                    vm.headerState.value.itemCount +
+                                        " title" +
+                                        (vm.headerState.value.itemCount === 1
+                                            ? ""
+                                            : "s")
+                                }}
                             </p>
                             <app-sort-button
                                 [options]="sortOptions"
@@ -151,13 +148,31 @@
                             <div class="user-list-detail__grid">
                                 @for (
                                     item of vm.itemsState.value;
-                                    track item.key
+                                    track item.mediaType + item.id
                                 ) {
-                                    <app-user-list-detail-item-card
-                                        [item]="item"
-                                        [showRemove]="vm.canManage"
-                                        (remove)="onRemoveItem(item)"
-                                    />
+                                    <article
+                                        class="user-list-detail__item-card"
+                                    >
+                                        <app-backdrop-card
+                                            [item]="item"
+                                        ></app-backdrop-card>
+
+                                        @if (vm.isOwnedByCurrentUser) {
+                                            <button
+                                                class="user-list-detail__item-remove"
+                                                type="button"
+                                                matTooltip="Remove from list"
+                                                matTooltipPosition="above"
+                                                aria-label="Remove item from list"
+                                                (click)="onRemoveItem(item)"
+                                            >
+                                                <i
+                                                    class="fa-solid fa-xmark"
+                                                    aria-hidden="true"
+                                                ></i>
+                                            </button>
+                                        }
+                                    </article>
                                 }
 
                                 @if (vm.itemsState.type === "loading-more") {
@@ -187,7 +202,7 @@
                                 }
                             </div>
 
-                            @if (vm.hasMore) {
+                            @if (vm.page < vm.totalPages) {
                                 <footer class="user-list-detail__footer">
                                     <button
                                         mat-stroked-button

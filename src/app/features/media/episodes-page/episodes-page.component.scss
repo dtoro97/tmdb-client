@@ -57,11 +57,7 @@
     justify-content: flex-end;
     gap: var(--space-2);
     padding: var(--space-4);
-    background: linear-gradient(
-        to top,
-        color-mix(in srgb, var(--surface-page) 88%, transparent) 0%,
-        transparent 60%
-    );
+    background: var(--gradient-overlay-bottom);
 }
 
 .episodes-page__featured-badge {

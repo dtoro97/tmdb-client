@@ -18,19 +18,25 @@
                 <p class="watchlist-section__count text-caption">
                     @if (selectedTab === "movies") {
                         {{
-                            (vm.watchlistMoviesTotal > 0 ? 1 : 0) +
+                            (vm.movies.total > 0 ? 1 : 0) +
                                 " - " +
-                                vm.watchlistMoviesLoadedCount +
+                                ((vm.movies.state.type === "loaded" ||
+                                    vm.movies.state.type === "loading-more")
+                                    ? vm.movies.state.value.length
+                                    : 0) +
                                 " of " +
-                                vm.watchlistMoviesTotal
+                                vm.movies.total
                         }}
                     } @else {
                         {{
-                            (vm.watchlistTvTotal > 0 ? 1 : 0) +
+                            (vm.tv.total > 0 ? 1 : 0) +
                                 " - " +
-                                vm.watchlistTvLoadedCount +
+                                ((vm.tv.state.type === "loaded" ||
+                                    vm.tv.state.type === "loading-more")
+                                    ? vm.tv.state.value.length
+                                    : 0) +
                                 " of " +
-                                vm.watchlistTvTotal
+                                vm.tv.total
                         }}
                     }
                 </p>
@@ -46,12 +52,9 @@
         <div class="watchlist-section__list">
             <div class="catalog-panel">
                 @if (selectedTab === "movies") {
-                    <app-media-list
-                        [state]="vm.watchlistMoviesState"
-                        routeType="movie"
-                    />
+                    <app-media-list [state]="vm.movies.state" routeType="movie" />
 
-                    @if (vm.watchlistMoviesState.type === "loaded" && !vm.hasWatchlistMovies) {
+                    @if (vm.movies.state.type === "loaded" && vm.movies.state.value.length === 0) {
                         <div class="empty-panel watchlist-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-bookmark"
@@ -61,20 +64,16 @@
                         </div>
                     }
 
-                    @if (vm.watchlistMoviesHasMore) {
+                    @if (vm.movies.hasMore) {
                         <footer class="catalog-panel-footer">
                             <button
                                 mat-stroked-button
                                 type="button"
-                                [disabled]="
-                                    vm.watchlistMoviesState.type ===
-                                    'loading-more'
-                                "
+                                [disabled]="vm.movies.isLoadingMore"
                                 (click)="onShowMore()"
                             >
                                 {{
-                                    vm.watchlistMoviesState.type ===
-                                    "loading-more"
+                                    vm.movies.isLoadingMore
                                         ? "Loading more"
                                         : "Show more"
                                 }}
@@ -82,9 +81,9 @@
                         </footer>
                     }
                 } @else {
-                    <app-media-list [state]="vm.watchlistTvState" routeType="tv" />
+                    <app-media-list [state]="vm.tv.state" routeType="tv" />
 
-                    @if (vm.watchlistTvState.type === "loaded" && !vm.hasWatchlistTv) {
+                    @if (vm.tv.state.type === "loaded" && vm.tv.state.value.length === 0) {
                         <div class="empty-panel watchlist-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-bookmark"
@@ -94,18 +93,16 @@
                         </div>
                     }
 
-                    @if (vm.watchlistTvHasMore) {
+                    @if (vm.tv.hasMore) {
                         <footer class="catalog-panel-footer">
                             <button
                                 mat-stroked-button
                                 type="button"
-                                [disabled]="
-                                    vm.watchlistTvState.type === 'loading-more'
-                                "
+                                [disabled]="vm.tv.isLoadingMore"
                                 (click)="onShowMore()"
                             >
                                 {{
-                                    vm.watchlistTvState.type === "loading-more"
+                                    vm.tv.isLoadingMore
                                         ? "Loading more"
                                         : "Show more"
                                 }}

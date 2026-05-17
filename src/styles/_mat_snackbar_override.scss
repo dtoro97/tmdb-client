@@ -1,7 +1,7 @@
 @use "./breakpoints" as *;
 
 .mat-mdc-snack-bar-container {
-    --mat-snack-bar-container-color: var(--color-surface-raised-2);
+    --mat-snack-bar-container-color: var(--mat-sys-surface-container-high);
     --mat-snack-bar-container-shape: var(--radius-2xl);
     --mat-snack-bar-supporting-text-color: var(--text-primary);
     --mat-snack-bar-supporting-text-font: inherit;
@@ -13,7 +13,7 @@
     margin: var(--space-4);
 
     .mdc-snackbar__surface {
-        border: 1px solid var(--surface-panel-border);
+        border: 1px solid var(--color-border-subtle);
         box-shadow: var(--shadow-lg);
         padding-right: var(--space-2);
     }
@@ -36,14 +36,10 @@
 }
 
 .snackbar-error {
-    --mat-snack-bar-container-color: color-mix(
-        in srgb,
-        var(--color-brand) 24%,
-        var(--color-surface-raised-2)
-    );
+    --mat-snack-bar-container-color: var(--surface-brand-strong);
 
     .mdc-snackbar__surface {
-        border-color: color-mix(in srgb, var(--color-brand) 32%, transparent);
+        border-color: var(--border-brand-soft);
     }
 }
 
@@ -53,7 +49,7 @@
     --mat-snack-bar-button-color: var(--text-primary);
 
     .mdc-snackbar__surface {
-        border-color: var(--surface-success-soft-border);
+        border-color: var(--border-success-soft);
     }
 }
 
@@ -64,11 +60,7 @@
     .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
     --mat-button-text-label-text-color: var(--text-primary);
     --mat-button-text-state-layer-color: var(--color-success-light);
-    --mat-button-text-ripple-color: color-mix(
-        in srgb,
-        var(--color-success-light) 22%,
-        transparent
-    );
+    --mat-button-text-ripple-color: var(--ripple-success-soft);
 
     color: var(--text-primary);
 }

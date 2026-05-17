@@ -6,7 +6,6 @@ import { map, Observable, of, switchMap, tap } from 'rxjs';
 import { AccountRestControllerService } from '../../api';
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
-    CardItem,
     LoadableItems,
     LocaleStoreService,
     MediaListItem,
@@ -25,94 +24,60 @@ import {
 
 type ApiSortBy = 'created_at.asc' | 'created_at.desc';
 
-interface UserWatchlistState {
-    watchlistMoviesState: LoadableItems<MediaListItem>;
-    watchlistMoviesPage: number;
-    watchlistMoviesTotalPages: number;
-    watchlistTvState: LoadableItems<MediaListItem>;
-    watchlistTvPage: number;
-    watchlistTvTotalPages: number;
-    watchlistMoviesTotal: number;
-    watchlistTvTotal: number;
-    sortDirection: SortDirection;
+interface WatchlistBucketState {
+    readonly itemsState: LoadableItems<MediaListItem>;
+    readonly page: number;
+    readonly totalPages: number;
+    readonly total: number;
 }
 
-export interface UserWatchlistVm {
-    readonly watchlistMoviesState: LoadableItems<MediaListItem>;
-    readonly watchlistTvState: LoadableItems<MediaListItem>;
-    readonly hasWatchlistMovies: boolean;
-    readonly hasWatchlistTv: boolean;
-    readonly watchlistMoviesHasMore: boolean;
-    readonly watchlistTvHasMore: boolean;
-    readonly watchlistPreviewCards: LoadableItems<CardItem>;
-    readonly watchlistTotal: number;
+interface UserWatchlistState {
+    readonly movies: WatchlistBucketState;
+    readonly tv: WatchlistBucketState;
     readonly sortDirection: SortDirection;
-    readonly watchlistMoviesTotal: number;
-    readonly watchlistTvTotal: number;
-    readonly watchlistMoviesLoadedCount: number;
-    readonly watchlistTvLoadedCount: number;
 }
+
+const INITIAL_BUCKET_STATE: WatchlistBucketState = {
+    itemsState: { type: 'idle' },
+    page: 1,
+    totalPages: 1,
+    total: 0,
+};
 
 const INITIAL_STATE: UserWatchlistState = {
-    watchlistMoviesState: { type: 'idle' },
-    watchlistMoviesPage: 1,
-    watchlistMoviesTotalPages: 1,
-    watchlistTvState: { type: 'idle' },
-    watchlistTvPage: 1,
-    watchlistTvTotalPages: 1,
-    watchlistMoviesTotal: 0,
-    watchlistTvTotal: 0,
+    movies: INITIAL_BUCKET_STATE,
+    tv: INITIAL_BUCKET_STATE,
     sortDirection: 'desc',
 };
 
 @Injectable()
 export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
-    readonly vm$ = this.select((state): UserWatchlistVm => {
-        const hasWatchlistMovies =
-            state.watchlistMoviesState.type === 'loaded' &&
-            state.watchlistMoviesState.value.length > 0;
-        const hasWatchlistTv =
-            state.watchlistTvState.type === 'loaded' &&
-            state.watchlistTvState.value.length > 0;
-
-        return {
-            watchlistMoviesState: state.watchlistMoviesState,
-            watchlistTvState: state.watchlistTvState,
-            hasWatchlistMovies,
-            hasWatchlistTv,
-            watchlistMoviesHasMore:
-                state.watchlistMoviesPage < state.watchlistMoviesTotalPages,
-            watchlistTvHasMore:
-                state.watchlistTvPage < state.watchlistTvTotalPages,
-            watchlistPreviewCards: combineLoadablePreviewItems(
-                [
-                    mapLoadableItems(
-                        state.watchlistMoviesState,
-                        mediaListItemToCardItem,
-                    ),
-                    mapLoadableItems(
-                        state.watchlistTvState,
-                        mediaListItemToCardItem,
-                    ),
-                ],
-                10,
-            ),
-            watchlistTotal: state.watchlistMoviesTotal + state.watchlistTvTotal,
-            sortDirection: state.sortDirection,
-            watchlistMoviesTotal: state.watchlistMoviesTotal,
-            watchlistTvTotal: state.watchlistTvTotal,
-            watchlistMoviesLoadedCount:
-                state.watchlistMoviesState.type === 'loaded' ||
-                state.watchlistMoviesState.type === 'loading-more'
-                    ? state.watchlistMoviesState.value.length
-                    : 0,
-            watchlistTvLoadedCount:
-                state.watchlistTvState.type === 'loaded' ||
-                state.watchlistTvState.type === 'loading-more'
-                    ? state.watchlistTvState.value.length
-                    : 0,
-        };
-    });
+    readonly userWatchlistVm$ = this.select((state) => ({
+        sortDirection: state.sortDirection,
+        watchlistTotal: state.movies.total + state.tv.total,
+        watchlistPreviewCards: combineLoadablePreviewItems(
+            [
+                mapLoadableItems(
+                    state.movies.itemsState,
+                    mediaListItemToCardItem,
+                ),
+                mapLoadableItems(state.tv.itemsState, mediaListItemToCardItem),
+            ],
+            10,
+        ),
+        movies: {
+            state: state.movies.itemsState,
+            total: state.movies.total,
+            hasMore: state.movies.page < state.movies.totalPages,
+            isLoadingMore: state.movies.itemsState.type === 'loading-more',
+        },
+        tv: {
+            state: state.tv.itemsState,
+            total: state.tv.total,
+            hasMore: state.tv.page < state.tv.totalPages,
+            isLoadingMore: state.tv.itemsState.type === 'loading-more',
+        },
+    }));
 
     constructor(
         private readonly accountService: AccountRestControllerService,
@@ -123,57 +88,135 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         super(INITIAL_STATE);
     }
 
-    toggleSortDirection$(): Observable<void> {
-        const currentDirection = this.get().sortDirection;
-        const nextDirection: SortDirection =
-            currentDirection === 'desc' ? 'asc' : 'desc';
-
-        this.patchState({ sortDirection: nextDirection });
-
-        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(({ accountId }) =>
-                this.load$(
-                    this.userSessionStore.sessionId()!,
-                    accountId,
-                    this.localeStore.language(),
-                ),
-            ),
-        );
-    }
-
     load$(
         sessionId: string,
         accountId: number,
         language: string,
     ): Observable<void> {
-        this.patchState({
-            watchlistMoviesState: { type: 'loading' },
-            watchlistTvState: { type: 'loading' },
-        });
+        this.patchState((state) => ({
+            movies: { ...state.movies, itemsState: { type: 'loading' } },
+            tv: { ...state.tv, itemsState: { type: 'loading' } },
+        }));
 
-        return this.fetchWatchlists$(sessionId, accountId, language);
+        return this.accountService
+            .accountWatchlistMovies(
+                accountId,
+                language,
+                1,
+                sessionId,
+                this.toApiSortBy(),
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            )
+            .pipe(
+                switchMap((movies) =>
+                    this.accountService
+                        .accountWatchlistTv(
+                            accountId,
+                            language,
+                            1,
+                            sessionId,
+                            this.toApiSortBy(),
+                            'body',
+                            false,
+                            API_JSON_OPTIONS,
+                        )
+                        .pipe(
+                            map((tv) => ({
+                                movies,
+                                tv,
+                            })),
+                        ),
+                ),
+                tap((result) => {
+                    this.patchState({
+                        movies: {
+                            itemsState: loaded(
+                                (result.movies.results ?? []).map((item) =>
+                                    toMediaListItem(item, 'movie', 'year'),
+                                ),
+                            ),
+                            page: result.movies.page ?? 1,
+                            totalPages: result.movies.total_pages ?? 1,
+                            total: result.movies.total_results ?? 0,
+                        },
+                        tv: {
+                            itemsState: loaded(
+                                (result.tv.results ?? []).map((item) =>
+                                    toMediaListItem(item, 'tv', 'year'),
+                                ),
+                            ),
+                            page: result.tv.page ?? 1,
+                            totalPages: result.tv.total_pages ?? 1,
+                            total: result.tv.total_results ?? 0,
+                        },
+                    });
+                }),
+                map(() => undefined),
+                tap({
+                    error: () => {
+                        this.patchState({
+                            movies: {
+                                itemsState: loaded([]),
+                                page: 1,
+                                totalPages: 1,
+                                total: 0,
+                            },
+                            tv: {
+                                itemsState: loaded([]),
+                                page: 1,
+                                totalPages: 1,
+                                total: 0,
+                            },
+                        });
+                    },
+                }),
+            );
     }
 
-    loadMoreWatchlistMovies$(): Observable<void> {
+    changeSortDirection$(): Observable<void> {
+        const nextDirection: SortDirection =
+            this.get().sortDirection === 'desc' ? 'asc' : 'desc';
+
+        this.patchState({ sortDirection: nextDirection });
+
+        return this.tmdbUserAccountService
+            .ensureAccountIdentity$()
+            .pipe(
+                switchMap(({ accountId }) =>
+                    this.load$(
+                        this.userSessionStore.sessionId()!,
+                        accountId,
+                        this.localeStore.language(),
+                    ),
+                ),
+            );
+    }
+
+    loadMoreMovies$(): Observable<void> {
         const state = this.get();
 
-        if (state.watchlistMoviesState.type !== 'loaded') {
+        if (state.movies.itemsState.type !== 'loaded') {
             return of(undefined);
         }
 
         return loadMorePaged$({
-            currentItems: state.watchlistMoviesState.value,
-            currentPage: state.watchlistMoviesPage,
-            totalPages: state.watchlistMoviesTotalPages,
+            currentItems: state.movies.itemsState.value,
+            currentPage: state.movies.page,
+            totalPages: state.movies.totalPages,
             placeholderCount: PAGE_SIZE,
             setLoadingMore: (items) =>
-                this.patchState({
-                    watchlistMoviesState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: PAGE_SIZE,
-                    } as LoadableItems<MediaListItem>,
-                }),
+                this.patchState((currentState) => ({
+                    movies: {
+                        ...currentState.movies,
+                        itemsState: {
+                            type: 'loading-more',
+                            value: items,
+                            placeholderCount: PAGE_SIZE,
+                        },
+                    },
+                })),
             fetchPage: (nextPage) =>
                 this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
                     switchMap(({ accountId }) =>
@@ -182,7 +225,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                             this.localeStore.language(),
                             nextPage,
                             this.userSessionStore.sessionId()!,
-                            this.apiSortBy,
+                            this.toApiSortBy(),
                             'body',
                             false,
                             API_JSON_OPTIONS,
@@ -195,33 +238,39 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                     ),
                 ),
             setLoaded: (items, page) =>
-                this.patchState({
-                    watchlistMoviesState: loaded(items),
-                    watchlistMoviesPage: page,
-                }),
+                this.patchState((currentState) => ({
+                    movies: {
+                        ...currentState.movies,
+                        itemsState: loaded(items),
+                        page,
+                    },
+                })),
         });
     }
 
-    loadMoreWatchlistTv$(): Observable<void> {
+    loadMoreTv$(): Observable<void> {
         const state = this.get();
 
-        if (state.watchlistTvState.type !== 'loaded') {
+        if (state.tv.itemsState.type !== 'loaded') {
             return of(undefined);
         }
 
         return loadMorePaged$({
-            currentItems: state.watchlistTvState.value,
-            currentPage: state.watchlistTvPage,
-            totalPages: state.watchlistTvTotalPages,
+            currentItems: state.tv.itemsState.value,
+            currentPage: state.tv.page,
+            totalPages: state.tv.totalPages,
             placeholderCount: PAGE_SIZE,
             setLoadingMore: (items) =>
-                this.patchState({
-                    watchlistTvState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: PAGE_SIZE,
-                    } as LoadableItems<MediaListItem>,
-                }),
+                this.patchState((currentState) => ({
+                    tv: {
+                        ...currentState.tv,
+                        itemsState: {
+                            type: 'loading-more',
+                            value: items,
+                            placeholderCount: PAGE_SIZE,
+                        },
+                    },
+                })),
             fetchPage: (nextPage) =>
                 this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
                     switchMap(({ accountId }) =>
@@ -230,7 +279,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                             this.localeStore.language(),
                             nextPage,
                             this.userSessionStore.sessionId()!,
-                            this.apiSortBy,
+                            this.toApiSortBy(),
                             'body',
                             false,
                             API_JSON_OPTIONS,
@@ -243,85 +292,17 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                     ),
                 ),
             setLoaded: (items, page) =>
-                this.patchState({
-                    watchlistTvState: loaded(items),
-                    watchlistTvPage: page,
-                }),
+                this.patchState((currentState) => ({
+                    tv: {
+                        ...currentState.tv,
+                        itemsState: loaded(items),
+                        page,
+                    },
+                })),
         });
     }
 
-    private get apiSortBy(): ApiSortBy {
+    private toApiSortBy(): ApiSortBy {
         return `created_at.${this.get().sortDirection}`;
-    }
-
-    private fetchWatchlists$(
-        sessionId: string,
-        accountId: number,
-        language: string,
-    ): Observable<void> {
-        return this.accountService
-            .accountWatchlistMovies(
-                accountId,
-                language,
-                1,
-                sessionId,
-                this.apiSortBy,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            )
-            .pipe(
-                switchMap((watchlistMovies) =>
-                    this.accountService
-                        .accountWatchlistTv(
-                            accountId,
-                            language,
-                            1,
-                            sessionId,
-                            this.apiSortBy,
-                            'body',
-                            false,
-                            API_JSON_OPTIONS,
-                        )
-                        .pipe(
-                            map((watchlistTv) => ({
-                                watchlistMovies,
-                                watchlistTv,
-                            })),
-                        ),
-                ),
-                tap((result) => {
-                    this.patchState({
-                        watchlistMoviesState: loaded(
-                            (result.watchlistMovies.results ?? []).map((item) =>
-                                toMediaListItem(item, 'movie', 'year'),
-                            ),
-                        ),
-                        watchlistMoviesPage: result.watchlistMovies.page ?? 1,
-                        watchlistMoviesTotalPages:
-                            result.watchlistMovies.total_pages ?? 1,
-                        watchlistMoviesTotal:
-                            result.watchlistMovies.total_results ?? 0,
-                        watchlistTvState: loaded(
-                            (result.watchlistTv.results ?? []).map((item) =>
-                                toMediaListItem(item, 'tv', 'year'),
-                            ),
-                        ),
-                        watchlistTvPage: result.watchlistTv.page ?? 1,
-                        watchlistTvTotalPages:
-                            result.watchlistTv.total_pages ?? 1,
-                        watchlistTvTotal: result.watchlistTv.total_results ?? 0,
-                    });
-                }),
-                map(() => undefined),
-                tap({
-                    error: () => {
-                        this.patchState({
-                            watchlistMoviesState: loaded([]),
-                            watchlistTvState: loaded([]),
-                        });
-                    },
-                }),
-            );
     }
 }

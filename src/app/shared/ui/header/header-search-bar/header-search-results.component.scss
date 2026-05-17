@@ -35,7 +35,7 @@
     transition: background-color var(--motion-fast);
 
     &:is(:hover, :focus-visible) {
-        background: var(--surface-panel-strong);
+        background: var(--mat-sys-surface-container-high);
 
         .header-search-results__title {
             color: var(--text-accent);
@@ -73,16 +73,6 @@
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-2);
-}
-
-.header-search-results__type {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--chip-height);
-    padding-inline: var(--space-2);
-    border-radius: var(--chip-radius);
-    background: var(--chip-muted-bg);
-    color: var(--chip-muted-text);
 }
 
 .header-search-results__title {

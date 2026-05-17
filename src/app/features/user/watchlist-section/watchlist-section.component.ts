@@ -38,7 +38,7 @@ const SORT_OPTIONS = [{ label: 'Date Added', value: 'created_at' }];
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WatchlistSectionComponent {
-    readonly vm$ = this.store.vm$;
+    readonly vm$ = this.store.userWatchlistVm$;
     readonly tabs = WATCHLIST_TABS;
     readonly sortOptions = SORT_OPTIONS;
     selectedTab: WatchlistTab = 'movies';
@@ -50,14 +50,14 @@ export class WatchlistSectionComponent {
     }
 
     onToggleSortDirection(): void {
-        this.store.toggleSortDirection$().subscribe();
+        this.store.changeSortDirection$().subscribe();
     }
 
     onShowMore(): void {
         if (this.selectedTab === 'movies') {
-            this.store.loadMoreWatchlistMovies$().subscribe();
+            this.store.loadMoreMovies$().subscribe();
         } else {
-            this.store.loadMoreWatchlistTv$().subscribe();
+            this.store.loadMoreTv$().subscribe();
         }
     }
 }

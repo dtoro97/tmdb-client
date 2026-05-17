@@ -1,15 +1,6 @@
 @use "breakpoints" as *;
 
 :host {
-    --rating-distribution-background: color-mix(
-        in srgb,
-        var(--surface-panel) 82%,
-        transparent
-    );
-    --rating-distribution-border: var(--color-border-subtle);
-    --rating-distribution-chart-height: 4.75rem;
-    --rating-distribution-bar-radius: var(--radius-sm);
-
     display: block;
 }
 
@@ -30,8 +21,8 @@
     min-width: 0;
     padding: var(--space-4);
     border-radius: var(--radius-lg);
-    background: var(--rating-distribution-background);
-    border: 1px solid var(--rating-distribution-border);
+    background: var(--surface-panel-soft);
+    border: 1px solid var(--color-border-subtle);
 }
 
 .rating-distribution__section--summary {
@@ -94,7 +85,7 @@
     grid-template-columns: repeat(10, minmax(0, 1fr));
     gap: var(--space-2);
     align-items: end;
-    height: var(--rating-distribution-chart-height);
+    height: 4.75rem;
 }
 
 .rating-distribution__bar-group {
@@ -108,7 +99,7 @@
     width: 100%;
     min-height: 0.2rem;
     align-self: end;
-    border-radius: var(--rating-distribution-bar-radius);
+    border-radius: var(--radius-sm);
     background: var(--color-rating-bar);
 }
 

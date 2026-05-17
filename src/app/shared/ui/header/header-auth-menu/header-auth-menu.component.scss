@@ -9,28 +9,23 @@
 }
 
 .header-auth-menu__trigger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     min-width: 0;
-    width: var(--icon-button-size);
-    height: var(--icon-button-size);
-    padding: 0;
-    border: none;
-    border-radius: var(--icon-button-radius);
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition:
-        background-color var(--motion-fast),
-        color var(--motion-fast);
+    flex-shrink: 0;
+}
+
+.header-auth-menu__trigger--signed-in {
+    @include icon-button-shell(
+        $surface: transparent,
+        $color: var(--text-primary),
+        $hover-surface: var(--control-subtle-surface),
+        $hover-color: var(--text-primary)
+    );
+    min-width: 0;
 
     &:disabled {
         cursor: progress;
         opacity: 0.68;
     }
-
-    @include focus-ring();
 }
 
 .header-auth-menu__trigger--anonymous {
@@ -76,8 +71,6 @@
 }
 
 .header-auth-menu__trigger--signed-in {
-    &:hover,
-    &:focus-visible,
     &[aria-expanded="true"] {
         background: var(--control-subtle-surface);
     }
@@ -131,11 +124,6 @@
 }
 
 @include mobile() {
-    .header-auth-menu__trigger {
-        width: var(--icon-button-size);
-        height: var(--icon-button-size);
-    }
-
     .header-auth-menu__trigger--anonymous {
         width: auto;
         height: auto;

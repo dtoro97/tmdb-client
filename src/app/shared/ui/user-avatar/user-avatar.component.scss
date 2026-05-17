@@ -12,10 +12,10 @@
     justify-content: center;
     width: var(--user-avatar-size);
     height: var(--user-avatar-size);
-    border: 1px solid color-mix(in srgb, var(--color-brand) 28%, transparent);
+    border: 1px solid var(--border-brand-soft);
     border-radius: var(--radius-full);
     overflow: hidden;
-    background: var(--surface-brand-subtle);
+    background: var(--surface-brand-soft);
     color: var(--text-primary);
 }
 

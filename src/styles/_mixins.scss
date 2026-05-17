@@ -73,11 +73,7 @@
     min-width: 1.75rem;
     flex-shrink: 0;
     text-align: right;
-    color: color-mix(
-        in srgb,
-        var(--text-primary) 52%,
-        var(--text-muted)
-    );
+    color: var(--text-index-muted);
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
     font-variant-numeric: tabular-nums;
@@ -85,9 +81,9 @@
 
 @mixin surface-panel($bg: var(--mat-sys-surface-dim)) {
     background: $bg;
-    border: 1px solid var(--surface-panel-border);
+    border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-2xl);
-    box-shadow: var(--surface-panel-shadow);
+    box-shadow: var(--shadow-lg);
 }
 
 @mixin absolute-fill {
@@ -103,14 +99,41 @@
     font-size: $size;
 }
 
+@mixin icon-button-shell(
+    $size: 2.5rem,
+    $surface: var(--control-subtle-surface),
+    $color: var(--control-subtle-text),
+    $hover-surface: var(--control-subtle-surface-hover),
+    $hover-color: var(--control-subtle-text-hover),
+    $radius: var(--radius-full)
+) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: $size;
+    block-size: $size;
+    padding: 0;
+    border: none;
+    border-radius: $radius;
+    background: $surface;
+    color: $color;
+    cursor: pointer;
+    transition: var(--control-transition);
+    @include focus-ring();
+
+    &:hover:not(:disabled) {
+        background: $hover-surface;
+        color: $hover-color;
+    }
+}
+
 @mixin focus-ring(
     $color: var(--control-focus-border),
     $opacity: 70%,
     $offset: 2px
 ) {
     &:focus-visible {
-        outline: 2px solid
-            color-mix(in srgb, #{$color} #{$opacity}, transparent);
+        outline: 2px solid $color;
         outline-offset: $offset;
     }
 }
@@ -192,12 +215,7 @@
             z-index: 1;
             background: linear-gradient(
                 to top,
-                color-mix(
-                        in srgb,
-                        var(--surface-page, var(--mat-sys-surface)) 72%,
-                        transparent
-                    )
-                    0%,
+                var(--color-surface-overlay) 0%,
                 transparent 72%
             );
             opacity: 0;

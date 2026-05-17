@@ -8,7 +8,7 @@ import {
     RatingComponent,
 } from '../../../shared';
 import { RepeatPipe } from '../../../shared/pipes/repeat.pipe';
-import { UserRatedEpisodeItem } from '../user-data.models';
+import { UserRatedEpisodeItem } from '../user-ratings-store.service';
 
 interface DisplayRatedEpisodeItem {
     readonly item: UserRatedEpisodeItem;

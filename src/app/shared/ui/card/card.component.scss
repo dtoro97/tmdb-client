@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .card__media {
     position: relative;
     aspect-ratio: var(--poster-ratio);
@@ -36,16 +32,8 @@
     top: var(--space-2);
     right: var(--space-2);
     z-index: 2;
-    --rating-badge-background: color-mix(
-        in srgb,
-        var(--surface-page) 62%,
-        transparent
-    );
-    --rating-badge-border: color-mix(
-        in srgb,
-        var(--color-rating) 18%,
-        transparent
-    );
+    --rating-badge-background: var(--color-surface-overlay);
+    --rating-badge-border: var(--border-overlay-soft);
     --rating-badge-backdrop-filter: blur(10px);
 }
 
@@ -56,13 +44,7 @@
     left: 0;
     z-index: 2;
     padding: var(--space-8) var(--space-3) var(--space-3);
-    background: linear-gradient(
-        to top,
-        color-mix(in srgb, var(--surface-page) 94%, transparent) 0%,
-        color-mix(in srgb, var(--surface-page) 78%, transparent) 44%,
-        color-mix(in srgb, var(--surface-page) 20%, transparent) 74%,
-        transparent 86%
-    );
+    background: var(--gradient-overlay-bottom);
 }
 
 .card__title {
@@ -72,8 +54,7 @@
     font-weight: var(--weight-semibold);
     line-height: var(--lh-tight);
     opacity: 0.7;
-    text-shadow: 0 1px 3px
-        color-mix(in srgb, var(--surface-page) 72%, transparent);
+    text-shadow: var(--shadow-text-hero);
     transition:
         color var(--motion-fast),
         opacity var(--motion-fast);
@@ -81,7 +62,7 @@
 }
 
 .card__meta {
-    color: var(--color-on-surface-soft);
+    color: var(--color-on-surface-medium);
     opacity: 0.72;
     transition:
         color var(--motion-fast),

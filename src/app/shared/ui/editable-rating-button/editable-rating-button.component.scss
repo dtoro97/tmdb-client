@@ -5,13 +5,9 @@
     gap: var(--space-1);
     min-height: 2.5rem;
     padding: 0.45rem 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--color-brand) 30%, transparent);
+    border: 1px solid var(--border-brand-soft);
     border-radius: var(--radius-pill);
-    background: color-mix(
-        in srgb,
-        var(--color-brand) 8%,
-        var(--surface-panel-soft)
-    );
+    background: var(--surface-brand-soft);
     color: var(--color-brand);
     font-size: var(--text-lg);
     font-weight: var(--weight-bold);
@@ -29,14 +25,10 @@
 .editable-rating-button:hover:not(:disabled),
 .editable-rating-button:focus-visible {
     transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--color-brand) 72%, transparent);
-    background: color-mix(
-        in srgb,
-        var(--color-brand) 18%,
-        var(--surface-panel-strong)
-    );
+    border-color: var(--border-brand-soft);
+    background: var(--surface-brand-strong);
     box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--color-brand) 28%, transparent),
+        0 0 0 1px var(--border-brand-soft),
         0 8px 18px rgba(0, 0, 0, 0.18);
 }
 

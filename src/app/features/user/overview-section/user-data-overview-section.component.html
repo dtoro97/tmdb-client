@@ -41,26 +41,49 @@
                             </h1>
 
                             <nav class="user-data-overview__stats-line">
-                                @for (
-                                    stat of vm.overviewStats;
-                                    track stat.route;
-                                    let last = $last
-                                ) {
-                                    <a
-                                        class="user-data-overview__stat-link"
-                                        [routerLink]="stat.route"
-                                    >
-                                        <strong>{{ stat.value }}</strong>
-                                        {{ stat.label }}
-                                    </a>
-                                    @if (!last) {
-                                        <span
-                                            class="user-data-overview__stat-separator"
-                                            aria-hidden="true"
-                                            >&#183;</span
-                                        >
-                                    }
-                                }
+                                <a
+                                    class="user-data-overview__stat-link"
+                                    routerLink="/me/ratings"
+                                >
+                                    <strong>{{ vm.ratingsTotal }}</strong>
+                                    Ratings
+                                </a>
+                                <span
+                                    class="user-data-overview__stat-separator"
+                                    aria-hidden="true"
+                                    >&#183;</span
+                                >
+                                <a
+                                    class="user-data-overview__stat-link"
+                                    routerLink="/me/watchlists"
+                                >
+                                    <strong>{{ vm.watchlistTotal }}</strong>
+                                    Watchlist
+                                </a>
+                                <span
+                                    class="user-data-overview__stat-separator"
+                                    aria-hidden="true"
+                                    >&#183;</span
+                                >
+                                <a
+                                    class="user-data-overview__stat-link"
+                                    routerLink="/me/favorites"
+                                >
+                                    <strong>{{ vm.favoritesTotal }}</strong>
+                                    Favorites
+                                </a>
+                                <span
+                                    class="user-data-overview__stat-separator"
+                                    aria-hidden="true"
+                                    >&#183;</span
+                                >
+                                <a
+                                    class="user-data-overview__stat-link"
+                                    routerLink="/me/lists"
+                                >
+                                    <strong>{{ vm.listsTotal }}</strong>
+                                    Lists
+                                </a>
                             </nav>
                         }
 
@@ -68,11 +91,38 @@
                             <app-skeleton
                                 class="user-data-overview__meta-line-skeleton"
                             />
-                        } @else if (vm.profileMetaLine) {
+                        } @else if (vm.profileState.type === "loaded") {
                             <p
                                 class="user-data-overview__meta-line text-caption"
                             >
-                                {{ vm.profileMetaLine }}
+                                @if (vm.profileState.value.language) {
+                                    <span>
+                                        Language:
+                                        {{
+                                            vm.profileState.value.language
+                                                | uppercase
+                                        }}
+                                    </span>
+                                }
+                                @if (
+                                    vm.profileState.value.language &&
+                                    vm.profileState.value.region
+                                ) {
+                                    <span
+                                        class="user-data-overview__stat-separator"
+                                        aria-hidden="true"
+                                        >&#183;</span
+                                    >
+                                }
+                                @if (vm.profileState.value.region) {
+                                    <span>
+                                        Region:
+                                        {{
+                                            vm.profileState.value.region
+                                                | uppercase
+                                        }}
+                                    </span>
+                                }
                             </p>
                         }
                     </div>
@@ -310,4 +360,3 @@
         </div>
     </section>
 }
-

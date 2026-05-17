@@ -46,11 +46,7 @@
                     />
                     <div class="header-search-results__content">
                         <div class="header-search-results__meta">
-                            <span
-                                class="header-search-results__type text-overline u-nowrap"
-                            >
-                                {{ item.mediaType }}
-                            </span>
+                            <app-badge [label]="item.mediaType"></app-badge>
                             @if (item.year) {
                                 <span class="text-caption">{{ item.year }}</span>
                             }

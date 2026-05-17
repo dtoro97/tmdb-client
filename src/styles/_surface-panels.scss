@@ -17,11 +17,7 @@
 
 .empty-panel {
     border-radius: var(--radius-2xl);
-    background: color-mix(
-        in srgb,
-        var(--mat-sys-surface-container-low) 38%,
-        transparent
-    );
+    background: var(--surface-panel-soft);
 }
 
 .catalog-panel {
@@ -33,14 +29,8 @@
     display: flex;
     justify-content: center;
     padding: var(--space-4) var(--space-4) var(--space-5);
-    border-top: 1px solid
-        color-mix(in srgb, var(--mat-sys-outline-variant) 70%, transparent);
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--mat-sys-surface-container) 26%, transparent)
-            0%,
-        transparent 100%
-    );
+    border-top: 1px solid var(--color-border-subtle);
+    background: transparent;
 }
 
 @include mobile() {

@@ -46,73 +46,29 @@
         background-color var(--motion-fast), color var(--motion-fast),
         border-color var(--motion-fast), box-shadow var(--motion-fast);
 
-    --control-surface: var(--surface-panel-strong);
-    --control-surface-hover: color-mix(
-        in srgb,
-        var(--surface-panel-strong) 72%,
-        var(--text-primary) 8%
-    );
+    --control-surface: var(--mat-sys-surface-container-high);
+    --control-surface-hover: #333333;
     --control-surface-active: var(--surface-panel);
-    --control-border: var(--surface-panel-border);
+    --control-border: var(--color-border-subtle);
     --control-border-hover: var(--color-border);
     --control-border-active: var(--color-border);
     --control-text: var(--text-secondary);
     --control-text-hover: var(--text-primary);
     --control-text-active: var(--text-primary);
     --control-focus-border: var(--color-brand);
-    --control-focus-outline: color-mix(
-        in srgb,
-        var(--control-focus-border) 72%,
-        white 28%
-    );
-    --control-focus-ring-inner: color-mix(
-        in srgb,
-        var(--color-brand) 24%,
-        transparent
-    );
-    --control-focus-ring-outer: color-mix(
-        in srgb,
-        var(--color-brand) 14%,
-        transparent
-    );
+    --control-focus-outline: #d76a6a;
+    --control-focus-ring-inner: rgba(198, 40, 40, 0.25);
+    --control-focus-ring-outer: rgba(198, 40, 40, 0.15);
 
-    --control-subtle-surface: color-mix(
-        in srgb,
-        var(--surface-panel) 88%,
-        transparent
-    );
+    --control-subtle-surface: rgba(30, 30, 30, 0.8);
     --control-subtle-surface-hover: var(--surface-panel);
-    --control-subtle-surface-active: color-mix(
-        in srgb,
-        var(--surface-panel-strong) 74%,
-        var(--text-primary) 8%
-    );
+    --control-subtle-surface-active: var(--mat-sys-surface-container-high);
     --control-subtle-border: var(--color-border-subtle);
     --control-subtle-border-hover: var(--color-border);
-    --control-subtle-border-active: color-mix(
-        in srgb,
-        var(--text-primary) 18%,
-        transparent
-    );
     --control-subtle-text: var(--text-muted);
     --control-subtle-text-hover: var(--text-primary);
     --control-subtle-text-active: #ffffff;
     --control-subtle-focus-border: var(--color-border);
-    --control-subtle-focus-outline: color-mix(
-        in srgb,
-        var(--control-subtle-focus-border) 72%,
-        white 28%
-    );
-    --control-subtle-focus-ring-inner: color-mix(
-        in srgb,
-        var(--text-primary) 12%,
-        transparent
-    );
-    --control-subtle-focus-ring-outer: color-mix(
-        in srgb,
-        var(--text-primary) 6%,
-        transparent
-    );
     --control-subtle-shadow-active: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
     --control-accent-surface: var(--color-brand);
@@ -124,11 +80,7 @@
     --control-accent-text: #ffffff;
     --control-accent-text-hover: #ffffff;
     --control-accent-text-active: #ffffff;
-    --control-accent-ripple: color-mix(
-        in srgb,
-        var(--control-accent-text) 16%,
-        transparent
-    );
+    --control-accent-ripple: rgba(255, 255, 255, 0.15);
 
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
@@ -172,16 +124,9 @@
     --color-brand-light: var(--color-brand-300);
     --color-brand-dark: var(--color-brand-700);
 
-    --color-primary-muted: color-mix(
-        in srgb,
-        var(--color-brand) 30%,
-        transparent
-    );
-
     --color-surface: #111111;
     --color-surface-dim: #161616;
     --color-surface-raised: #1e1e1e;
-    --color-surface-raised-2: #272727;
     --color-surface-overlay: rgba(10, 10, 10, 0.82);
 
     --color-border: #313131;
@@ -203,108 +148,33 @@
     --color-rating: #f5c518;
     --color-rating-bar: var(--color-brand);
 
-    --color-rank: color-mix(in srgb, var(--color-rating) 88%, #d18b00);
+    --color-rank: #f1bc16;
     --color-on-rank: #231900;
 
-    --color-rank-border: color-mix(
-        in srgb,
-        var(--color-rating) 64%,
-        var(--color-surface) 36%
-    );
+    --color-rank-border: #a98712;
 
-    --color-rank-cap: color-mix(in srgb, var(--color-rating) 76%, #b87700);
+    --color-rank-cap: #dcaa12;
 
     --text-rating: var(--color-rating);
 
     --surface-page: var(--color-surface);
     --surface-panel: var(--color-surface-raised);
+    --surface-panel-soft: rgba(30, 30, 30, 0.8);
+    --surface-brand-soft: rgba(198, 40, 40, 0.1);
+    --surface-brand-strong: #401d1d;
+    --surface-success-soft: #183626;
+    --border-brand-soft: rgba(198, 40, 40, 0.3);
+    --border-overlay-soft: rgba(255, 255, 255, 0.15);
+    --border-success-soft: rgba(47, 143, 82, 0.3);
+    --ripple-success-soft: rgba(120, 215, 159, 0.22);
+    --text-index-muted: rgba(255, 255, 255, 0.7);
 
-    --surface-panel-soft: color-mix(
-        in srgb,
-        var(--surface-panel) 82%,
-        transparent
-    );
+    --color-on-surface-faint: rgba(255, 255, 255, 0.5);
 
-    --surface-panel-strong: var(--color-surface-raised-2);
-
-    --surface-panel-border: color-mix(
-        in srgb,
-        var(--text-primary) 11%,
-        transparent
-    );
-
-    --surface-panel-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
-
-    --surface-brand-subtle: color-mix(
-        in srgb,
-        var(--color-brand) 10%,
-        transparent
-    );
-
-    --surface-brand-soft: color-mix(
-        in srgb,
-        var(--color-brand) 18%,
-        var(--surface-panel-strong)
-    );
-
-    --surface-brand-soft-border: color-mix(
-        in srgb,
-        var(--color-brand) 32%,
-        transparent
-    );
-
-    --surface-success-soft: color-mix(
-        in srgb,
-        var(--color-success) 14%,
-        var(--color-surface-raised-2)
-    );
-
-    --surface-success-soft-border: color-mix(
-        in srgb,
-        var(--color-success) 28%,
-        transparent
-    );
-
-    --focus-ring-subtle: color-mix(
-        in srgb,
-        var(--color-brand) 20%,
-        transparent
-    );
-
-    --focus-ring: 0 0 0 3px
-        color-mix(in srgb, var(--color-brand) 32%, transparent);
-
-    --color-on-surface-faint: color-mix(
-        in srgb,
-        var(--text-primary) 52%,
-        transparent
-    );
-
-    --color-on-surface-soft: color-mix(
-        in srgb,
-        var(--text-primary) 60%,
-        transparent
-    );
-
-    --color-on-surface-medium: color-mix(
-        in srgb,
-        var(--text-primary) 70%,
-        transparent
-    );
+    --color-on-surface-medium: rgba(255, 255, 255, 0.7);
 
     --skeleton-base: rgba(255, 255, 255, 0.08);
     --skeleton-highlight: rgba(255, 255, 255, 0.16);
-
-    --chip-radius: var(--radius-pill);
-    --chip-height: 22px;
-
-    --chip-primary-bg: var(--color-brand);
-    --chip-primary-text: #ffffff;
-    --chip-primary-border: var(--color-primary-muted);
-
-    --chip-muted-bg: var(--surface-panel-strong);
-    --chip-muted-text: var(--text-primary);
-    --chip-muted-border: var(--color-border-subtle);
 
     --poster-ratio: 2 / 3;
     --backdrop-ratio: 16 / 9;
@@ -313,58 +183,20 @@
     --media-square-sm: 44px;
     --media-square-md: 48px;
     --media-square-lg: 56px;
-    --photos-grid-tile-height-desktop: 180px;
-    --photos-grid-tile-height-mobile: 100px;
-
     --round-media-sm: 2.25rem;
     --round-media-md: 2.5rem;
     --round-media-lg: 3rem;
-    --icon-button-size: 2.5rem;
-    --icon-button-icon-size: 1rem;
-    --icon-button-radius: var(--radius-full);
-    --icon-button-disabled-opacity: 0.35;
 
-    --poster-mobile-width: 110px;
-    --poster-mobile-height: 165px;
-
-    --person-photo-size: 190px;
-
-    --hero-poster-overlap: 5rem;
-
-    --hero-fallback-bg: linear-gradient(
-        to bottom,
-        #000000,
-        color-mix(in srgb, #000000 82%, var(--surface-page))
+    --gradient-overlay-bottom: linear-gradient(
+        to top,
+        rgba(17, 17, 17, 0.9) 0%,
+        var(--color-surface-overlay) 45%,
+        transparent 85%
     );
 
-    --gradient-hero-scrim: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.1) 0%,
-        rgba(0, 0, 0, 0.45) 50%,
-        var(--surface-page) 100%
-    );
+    --shadow-text-hero: 0 1px 3px rgba(17, 17, 17, 0.4);
 
-    --gradient-hero-lateral: linear-gradient(
-        to right,
-        var(--color-surface) 0%,
-        color-mix(in srgb, var(--color-surface) 80%, transparent) 25%,
-        color-mix(in srgb, var(--color-surface) 20%, transparent) 55%,
-        transparent 75%
-    );
-
-    --gradient-poster-scrim: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.24) 0%,
-        rgba(0, 0, 0, 0.55) 50%,
-        var(--surface-page) 100%
-    );
-
-    --shadow-text-hero: 0 1px 3px
-        color-mix(in srgb, var(--color-surface) 40%, transparent);
-
-    --shadow-filter-media: drop-shadow(
-        0 4px 10px color-mix(in srgb, var(--color-surface) 20%, transparent)
-    );
+    --shadow-filter-media: drop-shadow(0 4px 10px rgba(17, 17, 17, 0.2));
 
     --z-base: 1;
     --z-overlay: 1000;
@@ -376,8 +208,5 @@
     :root {
         --text-2xs: 0.8125rem;
         --text-xs: 0.875rem;
-
-        --person-photo-size: 120px;
     }
 }
-

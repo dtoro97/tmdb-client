@@ -3,6 +3,7 @@
 
 :host {
     display: block;
+    --icon-button-size: 2.5rem;
 }
 
 .user-list-detail__hero,
@@ -55,12 +56,6 @@
     gap: var(--space-3);
 }
 
-.user-list-detail__title-chips {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
 .user-list-detail__hero-meta {
     display: flex;
     flex-wrap: wrap;
@@ -102,13 +97,11 @@
     gap: var(--space-4);
 }
 
-.user-list-detail__summary-copy,
 .user-list-detail__summary-copy {
-    display: grid;
-    grid-template-columns: auto;
+    display: flex;
+    flex-direction: column;
     gap: var(--space-4);
     min-width: 0;
-    align-items: start;
 }
 
 .user-list-detail__actions-block {
@@ -158,13 +151,8 @@
     gap: var(--space-2);
 }
 
-.user-list-detail__items-heading .text-overline,
 .user-list-detail__items-heading .text-title {
     margin: 0;
-}
-
-.user-list-detail__items-heading .text-overline {
-    color: var(--text-muted);
 }
 
 .user-list-detail__items-count {
@@ -197,6 +185,33 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-4);
     transition: opacity var(--motion-fast);
+}
+
+.user-list-detail__item-card {
+    position: relative;
+}
+
+.user-list-detail__item-remove {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-button-size);
+    height: var(--icon-button-size);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--mat-sys-surface-container-high);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--motion-fast);
+    @include focus-ring();
+
+    &:hover {
+        background: var(--color-surface-raised);
+    }
 }
 
 .user-list-detail__card-skeleton {
@@ -288,10 +303,6 @@
     .user-list-detail__summary-copy,
     .user-list-detail__items-section {
         gap: var(--space-4);
-    }
-
-    .user-list-detail__summary-copy {
-        grid-template-columns: 1fr;
     }
 
     .user-list-detail__title-row {

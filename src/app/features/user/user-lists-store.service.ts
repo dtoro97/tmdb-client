@@ -10,7 +10,6 @@ import {
 } from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
-    CardItem,
     LoadableItems,
     MediaListItem,
     UserSessionStoreService,
@@ -24,7 +23,16 @@ import {
     loadMorePaged$,
     mapLoadableItems,
 } from '../../shared/utils';
-import { UserDataListItem } from './user-data.models';
+
+export interface UserDataListItem {
+    readonly id: number;
+    readonly name: string;
+    readonly description: string | null;
+    readonly itemCount: number;
+    readonly metadata: string;
+    readonly updatedLabel: string | null;
+    readonly posterPath: string | null;
+}
 
 interface UserListsState {
     favoriteMoviesState: LoadableItems<MediaListItem>;
@@ -37,48 +45,7 @@ interface UserListsState {
     listsTotal: number;
 }
 
-interface UserListsPageResult {
-    readonly items: readonly UserDataListItem[];
-    readonly page: number;
-    readonly totalPages: number;
-    readonly totalResults: number;
-}
-
 const LISTS_PLACEHOLDER_COUNT = 4;
-
-function toMetadata(itemCount: number): string {
-    return `${itemCount} item${itemCount === 1 ? '' : 's'}`;
-}
-
-function toUserListItem(item: V4AccountListSummary): UserDataListItem {
-    const itemCount = item.number_of_items ?? 0;
-
-    return {
-        id: item.id ?? 0,
-        name: item.name?.trim() || 'Untitled List',
-        description: item.description?.trim() || null,
-        itemCount,
-        metadata: toMetadata(itemCount),
-        updatedLabel: toUpdatedAtLabel(item.updated_at ?? item.created_at),
-        posterPath: item.poster_path ?? null,
-    };
-}
-
-export interface UserListsVm {
-    readonly favoriteMoviesState: LoadableItems<MediaListItem>;
-    readonly favoriteTvState: LoadableItems<MediaListItem>;
-    readonly listsState: LoadableItems<UserDataListItem>;
-    readonly hasFavoriteMovies: boolean;
-    readonly hasFavoriteTv: boolean;
-    readonly hasLists: boolean;
-    readonly listsHasMore: boolean;
-    readonly favoritePreviewCards: LoadableItems<CardItem>;
-    readonly listPreviewState: LoadableItems<UserDataListItem>;
-    readonly favoritesTotal: number;
-    readonly favoriteMoviesTotal: number;
-    readonly favoriteTvTotal: number;
-    readonly listsTotal: number;
-}
 
 const INITIAL_STATE: UserListsState = {
     favoriteMoviesState: { type: 'idle' },
@@ -93,45 +60,40 @@ const INITIAL_STATE: UserListsState = {
 
 @Injectable()
 export class UserListsStore extends ComponentStore<UserListsState> {
-    readonly vm$ = this.select(
-        (state): UserListsVm => ({
-            favoriteMoviesState: state.favoriteMoviesState,
-            favoriteTvState: state.favoriteTvState,
-            listsState: state.listsState,
-            hasFavoriteMovies:
-                state.favoriteMoviesState.type === 'loaded' &&
-                state.favoriteMoviesState.value.length > 0,
-            hasFavoriteTv:
-                state.favoriteTvState.type === 'loaded' &&
-                state.favoriteTvState.value.length > 0,
-            hasLists:
-                (state.listsState.type === 'loaded' ||
-                    state.listsState.type === 'loading-more') &&
-                state.listsState.value.length > 0,
-            listsHasMore: state.listsPage < state.listsTotalPages,
-            favoritePreviewCards: combineLoadablePreviewItems(
-                [
-                    mapLoadableItems(
-                        state.favoriteMoviesState,
-                        mediaListItemToCardItem,
-                    ),
-                    mapLoadableItems(
-                        state.favoriteTvState,
-                        mediaListItemToCardItem,
-                    ),
-                ],
-                10,
-            ),
-            listPreviewState: combineLoadablePreviewItems(
-                [state.listsState],
-                3,
-            ),
-            favoritesTotal: state.favoriteMoviesTotal + state.favoriteTvTotal,
-            favoriteMoviesTotal: state.favoriteMoviesTotal,
-            favoriteTvTotal: state.favoriteTvTotal,
-            listsTotal: state.listsTotal,
-        }),
-    );
+    readonly vm$ = this.select((state) => ({
+        favoriteMoviesState: state.favoriteMoviesState,
+        favoriteTvState: state.favoriteTvState,
+        listsState: state.listsState,
+        hasFavoriteMovies:
+            state.favoriteMoviesState.type === 'loaded' &&
+            state.favoriteMoviesState.value.length > 0,
+        hasFavoriteTv:
+            state.favoriteTvState.type === 'loaded' &&
+            state.favoriteTvState.value.length > 0,
+        hasLists:
+            (state.listsState.type === 'loaded' ||
+                state.listsState.type === 'loading-more') &&
+            state.listsState.value.length > 0,
+        listsHasMore: state.listsPage < state.listsTotalPages,
+        favoritePreviewCards: combineLoadablePreviewItems(
+            [
+                mapLoadableItems(
+                    state.favoriteMoviesState,
+                    mediaListItemToCardItem,
+                ),
+                mapLoadableItems(
+                    state.favoriteTvState,
+                    mediaListItemToCardItem,
+                ),
+            ],
+            10,
+        ),
+        listPreviewState: combineLoadablePreviewItems([state.listsState], 3),
+        favoritesTotal: state.favoriteMoviesTotal + state.favoriteTvTotal,
+        favoriteMoviesTotal: state.favoriteMoviesTotal,
+        favoriteTvTotal: state.favoriteTvTotal,
+        listsTotal: state.listsTotal,
+    }));
 
     constructor(
         private readonly accountService: AccountRestControllerService,
@@ -254,10 +216,7 @@ export class UserListsStore extends ComponentStore<UserListsState> {
         });
     }
 
-    private fetchListsPage$(
-        page: number,
-        includeCustomLists: boolean,
-    ): Observable<UserListsPageResult> {
+    private fetchListsPage$(page: number, includeCustomLists: boolean) {
         const v4AccountId = this.userSessionStore.v4AccountId();
 
         if (!includeCustomLists || !v4AccountId) {
@@ -278,7 +237,21 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                             (item): item is V4AccountListSummary =>
                                 !!item.id && !!item.name?.trim(),
                         )
-                        .map((item) => toUserListItem(item)),
+                        .map((item) => {
+                            const itemCount = item.number_of_items ?? 0;
+
+                            return {
+                                id: item.id ?? 0,
+                                name: item.name?.trim() || 'Untitled List',
+                                description: item.description?.trim() || null,
+                                itemCount,
+                                metadata: `${itemCount} item${itemCount === 1 ? '' : 's'}`,
+                                updatedLabel: toUpdatedAtLabel(
+                                    item.updated_at ?? item.created_at,
+                                ),
+                                posterPath: item.poster_path ?? null,
+                            };
+                        }),
                     page: result.page ?? 1,
                     totalPages: result.total_pages ?? 1,
                     totalResults: result.total_results ?? 0,

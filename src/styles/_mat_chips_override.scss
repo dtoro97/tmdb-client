@@ -1,4 +1,13 @@
 :root {
+    --chip-radius: var(--radius-pill);
+    --chip-height: 22px;
+    --chip-primary-bg: var(--color-brand);
+    --chip-primary-text: #ffffff;
+    --chip-primary-border: var(--border-brand-soft);
+    --chip-muted-bg: var(--mat-sys-surface-container-high);
+    --chip-muted-text: var(--text-primary);
+    --chip-muted-border: var(--color-border-subtle);
+
     --mat-chip-elevated-container-color: var(--chip-primary-bg);
     --mat-chip-container-shape-radius: var(--chip-radius);
     --mat-chip-label-text-size: var(--text-xs);

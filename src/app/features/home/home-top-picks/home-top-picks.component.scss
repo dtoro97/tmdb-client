@@ -40,7 +40,7 @@
     aspect-ratio: var(--poster-ratio);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    background: var(--surface-panel-strong);
+    background: var(--mat-sys-surface-container-high);
 }
 
 .home-top-picks__feature-media {
@@ -180,15 +180,7 @@
     flex-direction: column;
     gap: var(--space-1);
     padding: var(--space-8) var(--space-3) var(--space-3);
-    background: linear-gradient(
-        transparent,
-        color-mix(
-                in srgb,
-                var(--mat-sys-surface-container-lowest) 90%,
-                transparent
-            )
-            40%
-    );
+    background: var(--gradient-overlay-bottom);
 }
 
 .home-top-picks__tile-title-skeleton {

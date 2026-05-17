@@ -7,17 +7,6 @@
 }
 
 .sort-button {
-    --sort-button-control-height: var(--control-height-sm);
-    --sort-button-surface: var(--control-surface);
-    --sort-button-surface-hover: var(--control-surface-hover);
-    --sort-button-border: var(--control-border);
-    --sort-button-border-focus: var(--control-focus-border);
-    --sort-button-label-color: var(--control-text-hover);
-    --sort-button-icon-color: var(--control-text);
-    --sort-button-select-padding-inline-start: var(--space-4);
-    --sort-button-select-padding-inline-end: var(--space-3);
-    --sort-button-direction-width: 1.875rem;
-
     display: inline-flex;
     align-items: center;
     min-width: 0;
@@ -27,18 +16,18 @@
     display: inline-flex;
     align-items: stretch;
     min-width: 0;
-    border: 1px solid var(--sort-button-border);
+    border: 1px solid var(--control-border);
     border-radius: var(--control-radius);
-    background: var(--sort-button-surface);
+    background: var(--control-surface);
     overflow: hidden;
     transition: var(--control-transition);
 
     &:hover {
-        background: var(--sort-button-surface-hover);
+        background: var(--control-surface-hover);
     }
 
     &:focus-within {
-        border-color: var(--sort-button-border-focus);
+        border-color: var(--control-focus-border);
     }
 }
 
@@ -46,18 +35,17 @@
     display: inline-flex;
     align-items: center;
     min-width: 0;
-    min-height: var(--sort-button-control-height);
-    padding-inline: var(--sort-button-select-padding-inline-start)
-        var(--sort-button-select-padding-inline-end);
+    min-height: var(--control-height-sm);
+    padding-inline: var(--space-4) var(--space-3);
 }
 
 .sort-button__select {
     --mat-select-trigger-text-size: var(--text-xs);
     --mat-select-trigger-text-weight: var(--weight-semibold);
-    --mat-select-enabled-trigger-text-color: var(--sort-button-label-color);
-    --mat-select-focused-arrow-color: var(--sort-button-icon-color);
-    --mat-select-enabled-arrow-color: var(--sort-button-icon-color);
-    --mat-select-placeholder-text-color: var(--sort-button-icon-color);
+    --mat-select-enabled-trigger-text-color: var(--control-text-hover);
+    --mat-select-focused-arrow-color: var(--control-text);
+    --mat-select-enabled-arrow-color: var(--control-text);
+    --mat-select-placeholder-text-color: var(--control-text);
 
     width: auto;
     max-width: 100%;
@@ -67,7 +55,7 @@
 .sort-button__divider {
     width: 1px;
     align-self: stretch;
-    background: color-mix(in srgb, var(--sort-button-border) 55%, transparent);
+    background: var(--control-border);
     flex-shrink: 0;
 }
 
@@ -75,25 +63,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--sort-button-surface);
+    background: var(--control-surface);
     border: none;
-    color: var(--sort-button-icon-color);
+    color: var(--control-text);
     cursor: pointer;
-    width: var(--sort-button-direction-width);
-    min-width: var(--sort-button-direction-width);
+    width: 1.875rem;
+    min-width: 1.875rem;
     padding: 0;
     line-height: 0;
     transition: var(--control-transition);
 
     &:hover {
-        background: var(--sort-button-surface-hover);
-        color: var(--sort-button-label-color);
+        background: var(--control-surface-hover);
+        color: var(--control-text-hover);
     }
 
     &:focus-visible {
         outline: none;
-        background: var(--sort-button-surface-hover);
-        color: var(--sort-button-label-color);
+        background: var(--control-surface-hover);
+        color: var(--control-text-hover);
         box-shadow: inset 0 0 0 1px var(--control-focus-ring-inner);
     }
 
@@ -109,8 +97,8 @@
 }
 
 @include mobile() {
-    .sort-button {
-        --sort-button-select-padding-inline-start: var(--space-3);
+    .sort-button__select-shell {
+        padding-inline-start: var(--space-3);
     }
 }
 

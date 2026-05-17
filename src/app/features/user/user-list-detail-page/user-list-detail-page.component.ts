@@ -20,29 +20,28 @@ import {
 } from 'rxjs';
 
 import {
-    BadgeComponent,
+    CardItem,
     EmptyStateComponent,
     HeroSurfaceComponent,
     RepeatPipe,
     SkeletonComponent,
     SortButtonComponent,
     toUserFacingErrorMessage,
+    BackdropCardComponent,
 } from '../../../shared';
 import {
     UserListConfirmDialogComponent,
     UserListConfirmDialogData,
 } from '../user-list-confirm-dialog/user-list-confirm-dialog.component';
-import { UserListDetailItemCardComponent } from '../user-list-detail-item-card/user-list-detail-item-card.component';
 import {
     UserListEditDialogComponent,
     UserListEditDialogData,
 } from '../user-list-edit-dialog/user-list-edit-dialog.component';
 import {
     UserListDetailHeader,
-    UserListDetailItem,
+    UserListDetailStore,
     UserListSortBy,
-} from '../user-list-detail.models';
-import { UserListDetailStore } from '../user-list-detail-store.service';
+} from '../user-list-detail-store.service';
 
 const LIST_NAME_MAX_LENGTH = 100;
 const LIST_DESCRIPTION_MAX_LENGTH = 280;
@@ -58,13 +57,12 @@ const SORT_OPTIONS = [
         AsyncPipe,
         RouterLink,
         MatButtonModule,
-        BadgeComponent,
         EmptyStateComponent,
         HeroSurfaceComponent,
         RepeatPipe,
         SkeletonComponent,
         SortButtonComponent,
-        UserListDetailItemCardComponent,
+        BackdropCardComponent,
     ],
     templateUrl: './user-list-detail-page.component.html',
     styleUrl: './user-list-detail-page.component.scss',
@@ -72,7 +70,7 @@ const SORT_OPTIONS = [
     providers: [UserListDetailStore],
 })
 export class UserListDetailPageComponent {
-    readonly vm$ = this.store.vm$;
+    readonly vm$ = this.store.userListDetailVm$;
     readonly backLink = '/me/lists';
     readonly initialSkeletonCount = 6;
     readonly loadingMoreSkeletonCount = 4;
@@ -91,9 +89,11 @@ export class UserListDetailPageComponent {
             .pipe(
                 map((params) => Number(params.get('listId'))),
                 distinctUntilChanged(),
-                switchMap((listId) =>
-                    this.store.loadList$(listId).pipe(catchError(() => EMPTY)),
-                ),
+                switchMap((listId) => this.store.loadList$(listId)),
+                catchError(() => {
+                    this.router.navigate(['not-found']);
+                    return EMPTY;
+                }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
@@ -101,10 +101,9 @@ export class UserListDetailPageComponent {
         this.vm$
             .pipe(
                 tap((vm) => {
-                    console.log(vm);
-                    if (vm.header) {
+                    if (vm.headerState.type === 'loaded') {
                         this.titleService.setTitle(
-                            `${vm.header.name} | Your TMDb List`,
+                            `${vm.headerState.value.name} | Your TMDb List`,
                         );
                         return;
                     }
@@ -129,7 +128,7 @@ export class UserListDetailPageComponent {
             .subscribe();
     }
 
-    onEditDetails(header: UserListDetailHeader): void {
+    onEditDetails(header: UserListDetailHeader, isPublic: boolean): void {
         this.dialog
             .open<UserListEditDialogComponent, UserListEditDialogData>(
                 UserListEditDialogComponent,
@@ -138,7 +137,7 @@ export class UserListDetailPageComponent {
                     data: {
                         name: header.name,
                         description: header.description,
-                        isPublic: header.isPublic ?? false,
+                        isPublic,
                         maxNameLength: LIST_NAME_MAX_LENGTH,
                         maxDescriptionLength: LIST_DESCRIPTION_MAX_LENGTH,
                     },
@@ -158,7 +157,7 @@ export class UserListDetailPageComponent {
                     if (
                         result.name === header.name &&
                         result.description === (header.description ?? '') &&
-                        result.isPublic === (header.isPublic ?? false)
+                        result.isPublic === isPublic
                     ) {
                         return EMPTY;
                     }
@@ -199,7 +198,7 @@ export class UserListDetailPageComponent {
 
     onToggleSortDirection(): void {
         this.store
-            .toggleSortDirection$()
+            .toggleSortDirection()
             .pipe(
                 take(1),
                 catchError((error) =>
@@ -255,7 +254,7 @@ export class UserListDetailPageComponent {
             .subscribe();
     }
 
-    onRemoveItem(item: UserListDetailItem): void {
+    onRemoveItem(item: CardItem): void {
         this.confirmAction$({
             title: `Remove ${item.title}?`,
             message:

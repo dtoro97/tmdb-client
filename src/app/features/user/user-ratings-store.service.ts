@@ -34,243 +34,132 @@ import {
     toMediaListItem,
 } from '../../shared';
 import {
+    combineLoadablePreviewItems,
     loadMorePaged$,
     mapLoadableItems,
     updateLoadableItems,
-    combineLoadablePreviewItems,
 } from '../../shared/utils';
-import { UserRatedEpisodeItem, UserRatedMediaItem } from './user-data.models';
+
+export interface UserRatedMediaItem {
+    readonly media: MediaListItem;
+    readonly userRating: number | null;
+}
+
+export interface UserRatedEpisodeItem {
+    readonly id: number;
+    readonly showId: number | null;
+    readonly showName: string | null;
+    readonly name: string;
+    readonly overview: string;
+    readonly seasonNumber: number | null;
+    readonly episodeNumber: number | null;
+    readonly airDate: string;
+    readonly runtime: number | null;
+    readonly voteAverage: number | null;
+    readonly stillPath: string | null;
+    readonly userRating: number | null;
+}
 
 type ApiSortBy = 'created_at.asc' | 'created_at.desc';
-type RatedMovieListItemWithCreatedAt = RatedMovieListItem & {
-    created_at?: string | null;
-};
-type RatedTvSeriesListItemWithCreatedAt = RatedTvSeriesListItem & {
-    created_at?: string | null;
-};
-type RatedTvEpisodeListItemWithCreatedAt = RatedTvEpisodeListItem & {
-    created_at?: string | null;
-};
-interface UserRecentRatingItem {
-    readonly userRating: number;
-    readonly ratedAt: string | null;
+
+interface RatingsBucketState<T> {
+    readonly itemsState: LoadableItems<T>;
+    readonly page: number;
+    readonly totalPages: number;
+    readonly total: number;
+}
+
+interface UserRatingsState {
+    readonly movies: RatingsBucketState<UserRatedMediaItem>;
+    readonly tv: RatingsBucketState<UserRatedMediaItem>;
+    readonly episodes: RatingsBucketState<UserRatedEpisodeItem>;
+    readonly sortDirection: SortDirection;
 }
 
 const RECENT_RATINGS_PREVIEW_LIMIT = 20;
 
-interface UserRatingsState {
-    ratedMoviesState: LoadableItems<UserRatedMediaItem>;
-    ratedMoviesPage: number;
-    ratedMoviesTotalPages: number;
-    ratedTvState: LoadableItems<UserRatedMediaItem>;
-    ratedTvPage: number;
-    ratedTvTotalPages: number;
-    ratedEpisodesState: LoadableItems<UserRatedEpisodeItem>;
-    ratedEpisodesPage: number;
-    ratedEpisodesTotalPages: number;
-    ratedMoviesTotal: number;
-    ratedTvTotal: number;
-    ratedEpisodesTotal: number;
-    sortDirection: SortDirection;
-}
-
-function toUserRatingsMap(
-    state: LoadableItems<UserRatedMediaItem>,
-): ReadonlyMap<number, number> {
-    if (state.type !== 'loaded' && state.type !== 'loading-more') {
-        return new Map();
-    }
-
-    return new Map(
-        state.value
-            .filter((item) => item.userRating != null)
-            .map((item) => [item.media.id, item.userRating!]),
-    );
-}
-
-function ratedItemToCardItem(item: UserRatedMediaItem): CardItem {
-    return {
-        id: item.media.id,
-        mediaType: item.media.mediaType as 'movie' | 'tv',
-        title: item.media.title,
-        imagePath: item.media.thumb,
-        backdropPath: null,
-        rating: item.userRating,
-        date: item.media.date,
-        overview: item.media.overview,
-    };
-}
-
-function toUserRatedMovie(item: RatedMovieListItem): UserRatedMediaItem {
-    return {
-        media: toMediaListItem(item, 'movie'),
-        userRating: item.rating ?? null,
-        ratedAt: toRatedAt((item as RatedMovieListItemWithCreatedAt).created_at),
-    };
-}
-
-function toUserRatedTv(item: RatedTvSeriesListItem): UserRatedMediaItem {
-    return {
-        media: toMediaListItem(item, 'tv'),
-        userRating: item.rating ?? null,
-        ratedAt: toRatedAt(
-            (item as RatedTvSeriesListItemWithCreatedAt).created_at,
-        ),
-    };
-}
-
-function toUserRatedEpisode(
-    item: RatedTvEpisodeListItem,
-    showName: string | null = null,
-): UserRatedEpisodeItem {
-    return {
-        id: item.id ?? 0,
-        showId: item.show_id ?? null,
-        showName,
-        name: item.name?.trim() || 'Untitled Episode',
-        overview: item.overview ?? '',
-        seasonNumber: item.season_number ?? null,
-        episodeNumber: item.episode_number ?? null,
-        airDate: item.air_date ?? '',
-        runtime: item.runtime ?? null,
-        voteAverage: item.vote_average ?? null,
-        stillPath: item.still_path ?? null,
-        userRating: item.rating ?? null,
-        ratedAt: toRatedAt(
-            (item as RatedTvEpisodeListItemWithCreatedAt).created_at,
-        ),
-    };
-}
-
-function toPagedTotalPages(totalResults: number): number {
-    return Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
-}
-
-export interface UserRatingsVm {
-    readonly ratedMoviesState: LoadableItems<UserRatedMediaItem>;
-    readonly ratedTvState: LoadableItems<UserRatedMediaItem>;
-    readonly ratedEpisodesState: LoadableItems<UserRatedEpisodeItem>;
-    readonly ratedMoviesMediaState: LoadableItems<MediaListItem>;
-    readonly ratedTvMediaState: LoadableItems<MediaListItem>;
-    readonly ratedMoviesUserRatings: ReadonlyMap<number, number>;
-    readonly ratedTvUserRatings: ReadonlyMap<number, number>;
-    readonly hasRatedMovies: boolean;
-    readonly hasRatedTv: boolean;
-    readonly hasRatedEpisodes: boolean;
-    readonly hasRatings: boolean;
-    readonly ratedMoviesHasMore: boolean;
-    readonly ratedTvHasMore: boolean;
-    readonly ratedEpisodesHasMore: boolean;
-    readonly ratingPreviewCards: LoadableItems<CardItem>;
-    readonly recentRatings: readonly number[];
-    readonly recentRatingsCount: number;
-    readonly recentRatingsAverage: number | null;
-    readonly ratingsTotal: number;
-    readonly sortDirection: SortDirection;
-    readonly ratedMoviesTotal: number;
-    readonly ratedTvTotal: number;
-    readonly ratedEpisodesTotal: number;
-    readonly ratedMoviesLoadedCount: number;
-    readonly ratedTvLoadedCount: number;
-    readonly ratedEpisodesLoadedCount: number;
-}
-
 const INITIAL_STATE: UserRatingsState = {
-    ratedMoviesState: { type: 'idle' },
-    ratedMoviesPage: 1,
-    ratedMoviesTotalPages: 1,
-    ratedTvState: { type: 'idle' },
-    ratedTvPage: 1,
-    ratedTvTotalPages: 1,
-    ratedEpisodesState: { type: 'idle' },
-    ratedEpisodesPage: 1,
-    ratedEpisodesTotalPages: 1,
-    ratedMoviesTotal: 0,
-    ratedTvTotal: 0,
-    ratedEpisodesTotal: 0,
+    movies: {
+        itemsState: { type: 'idle' },
+        page: 1,
+        totalPages: 1,
+        total: 0,
+    },
+    tv: {
+        itemsState: { type: 'idle' },
+        page: 1,
+        totalPages: 1,
+        total: 0,
+    },
+    episodes: {
+        itemsState: { type: 'idle' },
+        page: 1,
+        totalPages: 1,
+        total: 0,
+    },
     sortDirection: 'desc',
 };
 
 @Injectable()
 export class UserRatingsStore extends ComponentStore<UserRatingsState> {
-    readonly vm$ = this.select((state): UserRatingsVm => {
-        const ratedMoviesMediaState = mapLoadableItems(
-            state.ratedMoviesState,
+    readonly userRatingsVm$ = this.select((state) => {
+        const moviesMediaState = mapLoadableItems(
+            state.movies.itemsState,
             (item) => item.media,
         );
-        const ratedTvMediaState = mapLoadableItems(
-            state.ratedTvState,
-            (item) => item.media,
-        );
-        const hasRatedMovies =
-            state.ratedMoviesState.type === 'loaded' &&
-            state.ratedMoviesState.value.length > 0;
-        const hasRatedTv =
-            state.ratedTvState.type === 'loaded' &&
-            state.ratedTvState.value.length > 0;
-        const hasRatedEpisodes =
-            state.ratedEpisodesState.type === 'loaded' &&
-            state.ratedEpisodesState.value.length > 0;
-        const recentRatingItems = getRecentRatingItems(
-            state.ratedMoviesState,
-            state.ratedTvState,
-            state.ratedEpisodesState,
-        );
-        const recentRatings = recentRatingItems.map((item) => item.userRating);
+        const tvMediaState = mapLoadableItems(state.tv.itemsState, (item) => item.media);
+        const recentRatings = this.getRecentRatings(state);
 
         return {
-            ratedMoviesState: state.ratedMoviesState,
-            ratedTvState: state.ratedTvState,
-            ratedEpisodesState: state.ratedEpisodesState,
-            ratedMoviesMediaState,
-            ratedTvMediaState,
-            ratedMoviesUserRatings: toUserRatingsMap(state.ratedMoviesState),
-            ratedTvUserRatings: toUserRatingsMap(state.ratedTvState),
-            hasRatedMovies,
-            hasRatedTv,
-            hasRatedEpisodes,
-            hasRatings: hasRatedMovies || hasRatedTv || hasRatedEpisodes,
-            ratedMoviesHasMore:
-                state.ratedMoviesPage < state.ratedMoviesTotalPages,
-            ratedTvHasMore: state.ratedTvPage < state.ratedTvTotalPages,
-            ratedEpisodesHasMore:
-                state.ratedEpisodesPage < state.ratedEpisodesTotalPages,
+            sortDirection: state.sortDirection,
+            hasRatings:
+                this.hasItems(state.movies.itemsState) ||
+                this.hasItems(state.tv.itemsState) ||
+                this.hasItems(state.episodes.itemsState),
+            ratingsTotal:
+                state.movies.total + state.tv.total + state.episodes.total,
             ratingPreviewCards: combineLoadablePreviewItems(
                 [
-                    mapLoadableItems(
-                        state.ratedMoviesState,
-                        ratedItemToCardItem,
+                    mapLoadableItems(state.movies.itemsState, (item) =>
+                        this.toCardItem(item),
                     ),
-                    mapLoadableItems(state.ratedTvState, ratedItemToCardItem),
+                    mapLoadableItems(state.tv.itemsState, (item) =>
+                        this.toCardItem(item),
+                    ),
                 ],
                 10,
             ),
             recentRatings,
             recentRatingsCount: recentRatings.length,
-            recentRatingsAverage: getAverageRating(recentRatings),
-            ratingsTotal:
-                state.ratedMoviesTotal +
-                state.ratedTvTotal +
-                state.ratedEpisodesTotal,
-            sortDirection: state.sortDirection,
-            ratedMoviesTotal: state.ratedMoviesTotal,
-            ratedTvTotal: state.ratedTvTotal,
-            ratedEpisodesTotal: state.ratedEpisodesTotal,
-            ratedMoviesLoadedCount:
-                state.ratedMoviesState.type === 'loaded' ||
-                state.ratedMoviesState.type === 'loading-more'
-                    ? state.ratedMoviesState.value.length
-                    : 0,
-            ratedTvLoadedCount:
-                state.ratedTvState.type === 'loaded' ||
-                state.ratedTvState.type === 'loading-more'
-                    ? state.ratedTvState.value.length
-                    : 0,
-            ratedEpisodesLoadedCount:
-                state.ratedEpisodesState.type === 'loaded' ||
-                state.ratedEpisodesState.type === 'loading-more'
-                    ? state.ratedEpisodesState.value.length
-                    : 0,
+            recentRatingsAverage:
+                recentRatings.length > 0
+                    ? recentRatings.reduce((sum, rating) => sum + rating, 0) /
+                      recentRatings.length
+                    : null,
+            movies: {
+                state: moviesMediaState,
+                userRatings: this.toUserRatingsMap(state.movies.itemsState),
+                total: state.movies.total,
+                hasItems: this.hasItems(state.movies.itemsState),
+                hasMore: state.movies.page < state.movies.totalPages,
+                isLoadingMore: state.movies.itemsState.type === 'loading-more',
+            },
+            tv: {
+                state: tvMediaState,
+                userRatings: this.toUserRatingsMap(state.tv.itemsState),
+                total: state.tv.total,
+                hasItems: this.hasItems(state.tv.itemsState),
+                hasMore: state.tv.page < state.tv.totalPages,
+                isLoadingMore: state.tv.itemsState.type === 'loading-more',
+            },
+            episodes: {
+                state: state.episodes.itemsState,
+                total: state.episodes.total,
+                hasItems: this.hasItems(state.episodes.itemsState),
+                hasMore: state.episodes.page < state.episodes.totalPages,
+                isLoadingMore:
+                    state.episodes.itemsState.type === 'loading-more',
+            },
         };
     });
 
@@ -285,10 +174,178 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         super(INITIAL_STATE);
     }
 
-    toggleSortDirection$(): Observable<void> {
-        const currentDirection = this.get().sortDirection;
+    load$(
+        sessionId: string,
+        accountId: number,
+        language: string,
+    ): Observable<void> {
+        this.patchState({
+            movies: { ...this.get().movies, itemsState: { type: 'loading' } },
+            tv: { ...this.get().tv, itemsState: { type: 'loading' } },
+            episodes: {
+                ...this.get().episodes,
+                itemsState: { type: 'loading' },
+            },
+        });
+
+        return forkJoin({
+            movies: this.accountService.accountRatedMovies(
+                accountId,
+                language,
+                1,
+                sessionId,
+                this.toApiSortBy(),
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            ),
+            tv: this.accountService.accountRatedTv(
+                accountId,
+                language,
+                1,
+                sessionId,
+                this.toApiSortBy(),
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            ),
+            episodes: this.accountService.accountRatedTvEpisodes(
+                accountId,
+                language,
+                1,
+                sessionId,
+                this.toApiSortBy(),
+                'body',
+                false,
+                API_JSON_OPTIONS,
+            ),
+        }).pipe(
+            tap((result) => {
+                this.patchState({
+                    movies: {
+                        itemsState: loaded(
+                            (result.movies.results ?? []).map((item) =>
+                                this.toUserRatedMovie(item),
+                            ),
+                        ),
+                        page: result.movies.page ?? 1,
+                        totalPages: result.movies.total_pages ?? 1,
+                        total: result.movies.total_results ?? 0,
+                    },
+                    tv: {
+                        itemsState: loaded(
+                            (result.tv.results ?? []).map((item) =>
+                                this.toUserRatedTv(item),
+                            ),
+                        ),
+                        page: result.tv.page ?? 1,
+                        totalPages: result.tv.total_pages ?? 1,
+                        total: result.tv.total_results ?? 0,
+                    },
+                    episodes: {
+                        itemsState: loaded(
+                            (result.episodes.results ?? []).map((item) =>
+                                this.toUserRatedEpisode(item),
+                            ),
+                        ),
+                        page: result.episodes.page ?? 1,
+                        totalPages: result.episodes.total_pages ?? 1,
+                        total: result.episodes.total_results ?? 0,
+                    },
+                });
+            }),
+            switchMap((result) => {
+                const showIds = [
+                    ...new Set(
+                        (result.episodes.results ?? [])
+                            .map((episode) => episode.show_id)
+                            .filter((showId): showId is number => showId != null),
+                    ),
+                ];
+
+                if (showIds.length === 0) {
+                    return of(undefined);
+                }
+
+                return forkJoin(
+                    Object.fromEntries(
+                        showIds.map((showId) => [
+                            String(showId),
+                            this.tvSeriesService
+                                .tvSeriesDetails(
+                                    showId,
+                                    undefined,
+                                    language,
+                                    'body',
+                                    false,
+                                    API_JSON_OPTIONS,
+                                )
+                                .pipe(
+                                    map((series) => series.name?.trim() || null),
+                                    catchError(() => of(null as string | null)),
+                                ),
+                        ]),
+                    ),
+                ).pipe(
+                    tap((showNames) => {
+                        this.patchState((currentState) => ({
+                            episodes: {
+                                ...currentState.episodes,
+                                itemsState: updateLoadableItems(
+                                    currentState.episodes.itemsState,
+                                    (items) =>
+                                        items.map((item) => {
+                                            const showName =
+                                                item.showId != null
+                                                    ? showNames[
+                                                          String(item.showId)
+                                                      ] ?? null
+                                                    : null;
+
+                                            return showName === item.showName
+                                                ? item
+                                                : {
+                                                      ...item,
+                                                      showName,
+                                                  };
+                                        }),
+                                ),
+                            },
+                        }));
+                    }),
+                    map(() => undefined),
+                );
+            }),
+            tap({
+                error: () => {
+                    this.patchState({
+                        movies: {
+                            page: 1,
+                            totalPages: 1,
+                            total: 0,
+                            itemsState: loaded([]),
+                        },
+                        tv: {
+                            page: 1,
+                            totalPages: 1,
+                            total: 0,
+                            itemsState: loaded([]),
+                        },
+                        episodes: {
+                            page: 1,
+                            totalPages: 1,
+                            total: 0,
+                            itemsState: loaded([]),
+                        },
+                    });
+                },
+            }),
+        );
+    }
+
+    changeSortDirection$(): Observable<void> {
         const nextDirection: SortDirection =
-            currentDirection === 'desc' ? 'asc' : 'desc';
+            this.get().sortDirection === 'desc' ? 'asc' : 'desc';
 
         this.patchState({ sortDirection: nextDirection });
 
@@ -303,40 +360,29 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         );
     }
 
-    load$(
-        sessionId: string,
-        accountId: number,
-        language: string,
-    ): Observable<void> {
-        this.patchState({
-            ratedMoviesState: { type: 'loading' },
-            ratedTvState: { type: 'loading' },
-            ratedEpisodesState: { type: 'loading' },
-        });
-
-        return this.fetchRatings$(sessionId, accountId, language);
-    }
-
-    loadMoreRatedMovies$(): Observable<void> {
+    loadMoreMovies$(): Observable<void> {
         const state = this.get();
 
-        if (state.ratedMoviesState.type !== 'loaded') {
+        if (state.movies.itemsState.type !== 'loaded') {
             return of(undefined);
         }
 
         return loadMorePaged$({
-            currentItems: state.ratedMoviesState.value,
-            currentPage: state.ratedMoviesPage,
-            totalPages: state.ratedMoviesTotalPages,
+            currentItems: state.movies.itemsState.value,
+            currentPage: state.movies.page,
+            totalPages: state.movies.totalPages,
             placeholderCount: PAGE_SIZE,
             setLoadingMore: (items) =>
-                this.patchState({
-                    ratedMoviesState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: PAGE_SIZE,
-                    } as LoadableItems<UserRatedMediaItem>,
-                }),
+                this.patchState((currentState) => ({
+                    movies: {
+                        ...currentState.movies,
+                        itemsState: {
+                            type: 'loading-more',
+                            value: items,
+                            placeholderCount: PAGE_SIZE,
+                        },
+                    },
+                })),
             fetchPage: (nextPage) =>
                 this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
                     switchMap(({ accountId }) =>
@@ -345,7 +391,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                             this.localeStore.language(),
                             nextPage,
                             this.userSessionStore.sessionId()!,
-                            this.apiSortBy,
+                            this.toApiSortBy(),
                             'body',
                             false,
                             API_JSON_OPTIONS,
@@ -353,38 +399,44 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                     ),
                     map((result) =>
                         (result.results ?? []).map((item) =>
-                            toUserRatedMovie(item),
+                            this.toUserRatedMovie(item),
                         ),
                     ),
                 ),
             setLoaded: (items, page) =>
-                this.patchState({
-                    ratedMoviesState: loaded(items),
-                    ratedMoviesPage: page,
-                }),
+                this.patchState((currentState) => ({
+                    movies: {
+                        ...currentState.movies,
+                        itemsState: loaded(items),
+                        page,
+                    },
+                })),
         });
     }
 
-    loadMoreRatedTv$(): Observable<void> {
+    loadMoreTv$(): Observable<void> {
         const state = this.get();
 
-        if (state.ratedTvState.type !== 'loaded') {
+        if (state.tv.itemsState.type !== 'loaded') {
             return of(undefined);
         }
 
         return loadMorePaged$({
-            currentItems: state.ratedTvState.value,
-            currentPage: state.ratedTvPage,
-            totalPages: state.ratedTvTotalPages,
+            currentItems: state.tv.itemsState.value,
+            currentPage: state.tv.page,
+            totalPages: state.tv.totalPages,
             placeholderCount: PAGE_SIZE,
             setLoadingMore: (items) =>
-                this.patchState({
-                    ratedTvState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: PAGE_SIZE,
-                    } as LoadableItems<UserRatedMediaItem>,
-                }),
+                this.patchState((currentState) => ({
+                    tv: {
+                        ...currentState.tv,
+                        itemsState: {
+                            type: 'loading-more',
+                            value: items,
+                            placeholderCount: PAGE_SIZE,
+                        },
+                    },
+                })),
             fetchPage: (nextPage) =>
                 this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
                     switchMap(({ accountId }) =>
@@ -393,7 +445,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                             this.localeStore.language(),
                             nextPage,
                             this.userSessionStore.sessionId()!,
-                            this.apiSortBy,
+                            this.toApiSortBy(),
                             'body',
                             false,
                             API_JSON_OPTIONS,
@@ -401,38 +453,44 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                     ),
                     map((result) =>
                         (result.results ?? []).map((item) =>
-                            toUserRatedTv(item),
+                            this.toUserRatedTv(item),
                         ),
                     ),
                 ),
             setLoaded: (items, page) =>
-                this.patchState({
-                    ratedTvState: loaded(items),
-                    ratedTvPage: page,
-                }),
+                this.patchState((currentState) => ({
+                    tv: {
+                        ...currentState.tv,
+                        itemsState: loaded(items),
+                        page,
+                    },
+                })),
         });
     }
 
-    loadMoreRatedEpisodes$(): Observable<void> {
+    loadMoreEpisodes$(): Observable<void> {
         const state = this.get();
 
-        if (state.ratedEpisodesState.type !== 'loaded') {
+        if (state.episodes.itemsState.type !== 'loaded') {
             return of(undefined);
         }
 
         return loadMorePaged$({
-            currentItems: state.ratedEpisodesState.value,
-            currentPage: state.ratedEpisodesPage,
-            totalPages: state.ratedEpisodesTotalPages,
+            currentItems: state.episodes.itemsState.value,
+            currentPage: state.episodes.page,
+            totalPages: state.episodes.totalPages,
             placeholderCount: PAGE_SIZE,
             setLoadingMore: (items) =>
-                this.patchState({
-                    ratedEpisodesState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: PAGE_SIZE,
-                    } as LoadableItems<UserRatedEpisodeItem>,
-                }),
+                this.patchState((currentState) => ({
+                    episodes: {
+                        ...currentState.episodes,
+                        itemsState: {
+                            type: 'loading-more',
+                            value: items,
+                            placeholderCount: PAGE_SIZE,
+                        },
+                    },
+                })),
             fetchPage: (nextPage) =>
                 this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
                     switchMap(({ accountId }) =>
@@ -441,7 +499,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                             this.localeStore.language(),
                             nextPage,
                             this.userSessionStore.sessionId()!,
-                            this.apiSortBy,
+                            this.toApiSortBy(),
                             'body',
                             false,
                             API_JSON_OPTIONS,
@@ -449,19 +507,22 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                     ),
                     map((result) =>
                         (result.results ?? []).map((item) =>
-                            toUserRatedEpisode(item),
+                            this.toUserRatedEpisode(item),
                         ),
                     ),
                 ),
             setLoaded: (items, page) =>
-                this.patchState({
-                    ratedEpisodesState: loaded(items),
-                    ratedEpisodesPage: page,
-                }),
+                this.patchState((currentState) => ({
+                    episodes: {
+                        ...currentState.episodes,
+                        itemsState: loaded(items),
+                        page,
+                    },
+                })),
         });
     }
 
-    updateRatedMediaRating$(
+    updateMediaRating$(
         mediaId: number,
         mediaType: 'movie' | 'tv',
         userRating: number,
@@ -474,8 +535,31 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                 tap(() => {
                     if (mediaType === 'movie') {
                         this.patchState((state) => ({
-                            ratedMoviesState: updateLoadableItems(
-                                state.ratedMoviesState,
+                            movies: {
+                                ...state.movies,
+                                itemsState: updateLoadableItems(
+                                    state.movies.itemsState,
+                                    (items) =>
+                                        items.map((item) =>
+                                            item.media.id === mediaId
+                                                ? {
+                                                      ...item,
+                                                      userRating:
+                                                          normalizedRating,
+                                                  }
+                                                : item,
+                                        ),
+                                ),
+                            },
+                        }));
+                        return;
+                    }
+
+                    this.patchState((state) => ({
+                        tv: {
+                            ...state.tv,
+                            itemsState: updateLoadableItems(
+                                state.tv.itemsState,
                                 (items) =>
                                     items.map((item) =>
                                         item.media.id === mediaId
@@ -486,30 +570,14 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                                             : item,
                                     ),
                             ),
-                        }));
-                        return;
-                    }
-
-                    this.patchState((state) => ({
-                        ratedTvState: updateLoadableItems(
-                            state.ratedTvState,
-                            (items) =>
-                                items.map((item) =>
-                                    item.media.id === mediaId
-                                        ? {
-                                              ...item,
-                                              userRating: normalizedRating,
-                                          }
-                                        : item,
-                                ),
-                        ),
+                        },
                     }));
                 }),
                 map(() => undefined),
             );
     }
 
-    removeRatedMediaRating$(
+    removeMediaRating$(
         mediaId: number,
         mediaType: 'movie' | 'tv',
     ): Observable<void> {
@@ -519,52 +587,51 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                 tap(() => {
                     if (mediaType === 'movie') {
                         this.patchState((state) => {
-                            const nextTotalResults = Math.max(
-                                0,
-                                state.ratedMoviesTotal - 1,
-                            );
+                            const nextTotal = Math.max(0, state.movies.total - 1);
 
                             return {
-                                ratedMoviesState: updateLoadableItems(
-                                    state.ratedMoviesState,
-                                    (items) =>
-                                        items.filter(
-                                            (item) => item.media.id !== mediaId,
-                                        ),
-                                ),
-                                ratedMoviesPage: Math.min(
-                                    state.ratedMoviesPage,
-                                    toPagedTotalPages(nextTotalResults),
-                                ),
-                                ratedMoviesTotalPages:
-                                    toPagedTotalPages(nextTotalResults),
-                                ratedMoviesTotal: nextTotalResults,
+                                movies: {
+                                    ...state.movies,
+                                    itemsState: updateLoadableItems(
+                                        state.movies.itemsState,
+                                        (items) =>
+                                            items.filter(
+                                                (item) =>
+                                                    item.media.id !== mediaId,
+                                            ),
+                                    ),
+                                    page: Math.min(
+                                        state.movies.page,
+                                        this.toTotalPages(nextTotal),
+                                    ),
+                                    totalPages: this.toTotalPages(nextTotal),
+                                    total: nextTotal,
+                                },
                             };
                         });
                         return;
                     }
 
                     this.patchState((state) => {
-                        const nextTotalResults = Math.max(
-                            0,
-                            state.ratedTvTotal - 1,
-                        );
+                        const nextTotal = Math.max(0, state.tv.total - 1);
 
                         return {
-                            ratedTvState: updateLoadableItems(
-                                state.ratedTvState,
-                                (items) =>
-                                    items.filter(
-                                        (item) => item.media.id !== mediaId,
-                                    ),
-                            ),
-                            ratedTvPage: Math.min(
-                                state.ratedTvPage,
-                                toPagedTotalPages(nextTotalResults),
-                            ),
-                            ratedTvTotalPages:
-                                toPagedTotalPages(nextTotalResults),
-                            ratedTvTotal: nextTotalResults,
+                            tv: {
+                                ...state.tv,
+                                itemsState: updateLoadableItems(
+                                    state.tv.itemsState,
+                                    (items) =>
+                                        items.filter(
+                                            (item) => item.media.id !== mediaId,
+                                        ),
+                                ),
+                                page: Math.min(
+                                    state.tv.page,
+                                    this.toTotalPages(nextTotal),
+                                ),
+                                totalPages: this.toTotalPages(nextTotal),
+                                total: nextTotal,
+                            },
                         };
                     });
                 }),
@@ -572,15 +639,13 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
             );
     }
 
-    updateRatedEpisodeRating$(
+    updateEpisodeRating$(
         episodeId: number,
         showId: number | null,
         seasonNumber: number | null,
         episodeNumber: number | null,
         userRating: number,
     ): Observable<void> {
-        const normalizedRating = normalizeRatingValue(userRating);
-
         if (
             showId === null ||
             seasonNumber === null ||
@@ -591,30 +656,35 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
             );
         }
 
+        const normalizedRating = normalizeRatingValue(userRating);
+
         return this.mediaRatingService
             .rateEpisode$(showId, seasonNumber, episodeNumber, normalizedRating)
             .pipe(
                 tap(() => {
                     this.patchState((state) => ({
-                        ratedEpisodesState: updateLoadableItems(
-                            state.ratedEpisodesState,
-                            (items) =>
-                                items.map((item) =>
-                                    item.id === episodeId
-                                        ? {
-                                              ...item,
-                                              userRating: normalizedRating,
-                                          }
-                                        : item,
-                                ),
-                        ),
+                        episodes: {
+                            ...state.episodes,
+                            itemsState: updateLoadableItems(
+                                state.episodes.itemsState,
+                                (items) =>
+                                    items.map((item) =>
+                                        item.id === episodeId
+                                            ? {
+                                                  ...item,
+                                                  userRating: normalizedRating,
+                                              }
+                                            : item,
+                                    ),
+                            ),
+                        },
                     }));
                 }),
                 map(() => undefined),
             );
     }
 
-    removeRatedEpisodeRating$(
+    removeEpisodeRating$(
         episodeId: number,
         showId: number | null,
         seasonNumber: number | null,
@@ -635,26 +705,25 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
             .pipe(
                 tap(() => {
                     this.patchState((state) => {
-                        const nextTotalResults = Math.max(
-                            0,
-                            state.ratedEpisodesTotal - 1,
-                        );
+                        const nextTotal = Math.max(0, state.episodes.total - 1);
 
                         return {
-                            ratedEpisodesState: updateLoadableItems(
-                                state.ratedEpisodesState,
-                                (items) =>
-                                    items.filter(
-                                        (item) => item.id !== episodeId,
-                                    ),
-                            ),
-                            ratedEpisodesPage: Math.min(
-                                state.ratedEpisodesPage,
-                                toPagedTotalPages(nextTotalResults),
-                            ),
-                            ratedEpisodesTotalPages:
-                                toPagedTotalPages(nextTotalResults),
-                            ratedEpisodesTotal: nextTotalResults,
+                            episodes: {
+                                ...state.episodes,
+                                itemsState: updateLoadableItems(
+                                    state.episodes.itemsState,
+                                    (items) =>
+                                        items.filter(
+                                            (item) => item.id !== episodeId,
+                                        ),
+                                ),
+                                page: Math.min(
+                                    state.episodes.page,
+                                    this.toTotalPages(nextTotal),
+                                ),
+                                totalPages: this.toTotalPages(nextTotal),
+                                total: nextTotal,
+                            },
                         };
                     });
                 }),
@@ -662,225 +731,102 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
             );
     }
 
-    private get apiSortBy(): ApiSortBy {
+    private hasItems<T>(state: LoadableItems<T>): boolean {
+        return (
+            (state.type === 'loaded' || state.type === 'loading-more') &&
+            state.value.length > 0
+        );
+    }
+
+    private toTotalPages(total: number): number {
+        return Math.max(1, Math.ceil(total / PAGE_SIZE));
+    }
+
+    private toApiSortBy(): ApiSortBy {
         return `created_at.${this.get().sortDirection}`;
     }
 
-    private fetchRatings$(
-        sessionId: string,
-        accountId: number,
-        language: string,
-    ): Observable<void> {
-        return forkJoin({
-            ratedMovies: this.accountService.accountRatedMovies(
-                accountId,
-                language,
-                1,
-                sessionId,
-                this.apiSortBy,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            ),
-            ratedTv: this.accountService.accountRatedTv(
-                accountId,
-                language,
-                1,
-                sessionId,
-                this.apiSortBy,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            ),
-            ratedEpisodes: this.accountService.accountRatedTvEpisodes(
-                accountId,
-                language,
-                1,
-                sessionId,
-                this.apiSortBy,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            ),
-        }).pipe(
-            tap((result) => {
-                this.patchState({
-                    ratedMoviesState: loaded(
-                        (result.ratedMovies.results ?? []).map((item) =>
-                            toUserRatedMovie(item),
-                        ),
-                    ),
-                    ratedMoviesPage: result.ratedMovies.page ?? 1,
-                    ratedMoviesTotalPages:
-                        result.ratedMovies.total_pages ?? 1,
-                    ratedMoviesTotal: result.ratedMovies.total_results ?? 0,
-                    ratedTvState: loaded(
-                        (result.ratedTv.results ?? []).map((item) =>
-                            toUserRatedTv(item),
-                        ),
-                    ),
-                    ratedTvPage: result.ratedTv.page ?? 1,
-                    ratedTvTotalPages: result.ratedTv.total_pages ?? 1,
-                    ratedTvTotal: result.ratedTv.total_results ?? 0,
-                    ratedEpisodesState: loaded(
-                        (result.ratedEpisodes.results ?? []).map((item) =>
-                            toUserRatedEpisode(item),
-                        ),
-                    ),
-                    ratedEpisodesPage: result.ratedEpisodes.page ?? 1,
-                    ratedEpisodesTotalPages:
-                        result.ratedEpisodes.total_pages ?? 1,
-                    ratedEpisodesTotal:
-                        result.ratedEpisodes.total_results ?? 0,
-                });
-            }),
-            switchMap((result) =>
-                this.resolveEpisodeShowNames$(
-                    result.ratedEpisodes.results ?? [],
-                    language,
-                ),
-            ),
-            tap({
-                error: () => {
-                    this.patchState({
-                        ratedMoviesState: loaded([]),
-                        ratedTvState: loaded([]),
-                        ratedEpisodesState: loaded([]),
-                    });
-                },
-            }),
-        );
+    private toCardItem(item: UserRatedMediaItem): CardItem {
+        return {
+            id: item.media.id,
+            mediaType: item.media.mediaType as 'movie' | 'tv',
+            title: item.media.title,
+            imagePath: item.media.thumb,
+            backdropPath: null,
+            rating: item.userRating,
+            date: item.media.date,
+            overview: item.media.overview,
+        };
     }
 
-    private resolveEpisodeShowNames$(
-        episodes: readonly RatedTvEpisodeListItem[],
-        language: string,
-    ): Observable<void> {
-        const uniqueShowIds = [
-            ...new Set(
-                episodes
-                    .map((ep) => ep.show_id)
-                    .filter((id): id is number => id != null),
-            ),
-        ];
-
-        if (uniqueShowIds.length === 0) {
-            return of(undefined);
+    private toUserRatingsMap(
+        state: LoadableItems<UserRatedMediaItem>,
+    ): ReadonlyMap<number, number> {
+        if (state.type !== 'loaded' && state.type !== 'loading-more') {
+            return new Map();
         }
 
-        const showNameRequests = Object.fromEntries(
-            uniqueShowIds.map((id) => [
-                String(id),
-                this.tvSeriesService
-                    .tvSeriesDetails(id, undefined, language, 'body', false, API_JSON_OPTIONS)
-                    .pipe(
-                        map((series) => series.name?.trim() || null),
-                        catchError(() => of(null as string | null)),
-                    ),
-            ]),
-        );
-
-        return forkJoin(showNameRequests).pipe(
-            tap((showNames) => {
-                this.patchState((state) => ({
-                    ratedEpisodesState: updateLoadableItems(
-                        state.ratedEpisodesState,
-                        (items) =>
-                            items.map((item) => {
-                                const name =
-                                    item.showId != null
-                                        ? showNames[String(item.showId)] ?? null
-                                        : null;
-                                return name !== item.showName
-                                    ? { ...item, showName: name }
-                                    : item;
-                            }),
-                    ),
-                }));
-            }),
-            map(() => undefined),
+        return new Map(
+            state.value.flatMap((item) =>
+                item.userRating == null
+                    ? []
+                    : [[item.media.id, item.userRating] as const],
+            ),
         );
     }
-}
 
-function toRatedAt(value: string | null | undefined): string | null {
-    if (typeof value !== 'string') {
-        return null;
+    private toUserRatedMovie(item: RatedMovieListItem): UserRatedMediaItem {
+        return {
+            media: toMediaListItem(item, 'movie'),
+            userRating: item.rating ?? null,
+        };
     }
 
-    const normalizedValue = value.trim();
-
-    return normalizedValue.length > 0 ? normalizedValue : null;
-}
-
-function toRecentRatingItem(
-    item: Pick<UserRatedMediaItem, 'userRating' | 'ratedAt'>,
-): UserRecentRatingItem | null;
-function toRecentRatingItem(
-    item: Pick<UserRatedEpisodeItem, 'userRating' | 'ratedAt'>,
-): UserRecentRatingItem | null;
-function toRecentRatingItem(
-    item: Pick<UserRatedMediaItem | UserRatedEpisodeItem, 'userRating' | 'ratedAt'>,
-): UserRecentRatingItem | null {
-    if (item.userRating == null) {
-        return null;
+    private toUserRatedTv(item: RatedTvSeriesListItem): UserRatedMediaItem {
+        return {
+            media: toMediaListItem(item, 'tv'),
+            userRating: item.rating ?? null,
+        };
     }
 
-    return {
-        userRating: item.userRating,
-        ratedAt: item.ratedAt,
-    };
-}
-
-function toRecentRatingItems<T extends UserRatedMediaItem | UserRatedEpisodeItem>(
-    state: LoadableItems<T>,
-): readonly UserRecentRatingItem[] {
-    if (state.type !== 'loaded' && state.type !== 'loading-more') {
-        return [];
+    private toUserRatedEpisode(
+        item: RatedTvEpisodeListItem,
+    ): UserRatedEpisodeItem {
+        return {
+            id: item.id ?? 0,
+            showId: item.show_id ?? null,
+            showName: null,
+            name: item.name?.trim() || 'Untitled Episode',
+            overview: item.overview ?? '',
+            seasonNumber: item.season_number ?? null,
+            episodeNumber: item.episode_number ?? null,
+            airDate: item.air_date ?? '',
+            runtime: item.runtime ?? null,
+            voteAverage: item.vote_average ?? null,
+            stillPath: item.still_path ?? null,
+            userRating: item.rating ?? null,
+        };
     }
 
-    return state.value
-        .map((item) => toRecentRatingItem(item))
-        .filter((item): item is UserRecentRatingItem => item !== null);
-}
-
-function getRecentRatingItems(
-    ratedMoviesState: LoadableItems<UserRatedMediaItem>,
-    ratedTvState: LoadableItems<UserRatedMediaItem>,
-    ratedEpisodesState: LoadableItems<UserRatedEpisodeItem>,
-): readonly UserRecentRatingItem[] {
-    return [
-        ...toRecentRatingItems(ratedMoviesState),
-        ...toRecentRatingItems(ratedTvState),
-        ...toRecentRatingItems(ratedEpisodesState),
-    ]
-        .sort(compareRecentRatings)
-        .slice(0, RECENT_RATINGS_PREVIEW_LIMIT);
-}
-
-function compareRecentRatings(
-    left: UserRecentRatingItem,
-    right: UserRecentRatingItem,
-): number {
-    return getRatedAtTime(right.ratedAt) - getRatedAtTime(left.ratedAt);
-}
-
-function getRatedAtTime(value: string | null): number {
-    if (value === null) {
-        return 0;
+    private getRecentRatings(state: UserRatingsState): readonly number[] {
+        return [
+            ...this.toRecentRatingItems(state.movies.itemsState),
+            ...this.toRecentRatingItems(state.tv.itemsState),
+            ...this.toRecentRatingItems(state.episodes.itemsState),
+        ]
+            .slice(0, RECENT_RATINGS_PREVIEW_LIMIT)
+            .map((rating) => rating);
     }
 
-    const time = Date.parse(value);
+    private toRecentRatingItems<T extends { userRating: number | null }>(
+        state: LoadableItems<T>,
+    ): readonly number[] {
+        if (state.type !== 'loaded' && state.type !== 'loading-more') {
+            return [];
+        }
 
-    return Number.isNaN(time) ? 0 : time;
-}
-
-function getAverageRating(ratings: readonly number[]): number | null {
-    if (ratings.length === 0) {
-        return null;
+        return state.value.flatMap((item) =>
+            item.userRating == null ? [] : [item.userRating],
+        );
     }
-
-    const total = ratings.reduce((sum, rating) => sum + rating, 0);
-
-    return total / ratings.length;
 }

@@ -2,6 +2,8 @@
 @use "mixins" as *;
 
 .person-hero {
+    --person-photo-size: 190px;
+
     display: grid;
     grid-template-columns: var(--person-photo-size) minmax(0, 1fr);
     align-items: start;
@@ -176,6 +178,7 @@
 
 @include mobile() {
     .person-hero {
+        --person-photo-size: 120px;
         grid-template-columns: 1fr;
         gap: var(--space-4);
         padding-top: var(--space-1);

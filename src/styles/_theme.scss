@@ -9,7 +9,7 @@
     --mat-sys-surface-container-lowest: var(--surface-page);
     --mat-sys-surface-container-low: #1f1f22;
     --mat-sys-surface-container: var(--surface-panel);
-    --mat-sys-surface-container-high: var(--surface-panel-strong);
+    --mat-sys-surface-container-high: #2a2a2a;
     --mat-sys-surface-container-highest: #3f3f46;
 
     --mat-sys-on-surface: var(--text-primary);
@@ -20,7 +20,7 @@
     --mat-sys-surface-bright: var(--surface-panel);
     --mat-sys-corner-full: var(--radius-pill);
 
-    --mat-sys-inverse-surface: var(--color-surface-raised-2);
+    --mat-sys-inverse-surface: var(--mat-sys-surface-container-high);
     --mat-sys-inverse-on-surface: var(--text-primary);
 }
 

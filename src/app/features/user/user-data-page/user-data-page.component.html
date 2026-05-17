@@ -1,34 +1,20 @@
-@if (currentSection === "profile") {
-    <app-user-data-overview-section />
-} @else if (currentSection === "watchlists") {
-    <app-watchlist-section />
-} @else if (currentSection === "favorites") {
-    <app-favorites-section />
-} @else if (currentSection === "ratings") {
-    <app-ratings-section />
-} @else if (currentSection === "lists") {
-    <app-lists-section />
-} @else {
-    <section class="user-data-page page-container">
-        <div class="page-main">
-            <header class="user-data-page__intro">
-                <span class="text-overline">TMDb account</span>
-                <h1 class="text-headline user-data-page__title">
-                    {{ sectionContent.title }}
-                </h1>
-                <p class="text-body-sm user-data-page__subtitle">
-                    {{ sectionContent.description }}
-                </p>
-            </header>
-
-            <div class="surface-panel empty-panel">
-                <app-empty-state
-                    [iconClass]="sectionContent.iconClass"
-                    [title]="sectionContent.emptyStateTitle"
-                    [text]="sectionContent.emptyStateText"
-                />
-            </div>
-        </div>
-    </section>
+@if (currentSection$ | async; as currentSection) {
+    @switch (currentSection) {
+        @case ("profile") {
+            <app-user-data-overview-section />
+        }
+        @case ("watchlists") {
+            <app-watchlist-section />
+        }
+        @case ("favorites") {
+            <app-favorites-section />
+        }
+        @case ("ratings") {
+            <app-ratings-section />
+        }
+        @case ("lists") {
+            <app-lists-section />
+        }
+    }
 }
 

@@ -2,6 +2,24 @@
 
 :host {
     display: block;
+    --hero-fallback-bg: linear-gradient(
+        to bottom,
+        #000000,
+        #0d0d0d
+    );
+    --gradient-hero-scrim: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.45) 50%,
+        var(--surface-page) 100%
+    );
+    --gradient-hero-lateral: linear-gradient(
+        to right,
+        var(--color-surface) 0%,
+        rgba(17, 17, 17, 0.8) 25%,
+        rgba(17, 17, 17, 0.2) 55%,
+        transparent 75%
+    );
 }
 
 .hero-surface {

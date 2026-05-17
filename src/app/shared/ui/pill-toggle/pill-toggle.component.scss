@@ -9,83 +9,77 @@
 }
 
 .pill-toggle {
-    --pill-toggle-gap: var(--space-2);
-    --pill-toggle-button-min-height: var(--control-height-sm);
-    --pill-toggle-button-padding-block: var(--space-1);
-    --pill-toggle-button-padding-inline: var(--space-4);
-    --pill-toggle-button-background: var(--control-surface);
-    --pill-toggle-button-color: var(--control-text);
-    --pill-toggle-button-border: var(--control-border);
-    --pill-toggle-button-hover-background: var(--control-surface-hover);
-    --pill-toggle-button-hover-color: var(--control-text-hover);
-    --pill-toggle-button-hover-border: var(--control-border-hover);
-    --pill-toggle-button-active-background: var(--control-accent-surface);
-    --pill-toggle-button-active-color: var(--control-accent-text);
-    --pill-toggle-button-active-border: var(--control-accent-border);
-    --pill-toggle-button-focus-border: var(--control-focus-border);
-    --pill-toggle-button-focus-ring-inner: var(--control-focus-ring-inner);
-    --pill-toggle-button-focus-ring-outer: var(--control-focus-ring-outer);
-
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pill-toggle-gap);
-}
-
-.pill-toggle--subtle {
-    --pill-toggle-button-background: var(--control-subtle-surface);
-    --pill-toggle-button-color: var(--control-subtle-text);
-    --pill-toggle-button-border: var(--control-subtle-border);
-    --pill-toggle-button-hover-background: var(--control-subtle-surface-hover);
-    --pill-toggle-button-hover-color: var(--control-subtle-text-hover);
-    --pill-toggle-button-hover-border: var(--control-subtle-border-hover);
-    --pill-toggle-button-active-background: var(--control-subtle-surface-active);
-    --pill-toggle-button-active-color: var(--control-subtle-text-active);
-    --pill-toggle-button-active-border: var(--control-subtle-border-active);
-    --pill-toggle-button-focus-border: var(--control-subtle-focus-border);
-    --pill-toggle-button-focus-ring-inner: var(--control-subtle-focus-ring-inner);
-    --pill-toggle-button-focus-ring-outer: var(--control-subtle-focus-ring-outer);
-    --pill-toggle-button-active-shadow: var(--control-subtle-shadow-active);
+    gap: var(--space-2);
 }
 
 .pill-toggle__button {
-    min-height: var(--pill-toggle-button-min-height);
-    background: var(--pill-toggle-button-background);
-    color: var(--pill-toggle-button-color);
-    border: 1px solid var(--pill-toggle-button-border);
-    padding: var(--pill-toggle-button-padding-block)
-        var(--pill-toggle-button-padding-inline);
+    min-height: var(--control-height-sm);
+    background: var(--control-surface);
+    color: var(--control-text);
+    border: 1px solid var(--control-border);
+    padding: var(--space-1) var(--space-4);
     border-radius: var(--control-radius);
     cursor: pointer;
     transition: var(--control-transition);
     box-shadow: none;
 
     &:hover {
-        background: var(--pill-toggle-button-hover-background);
-        color: var(--pill-toggle-button-hover-color);
-        border-color: var(--pill-toggle-button-hover-border);
+        background: var(--control-surface-hover);
+        color: var(--control-text-hover);
+        border-color: var(--control-border-hover);
     }
 
     &:focus-visible {
         outline: none;
-        border-color: var(--pill-toggle-button-focus-border);
+        border-color: var(--control-focus-border);
         box-shadow:
-            0 0 0 1px var(--pill-toggle-button-focus-ring-inner),
-            0 0 0 4px var(--pill-toggle-button-focus-ring-outer);
+            0 0 0 1px var(--control-focus-ring-inner),
+            0 0 0 4px var(--control-focus-ring-outer);
     }
 }
 
 .pill-toggle__button--active {
-    background: var(--pill-toggle-button-active-background);
-    color: var(--pill-toggle-button-active-color);
-    border-color: var(--pill-toggle-button-active-border);
-    box-shadow: var(--pill-toggle-button-active-shadow, none);
+    background: var(--control-accent-surface);
+    color: var(--control-accent-text);
+    border-color: var(--control-accent-border);
     font-weight: var(--weight-semibold);
 }
 
 .pill-toggle__button--active:hover {
-    background: var(--pill-toggle-button-active-background);
-    color: var(--pill-toggle-button-active-color);
-    border-color: var(--pill-toggle-button-active-border);
+    background: var(--control-accent-surface);
+    color: var(--control-accent-text);
+    border-color: var(--control-accent-border);
+}
+
+.pill-toggle--subtle .pill-toggle__button {
+    background: var(--control-subtle-surface);
+    color: var(--control-subtle-text);
+    border-color: var(--control-subtle-border);
+
+    &:hover {
+        background: var(--control-subtle-surface-hover);
+        color: var(--control-subtle-text-hover);
+        border-color: var(--control-subtle-border-hover);
+    }
+
+    &:focus-visible {
+        border-color: var(--control-subtle-focus-border);
+    }
+}
+
+.pill-toggle--subtle .pill-toggle__button--active {
+    background: var(--control-subtle-surface-active);
+    color: var(--control-subtle-text-active);
+    border-color: var(--color-border-subtle);
+    box-shadow: var(--control-subtle-shadow-active);
+}
+
+.pill-toggle--subtle .pill-toggle__button--active:hover {
+    background: var(--control-subtle-surface-active);
+    color: var(--control-subtle-text-active);
+    border-color: var(--color-border-subtle);
 }
 
 @include mobile() {

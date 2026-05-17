@@ -1,25 +1,13 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .episode-rating-list {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
 }
 
-.episode-rating-list__score-badge {
-    align-self: center;
-}
-
 @include mobile() {
     .episode-rating-list {
         gap: var(--space-2);
-    }
-
-    .episode-rating-list__score-badge {
-        align-self: center;
     }
 }

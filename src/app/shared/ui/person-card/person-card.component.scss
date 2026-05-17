@@ -1,6 +1,10 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
+:host {
+    --person-photo-size: 190px;
+}
+
 .person-card {
     display: flex;
     flex-direction: column;
@@ -56,6 +60,10 @@
 }
 
 @include mobile() {
+    :host {
+        --person-photo-size: 120px;
+    }
+
     .person-card {
         gap: var(--space-1);
     }

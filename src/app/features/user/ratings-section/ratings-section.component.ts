@@ -41,7 +41,7 @@ const SORT_OPTIONS = [{ label: 'Date Added', value: 'created_at' }];
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RatingsSectionComponent {
-    readonly vm$ = this.store.vm$;
+    readonly vm$ = this.store.userRatingsVm$;
     readonly tabs = RATINGS_TABS;
     readonly sortOptions = SORT_OPTIONS;
     selectedTab: RatingsTab = 'movies';
@@ -53,16 +53,16 @@ export class RatingsSectionComponent {
     }
 
     onToggleSortDirection(): void {
-        this.store.toggleSortDirection$().subscribe();
+        this.store.changeSortDirection$().subscribe();
     }
 
     onShowMore(): void {
         if (this.selectedTab === 'movies') {
-            this.store.loadMoreRatedMovies$().subscribe();
+            this.store.loadMoreMovies$().subscribe();
         } else if (this.selectedTab === 'tv') {
-            this.store.loadMoreRatedTv$().subscribe();
+            this.store.loadMoreTv$().subscribe();
         } else {
-            this.store.loadMoreRatedEpisodes$().subscribe();
+            this.store.loadMoreEpisodes$().subscribe();
         }
     }
 }

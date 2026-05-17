@@ -18,27 +18,36 @@
                 <p class="ratings-section__count text-caption">
                     @if (selectedTab === "movies") {
                         {{
-                            (vm.ratedMoviesTotal > 0 ? 1 : 0) +
+                            (vm.movies.total > 0 ? 1 : 0) +
                                 " - " +
-                                vm.ratedMoviesLoadedCount +
+                                ((vm.movies.state.type === "loaded" ||
+                                    vm.movies.state.type === "loading-more")
+                                    ? vm.movies.state.value.length
+                                    : 0) +
                                 " of " +
-                                vm.ratedMoviesTotal
+                                vm.movies.total
                         }}
                     } @else if (selectedTab === "tv") {
                         {{
-                            (vm.ratedTvTotal > 0 ? 1 : 0) +
+                            (vm.tv.total > 0 ? 1 : 0) +
                                 " - " +
-                                vm.ratedTvLoadedCount +
+                                ((vm.tv.state.type === "loaded" ||
+                                    vm.tv.state.type === "loading-more")
+                                    ? vm.tv.state.value.length
+                                    : 0) +
                                 " of " +
-                                vm.ratedTvTotal
+                                vm.tv.total
                         }}
                     } @else {
                         {{
-                            (vm.ratedEpisodesTotal > 0 ? 1 : 0) +
+                            (vm.episodes.total > 0 ? 1 : 0) +
                                 " - " +
-                                vm.ratedEpisodesLoadedCount +
+                                ((vm.episodes.state.type === "loaded" ||
+                                    vm.episodes.state.type === "loading-more")
+                                    ? vm.episodes.state.value.length
+                                    : 0) +
                                 " of " +
-                                vm.ratedEpisodesTotal
+                                vm.episodes.total
                         }}
                     }
                 </p>
@@ -55,15 +64,12 @@
             @if (selectedTab === "movies") {
                 <div class="catalog-panel">
                     <app-media-list
-                        [state]="vm.ratedMoviesMediaState"
-                        [userRatings]="vm.ratedMoviesUserRatings"
+                        [state]="vm.movies.state"
+                        [userRatings]="vm.movies.userRatings"
                         routeType="movie"
                     />
 
-                    @if (
-                        vm.ratedMoviesMediaState.type === "loaded" &&
-                        !vm.hasRatedMovies
-                    ) {
+                    @if (vm.movies.state.type === "loaded" && !vm.movies.hasItems) {
                         <div class="empty-panel ratings-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-star"
@@ -73,18 +79,16 @@
                         </div>
                     }
 
-                    @if (vm.ratedMoviesHasMore) {
+                    @if (vm.movies.hasMore) {
                         <footer class="catalog-panel-footer">
                             <button
                                 mat-stroked-button
                                 type="button"
-                                [disabled]="
-                                    vm.ratedMoviesState.type === 'loading-more'
-                                "
+                                [disabled]="vm.movies.isLoadingMore"
                                 (click)="onShowMore()"
                             >
                                 {{
-                                    vm.ratedMoviesState.type === "loading-more"
+                                    vm.movies.isLoadingMore
                                         ? "Loading more"
                                         : "Show more"
                                 }}
@@ -95,14 +99,12 @@
             } @else if (selectedTab === "tv") {
                 <div class="catalog-panel">
                     <app-media-list
-                        [state]="vm.ratedTvMediaState"
-                        [userRatings]="vm.ratedTvUserRatings"
+                        [state]="vm.tv.state"
+                        [userRatings]="vm.tv.userRatings"
                         routeType="tv"
                     />
 
-                    @if (
-                        vm.ratedTvMediaState.type === "loaded" && !vm.hasRatedTv
-                    ) {
+                    @if (vm.tv.state.type === "loaded" && !vm.tv.hasItems) {
                         <div class="empty-panel ratings-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-star"
@@ -112,18 +114,16 @@
                         </div>
                     }
 
-                    @if (vm.ratedTvHasMore) {
+                    @if (vm.tv.hasMore) {
                         <footer class="catalog-panel-footer">
                             <button
                                 mat-stroked-button
                                 type="button"
-                                [disabled]="
-                                    vm.ratedTvState.type === 'loading-more'
-                                "
+                                [disabled]="vm.tv.isLoadingMore"
                                 (click)="onShowMore()"
                             >
                                 {{
-                                    vm.ratedTvState.type === "loading-more"
+                                    vm.tv.isLoadingMore
                                         ? "Loading more"
                                         : "Show more"
                                 }}
@@ -132,14 +132,9 @@
                     }
                 </div>
             } @else {
-                <app-episode-rating-list
-                    [state]="vm.ratedEpisodesState"
-                />
+                <app-episode-rating-list [state]="vm.episodes.state" />
 
-                @if (
-                    vm.ratedEpisodesState.type === "loaded" &&
-                    !vm.hasRatedEpisodes
-                ) {
+                @if (vm.episodes.state.type === "loaded" && !vm.episodes.hasItems) {
                     <div class="empty-panel ratings-section__empty">
                         <app-empty-state
                             iconClass="fa-solid fa-star"
@@ -149,18 +144,16 @@
                     </div>
                 }
 
-                @if (vm.ratedEpisodesHasMore) {
+                @if (vm.episodes.hasMore) {
                     <footer class="catalog-panel-footer">
                         <button
                             mat-stroked-button
                             type="button"
-                            [disabled]="
-                                vm.ratedEpisodesState.type === 'loading-more'
-                            "
+                            [disabled]="vm.episodes.isLoadingMore"
                             (click)="onShowMore()"
                         >
                             {{
-                                vm.ratedEpisodesState.type === "loading-more"
+                                vm.episodes.isLoadingMore
                                     ? "Loading more"
                                     : "Show more"
                             }}

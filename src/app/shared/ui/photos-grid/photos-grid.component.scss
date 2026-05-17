@@ -3,17 +3,15 @@
 
 :host {
     display: block;
+    --photos-grid-tile-height-desktop: 180px;
+    --photos-grid-tile-height-mobile: 100px;
 }
 
 .photos-grid {
     --photos-grid-gap: var(--space-4);
     --photos-grid-row-height: var(--photos-grid-tile-height-desktop, 180px);
     --photos-grid-single-max-height: 300px;
-    --photos-grid-overlay-scrim: color-mix(
-        in srgb,
-        var(--surface-page) 72%,
-        transparent
-    );
+    --photos-grid-overlay-scrim: var(--gradient-overlay-bottom);
 
     display: flex;
     flex-wrap: wrap;
