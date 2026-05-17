@@ -15,10 +15,12 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 export interface UserListEditDialogData {
     readonly name: string;
     readonly description: string | null;
+    readonly isPublic: boolean;
     readonly maxNameLength?: number;
     readonly maxDescriptionLength?: number;
 }
@@ -26,6 +28,7 @@ export interface UserListEditDialogData {
 export interface UserListEditDialogResult {
     readonly name: string;
     readonly description: string;
+    readonly isPublic: boolean;
 }
 
 @Component({
@@ -35,6 +38,7 @@ export interface UserListEditDialogResult {
         MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
+        MatCheckboxModule,
         ReactiveFormsModule,
     ],
     templateUrl: './user-list-edit-dialog.component.html',
@@ -45,6 +49,7 @@ export class UserListEditDialogComponent {
     readonly form: FormGroup<{
         name: FormControl<string>;
         description: FormControl<string>;
+        isPublic: FormControl<boolean>;
     }>;
 
     constructor(
@@ -68,6 +73,7 @@ export class UserListEditDialogComponent {
                 this.data.description ?? '',
                 [Validators.maxLength(this.data.maxDescriptionLength ?? 280)],
             ],
+            isPublic: [this.data.isPublic],
         });
     }
 
@@ -77,11 +83,12 @@ export class UserListEditDialogComponent {
             return;
         }
 
-        const { name, description } = this.form.getRawValue();
+        const { name, description, isPublic } = this.form.getRawValue();
 
         this.dialogRef.close({
             name: name.trim(),
             description: description.trim(),
+            isPublic,
         });
     }
 }

@@ -10,16 +10,6 @@
     }
 }
 
-@keyframes app-fade-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
 @mixin line-clamp($lines: 2) {
     display: -webkit-box;
     -webkit-line-clamp: $lines;
@@ -35,10 +25,6 @@
 ) {
     --fade-up-distance: #{$distance};
     animation: app-fade-up $duration $timing both;
-}
-
-@mixin fade-in($duration: 0.24s, $timing: ease-out) {
-    animation: app-fade-in $duration $timing both;
 }
 
 @mixin text-link($color: var(--mat-sys-on-surface)) {
@@ -189,20 +175,6 @@
     &:hover {
         transform: translateY($y);
         box-shadow: $shadow;
-    }
-}
-
-@mixin panel-card-hover($y: -2px) {
-    border: 1px solid transparent;
-    transition:
-        transform var(--motion-fast),
-        border-color var(--motion-fast),
-        background-color var(--motion-fast);
-
-    &:is(:hover, :focus-visible) {
-        transform: translateY($y);
-        border-color: var(--surface-panel-border);
-        background: var(--surface-panel-strong);
     }
 }
 

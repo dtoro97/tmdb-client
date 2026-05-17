@@ -265,7 +265,8 @@ export class TmdbListService {
                             return summary;
                         })
                         .filter(
-                            (list): list is MediaUserListSummary => list !== null,
+                            (list): list is MediaUserListSummary =>
+                                list !== null,
                         ),
                 ),
             );
@@ -299,18 +300,13 @@ export class TmdbListService {
         } as V4CreateListRequest & { iso_639_1: string };
 
         return this.listV4Service
-            .listV4Create(
-                createListRequest,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            )
+            .listV4Create(createListRequest, 'body', false, API_JSON_OPTIONS)
             .pipe(
                 map((response) => {
                     if (
                         !response.success ||
                         (response.status_code ?? 0) >= 400 ||
-                        !response.list_id
+                        !response.id
                     ) {
                         throw toStatusError(
                             'Unable to create your list.',
@@ -318,7 +314,7 @@ export class TmdbListService {
                         );
                     }
 
-                    return response.list_id;
+                    return response.id;
                 }),
             );
     }

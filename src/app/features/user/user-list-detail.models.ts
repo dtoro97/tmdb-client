@@ -1,10 +1,18 @@
 import { V4ListContentItem, V4ListDetails } from '../../api-v4';
-import { CardItem } from '../../shared';
+import { CardItem, toUpdatedAtLabel } from '../../shared';
 
 interface ListCreatorShape {
     readonly username?: string | null;
     readonly name?: string | null;
 }
+
+export type UserListSortBy =
+    | 'original_order.asc'
+    | 'original_order.desc'
+    | 'title.asc'
+    | 'title.desc'
+    | 'primary_release_date.asc'
+    | 'primary_release_date.desc';
 
 export interface UserListDetailHeader {
     readonly id: number;
@@ -16,10 +24,12 @@ export interface UserListDetailHeader {
     readonly itemCountLabel: string;
     readonly favoriteCount: number | null;
     readonly favoriteCountLabel: string | null;
+    readonly updatedLabel: string | null;
     readonly posterPath: string | null;
     readonly backdropPath: string | null;
     readonly isPublic: boolean | null;
     readonly visibilityLabel: string | null;
+    readonly sortBy: UserListSortBy;
 }
 
 export interface UserListDetailItem extends CardItem {
@@ -38,6 +48,7 @@ export interface UserListDetailPageResult {
 export interface UpdateUserListRequest {
     readonly name: string;
     readonly description: string;
+    readonly isPublic: boolean;
 }
 
 function toCountLabel(count: number, noun: string): string {
@@ -69,56 +80,21 @@ function toCreatorName(value: unknown): string | null {
     return toTrimmedString(creator.username) ?? toTrimmedString(creator.name);
 }
 
-export function formatListUpdatedLabel(
+export function toUserListSortBy(
     value: string | null | undefined,
-): string | null {
-    if (typeof value !== 'string') {
-        return null;
+): UserListSortBy {
+    if (
+        value === 'original_order.asc' ||
+        value === 'original_order.desc' ||
+        value === 'title.asc' ||
+        value === 'title.desc' ||
+        value === 'primary_release_date.asc' ||
+        value === 'primary_release_date.desc'
+    ) {
+        return value;
     }
 
-    const normalizedValue = value.trim();
-
-    if (!normalizedValue) {
-        return null;
-    }
-
-    const timestamp = Date.parse(normalizedValue);
-
-    if (Number.isNaN(timestamp)) {
-        return null;
-    }
-
-    const diffMs = Date.now() - timestamp;
-
-    if (diffMs < 0) {
-        return `Updated ${new Intl.DateTimeFormat(undefined, {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        }).format(timestamp)}`;
-    }
-
-    const diffMinutes = Math.floor(diffMs / 60000);
-
-    if (diffMinutes < 1) {
-        return 'Updated just now';
-    }
-
-    if (diffMinutes < 60) {
-        return `Updated ${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
-    }
-
-    const diffHours = Math.floor(diffMinutes / 60);
-
-    if (diffHours < 24) {
-        return `Updated ${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-    }
-
-    return `Updated ${new Intl.DateTimeFormat(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    }).format(timestamp)}`;
+    return 'original_order.asc';
 }
 
 export function toListItemKey(mediaType: 'movie' | 'tv', id: number): string {
@@ -192,6 +168,7 @@ export function toUserListDetailPage(
                 typeof result.favorite_count === 'number'
                     ? toCountLabel(result.favorite_count, 'favorite')
                     : null,
+            updatedLabel: toUpdatedAtLabel(result.updated_at ?? result.created_at),
             posterPath: result.poster_path ?? null,
             backdropPath:
                 items.find((item) => !!item.backdropPath)?.backdropPath ??
@@ -205,6 +182,7 @@ export function toUserListDetailPage(
                         ? 'Public list'
                         : 'Private list'
                     : null,
+            sortBy: toUserListSortBy(result.sort_by),
         },
         items,
         page: result.page ?? 1,

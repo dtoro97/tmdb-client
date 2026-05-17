@@ -1,9 +1,6 @@
-<div class="media-rating-dialog">
+<div>
     <header class="media-rating-dialog__header">
-        <p class="media-rating-dialog__eyebrow text-overline">Your rating</p>
-        <h2 class="media-rating-dialog__title text-title">
-            {{ data.title }}
-        </h2>
+        <h2 class="text-title">Rate {{ data.title }}</h2>
         @if (data.authMode === "anonymous") {
             <p class="media-rating-dialog__subtitle text-body-sm">
                 Save as a guest, or sign in to keep it on your account.
@@ -23,7 +20,7 @@
             <span class="media-rating-dialog__scale text-caption">/ 10</span>
         </div>
 
-        <div class="media-rating-dialog__controls">
+        <div>
             <mat-slider
                 class="media-rating-dialog__slider"
                 [min]="0.5"
@@ -41,18 +38,9 @@
     </div>
 
     @if (data.authMode === "anonymous") {
-        <div
-            class="media-rating-dialog__footer media-rating-dialog__footer--anonymous"
-            mat-dialog-actions
-        >
+        <div class="media-rating-dialog__footer" mat-dialog-actions>
             <div class="media-rating-dialog__footer-actions">
-                <button
-                    class="media-rating-dialog__cancel"
-                    type="button"
-                    mat-dialog-close
-                >
-                    Cancel
-                </button>
+                <button matButton type="button" mat-dialog-close>Cancel</button>
                 <button
                     matButton="filled"
                     type="button"
@@ -83,13 +71,7 @@
             }
 
             <div class="media-rating-dialog__footer-actions">
-                <button
-                    class="media-rating-dialog__cancel"
-                    type="button"
-                    mat-dialog-close
-                >
-                    Cancel
-                </button>
+                <button matButton type="button" mat-dialog-close>Cancel</button>
                 <button matButton="filled" type="button" (click)="save()">
                     @if (data.currentRating !== null) {
                         Update

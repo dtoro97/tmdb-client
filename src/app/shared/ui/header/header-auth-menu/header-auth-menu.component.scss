@@ -125,13 +125,6 @@
     padding-block: var(--space-1);
 }
 
-.header-auth-menu__item {
-    width: 100%;
-    min-height: 2.625rem;
-    padding-inline: var(--space-3);
-    background: transparent;
-}
-
 .header-auth-menu__divider {
     margin: 0 var(--space-3);
     --mat-menu-divider-color: var(--mat-sys-outline-variant);

@@ -27,6 +27,7 @@ import {
     UserListDetailHeader,
     UserListDetailItem,
     UserListDetailPageResult,
+    UserListSortBy,
     toUserListDetailPage,
 } from './user-list-detail.models';
 
@@ -37,6 +38,7 @@ interface UserListDetailState {
     readonly page: number;
     readonly totalPages: number;
     readonly totalResults: number;
+    readonly sortBy: UserListSortBy;
 }
 
 export interface UserListDetailVm {
@@ -44,6 +46,9 @@ export interface UserListDetailVm {
     readonly itemsState: LoadableItems<UserListDetailItem>;
     readonly hasMore: boolean;
     readonly canManage: boolean;
+    readonly sortBy: UserListSortBy;
+    readonly sortField: 'original_order' | 'title' | 'primary_release_date';
+    readonly sortDirection: 'asc' | 'desc';
 }
 
 const LIST_DETAIL_PLACEHOLDER_COUNT = 6;
@@ -55,6 +60,7 @@ const INITIAL_STATE: UserListDetailState = {
     page: 1,
     totalPages: 1,
     totalResults: 0,
+    sortBy: 'original_order.asc',
 };
 
 function toTitleCountLabel(count: number): string {
@@ -63,6 +69,20 @@ function toTitleCountLabel(count: number): string {
 
 function toPagedTotalPages(totalResults: number): number {
     return Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
+}
+
+function toSortField(
+    sortBy: UserListSortBy,
+): 'original_order' | 'title' | 'primary_release_date' {
+    if (sortBy.startsWith('title.')) {
+        return 'title';
+    }
+
+    if (sortBy.startsWith('primary_release_date.')) {
+        return 'primary_release_date';
+    }
+
+    return 'original_order';
 }
 
 function patchPageResult(
@@ -108,6 +128,9 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             itemsState: state.itemsState,
             hasMore: state.page < state.totalPages,
             canManage: !!header?.isOwnedByCurrentUser,
+            sortBy: state.sortBy,
+            sortField: toSortField(state.sortBy),
+            sortDirection: this.currentSortDirection(state.sortBy),
         };
     });
 
@@ -122,12 +145,13 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     private reloadLoadedPages$(
         listId: number,
         pageCount: number,
+        sortBy: UserListSortBy,
     ): Observable<UserListDetailPageResult> {
         return forkJoin(
             Array.from({ length: pageCount }, (_, index) => index + 1).map(
                 (page) =>
                     this.tmdbListService
-                        .getListDetails$(listId, page)
+                        .getListDetails$(listId, page, sortBy)
                         .pipe(
                             map((result) =>
                                 toUserListDetailPage(
@@ -141,6 +165,8 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     }
 
     loadList$(listId: number) {
+        const sortBy = this.get().sortBy;
+
         this.patchState({
             listId,
             headerState: { type: 'loading' },
@@ -150,7 +176,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             totalResults: 0,
         });
 
-        return this.tmdbListService.getListDetails$(listId).pipe(
+        return this.tmdbListService.getListDetails$(listId, 1, sortBy).pipe(
             map((result) =>
                 toUserListDetailPage(result, this.userSessionStore.username()),
             ),
@@ -186,7 +212,9 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                     } as LoadableItems<UserListDetailItem>,
                 }),
             fetchPage: (nextPage) =>
-                this.tmdbListService.getListDetails$(listId, nextPage).pipe(
+                this.tmdbListService
+                    .getListDetails$(listId, nextPage, state.sortBy)
+                    .pipe(
                     map((result) =>
                         toUserListDetailPage(
                             result,
@@ -223,6 +251,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             .updateList$(state.listId, {
                 name: request.name,
                 description: request.description,
+                public: request.isPublic,
             })
             .pipe(
                 tap(() => {
@@ -233,6 +262,10 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                                       ...currentState.headerState.value,
                                       name: request.name,
                                       description: request.description || null,
+                                      isPublic: request.isPublic,
+                                      visibilityLabel: request.isPublic
+                                          ? 'Public list'
+                                          : 'Private list',
                                   })
                                 : currentState.headerState,
                     }));
@@ -307,7 +340,12 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             .pipe(
                 switchMap(() =>
                     shouldReloadLoadedPages
-                        ? this.reloadLoadedPages$(listId, state.page).pipe(
+                        ? this.reloadLoadedPages$(
+                              listId,
+                              state.page,
+                              state.sortBy,
+                          ).pipe(
+                              // Keep list pagination stable when server-side sort is active.
                               catchError(() => of(null)),
                           )
                         : of(null),
@@ -371,5 +409,50 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                 }),
                 map(() => undefined),
             );
+    }
+
+    setSortBy$(sortBy: UserListSortBy): Observable<void> {
+        const state = this.get();
+
+        if (state.listId === null || sortBy === state.sortBy) {
+            return of(undefined);
+        }
+
+        this.patchState({
+            sortBy,
+            itemsState: { type: 'loading' },
+            page: 1,
+            totalPages: 1,
+            totalResults: 0,
+        });
+
+        return this.tmdbListService.getListDetails$(state.listId, 1, sortBy).pipe(
+            map((result) =>
+                toUserListDetailPage(result, this.userSessionStore.username()),
+            ),
+            tap((result) => {
+                this.patchState(patchPageResult(result));
+            }),
+            map(() => undefined),
+        );
+    }
+
+    private currentSortDirection(sortBy: UserListSortBy): 'asc' | 'desc' {
+        return sortBy.endsWith('.asc') ? 'asc' : 'desc';
+    }
+
+    toggleSortDirection$(): Observable<void> {
+        const state = this.get();
+
+        if (state.listId === null) {
+            return of(undefined);
+        }
+
+        const direction = this.currentSortDirection(state.sortBy);
+        const nextDirection = direction === 'asc' ? 'desc' : 'asc';
+        const base = state.sortBy.replace(/\.asc$|\.desc$/, '');
+        const nextSortBy = `${base}.${nextDirection}` as UserListSortBy;
+
+        return this.setSortBy$(nextSortBy);
     }
 }

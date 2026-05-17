@@ -25,6 +25,7 @@ import {
     HeroSurfaceComponent,
     RepeatPipe,
     SkeletonComponent,
+    SortButtonComponent,
     toUserFacingErrorMessage,
 } from '../../../shared';
 import {
@@ -39,11 +40,17 @@ import {
 import {
     UserListDetailHeader,
     UserListDetailItem,
+    UserListSortBy,
 } from '../user-list-detail.models';
 import { UserListDetailStore } from '../user-list-detail-store.service';
 
 const LIST_NAME_MAX_LENGTH = 100;
 const LIST_DESCRIPTION_MAX_LENGTH = 280;
+const SORT_OPTIONS = [
+    { label: 'Original Order', value: 'original_order' },
+    { label: 'Title', value: 'title' },
+    { label: 'Release Date', value: 'primary_release_date' },
+];
 
 @Component({
     selector: 'app-user-list-detail-page',
@@ -56,6 +63,7 @@ const LIST_DESCRIPTION_MAX_LENGTH = 280;
         HeroSurfaceComponent,
         RepeatPipe,
         SkeletonComponent,
+        SortButtonComponent,
         UserListDetailItemCardComponent,
     ],
     templateUrl: './user-list-detail-page.component.html',
@@ -68,6 +76,7 @@ export class UserListDetailPageComponent {
     readonly backLink = '/me/lists';
     readonly initialSkeletonCount = 6;
     readonly loadingMoreSkeletonCount = 4;
+    readonly sortOptions = SORT_OPTIONS;
 
     constructor(
         private readonly destroyRef: DestroyRef,
@@ -92,6 +101,7 @@ export class UserListDetailPageComponent {
         this.vm$
             .pipe(
                 tap((vm) => {
+                    console.log(vm);
                     if (vm.header) {
                         this.titleService.setTitle(
                             `${vm.header.name} | Your TMDb List`,
@@ -128,6 +138,7 @@ export class UserListDetailPageComponent {
                     data: {
                         name: header.name,
                         description: header.description,
+                        isPublic: header.isPublic ?? false,
                         maxNameLength: LIST_NAME_MAX_LENGTH,
                         maxDescriptionLength: LIST_DESCRIPTION_MAX_LENGTH,
                     },
@@ -146,7 +157,8 @@ export class UserListDetailPageComponent {
 
                     if (
                         result.name === header.name &&
-                        result.description === (header.description ?? '')
+                        result.description === (header.description ?? '') &&
+                        result.isPublic === (header.isPublic ?? false)
                     ) {
                         return EMPTY;
                     }
@@ -159,6 +171,39 @@ export class UserListDetailPageComponent {
                 }),
                 catchError((error) =>
                     this.showError(error, 'Could not update this list.'),
+                ),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
+    }
+
+    onSortChange(value: unknown, activeSortBy: UserListSortBy): void {
+        if (typeof value !== 'string') {
+            return;
+        }
+
+        const direction = activeSortBy.endsWith('.asc') ? 'asc' : 'desc';
+        const nextSortBy = `${value}.${direction}` as UserListSortBy;
+
+        this.store
+            .setSortBy$(nextSortBy)
+            .pipe(
+                take(1),
+                catchError((error) =>
+                    this.showError(error, 'Could not update list sorting.'),
+                ),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
+    }
+
+    onToggleSortDirection(): void {
+        this.store
+            .toggleSortDirection$()
+            .pipe(
+                take(1),
+                catchError((error) =>
+                    this.showError(error, 'Could not update list sorting.'),
                 ),
                 takeUntilDestroyed(this.destroyRef),
             )

@@ -1,47 +1,17 @@
-.media-rating-dialog {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-    min-width: min(32rem, 100%);
-    padding: var(--space-6);
-    color: var(--text-primary);
-}
+@use "mixins" as *;
 
 .media-rating-dialog__header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.media-rating-dialog__eyebrow {
-    margin: 0;
-    color: var(--text-secondary);
-}
-
-.media-rating-dialog__title,
-.media-rating-dialog__subtitle {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    min-height: 0;
-}
-
-.media-rating-dialog__title {
-    max-width: 34ch;
+    margin-bottom: 1.5rem;
 }
 
 .media-rating-dialog__subtitle {
     color: var(--text-secondary);
-    max-width: 42ch;
 }
 
 .media-rating-dialog__content {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    margin: 0;
-    padding: 0;
-    overflow: visible;
 }
 
 .media-rating-dialog__value-block {
@@ -51,145 +21,49 @@
 }
 
 .media-rating-dialog__value {
-    font-size: clamp(var(--text-4xl), 3vw + 1rem, 4rem);
+    font-size: var(--text-4xl);
     font-weight: var(--weight-bold);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-    letter-spacing: -0.03em;
     color: var(--color-rating);
 }
 
 .media-rating-dialog__scale {
     padding-bottom: 0.45rem;
     color: var(--text-muted);
-    font-size: var(--text-base);
-}
-
-.media-rating-dialog__controls {
-    margin-top: var(--space-1);
 }
 
 .media-rating-dialog__slider {
     width: 100%;
     margin: 0;
-    --mdc-slider-inactive-track-color: color-mix(
-        in srgb,
-        var(--text-muted) 24%,
-        transparent
-    );
 }
 
 .media-rating-dialog__footer {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    margin: 0;
-    padding: 0;
-    min-height: 0;
     justify-content: space-between;
-}
-
-.media-rating-dialog__footer--anonymous {
-    flex-direction: column;
-    align-items: stretch;
+    gap: var(--space-2);
 }
 
 .media-rating-dialog__footer-actions {
     display: flex;
     justify-content: flex-end;
-    align-items: center;
     gap: var(--space-3);
     margin-left: auto;
 }
 
-.media-rating-dialog__cancel {
-    padding: var(--space-1) 0;
-    border: 0;
-    background: transparent;
-    color: var(--text-secondary);
-    font: inherit;
-    font-size: var(--font-size-body-sm);
-    cursor: pointer;
-    transition: color var(--motion-fast);
-}
-
-.media-rating-dialog__cancel:hover {
-    color: var(--text-primary);
-}
-
-.media-rating-dialog__cancel:focus-visible {
-    outline: 2px solid var(--control-focus-outline);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
-}
-
+.media-rating-dialog__login-link,
 .media-rating-dialog__remove {
-    padding: var(--space-1) 0;
     border: 0;
     background: transparent;
-    color: var(--color-danger-text, #ef5350);
+    padding: 0;
     font: inherit;
-    font-size: var(--font-size-body-sm);
     cursor: pointer;
-    transition: color var(--motion-fast);
-}
-
-.media-rating-dialog__remove:hover {
-    text-decoration: underline;
-}
-
-.media-rating-dialog__remove:focus-visible {
-    outline: 2px solid var(--control-focus-outline);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
 }
 
 .media-rating-dialog__login-link {
     align-self: flex-start;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--text-secondary);
-    font: inherit;
-    font-size: var(--font-size-body-sm);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-    transition: color var(--motion-fast);
+    @include text-link-underline(var(--text-secondary));
 }
 
-.media-rating-dialog__login-link:hover {
-    color: var(--text-primary);
-}
-
-.media-rating-dialog__login-link:focus-visible {
-    outline: 2px solid var(--control-focus-outline);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
-}
-
-@media (max-width: 767px) {
-    .media-rating-dialog {
-        min-width: 100%;
-        padding: var(--space-5);
-    }
-
-    .media-rating-dialog__footer {
-        flex-wrap: wrap;
-    }
-
-    .media-rating-dialog__footer-actions {
-        flex: 1 1 100%;
-        margin-left: 0;
-        justify-content: stretch;
-    }
-
-    .media-rating-dialog__footer-actions > * {
-        flex: 1;
-    }
-
-    .media-rating-dialog__remove {
-        order: 1;
-        flex-basis: 100%;
-    }
+.media-rating-dialog__remove {
+    color: var(--color-danger-text, #ef5350);
 }

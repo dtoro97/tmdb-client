@@ -16,16 +16,12 @@ import { MatInputModule } from '@angular/material/input';
 
 import { MediaUserListSummary } from '../../../shared';
 
-export type MediaListDialogMode = 'lists' | 'sign-in';
-
 export interface MediaListDialogData {
     title: string;
-    mode: MediaListDialogMode;
     customLists: MediaUserListSummary[];
 }
 
 export type MediaListDialogResult =
-    | 'login'
     | { kind: 'select-list'; listId: number }
     | { kind: 'create-list'; name: string; description: string };
 
@@ -59,7 +55,7 @@ export class MediaListDialogComponent {
             MediaListDialogResult
         >,
     ) {
-        if (data.mode === 'lists' && data.customLists.length === 0) {
+        if (data.customLists.length === 0) {
             this.createMode = true;
         }
     }
@@ -93,10 +89,6 @@ export class MediaListDialogComponent {
             name: name.trim(),
             description: description.trim(),
         });
-    }
-
-    requestLogin(): void {
-        this.dialogRef.close('login');
     }
 
     cancel(): void {

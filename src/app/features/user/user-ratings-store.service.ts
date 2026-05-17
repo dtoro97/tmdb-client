@@ -167,6 +167,12 @@ export interface UserRatingsVm {
     readonly recentRatingsAverage: number | null;
     readonly ratingsTotal: number;
     readonly sortDirection: SortDirection;
+    readonly ratedMoviesTotal: number;
+    readonly ratedTvTotal: number;
+    readonly ratedEpisodesTotal: number;
+    readonly ratedMoviesLoadedCount: number;
+    readonly ratedTvLoadedCount: number;
+    readonly ratedEpisodesLoadedCount: number;
 }
 
 const INITIAL_STATE: UserRatingsState = {
@@ -247,6 +253,24 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                 state.ratedTvTotal +
                 state.ratedEpisodesTotal,
             sortDirection: state.sortDirection,
+            ratedMoviesTotal: state.ratedMoviesTotal,
+            ratedTvTotal: state.ratedTvTotal,
+            ratedEpisodesTotal: state.ratedEpisodesTotal,
+            ratedMoviesLoadedCount:
+                state.ratedMoviesState.type === 'loaded' ||
+                state.ratedMoviesState.type === 'loading-more'
+                    ? state.ratedMoviesState.value.length
+                    : 0,
+            ratedTvLoadedCount:
+                state.ratedTvState.type === 'loaded' ||
+                state.ratedTvState.type === 'loading-more'
+                    ? state.ratedTvState.value.length
+                    : 0,
+            ratedEpisodesLoadedCount:
+                state.ratedEpisodesState.type === 'loaded' ||
+                state.ratedEpisodesState.type === 'loading-more'
+                    ? state.ratedEpisodesState.value.length
+                    : 0,
         };
     });
 

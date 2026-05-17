@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, catchError, filter, forkJoin, map, of, take, tap } from 'rxjs';
+import {
+    Observable,
+    catchError,
+    filter,
+    forkJoin,
+    map,
+    of,
+    take,
+    tap,
+} from 'rxjs';
 
 import { API_JSON_OPTIONS, TRAILERS_PAGE_SEED_COUNT } from '../../constants';
 import {
@@ -29,10 +38,6 @@ interface TrailerDataState {
     videoCache: Record<string, LoadableValue<Video[]>>;
 }
 
-const INITIAL_STATE: TrailerDataState = {
-    videoCache: {},
-};
-
 @Injectable({ providedIn: 'root' })
 export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
     private readonly opts = API_JSON_OPTIONS;
@@ -44,7 +49,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         private readonly tvService: TvSeriesRestControllerService,
         private readonly localeStore: LocaleStoreService,
     ) {
-        super(INITIAL_STATE);
+        super({ videoCache: {} });
     }
 
     getTrendingTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {

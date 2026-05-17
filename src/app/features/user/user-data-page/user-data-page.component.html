@@ -10,11 +10,13 @@
     <app-lists-section />
 } @else {
     <section class="user-data-page page-container">
-        <div class="page-main page-main--full-padding">
+        <div class="page-main">
             <header class="user-data-page__intro">
-                <span class="page-kicker">TMDb account</span>
-                <h1 class="page-title">{{ sectionContent.title }}</h1>
-                <p class="page-subtitle">
+                <span class="text-overline">TMDb account</span>
+                <h1 class="text-headline user-data-page__title">
+                    {{ sectionContent.title }}
+                </h1>
+                <p class="text-body-sm user-data-page__subtitle">
                     {{ sectionContent.description }}
                 </p>
             </header>
@@ -29,3 +31,4 @@
         </div>
     </section>
 }
+

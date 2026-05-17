@@ -94,11 +94,7 @@ export class TmdbUserAuthService {
         }
 
         return this.authenticationService
-            .authenticationCreateGuestSession(
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            )
+            .authenticationCreateGuestSession('body', false, API_JSON_OPTIONS)
             .pipe(
                 tap((response) => {
                     const guestSessionId = response.guest_session_id?.trim();
@@ -257,7 +253,7 @@ export class TmdbUserAuthService {
         return this.completeLoginFromCallback$(requestToken, true).pipe(
             tap(() => {
                 this.clearPendingLogin();
-                window.localStorage.removeItem(LAST_AUTH_ERROR_KEY);
+                this.browserStorage.removeItem(LAST_AUTH_ERROR_KEY);
                 const url = new URL(window.location.href);
                 url.searchParams.delete('request_token');
                 if (approvedParam !== null) {
@@ -275,8 +271,7 @@ export class TmdbUserAuthService {
                     error instanceof Error
                         ? error.message
                         : 'TMDb sign-in could not be completed.';
-                window.localStorage.setItem(LAST_AUTH_ERROR_KEY, message);
-                window.alert(`TMDb sign-in failed:\n${message}`);
+                this.browserStorage.setItem(LAST_AUTH_ERROR_KEY, message);
                 return of(undefined);
             }),
         );
@@ -295,10 +290,7 @@ export class TmdbUserAuthService {
             PENDING_V4_REQUEST_TOKEN_KEY,
             requestToken,
         );
-        this.browserStorage.writeItem(
-            PENDING_V4_REDIRECT_URL_KEY,
-            redirectUrl,
-        );
+        this.browserStorage.writeItem(PENDING_V4_REDIRECT_URL_KEY, redirectUrl);
     }
 
     private clearPendingLogin(): void {

@@ -6,7 +6,7 @@
         subtitle="Browse the custom collections you have built on TMDb."
     />
 
-    <div class="page-main page-main--full-padding">
+    <div class="page-main">
         <div class="lists-section">
             @if (
                 vm.listsState.type === "loading" ||
@@ -25,7 +25,13 @@
             ) {
                 @if (vm.listsState.value.length) {
                     <p class="lists-section__summary text-caption">
-                        {{ vm.listsTotal }} custom lists
+                        {{
+                            (vm.listsTotal > 0 ? 1 : 0) +
+                                " - " +
+                                vm.listsState.value.length +
+                                " of " +
+                                vm.listsTotal
+                        }}
                     </p>
 
                     <div class="lists-section__grid">
@@ -74,3 +80,4 @@
         </div>
     </div>
 }
+

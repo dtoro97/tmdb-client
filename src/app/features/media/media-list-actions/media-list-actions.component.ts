@@ -1,7 +1,6 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    DestroyRef,
     Input,
 } from '@angular/core';
 import { Router } from '@angular/router';
@@ -26,6 +25,7 @@ import {
     MediaListDialogData,
     MediaListDialogResult,
 } from '../media-list-dialog/media-list-dialog.component';
+import { MediaSigninDialogComponent } from '../media-signin-dialog/media-signin-dialog.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
@@ -55,7 +55,7 @@ export class MediaListActionsComponent {
         const action$ =
             this.userSessionStore.mode() === 'user'
                 ? this.mediaDetailActionsStore.toggleWatchlist$()
-                : this.openDialog('sign-in', []);
+                : this.openSigninDialog();
 
         action$
             .pipe(
@@ -71,7 +71,7 @@ export class MediaListActionsComponent {
         const action$ =
             this.userSessionStore.mode() === 'user'
                 ? this.mediaDetailActionsStore.toggleFavorite$()
-                : this.openDialog('sign-in', []);
+                : this.openSigninDialog();
 
         action$
             .pipe(
@@ -88,7 +88,7 @@ export class MediaListActionsComponent {
             this.userSessionStore.mode() !== 'user' ||
             !this.userSessionStore.v4AccessToken()
         ) {
-            this.openDialog('sign-in', [])
+            this.openSigninDialog()
                 .pipe(
                     take(1),
                     catchError((error) =>
@@ -104,7 +104,7 @@ export class MediaListActionsComponent {
             .pipe(
                 take(1),
                 catchError(() => of([] as MediaUserListSummary[])),
-                switchMap((lists) => this.openDialog('lists', lists)),
+                switchMap((lists) => this.openListsDialog(lists)),
                 tap(() => this.showSuccess('Media added to your list.')),
                 catchError((error) =>
                     this.showError(error, 'Could not update your list.'),
@@ -113,17 +113,14 @@ export class MediaListActionsComponent {
             .subscribe();
     }
 
-    private openDialog(
-        mode: MediaListDialogData['mode'],
-        customLists: MediaUserListSummary[],
-    ) {
+    private openListsDialog(customLists: MediaUserListSummary[]) {
         return this.dialog
             .open<
                 MediaListDialogComponent,
                 MediaListDialogData,
                 MediaListDialogResult
             >(MediaListDialogComponent, {
-                data: { title: this.title, mode, customLists },
+                data: { title: this.title, customLists },
                 autoFocus: false,
                 maxWidth: '32rem',
                 panelClass: 'media-list-dialog-panel',
@@ -132,17 +129,35 @@ export class MediaListActionsComponent {
             .afterClosed()
             .pipe(
                 take(1),
-                switchMap((result) => this.handleDialogResult(result)),
+                switchMap((result) => this.handleListsDialogResult(result)),
             );
     }
 
-    private handleDialogResult(result: MediaListDialogResult | undefined) {
+    private openSigninDialog() {
+        return this.dialog
+            .open<MediaSigninDialogComponent, undefined, boolean>(
+                MediaSigninDialogComponent,
+                {
+                autoFocus: false,
+                maxWidth: '32rem',
+                panelClass: 'media-list-dialog-panel',
+                width: '100%',
+                },
+            )
+            .afterClosed()
+            .pipe(
+                take(1),
+                switchMap((shouldLogin) =>
+                    shouldLogin
+                        ? this.tmdbUserAuthService.startLogin$(this.router.url)
+                        : EMPTY,
+                ),
+            );
+    }
+
+    private handleListsDialogResult(result: MediaListDialogResult | undefined) {
         if (result === undefined) {
             return EMPTY;
-        }
-
-        if (result === 'login') {
-            return this.tmdbUserAuthService.startLogin$(this.router.url);
         }
 
         if (result.kind === 'create-list') {

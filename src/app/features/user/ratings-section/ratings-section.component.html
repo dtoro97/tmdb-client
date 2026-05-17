@@ -6,7 +6,7 @@
         subtitle="See the titles and episodes you have rated."
     />
 
-    <div class="page-main page-main--full-padding">
+    <div class="page-main">
         <app-browse-toolbar>
             <app-pill-toggle
                 start
@@ -14,13 +14,41 @@
                 [selectedValue]="selectedTab"
                 (selected)="onTabChange($event)"
             />
-            <app-sort-button
-                end
-                [options]="sortOptions"
-                selectedValue="created_at"
-                [direction]="vm.sortDirection"
-                (directionToggle)="onToggleSortDirection()"
-            />
+            <div end class="ratings-section__sort-block">
+                <p class="ratings-section__count text-caption">
+                    @if (selectedTab === "movies") {
+                        {{
+                            (vm.ratedMoviesTotal > 0 ? 1 : 0) +
+                                " - " +
+                                vm.ratedMoviesLoadedCount +
+                                " of " +
+                                vm.ratedMoviesTotal
+                        }}
+                    } @else if (selectedTab === "tv") {
+                        {{
+                            (vm.ratedTvTotal > 0 ? 1 : 0) +
+                                " - " +
+                                vm.ratedTvLoadedCount +
+                                " of " +
+                                vm.ratedTvTotal
+                        }}
+                    } @else {
+                        {{
+                            (vm.ratedEpisodesTotal > 0 ? 1 : 0) +
+                                " - " +
+                                vm.ratedEpisodesLoadedCount +
+                                " of " +
+                                vm.ratedEpisodesTotal
+                        }}
+                    }
+                </p>
+                <app-sort-button
+                    [options]="sortOptions"
+                    selectedValue="created_at"
+                    [direction]="vm.sortDirection"
+                    (directionToggle)="onToggleSortDirection()"
+                />
+            </div>
         </app-browse-toolbar>
 
         <div class="ratings-section__list">
@@ -143,3 +171,4 @@
         </div>
     </div>
 }
+

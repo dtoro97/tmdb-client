@@ -27,10 +27,14 @@
                         size="sm"
                     />
                     <div class="header-auth-menu__profile-copy">
-                        <span class="header-auth-menu__panel-name text-body-sm u-truncate">
+                        <span
+                            class="header-auth-menu__panel-name text-body-sm u-truncate"
+                        >
                             {{ vm.displayName }}
                         </span>
-                        <span class="header-auth-menu__panel-subtitle text-caption">
+                        <span
+                            class="header-auth-menu__panel-subtitle text-caption"
+                        >
                             TMDb account
                         </span>
                     </div>
@@ -40,11 +44,7 @@
 
                 <div class="header-auth-menu__group">
                     @for (link of accountLinks; track link.route) {
-                        <a
-                            mat-menu-item
-                            class="header-auth-menu__item"
-                            [routerLink]="link.route"
-                        >
+                        <a mat-menu-item [routerLink]="link.route">
                             {{ link.label }}
                         </a>
                     }
@@ -55,7 +55,6 @@
                 <div class="header-auth-menu__group">
                     <button
                         mat-menu-item
-                        class="header-auth-menu__item"
                         type="button"
                         [disabled]="vm.logoutPending"
                         (click)="signOut()"

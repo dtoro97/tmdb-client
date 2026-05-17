@@ -171,6 +171,12 @@
     color: var(--text-muted);
 }
 
+.user-list-detail__items-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
 .user-list-detail__items-eyebrow-skeleton {
     width: 6rem;
     height: 0.9rem;
@@ -304,6 +310,11 @@
     .user-list-detail__items-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .user-list-detail__items-controls {
+        width: 100%;
+        justify-content: space-between;
     }
 
     .user-list-detail__actions > * {

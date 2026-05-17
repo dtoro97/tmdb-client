@@ -1,5 +1,5 @@
-<div class="user-list-confirm-dialog">
-    <header class="user-list-confirm-dialog__header">
+<div>
+    <header>
         <h2 class="user-list-confirm-dialog__title text-title">
             {{ data.title }}
         </h2>
@@ -8,16 +8,12 @@
         </p>
     </header>
 
-    <div class="user-list-confirm-dialog__footer" mat-dialog-actions>
-        <button
-            class="user-list-confirm-dialog__cancel"
-            type="button"
-            mat-dialog-close
-        >
+    <mat-dialog-actions align="end">
+        <button matButton type="button" mat-dialog-close>
             {{ data.cancelLabel ?? "Cancel" }}
         </button>
         <button matButton="filled" type="button" (click)="confirm()">
             {{ data.confirmLabel }}
         </button>
-    </div>
+    </mat-dialog-actions>
 </div>

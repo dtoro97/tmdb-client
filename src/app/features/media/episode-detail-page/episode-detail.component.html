@@ -12,7 +12,7 @@
 
         @if (vm.media; as media) {
             @if (vm.episode; as episode) {
-                <nav class="episode-nav inner-container page-content">
+                <nav class="episode-nav inner-container">
                     @if (vm.previousEpisode; as previousEpisode) {
                         <a
                             class="episode-nav-link"
@@ -53,7 +53,7 @@
                     }
                 </nav>
 
-                <div class="episode-header inner-container page-content">
+                <div class="episode-header inner-container">
                     <app-image
                         class="episode-still aspect-landscape"
                         [src]="episode.still_path ?? null"
@@ -168,7 +168,7 @@
                     </div>
                 </div>
 
-                <div class="inner-container page-content">
+                <div class="inner-container">
                     <p
                         class="episode-overview text-body"
                         [class.episode-overview--empty]="!episode.overview"
@@ -178,7 +178,7 @@
                 </div>
             } @else {
                 <nav
-                    class="episode-nav episode-nav--skeleton inner-container page-content"
+                    class="episode-nav episode-nav--skeleton inner-container"
                     aria-hidden="true"
                 >
                     <app-skeleton class="episode-nav-skeleton-link" />
@@ -187,7 +187,7 @@
                     />
                 </nav>
 
-                <div class="episode-header inner-container page-content">
+                <div class="episode-header inner-container">
                     <app-skeleton
                         class="episode-still episode-still--skeleton aspect-landscape"
                     />
@@ -213,7 +213,7 @@
                     </div>
                 </div>
 
-                <div class="inner-container page-content">
+                <div class="inner-container">
                     <div class="episode-overview-skeleton">
                         <app-skeleton
                             class="episode-skeleton-line episode-skeleton-line--full"
@@ -228,7 +228,7 @@
                 </div>
             }
 
-            <div class="episode-sections inner-container page-content">
+            <div class="episode-sections inner-container">
                 @if (vm.stillsState.type !== "loaded" || vm.stillsTotalCount) {
                     <app-page-section subtitle="Stills">
                         @if (vm.stillsTotalCount) {
@@ -265,3 +265,4 @@
         }
     }
 </div>
+

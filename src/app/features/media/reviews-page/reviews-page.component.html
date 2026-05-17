@@ -15,7 +15,7 @@
             pageTitle="Reviews"
         />
 
-        <main class="page-main page-main--full-padding">
+        <main class="page-main">
             @if (mediaReviewsStoreService.reviewsState$ | async; as reviewsState) {
                 @if (
                     reviewsState.type === "loading" ||
@@ -142,3 +142,4 @@
         </article>
     }
 </ng-template>
+

@@ -47,6 +47,10 @@ export interface UserWatchlistVm {
     readonly watchlistPreviewCards: LoadableItems<CardItem>;
     readonly watchlistTotal: number;
     readonly sortDirection: SortDirection;
+    readonly watchlistMoviesTotal: number;
+    readonly watchlistTvTotal: number;
+    readonly watchlistMoviesLoadedCount: number;
+    readonly watchlistTvLoadedCount: number;
 }
 
 const INITIAL_STATE: UserWatchlistState = {
@@ -95,6 +99,18 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
             ),
             watchlistTotal: state.watchlistMoviesTotal + state.watchlistTvTotal,
             sortDirection: state.sortDirection,
+            watchlistMoviesTotal: state.watchlistMoviesTotal,
+            watchlistTvTotal: state.watchlistTvTotal,
+            watchlistMoviesLoadedCount:
+                state.watchlistMoviesState.type === 'loaded' ||
+                state.watchlistMoviesState.type === 'loading-more'
+                    ? state.watchlistMoviesState.value.length
+                    : 0,
+            watchlistTvLoadedCount:
+                state.watchlistTvState.type === 'loaded' ||
+                state.watchlistTvState.type === 'loading-more'
+                    ? state.watchlistTvState.value.length
+                    : 0,
         };
     });
 

@@ -24,7 +24,6 @@
                         </h1>
 
                         <div class="user-list-detail__title-chips">
-                            <app-badge label="TMDB List" />
                             @if (header.visibilityLabel) {
                                 <app-badge [label]="header.visibilityLabel" />
                             }
@@ -37,6 +36,9 @@
                                 Created by
                                 <strong>{{ header.createdBy }}</strong>
                             </span>
+                        }
+                        @if (header.updatedLabel) {
+                            <span>{{ header.updatedLabel }}</span>
                         }
                     </p>
 
@@ -54,7 +56,7 @@
                 </header>
             </app-hero-surface>
 
-            <div class="page-main page-main--full-padding">
+            <div class="page-main">
                 <section class="user-list-detail__summary-shell">
                     @if (vm.canManage) {
                         <article
@@ -95,12 +97,22 @@
                 <section class="user-list-detail__items-section">
                     <div class="user-list-detail__items-header">
                         <div class="user-list-detail__items-heading">
-                            <p class="text-overline">In this list</p>
-                            <h2 class="text-title">Titles</h2>
+                            <h2 class="text-title">In this list</h2>
                         </div>
-                        <p class="user-list-detail__items-count text-caption">
-                            {{ header.itemCountLabel }}
-                        </p>
+                        <div class="user-list-detail__items-controls">
+                            <p
+                                class="user-list-detail__items-count text-caption"
+                            >
+                                {{ header.itemCountLabel }}
+                            </p>
+                            <app-sort-button
+                                [options]="sortOptions"
+                                [selectedValue]="vm.sortField"
+                                [direction]="vm.sortDirection"
+                                (sortChange)="onSortChange($event, vm.sortBy)"
+                                (directionToggle)="onToggleSortDirection()"
+                            />
+                        </div>
                     </div>
 
                     @if (
@@ -223,7 +235,7 @@
                 </div>
             </app-hero-surface>
 
-            <div class="page-main page-main--full-padding">
+            <div class="page-main">
                 <section class="user-list-detail__summary-shell">
                     <article
                         class="surface-panel user-list-detail__summary-card"
@@ -290,3 +302,4 @@
         }
     </div>
 }
+

@@ -15,7 +15,7 @@
             pageTitle="Photos"
         />
 
-        <main class="page-main page-main--full-padding">
+        <main class="page-main">
             @if (mediaStoreService.photosState$ | async; as photosState) {
                 @if (photosState.type === "loaded") {
                     <app-photos-browser
@@ -32,3 +32,4 @@
         </main>
     }
 </div>
+

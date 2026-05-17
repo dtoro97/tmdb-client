@@ -1,43 +1,17 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
-
-:host {
-    display: block;
-}
-
-.user-list-edit-dialog {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-    min-width: min(34rem, 100%);
-    padding: var(--space-6);
-    color: var(--text-primary);
-}
-
 .user-list-edit-dialog__header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    .user-list-edit-dialog__title {
+        margin-bottom: 0.5rem;
+    }
+    margin-bottom: 1.5rem;
 }
-
-.user-list-edit-dialog__eyebrow,
-.user-list-edit-dialog__title,
-.user-list-edit-dialog__subtitle {
-    margin: 0;
-}
-
 .user-list-edit-dialog__subtitle {
     color: var(--text-secondary);
-    max-width: 42ch;
 }
 
-.user-list-edit-dialog__form {
+.user-list-edit-dialog__content {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    margin: 0;
-    padding: 0;
-    overflow: visible;
 }
 
 .user-list-edit-dialog__field {
@@ -46,56 +20,10 @@
     gap: var(--space-3);
 }
 
-.user-list-edit-dialog__field-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-}
-
 .user-list-edit-dialog__description-field {
     --mat-form-field-container-height: auto;
 
     textarea.mat-mdc-input-element {
         resize: vertical;
-    }
-}
-
-.user-list-edit-dialog__footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--space-3);
-    margin: 0;
-    padding: 0;
-    min-height: 0;
-}
-
-.user-list-edit-dialog__cancel {
-    padding: var(--space-1) 0;
-    border: 0;
-    background: transparent;
-    color: var(--text-secondary);
-    font: inherit;
-    cursor: pointer;
-    transition: color var(--motion-fast);
-    @include focus-ring();
-
-    &:hover {
-        color: var(--text-primary);
-    }
-}
-
-@include mobile() {
-    .user-list-edit-dialog {
-        min-width: 100%;
-        padding: var(--space-5);
-    }
-
-    .user-list-edit-dialog__footer {
-        flex-wrap: wrap;
-    }
-
-    .user-list-edit-dialog__footer > * {
-        flex: 1 1 100%;
     }
 }

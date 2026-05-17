@@ -15,7 +15,7 @@
             pageTitle="Videos"
         />
 
-        <main class="page-main page-main--full-padding">
+        <main class="page-main">
             @if (videosState$ | async; as videosState) {
                 @if (
                     videosState.type === "loading" ||
@@ -117,3 +117,4 @@
         </main>
     }
 </div>
+

@@ -4,7 +4,10 @@ import { ComponentStore } from '@ngrx/component-store';
 import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
 
 import { AccountRestControllerService } from '../../api';
-import { AccountService as AccountV4Service, V4AccountListSummary } from '../../api-v4';
+import {
+    AccountService as AccountV4Service,
+    V4AccountListSummary,
+} from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
     CardItem,
@@ -14,6 +17,7 @@ import {
     loaded,
     mediaListItemToCardItem,
     toMediaListItem,
+    toUpdatedAtLabel,
 } from '../../shared';
 import {
     combineLoadablePreviewItems,
@@ -46,56 +50,6 @@ function toMetadata(itemCount: number): string {
     return `${itemCount} item${itemCount === 1 ? '' : 's'}`;
 }
 
-function formatListUpdatedLabel(value: string | null | undefined): string | null {
-    if (typeof value !== 'string') {
-        return null;
-    }
-
-    const normalizedValue = value.trim();
-
-    if (!normalizedValue) {
-        return null;
-    }
-
-    const timestamp = Date.parse(normalizedValue);
-
-    if (Number.isNaN(timestamp)) {
-        return null;
-    }
-
-    const diffMs = Date.now() - timestamp;
-
-    if (diffMs < 0) {
-        return `Updated ${new Intl.DateTimeFormat(undefined, {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        }).format(timestamp)}`;
-    }
-
-    const diffMinutes = Math.floor(diffMs / 60000);
-
-    if (diffMinutes < 1) {
-        return 'Updated just now';
-    }
-
-    if (diffMinutes < 60) {
-        return `Updated ${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
-    }
-
-    const diffHours = Math.floor(diffMinutes / 60);
-
-    if (diffHours < 24) {
-        return `Updated ${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-    }
-
-    return `Updated ${new Intl.DateTimeFormat(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    }).format(timestamp)}`;
-}
-
 function toUserListItem(item: V4AccountListSummary): UserDataListItem {
     const itemCount = item.number_of_items ?? 0;
 
@@ -105,7 +59,7 @@ function toUserListItem(item: V4AccountListSummary): UserDataListItem {
         description: item.description?.trim() || null,
         itemCount,
         metadata: toMetadata(itemCount),
-        updatedLabel: formatListUpdatedLabel(item.updated_at ?? item.created_at),
+        updatedLabel: toUpdatedAtLabel(item.updated_at ?? item.created_at),
         posterPath: item.poster_path ?? null,
     };
 }
@@ -168,7 +122,10 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 ],
                 10,
             ),
-            listPreviewState: combineLoadablePreviewItems([state.listsState], 3),
+            listPreviewState: combineLoadablePreviewItems(
+                [state.listsState],
+                3,
+            ),
             favoritesTotal: state.favoriteMoviesTotal + state.favoriteTvTotal,
             favoriteMoviesTotal: state.favoriteMoviesTotal,
             favoriteTvTotal: state.favoriteTvTotal,
@@ -313,13 +270,7 @@ export class UserListsStore extends ComponentStore<UserListsState> {
         }
 
         return this.accountV4Service
-            .accountV4Lists(
-                v4AccountId,
-                page,
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            )
+            .accountV4Lists(v4AccountId, page, 'body', false, API_JSON_OPTIONS)
             .pipe(
                 map((result) => ({
                     items: (result.results ?? [])

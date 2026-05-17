@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="user-data-overview__identity-copy">
-                        <span class="page-kicker">TMDb account</span>
+                        <span class="text-overline">TMDb account</span>
                         @if (vm.profileState.type === "loading") {
                             <div class="user-data-overview__identity-skeletons">
                                 <app-skeleton
@@ -36,7 +36,7 @@
                                 />
                             </div>
                         } @else {
-                            <h1 class="page-title user-data-overview__name">
+                            <h1 class="text-headline user-data-overview__name">
                                 {{ vm.profileDisplayName }}
                             </h1>
 
@@ -80,7 +80,7 @@
             </header>
         </app-hero-surface>
 
-        <div class="page-main page-main--full-padding user-data-overview__main">
+        <div class="page-main user-data-overview__main">
             <div class="user-data-overview__sections">
                 <app-page-section title="Watchlist">
                     <a
@@ -310,3 +310,4 @@
         </div>
     </section>
 }
+

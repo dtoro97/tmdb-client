@@ -11,6 +11,15 @@
     margin-bottom: var(--space-6);
 }
 
+.user-data-page__title,
+.user-data-page__subtitle {
+    margin: 0;
+}
+
+.user-data-page__subtitle {
+    color: var(--text-muted);
+}
+
 @include mobile() {
     .user-data-page__intro {
         margin-bottom: var(--space-5);

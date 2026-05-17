@@ -6,7 +6,7 @@
         subtitle="Keep track of the movies and shows you want to revisit."
     />
 
-    <div class="page-main page-main--full-padding">
+    <div class="page-main">
         <app-browse-toolbar>
             <app-pill-toggle
                 start
@@ -14,13 +14,33 @@
                 [selectedValue]="selectedTab"
                 (selected)="onTabChange($event)"
             />
-            <app-sort-button
-                end
-                [options]="sortOptions"
-                selectedValue="created_at"
-                [direction]="vm.sortDirection"
-                (directionToggle)="onToggleSortDirection()"
-            />
+            <div end class="watchlist-section__sort-block">
+                <p class="watchlist-section__count text-caption">
+                    @if (selectedTab === "movies") {
+                        {{
+                            (vm.watchlistMoviesTotal > 0 ? 1 : 0) +
+                                " - " +
+                                vm.watchlistMoviesLoadedCount +
+                                " of " +
+                                vm.watchlistMoviesTotal
+                        }}
+                    } @else {
+                        {{
+                            (vm.watchlistTvTotal > 0 ? 1 : 0) +
+                                " - " +
+                                vm.watchlistTvLoadedCount +
+                                " of " +
+                                vm.watchlistTvTotal
+                        }}
+                    }
+                </p>
+                <app-sort-button
+                    [options]="sortOptions"
+                    selectedValue="created_at"
+                    [direction]="vm.sortDirection"
+                    (directionToggle)="onToggleSortDirection()"
+                />
+            </div>
         </app-browse-toolbar>
 
         <div class="watchlist-section__list">
@@ -97,3 +117,4 @@
         </div>
     </div>
 }
+

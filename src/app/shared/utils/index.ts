@@ -5,6 +5,7 @@ export * from './get-iso-date';
 export * from './loadable';
 export * from './pagination';
 export * from './rating';
+export * from './relative-time';
 export * from './route-utils';
 export * from './shuffle';
 export * from './sort';

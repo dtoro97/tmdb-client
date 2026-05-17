@@ -6,7 +6,7 @@
         subtitle="The movies and series you marked as favorites on TMDb."
     />
 
-    <div class="page-main page-main--full-padding">
+    <div class="page-main">
         <app-browse-toolbar>
             <app-pill-toggle
                 start
@@ -14,6 +14,31 @@
                 [selectedValue]="selectedTab"
                 (selected)="onTabChange($event)"
             />
+            <p end class="favorites-section__count text-caption">
+                @if (selectedTab === "movies") {
+                    {{
+                        (vm.favoriteMoviesTotal > 0 ? 1 : 0) +
+                            " - " +
+                            ((vm.favoriteMoviesState.type === "loaded" ||
+                                vm.favoriteMoviesState.type === "loading-more")
+                                ? vm.favoriteMoviesState.value.length
+                                : 0) +
+                            " of " +
+                            vm.favoriteMoviesTotal
+                    }}
+                } @else {
+                    {{
+                        (vm.favoriteTvTotal > 0 ? 1 : 0) +
+                            " - " +
+                            ((vm.favoriteTvState.type === "loaded" ||
+                                vm.favoriteTvState.type === "loading-more")
+                                ? vm.favoriteTvState.value.length
+                                : 0) +
+                            " of " +
+                            vm.favoriteTvTotal
+                    }}
+                }
+            </p>
         </app-browse-toolbar>
 
         <div class="favorites-section__list">
@@ -50,3 +75,4 @@
         </div>
     </div>
 }
+

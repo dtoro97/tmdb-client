@@ -12,3 +12,8 @@
 .favorites-section__empty {
     border-radius: inherit;
 }
+
+.favorites-section__count {
+    margin: 0;
+    color: var(--text-muted);
+}

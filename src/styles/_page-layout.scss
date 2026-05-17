@@ -5,7 +5,6 @@
     background-color: var(--mat-sys-surface);
 }
 
-.page-content,
 .inner-container {
     box-sizing: border-box;
     width: 100%;
@@ -22,63 +21,16 @@
     padding: var(--space-8) var(--space-6);
 }
 
-.page-main--full-padding {
-    padding-bottom: var(--space-8);
-}
-
-.page-kicker {
-    display: block;
-    color: var(--color-brand);
-    font-size: var(--text-xs);
-    font-weight: var(--weight-bold);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-}
-
-.page-title {
-    margin: 0;
-    font-size: var(--text-2xl);
-    font-weight: var(--weight-bold);
-    line-height: var(--lh-tight);
-}
-
-.page-subtitle {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    line-height: var(--lh-relaxed);
-}
-
 .section-title {
     margin: 0 0 var(--space-4);
     font-size: var(--text-xl);
     font-weight: var(--weight-semibold);
 }
 
-.section-count {
-    margin-left: var(--space-2);
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-regular);
-}
-
 .result-list {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-}
-
-.media-grid {
-    display: grid;
-    gap: var(--space-4);
-}
-
-.media-grid--6 {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-.media-grid--5 {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .page-sections {
@@ -92,28 +44,13 @@
     padding: var(--space-8) var(--space-6);
 }
 
-.browse-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
 @include mobile() {
-    .page-content,
     .inner-container {
         padding-inline: var(--space-4);
     }
 
     .page-main {
-        padding: var(--space-6) var(--space-4) 0;
-    }
-
-    .page-main--full-padding {
-        padding-bottom: var(--space-6);
-    }
-
-    .page-title {
-        font-size: var(--text-xl);
+        padding: var(--space-6) var(--space-4);
     }
 
     .page-sections {
@@ -121,22 +58,4 @@
         padding: var(--space-4);
     }
 
-    .media-grid--6,
-    .media-grid--5 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@include content-md() {
-    .media-grid--6,
-    .media-grid--5 {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-@include content-sm() {
-    .media-grid--6,
-    .media-grid--5 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
 }

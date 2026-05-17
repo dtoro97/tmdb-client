@@ -1,0 +1,19 @@
+.cdk-overlay-pane:not(.photo-viewer-panel) {
+    .mat-mdc-dialog-container .mdc-dialog__surface {
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--surface-panel-border);
+        box-shadow: var(--shadow-xl);
+        padding: var(--space-6);
+    }
+
+    .mat-mdc-dialog-content {
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+:root {
+    --mat-dialog-with-actions-content-padding: 0;
+    --mat-dialog-content-padding: var(--space-4) 0 0;
+    --mat-dialog-actions-padding: var(--space-4) 0 0;
+}
