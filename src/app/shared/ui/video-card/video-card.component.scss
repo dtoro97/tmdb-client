@@ -1,12 +1,6 @@
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .video-card {
-    position: relative;
-    display: block;
     border-radius: var(--radius-lg);
     background: var(--mat-sys-surface-container);
     @include media-surface-hover("&", ".video-card__poster");
@@ -44,12 +38,6 @@
     border-radius: var(--radius-full);
     background: var(--color-surface-overlay);
     color: var(--text-primary);
-
-    i {
-        display: block;
-        font-size: var(--text-md);
-        line-height: 1;
-    }
 }
 
 .video-card__overlay {

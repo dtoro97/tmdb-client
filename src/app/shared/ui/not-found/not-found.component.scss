@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .not-found {
     width: min(100%, 42rem);
     margin: var(--space-8) auto 0;

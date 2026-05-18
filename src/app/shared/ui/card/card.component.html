@@ -1,22 +1,25 @@
 @if (item) {
-    <a class="card" [routerLink]="['/title', item.id, item.mediaType]">
-        <div class="card__media">
+    <a class="media-card" [routerLink]="['/title', item.id, item.mediaType]">
+        <div class="media-card__media">
             <app-image
-                class="card__image"
+                class="media-card__image"
                 [src]="item.imagePath"
                 [alt]="item.title"
             />
 
             @if (showRating && item.rating) {
-                <app-rating-badge class="card__rating" [value]="item.rating" />
+                <app-rating-badge
+                    class="media-card__rating"
+                    [value]="item.rating"
+                />
             }
         </div>
 
-        <div class="card__content">
-            <span class="card__title text-body-sm">{{ item.title }}</span>
+        <div class="media-card__content">
+            <span class="media-card__title text-body-sm">{{ item.title }}</span>
 
             @if (item.date) {
-                <span class="card__meta text-caption">
+                <span class="media-card__meta text-caption">
                     {{
                         item.date
                             | date
@@ -28,7 +31,7 @@
             }
 
             @if (item.role) {
-                <span class="card__role text-caption">{{ item.role }}</span>
+                <span class="media-card__role text-caption">{{ item.role }}</span>
             }
         </div>
     </a>

@@ -29,9 +29,13 @@
     padding-bottom: var(--space-8);
 }
 
+.discover-count--muted {
+    color: var(--text-muted);
+}
+
 .discover-results {
     flex: 1;
-    min-width: 0;
+    width: 100%;
 }
 
 .discover-empty-state {

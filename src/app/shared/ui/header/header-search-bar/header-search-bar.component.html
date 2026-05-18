@@ -13,6 +13,7 @@
                 subscriptSizing="dynamic"
             >
                 <mat-select
+                    class="header-search__filter-select"
                     [value]="vm.searchFilter"
                     (selectionChange)="setFilter($event.value)"
                 >

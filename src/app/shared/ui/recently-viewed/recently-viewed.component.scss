@@ -22,6 +22,6 @@
     background: transparent;
     cursor: pointer;
     white-space: nowrap;
-    @include text-link-underline(inherit);
+    @include text-link-underline();
     @include focus-ring();
 }

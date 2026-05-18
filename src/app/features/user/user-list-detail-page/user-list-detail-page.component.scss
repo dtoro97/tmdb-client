@@ -2,7 +2,6 @@
 @use "mixins" as *;
 
 :host {
-    display: block;
     --icon-button-size: 2.5rem;
 }
 
@@ -88,7 +87,7 @@
 .user-list-detail__summary-shell {
     position: relative;
     margin-top: calc(-1 * var(--space-8));
-    z-index: var(--z-base);
+    z-index: 1;
 }
 
 .user-list-detail__summary-card {
@@ -216,7 +215,6 @@
 
 .user-list-detail__card-skeleton {
     position: relative;
-    display: block;
     aspect-ratio: var(--backdrop-ratio);
     gap: 0;
     padding: 0;
@@ -227,7 +225,6 @@
 .user-list-detail__card-skeleton-media {
     position: absolute;
     inset: 0;
-    display: block;
     --skeleton-height: 100%;
     --skeleton-radius: 0;
 }

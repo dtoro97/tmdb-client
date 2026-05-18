@@ -1,13 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
-.trailers-page {
-    display: block;
-}
-
 .trailers-page__content,
 .trailers-page__grid-item {
     display: flex;
@@ -23,11 +15,6 @@
     list-style: none;
 }
 
-.trailers-page__card {
-    display: block;
-    height: 100%;
-}
-
 .trailers-page__thumb-skeleton {
     display: flex;
     flex-direction: column;
@@ -39,7 +26,6 @@
 }
 
 .trailers-page__thumb-skeleton-art {
-    display: block;
     width: 100%;
     height: 100%;
     --skeleton-height: auto;
@@ -48,7 +34,6 @@
 }
 
 .trailers-page__thumb-skeleton-line {
-    display: block;
     height: 0.875rem;
     border-radius: var(--radius-sm);
 }

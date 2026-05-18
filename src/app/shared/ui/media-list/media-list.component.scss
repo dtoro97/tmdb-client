@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .media-list {
     display: flex;
     flex-direction: column;

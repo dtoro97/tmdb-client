@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .page-sections {
     gap: var(--space-12);
     padding-bottom: var(--space-10);
@@ -12,13 +8,11 @@
 
 .home-page__feature-band,
 .home-page__streaming-band {
-    display: block;
     padding: var(--space-5);
     @include surface-panel(var(--surface-panel));
 }
 
 .home-page__utility-band {
-    display: block;
     padding: var(--space-4) var(--space-5);
     @include surface-panel(var(--surface-panel-soft));
 }
@@ -100,6 +94,10 @@
     display: flex;
     align-items: center;
     gap: var(--space-1-5);
+}
+
+.tonight-row__meta--muted {
+    color: var(--text-muted);
 }
 
 @include tablet() {

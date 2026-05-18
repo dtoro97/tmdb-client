@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .user-data-page__intro {
     display: flex;
     flex-direction: column;

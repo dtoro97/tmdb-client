@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ComponentStore } from '@ngrx/component-store';
 import {
     catchError,
+    delay,
     EMPTY,
     filter,
     forkJoin,
@@ -185,6 +186,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         return this.collectionRestControllerService
             .collectionDetails(id, undefined, undefined, undefined, this.opts)
             .pipe(
+                delay(1000),
                 switchMap((collection) => {
                     const mappedItems = sortByDate(
                         collection.parts ?? [],

@@ -23,19 +23,3 @@
     --mat-sys-inverse-surface: var(--mat-sys-surface-container-high);
     --mat-sys-inverse-on-surface: var(--text-primary);
 }
-
-.photo-viewer-panel {
-    .mat-mdc-dialog-container,
-    .mdc-dialog__surface {
-        background: rgba(0, 0, 0, 0.95) !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        max-height: 100vh !important;
-    }
-}
-ngx-mat-select-search.locale-select-search {
-    .mat-select-search-no-entries-found {
-        padding-top: 20px;
-    }
-}

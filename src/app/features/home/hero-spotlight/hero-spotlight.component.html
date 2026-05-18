@@ -18,10 +18,7 @@
             <div class="spotlight-content">
                 <span class="spotlight-badge text-overline">{{ badge }}</span>
 
-                <a
-                    class="spotlight-title-link"
-                    [routerLink]="['/title', s.id, s.mediaType]"
-                >
+                <a [routerLink]="['/title', s.id, s.mediaType]">
                     <h1 class="spotlight-title text-hero-title">
                         {{ s.title }}
                     </h1>

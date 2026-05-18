@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .episode-list {
     display: flex;
     flex-direction: column;
@@ -16,4 +12,3 @@
 .episode-list__entry {
     min-width: 0;
 }
-

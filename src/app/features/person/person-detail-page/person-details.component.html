@@ -167,7 +167,9 @@
                                     >
                                         {{ person.birthday | date }}
                                         @if (!person.deathday) {
-                                            <span class="person-facts__meta text-caption">
+                                            <span
+                                                class="person-facts__meta text-caption"
+                                            >
                                                 (age {{ person | age }})
                                             </span>
                                         }
@@ -185,7 +187,9 @@
                                         class="person-facts__value person-facts__value--inline text-body"
                                     >
                                         {{ person.deathday | date }}
-                                        <span class="person-facts__meta text-caption">
+                                        <span
+                                            class="person-facts__meta text-caption"
+                                        >
                                             (age {{ person | age }})
                                         </span>
                                     </span>
@@ -198,9 +202,7 @@
                                     >
                                         Birthplace
                                     </span>
-                                    <span
-                                        class="person-facts__value text-body"
-                                    >
+                                    <span class="person-facts__value text-body">
                                         {{ person.place_of_birth }}
                                     </span>
                                 </li>
@@ -211,11 +213,11 @@
                                         <span
                                             class="person-facts__label text-overline"
                                         >
-                                        {{
-                                            aliases.length === 1
-                                                ? "Alternative name"
-                                                : "Alternative names"
-                                        }}
+                                            {{
+                                                aliases.length === 1
+                                                    ? "Alternative name"
+                                                    : "Alternative names"
+                                            }}
                                         </span>
                                         <div class="person-facts__value">
                                             <ul class="person-facts__aliases">

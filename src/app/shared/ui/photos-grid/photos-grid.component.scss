@@ -2,7 +2,6 @@
 @use "mixins" as *;
 
 :host {
-    display: block;
     --photos-grid-tile-height-desktop: 180px;
     --photos-grid-tile-height-mobile: 100px;
 }
@@ -38,7 +37,6 @@
     position: relative;
     overflow: hidden;
     border-radius: var(--radius-md);
-    display: block;
     border: none;
     padding: 0;
     cursor: pointer;
@@ -76,7 +74,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
 }
 
 .photos-grid__more {

@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .page-section {
     display: flex;
     flex-direction: column;
@@ -57,6 +53,7 @@
     justify-content: flex-end;
     gap: var(--space-2);
     flex-shrink: 0;
+    min-width: 0;
 }
 
 .page-section__controls:empty {
@@ -75,7 +72,8 @@
     }
 
     .page-section__controls {
-        width: auto;
+        width: 100%;
+        justify-content: flex-start;
     }
 
     .page-section__subtitle {

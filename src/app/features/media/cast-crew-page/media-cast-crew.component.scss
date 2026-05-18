@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .media-header {
     display: flex;
     align-items: flex-start;
@@ -63,7 +59,6 @@
 }
 
 .credit-toolbar-skeleton {
-    display: block;
     width: min(12rem, 100%);
     height: 2.25rem;
 }
@@ -73,12 +68,6 @@
     align-items: end;
     justify-content: space-between;
     gap: var(--space-3);
-}
-
-.credit-section-title-skeleton,
-.credit-section-count-skeleton,
-.credit-row-count-skeleton {
-    display: block;
 }
 
 .credit-section-title-skeleton {
@@ -98,12 +87,6 @@
     column-gap: var(--space-3);
     row-gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
-}
-
-.credit-avatar-skeleton,
-.credit-title-skeleton,
-.credit-subtitle-skeleton {
-    display: block;
 }
 
 .credit-avatar-skeleton {
@@ -194,4 +177,3 @@ app-empty-state {
         grid-area: count;
     }
 }
-

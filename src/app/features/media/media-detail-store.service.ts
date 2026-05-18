@@ -56,7 +56,6 @@ import {
 import {
     CastCreditWithEpisodes,
     CrewCreditWithEpisodes,
-    MediaDetailVm,
 } from './media-detail.models';
 import {
     toCastFromAggregate,
@@ -266,7 +265,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
         map((state) => loadedItems(state)),
     );
 
-    readonly mediaDetailVm$: Observable<MediaDetailVm | null> = combineLatest({
+    readonly mediaDetailVm$ = combineLatest({
         mediaDetailsState: this.mediaDetailsState$,
         topCastState: this.topCastState$,
         castState: this.castState$,
@@ -319,7 +318,10 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                         topCastState,
                         castState,
                         crewState,
-                        directors: directors.map((d) => ({ id: d.id, name: d.name })),
+                        directors: directors.map((d) => ({
+                            id: d.id,
+                            name: d.name,
+                        })),
                         creators,
                         showPanel: shouldShowCreditsPanel(
                             castState,
@@ -329,7 +331,10 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                     },
                     collection,
                     latestEpisode: media.lastEpisode
-                        ? { type: 'loaded' as const, value: media.lastEpisode as TvEpisode }
+                        ? {
+                              type: 'loaded' as const,
+                              value: media.lastEpisode as TvEpisode,
+                          }
                         : { type: 'idle' as const },
                     photos: {
                         state: photosState,
@@ -338,7 +343,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                     },
                     recommendations,
                     keywords,
-                } satisfies MediaDetailVm;
+                };
             },
         ),
     );
@@ -483,7 +488,9 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                 this.patchState({
                     recommendations: {
                         type: 'loaded',
-                        value: rankedItems.slice(0, PAGE_SIZE).map((item) => toCardItem(item, type)),
+                        value: rankedItems
+                            .slice(0, PAGE_SIZE)
+                            .map((item) => toCardItem(item, type)),
                     },
                 });
             }),
@@ -499,8 +506,14 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                     photos: {
                         type: 'loaded',
                         value: [
-                            ...(images.backdrops ?? []).map((img) => ({ ...img, photoType: 'backdrop' })),
-                            ...(images.posters ?? []).map((img) => ({ ...img, photoType: 'poster' })),
+                            ...(images.backdrops ?? []).map((img) => ({
+                                ...img,
+                                photoType: 'backdrop',
+                            })),
+                            ...(images.posters ?? []).map((img) => ({
+                                ...img,
+                                photoType: 'poster',
+                            })),
                         ],
                     },
                 });
@@ -558,15 +571,20 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
             tap((response) => {
                 let value: string | null = null;
                 if (type === 'tv') {
-                    const rating = ((response as ContentRatingList).results ?? [])
-                        .find((r) => r.iso_3166_1 === country)?.rating?.trim();
+                    const rating = (
+                        (response as ContentRatingList).results ?? []
+                    )
+                        .find((r) => r.iso_3166_1 === country)
+                        ?.rating?.trim();
                     value = rating || null;
                 } else {
-                    const countryDates = ((response as ReleaseDateList).results ?? [])
-                        .find((r) => r.iso_3166_1 === country);
-                    value = countryDates?.release_dates
-                        ?.map((r) => r.certification?.trim())
-                        .find((c): c is string => !!c) ?? null;
+                    const countryDates = (
+                        (response as ReleaseDateList).results ?? []
+                    ).find((r) => r.iso_3166_1 === country);
+                    value =
+                        countryDates?.release_dates
+                            ?.map((r) => r.certification?.trim())
+                            .find((c): c is string => !!c) ?? null;
                 }
                 this.patchState({
                     certification: { type: 'loaded', value },
@@ -613,6 +631,3 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
             );
     }
 }
-
-
-

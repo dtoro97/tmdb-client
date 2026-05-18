@@ -57,18 +57,3 @@ export interface MediaDetailReviewsSection {
     totalResults: number;
     hasMore: boolean;
 }
-
-export interface MediaDetailVm {
-    media: MediaDetails;
-    canRateTitle: boolean;
-    tvYearLabel: string | null;
-    externalLinks: ExternalLinks | null;
-    certification: LoadableValue<string | null>;
-    watchProviders: LoadableValue<MediaDetailProviderPreview | null>;
-    creditsPanel: MediaCreditsPanelData & { showPanel: boolean };
-    collection: LoadableValue<CollectionDetails | null>;
-    latestEpisode: LoadableValue<TvEpisode | null>;
-    photos: MediaDetailPhotosSection;
-    recommendations: LoadableItems<CardItem>;
-    keywords: LoadableItems<KeywordListItem>;
-}

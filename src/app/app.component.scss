@@ -7,4 +7,5 @@
 
 .main-content {
   flex: 1;
+  min-height: calc(100dvh - (var(--space-12) + var(--space-3)));
 }

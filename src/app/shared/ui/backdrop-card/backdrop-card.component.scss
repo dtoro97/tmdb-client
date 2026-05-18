@@ -1,7 +1,6 @@
 @use "mixins" as *;
 
 :host {
-    display: block;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
 }
@@ -59,6 +58,10 @@
     align-items: center;
     gap: var(--space-1-5);
     text-shadow: var(--shadow-text-hero);
+}
+
+.backdrop-card__meta-muted {
+    color: var(--text-muted);
 }
 
 .backdrop-card:is(:hover, :focus-visible, :focus-within) .backdrop-card__title {

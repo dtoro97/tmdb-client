@@ -1,7 +1,7 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-.card__media {
+.media-card__media {
     position: relative;
     aspect-ratio: var(--poster-ratio);
     border-radius: var(--radius-lg);
@@ -16,7 +16,7 @@
     }
 }
 
-.card {
+.media-card {
     display: block;
     position: relative;
     overflow: hidden;
@@ -27,7 +27,7 @@
     @include lift-surface-hover();
 }
 
-.card__rating {
+.media-card__rating {
     position: absolute;
     top: var(--space-2);
     right: var(--space-2);
@@ -37,7 +37,7 @@
     --rating-badge-backdrop-filter: blur(10px);
 }
 
-.card__content {
+.media-card__content {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -47,8 +47,7 @@
     background: var(--gradient-overlay-bottom);
 }
 
-.card__title {
-    display: -webkit-box;
+.media-card__title {
     margin-bottom: var(--space-1);
     color: var(--mat-sys-on-surface);
     font-weight: var(--weight-semibold);
@@ -61,19 +60,19 @@
     @include line-clamp(2);
 }
 
-.card__meta {
-    color: var(--color-on-surface-medium);
+.media-card__meta {
+    color: var(--text-soft);
     opacity: 0.72;
     transition:
         color var(--motion-fast),
         opacity var(--motion-fast);
 }
 
-.card__role {
+.media-card__role {
     display: block;
     margin-top: var(--space-1);
     overflow: hidden;
-    color: var(--color-on-surface-faint);
+    color: var(--text-faint);
     text-overflow: ellipsis;
     white-space: nowrap;
     opacity: 0.72;
@@ -82,29 +81,22 @@
         opacity var(--motion-fast);
 }
 
-.card__overview {
-    margin-top: var(--space-2);
-    color: var(--color-on-surface-medium);
-    line-height: var(--lh-normal);
-    @include line-clamp(4);
-}
-
-.card:is(:hover, :focus-visible, :focus-within) .card__title {
+.media-card:is(:hover, :focus-visible, :focus-within) .media-card__title {
     color: var(--color-brand);
     opacity: 1;
 }
 
-.card:is(:hover, :focus-visible, :focus-within) .card__meta,
-.card:is(:hover, :focus-visible, :focus-within) .card__role {
+.media-card:is(:hover, :focus-visible, :focus-within) .media-card__meta,
+.media-card:is(:hover, :focus-visible, :focus-within) .media-card__role {
     opacity: 1;
 }
 
 @include mobile() {
-    .card__content {
+    .media-card__content {
         padding: var(--space-8) var(--space-2) var(--space-2);
     }
 
-    .card__title {
+    .media-card__title {
         font-size: var(--text-sm);
     }
 }

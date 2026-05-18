@@ -1,29 +1,16 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-    min-width: 0;
-    @include fade-up(0.35s, 12px);
-    animation-delay: calc(var(--item-index, 0) * 0.04s);
-}
-
-:host:not(:last-child) {
-    border-bottom: 1px solid var(--color-border-subtle);
-}
-
 .person-list-item {
     display: flex;
     align-items: flex-start;
     gap: var(--space-4);
     padding: var(--space-4);
-    border: 1px solid transparent;
     border-radius: var(--radius-md);
+    border-bottom: 1px solid var(--color-border-subtle);
     min-width: 0;
     cursor: pointer;
-    @include list-row-hover(
-        $title-selector: ".person-list-item__title"
-    );
+    @include list-row-hover($title-selector: ".person-list-item__title");
     @include focus-ring();
 }
 
@@ -56,7 +43,6 @@
 }
 
 .person-list-item__title {
-    display: block;
     min-width: 0;
     color: var(--mat-sys-on-surface);
     font-weight: var(--weight-bold);
@@ -102,8 +88,8 @@
 @include mobile() {
     .person-list-item {
         display: grid;
-        grid-template-columns: auto 48px minmax(0, 1fr) auto;
-        grid-template-areas: "index avatar content icon";
+        grid-template-columns: auto 48px minmax(0, 1fr);
+        grid-template-areas: "index avatar content";
         align-items: start;
         gap: var(--space-3);
         padding: var(--space-3);

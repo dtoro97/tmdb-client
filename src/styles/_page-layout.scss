@@ -21,18 +21,6 @@
     padding: var(--space-8) var(--space-6);
 }
 
-.section-title {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-xl);
-    font-weight: var(--weight-semibold);
-}
-
-.result-list {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
 .page-sections {
     box-sizing: border-box;
     display: flex;
@@ -57,5 +45,4 @@
         gap: var(--space-8);
         padding: var(--space-4);
     }
-
 }

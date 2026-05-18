@@ -33,6 +33,12 @@
     border-radius: var(--radius-xl);
 }
 
+section {
+    h2 {
+        margin: 0 0 var(--space-4);
+    }
+}
+
 @include mobile() {
     .search-header {
         gap: var(--space-3);

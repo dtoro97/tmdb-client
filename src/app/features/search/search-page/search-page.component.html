@@ -18,10 +18,10 @@
                 vm.movieState.type === "loading-more" ||
                 (vm.movieState.type === "loaded" && vm.movieState.value.length)
             ) {
-                <section class="search-section">
-                    <h2 class="section-title">Movies</h2>
+                <section>
+                    <h2>Movies</h2>
                     <div class="catalog-panel">
-                        <div class="result-list">
+                        <div>
                             <app-media-list
                                 [state]="vm.movieState"
                                 [genreMap]="vm.movieGenreMap"
@@ -34,7 +34,10 @@
                         </div>
                         @if (vm.movieHasMore) {
                             <div class="catalog-panel-footer">
-                                <button mat-stroked-button (click)="loadMoreMovies()">
+                                <button
+                                    mat-stroked-button
+                                    (click)="loadMoreMovies()"
+                                >
                                     Show more movies
                                 </button>
                             </div>
@@ -48,10 +51,10 @@
                 vm.tvState.type === "loading-more" ||
                 (vm.tvState.type === "loaded" && vm.tvState.value.length)
             ) {
-                <section class="search-section">
-                    <h2 class="section-title">TV Shows</h2>
+                <section>
+                    <h2>TV Shows</h2>
                     <div class="catalog-panel">
-                        <div class="result-list">
+                        <div>
                             <app-media-list
                                 [state]="vm.tvState"
                                 [genreMap]="vm.tvGenreMap"
@@ -64,7 +67,10 @@
                         </div>
                         @if (vm.tvHasMore) {
                             <div class="catalog-panel-footer">
-                                <button mat-stroked-button (click)="loadMoreTv()">
+                                <button
+                                    mat-stroked-button
+                                    (click)="loadMoreTv()"
+                                >
                                     Show more TV shows
                                 </button>
                             </div>
@@ -76,12 +82,13 @@
             @if (
                 vm.personState.type === "loading" ||
                 vm.personState.type === "loading-more" ||
-                (vm.personState.type === "loaded" && vm.personState.value.length)
+                (vm.personState.type === "loaded" &&
+                    vm.personState.value.length)
             ) {
-                <section class="search-section">
-                    <h2 class="section-title">People</h2>
+                <section>
+                    <h2>People</h2>
                     <div class="catalog-panel">
-                        <div class="result-list">
+                        <div>
                             <app-person-list
                                 [state]="vm.personState"
                                 [skeletonCount]="vm.listSkeletonCount"
@@ -91,7 +98,10 @@
                         </div>
                         @if (vm.personHasMore) {
                             <div class="catalog-panel-footer">
-                                <button mat-stroked-button (click)="loadMorePeople()">
+                                <button
+                                    mat-stroked-button
+                                    (click)="loadMorePeople()"
+                                >
                                     Show more people
                                 </button>
                             </div>

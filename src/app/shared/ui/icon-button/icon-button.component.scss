@@ -7,10 +7,6 @@
 .icon-button {
     @include icon-button-shell();
 
-    &:hover:not(:disabled) {
-        border-color: transparent;
-    }
-
     &:disabled {
         opacity: 0.35;
         cursor: default;

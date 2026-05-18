@@ -1,10 +1,6 @@
 @use "mixins" as *;
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .sub-page-header {
     display: flex;
     flex-direction: column;
@@ -49,4 +45,3 @@
         font-size: var(--text-xl);
     }
 }
-

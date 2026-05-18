@@ -11,60 +11,56 @@
     <div class="locale-panel" (click)="$event.stopPropagation()">
         <div class="locale-field">
             <span class="locale-label text-caption">Language</span>
-            <div class="locale-select-shell">
-                <mat-select
-                    class="locale-select text-body-sm"
-                    aria-label="Language"
-                    [value]="selectedLanguage"
-                    (selectionChange)="onLanguageChange($event.value)"
-                >
-                    <mat-option>
-                        <ngx-mat-select-search
-                            class="locale-select-search"
-                            placeholderLabel="Search"
-                            noEntriesFoundLabel="No language"
-                            ngModel
-                            (ngModelChange)="updateLanguageFilter($event)"
-                        ></ngx-mat-select-search>
-                    </mat-option>
-                    @if (languageOptions$ | async; as options) {
-                        @for (opt of options; track opt.value) {
-                            <mat-option [value]="opt.value">{{
-                                opt.label
-                            }}</mat-option>
-                        }
+            <mat-select
+                class="locale-select"
+                aria-label="Language"
+                [value]="selectedLanguage"
+                (selectionChange)="onLanguageChange($event.value)"
+            >
+                <mat-option>
+                    <ngx-mat-select-search
+                        class="locale-select-search"
+                        placeholderLabel="Search"
+                        noEntriesFoundLabel="No language"
+                        ngModel
+                        (ngModelChange)="updateLanguageFilter($event)"
+                    ></ngx-mat-select-search>
+                </mat-option>
+                @if (languageOptions$ | async; as options) {
+                    @for (opt of options; track opt.value) {
+                        <mat-option [value]="opt.value">{{
+                            opt.label
+                        }}</mat-option>
                     }
-                </mat-select>
-            </div>
+                }
+            </mat-select>
         </div>
 
         <div class="locale-field">
             <span class="locale-label text-caption">Region</span>
-            <div class="locale-select-shell">
-                <mat-select
-                    class="locale-select text-body-sm"
-                    aria-label="Region"
-                    [value]="selectedRegion"
-                    (selectionChange)="onRegionChange($event.value)"
-                >
-                    <mat-option
-                        ><ngx-mat-select-search
-                            class="locale-select-search"
-                            placeholderLabel="Search"
-                            noEntriesFoundLabel="No region"
-                            ngModel
-                            (ngModelChange)="updateRegionFilter($event)"
-                        ></ngx-mat-select-search
-                    ></mat-option>
-                    @if (countryOptions$ | async; as options) {
-                        @for (opt of options; track opt.value) {
-                            <mat-option [value]="opt.value">{{
-                                opt.label
-                            }}</mat-option>
-                        }
+            <mat-select
+                class="locale-select"
+                aria-label="Region"
+                [value]="selectedRegion"
+                (selectionChange)="onRegionChange($event.value)"
+            >
+                <mat-option
+                    ><ngx-mat-select-search
+                        class="locale-select-search"
+                        placeholderLabel="Search"
+                        noEntriesFoundLabel="No region"
+                        ngModel
+                        (ngModelChange)="updateRegionFilter($event)"
+                    ></ngx-mat-select-search
+                ></mat-option>
+                @if (countryOptions$ | async; as options) {
+                    @for (opt of options; track opt.value) {
+                        <mat-option [value]="opt.value">{{
+                            opt.label
+                        }}</mat-option>
                     }
-                </mat-select>
-            </div>
+                }
+            </mat-select>
         </div>
     </div>
 </mat-menu>

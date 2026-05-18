@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .episodes-page__main {
     display: flex;
     flex-direction: column;
@@ -132,4 +128,3 @@
         padding: var(--space-3);
     }
 }
-

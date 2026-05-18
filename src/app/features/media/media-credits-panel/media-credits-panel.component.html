@@ -1,12 +1,7 @@
-<app-person-carousel-panel
-    [state]="data.topCastState"
-    [showRank]="false"
-/>
+<app-person-carousel-panel [state]="data.topCastState" [showRank]="false" />
 
 @if (data.castState.type === "loading" || data.crewState.type === "loading") {
-    <div
-        class="media-credits-panel__list media-credits-panel__list--loading"
-    >
+    <div class="media-credits-panel__list media-credits-panel__list--loading">
         <div
             class="media-credits-panel__row media-credits-panel__row--skeleton"
         >
@@ -60,9 +55,6 @@
                         }
 
                         @if (data.directors.length > 5) {
-                            <span class="media-credits-panel__separator">
-                                &#x2022;
-                            </span>
                             <span class="text-caption">
                                 +{{ data.directors.length - 5 }} more
                             </span>

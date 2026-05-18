@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .media-reviews-page__content {
     display: flex;
     flex-direction: column;
@@ -44,7 +40,6 @@
 }
 
 .media-reviews-page__review-skeleton-avatar {
-    display: block;
     width: var(--round-media-sm);
     height: var(--round-media-sm);
     --skeleton-radius: var(--radius-full);
@@ -129,4 +124,3 @@
         gap: var(--space-3);
     }
 }
-

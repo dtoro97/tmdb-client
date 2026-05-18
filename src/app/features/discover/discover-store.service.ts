@@ -416,7 +416,10 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                 certificationOptions,
             }) => {
                 const browsingPeople = state.type === 'person';
-                const config = this.getCategoryConfig(state.category, state.type);
+                const config = this.getCategoryConfig(
+                    state.category,
+                    state.type,
+                );
                 const visibleCount = this.getVisibleCount(state.resultsState);
                 const startIndex =
                     state.sortDirection === 'asc' ? state.totalResults : 1;
@@ -433,7 +436,8 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                         !(
                             state.type === 'person' &&
                             state.category === 'trending'
-                        ) && state.pagination.page < state.pagination.totalPages,
+                        ) &&
+                        state.pagination.page < state.pagination.totalPages,
                     mediaState: browsingPeople
                         ? ({
                               type: 'loaded',
@@ -478,56 +482,57 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             ),
     );
 
-    private readonly syncSelectedKeywordsEffect = this.effect<readonly string[]>(
-        (keywordIds$) =>
-            keywordIds$.pipe(
-                switchMap((keywordIds) => {
-                    if (!keywordIds.length) {
-                        this.patchState({
-                            selectedKeywords: [],
-                            keywordSuggestions: [],
-                        });
-                        return EMPTY;
-                    }
+    private readonly syncSelectedKeywordsEffect = this.effect<
+        readonly string[]
+    >((keywordIds$) =>
+        keywordIds$.pipe(
+            switchMap((keywordIds) => {
+                if (!keywordIds.length) {
+                    this.patchState({
+                        selectedKeywords: [],
+                        keywordSuggestions: [],
+                    });
+                    return EMPTY;
+                }
 
-                    return forkJoin(
-                        keywordIds.map((keywordId) =>
-                            this.keywordService
-                                .keywordDetails(
-                                    Number(keywordId),
-                                    'body',
-                                    false,
-                                    API_JSON_OPTIONS,
+                return forkJoin(
+                    keywordIds.map((keywordId) =>
+                        this.keywordService
+                            .keywordDetails(
+                                Number(keywordId),
+                                'body',
+                                false,
+                                API_JSON_OPTIONS,
+                            )
+                            .pipe(catchError(() => of(null))),
+                    ),
+                ).pipe(
+                    tap((keywords) => {
+                        this.patchState({
+                            selectedKeywords: keywords
+                                .filter(
+                                    (
+                                        keyword,
+                                    ): keyword is {
+                                        id: number;
+                                        name: string;
+                                    } =>
+                                        typeof keyword?.id === 'number' &&
+                                        typeof keyword?.name === 'string',
                                 )
-                                .pipe(catchError(() => of(null))),
-                        ),
-                    ).pipe(
-                        tap((keywords) => {
-                            this.patchState({
-                                selectedKeywords: keywords
-                                    .filter(
-                                        (
-                                            keyword,
-                                        ): keyword is {
-                                            id: number;
-                                            name: string;
-                                        } =>
-                                            typeof keyword?.id === 'number' &&
-                                            typeof keyword?.name === 'string',
-                                    )
-                                    .map((keyword) => ({
-                                        id: keyword.id,
-                                        name: keyword.name,
-                                    })),
-                            });
-                        }),
-                        catchError(() => {
-                            this.patchState({ selectedKeywords: [] });
-                            return EMPTY;
-                        }),
-                    );
-                }),
-            ),
+                                .map((keyword) => ({
+                                    id: keyword.id,
+                                    name: keyword.name,
+                                })),
+                        });
+                    }),
+                    catchError(() => {
+                        this.patchState({ selectedKeywords: [] });
+                        return EMPTY;
+                    }),
+                );
+            }),
+        ),
     );
 
     private readonly searchKeywordsEffect = this.effect<string>((query$) =>
@@ -626,7 +631,10 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             return;
         }
 
-        const config = this.getCategoryConfig(nextParams.category, nextParams.type);
+        const config = this.getCategoryConfig(
+            nextParams.category,
+            nextParams.type,
+        );
         if (config) {
             this.titleService.setTitle(config.title);
         }
@@ -1182,7 +1190,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         const nextSortField =
             params.type === 'person'
                 ? null
-                : params.sortField ?? config.defaultSortField;
+                : (params.sortField ?? config.defaultSortField);
         const nextSortDirection =
             params.sortDirection ?? config.defaultSortDirection;
 
@@ -1390,7 +1398,10 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         this.patchState({
             resultsState: {
                 type: 'loaded',
-                value: currentState.type === 'loading-more' ? currentState.value : [],
+                value:
+                    currentState.type === 'loading-more'
+                        ? currentState.value
+                        : [],
             },
         });
 
@@ -1400,10 +1411,6 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
     private normalizeSortDirection(
         value: string | null,
     ): SortDirection | undefined {
-        if (value === 'asc' || value === 'desc') {
-            return value;
-        }
-
-        return undefined;
+        return value === 'asc' || value === 'desc' ? value : undefined;
     }
 }

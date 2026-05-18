@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .home-top-picks {
     display: flex;
     flex-direction: column;
@@ -119,10 +115,6 @@
     z-index: 3;
 }
 
-.home-top-picks__tile-card {
-    display: block;
-}
-
 .home-top-picks__feature--skeleton {
     @include surface-panel(var(--surface-panel));
     display: grid;
@@ -143,7 +135,6 @@
     width: 3.15rem;
     --skeleton-height: 1.6rem;
     --skeleton-radius: var(--radius-sm);
-    clip-path: polygon(0 0, 100% 0, calc(100% - 0.45rem) 100%, 0 100%);
 }
 
 .home-top-picks__feature-title-skeleton {

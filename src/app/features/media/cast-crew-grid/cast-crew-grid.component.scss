@@ -99,8 +99,6 @@
 }
 
 .credit-row__thumb {
-    grid-area: thumb;
-    display: block;
     width: var(--media-square-sm);
     height: var(--media-square-sm);
     border-radius: var(--radius-full);
@@ -190,7 +188,6 @@
         text-overflow: clip;
         -webkit-line-clamp: unset;
         line-clamp: unset;
-        display: block;
     }
 
     .credit-row__name {

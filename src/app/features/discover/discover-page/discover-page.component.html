@@ -7,7 +7,9 @@
                     vm.resultsState.type === "loaded" ||
                     vm.resultsState.type === "loading-more"
                 ) {
-                    <span class="discover-count text-caption muted">
+                    <span
+                        class="discover-count discover-count--muted text-caption"
+                    >
                         1 - {{ vm.visibleCount }} of {{ vm.totalResults }}
                     </span>
                 }
@@ -87,7 +89,7 @@
                             />
                         </div>
                     } @else {
-                        <div class="result-list">
+                        <div>
                             @if (vm.browsingPeople) {
                                 <app-person-list
                                     [state]="vm.personState"
@@ -121,6 +123,3 @@
         </div>
     }
 </div>
-
-
-

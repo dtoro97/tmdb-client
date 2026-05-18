@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .browse-toolbar {
     display: flex;
     justify-content: space-between;
@@ -36,4 +32,3 @@
         justify-content: flex-start;
     }
 }
-

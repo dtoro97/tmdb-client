@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .person-list__skeleton-row {
     display: flex;
     align-items: center;
@@ -65,4 +61,3 @@
         width: min(56%, 14rem);
     }
 }
-

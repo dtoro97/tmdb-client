@@ -35,6 +35,10 @@
     color: var(--text-secondary);
     transition: color var(--motion-fast);
 
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+
     &:hover,
     &:focus-visible {
         color: var(--color-brand-light);

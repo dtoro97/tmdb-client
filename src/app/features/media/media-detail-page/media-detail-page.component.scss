@@ -2,7 +2,6 @@
 @use "mixins" as *;
 
 :host {
-    display: block;
     --hero-poster-overlap: 5rem;
     --poster-mobile-width: 110px;
     --poster-mobile-height: 165px;
@@ -321,7 +320,6 @@
 
 .media-detail-page__provider-label-skeleton,
 .media-detail-page__provider-logo-skeleton {
-    display: block;
     flex: 0 0 auto;
 }
 
@@ -372,6 +370,10 @@
     white-space: nowrap;
     @include text-link-underline(inherit);
     @include focus-ring();
+}
+
+.media-detail-page__section-link--muted {
+    color: var(--text-muted);
 }
 
 .media-detail-page__collection {
@@ -532,7 +534,6 @@
 }
 
 .media-detail-page__review-skeleton-line {
-    display: block;
     --skeleton-height: 1rem;
 }
 

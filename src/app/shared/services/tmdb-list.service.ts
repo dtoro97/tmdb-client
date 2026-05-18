@@ -264,10 +264,7 @@ export class TmdbListService {
 
                             return summary;
                         })
-                        .filter(
-                            (list): list is MediaUserListSummary =>
-                                list !== null,
-                        ),
+                        .filter((list) => list !== null),
                 ),
             );
     }

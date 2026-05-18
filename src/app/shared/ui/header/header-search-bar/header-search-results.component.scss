@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .header-search-results {
     list-style: none;
     margin: 0;
@@ -93,7 +89,6 @@
 
 .header-search-results__skeleton-chip,
 .header-search-results__skeleton-line {
-    display: block;
     border-radius: var(--radius-sm);
 }
 
@@ -134,4 +129,3 @@
         height: 4.5rem;
     }
 }
-

@@ -3,10 +3,7 @@
 
 :host {
     --media-list-item-year-font-size: 0.9em;
-    --media-list-item-year-opacity: 0.78;
-
-    display: block;
-    min-width: 0;
+    --media-list-item-year-opacity: 0.8;
 }
 
 :host:not(:last-child) {
@@ -19,7 +16,6 @@
     align-items: flex-start;
     gap: var(--space-3);
     padding: var(--space-4);
-    border: 1px solid transparent;
     border-radius: var(--radius-md);
     min-width: 0;
     cursor: pointer;
@@ -57,7 +53,6 @@
 }
 
 .media-list-item__title {
-    display: block;
     min-width: 0;
     font-size: var(--text-md);
     color: var(--mat-sys-on-surface);
@@ -113,9 +108,7 @@
     .media-list-item {
         display: grid;
         grid-template-columns: 72px minmax(0, 1fr) auto;
-        grid-template-areas:
-            "poster content date"
-            "poster content icon";
+        grid-template-areas: "poster content date";
         align-items: start;
         column-gap: var(--space-3);
         row-gap: var(--space-1);

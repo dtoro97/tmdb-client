@@ -1,11 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-    align-self: start;
-}
-
 .user-list-card {
     display: flex;
     flex-direction: column;

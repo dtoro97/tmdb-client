@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .photos-browser {
     display: flex;
     flex-direction: column;
@@ -33,44 +29,16 @@
     gap: var(--space-3);
 }
 
-.photos-browser__language-filter {
+.photos-browser__language-select {
     display: inline-flex;
     flex: 0 1 18rem;
     align-items: center;
-    width: min(100%, 18rem);
-    min-width: 0;
-    min-height: var(--control-height-sm);
-    padding-inline: var(--space-4) var(--space-3);
-    border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: var(--radius-pill);
-    background: var(--mat-sys-surface-container-high);
-    transition:
-        border-color var(--motion-fast),
-        background-color var(--motion-fast);
-
-    &:hover {
-        background: var(--mat-sys-surface-container-highest);
-    }
-
-    &:focus-within {
-        border-color: var(--mat-sys-outline);
-    }
-}
-
-.photos-browser__language-select {
-    --mat-select-trigger-text-size: var(--text-xs);
-    --mat-select-trigger-text-weight: var(--weight-semibold);
-    --mat-select-enabled-trigger-text-color: var(--text-primary);
-    --mat-select-focused-arrow-color: var(--text-muted);
-    --mat-select-enabled-arrow-color: var(--text-muted);
-    --mat-select-placeholder-text-color: var(--text-muted);
-
     width: 100%;
+    max-width: 18rem;
     min-width: 0;
 }
 
 .photos-browser__language-trigger {
-    display: block;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -78,9 +46,8 @@
 }
 
 .photos-browser__language-placeholder {
-    display: block;
     min-width: 0;
-    color: var(--text-muted);
+    color: var(--control-text);
     white-space: nowrap;
 }
 
@@ -115,7 +82,6 @@
 .photos-browser__image {
     width: 100%;
     height: 100%;
-    display: block;
     object-fit: cover;
 }
 
@@ -180,10 +146,10 @@
         flex-direction: column;
     }
 
-    .photos-browser__language-filter {
+    .photos-browser__language-select {
         flex: none;
         width: 100%;
-        min-width: 0;
+        max-width: none;
     }
 
     .photos-browser__grid {

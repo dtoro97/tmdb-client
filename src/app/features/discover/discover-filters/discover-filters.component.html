@@ -348,41 +348,28 @@
             </button>
             @if (languageItem.expanded) {
                 <div class="accordion-body">
-                    <div class="discover-filters__language-select">
-                        <mat-form-field
-                            class="discover-filters__language-field"
-                            appearance="outline"
-                        >
-                            <mat-select
-                                class="discover-filters__select"
-                                placeholder="Any language"
-                                [value]="originalLanguage"
-                                (selectionChange)="
-                                    onLanguageChange($event.value)
-                                "
+                    <mat-select
+                        class="discover-filters__select"
+                        placeholder="Any language"
+                        [value]="originalLanguage"
+                        (selectionChange)="onLanguageChange($event.value)"
+                    >
+                        <mat-option>
+                            <ngx-mat-select-search
+                                placeholderLabel="Search"
+                                noEntriesFoundLabel="No language found"
+                                ngModel
+                                (ngModelChange)="updateLanguageFilter($event)"
                             >
-                                <mat-option>
-                                    <ngx-mat-select-search
-                                        placeholderLabel="Search"
-                                        noEntriesFoundLabel="No language found"
-                                        ngModel
-                                        (ngModelChange)="
-                                            updateLanguageFilter($event)
-                                        "
-                                    >
-                                    </ngx-mat-select-search>
-                                </mat-option>
-                                <mat-option [value]="null"
-                                    >Any language</mat-option
-                                >
-                                @for (opt of filteredLanguageOptions; track opt.value) {
-                                    <mat-option [value]="opt.value">{{
-                                        opt.label
-                                    }}</mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
+                            </ngx-mat-select-search>
+                        </mat-option>
+                        <mat-option [value]="null">Any language</mat-option>
+                        @for (opt of filteredLanguageOptions; track opt.value) {
+                            <mat-option [value]="opt.value">{{
+                                opt.label
+                            }}</mat-option>
+                        }
+                    </mat-select>
                 </div>
             }
         </cdk-accordion-item>

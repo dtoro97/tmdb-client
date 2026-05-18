@@ -1,8 +1,4 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    Input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -51,7 +47,7 @@ export class MediaListActionsComponent {
         private readonly userSessionStore: UserSessionStoreService,
     ) {}
 
-    toggleWatchlist(): void {
+    toggleWatchlist() {
         const action$ =
             this.userSessionStore.mode() === 'user'
                 ? this.mediaDetailActionsStore.toggleWatchlist$()
@@ -67,7 +63,7 @@ export class MediaListActionsComponent {
             .subscribe();
     }
 
-    toggleFavorite(): void {
+    toggleFavorite() {
         const action$ =
             this.userSessionStore.mode() === 'user'
                 ? this.mediaDetailActionsStore.toggleFavorite$()
@@ -83,7 +79,7 @@ export class MediaListActionsComponent {
             .subscribe();
     }
 
-    openCustomListsDialog(): void {
+    openCustomListsDialog() {
         if (
             this.userSessionStore.mode() !== 'user' ||
             !this.userSessionStore.v4AccessToken()
@@ -138,10 +134,10 @@ export class MediaListActionsComponent {
             .open<MediaSigninDialogComponent, undefined, boolean>(
                 MediaSigninDialogComponent,
                 {
-                autoFocus: false,
-                maxWidth: '32rem',
-                panelClass: 'media-list-dialog-panel',
-                width: '100%',
+                    autoFocus: false,
+                    maxWidth: '32rem',
+                    panelClass: 'media-list-dialog-panel',
+                    width: '100%',
                 },
             )
             .afterClosed()
@@ -179,7 +175,7 @@ export class MediaListActionsComponent {
         return EMPTY;
     }
 
-    private showSuccess(message: string): void {
+    private showSuccess(message: string) {
         this.snackBar.open(message, 'Dismiss', {
             duration: 4000,
             panelClass: 'snackbar-success',

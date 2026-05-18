@@ -13,10 +13,7 @@
                         type="button"
                         (click)="openTrailer(featured.videoUrl)"
                     >
-                        <i
-                            class="fa-solid fa-play"
-                            aria-hidden="true"
-                        ></i>
+                        <i class="fa-solid fa-play" aria-hidden="true"></i>
                         Play Trailer
                     </button>
                 </app-hero-spotlight>
@@ -67,7 +64,6 @@
                                 <li class="trailers-page__grid-item">
                                     @if (trailer.video; as video) {
                                         <app-youtube-video-card
-                                            class="trailers-page__card"
                                             [video]="video"
                                             [mediaTitle]="trailer.mediaTitle"
                                             [mediaYear]="

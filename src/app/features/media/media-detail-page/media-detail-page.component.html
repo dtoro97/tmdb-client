@@ -234,7 +234,7 @@
                                                     </span>
                                                     @if (providers.link) {
                                                         <a
-                                                            class="media-detail-page__section-link text-body-sm muted"
+                                                            class="media-detail-page__section-link media-detail-page__section-link--muted text-body-sm"
                                                             [href]="
                                                                 providers.link
                                                             "
@@ -398,16 +398,13 @@
                                             name: episode.name,
                                             subtitle: null,
                                             overview: episode.overview,
-                                            stillPath:
-                                                episode.still_path ?? null,
-                                            seasonNumber:
-                                                episode.season_number ?? null,
+                                            stillPath: episode.still_path,
+                                            seasonNumber: episode.season_number,
                                             episodeNumber:
-                                                episode.episode_number ?? null,
-                                            airDate: episode.air_date ?? null,
-                                            runtime: episode.runtime ?? null,
-                                            voteAverage:
-                                                episode.vote_average ?? null,
+                                                episode.episode_number,
+                                            airDate: episode.air_date,
+                                            runtime: episode.runtime,
+                                            voteAverage: episode.vote_average,
                                             routeCommands: [
                                                 '/title',
                                                 vm.media.id,

@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import {
+    Observable,
+    catchError,
+    forkJoin,
+    map,
+    of,
+    switchMap,
+    tap,
+} from 'rxjs';
 
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
@@ -23,10 +31,7 @@ import {
     toCardItem,
     toPersonCardItem,
 } from '../../shared';
-import {
-    SpotlightItem,
-    toSpotlightItem,
-} from './home-spotlight-models';
+import { SpotlightItem, toSpotlightItem } from './home-spotlight-models';
 import { TrailerDataStoreService } from './trailer-data-store.service';
 import { WatchProviderStoreService } from '../../shared/services';
 
@@ -81,9 +86,12 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                 label: p.label,
                 value: p.id,
             })),
-            streamingNow: state.selectedStreamingProviderId !== null
-                ? state.streamingByProviderId[state.selectedStreamingProviderId] ?? { type: 'idle' as const }
-                : { type: 'idle' as const },
+            streamingNow:
+                state.selectedStreamingProviderId !== null
+                    ? (state.streamingByProviderId[
+                          state.selectedStreamingProviderId
+                      ] ?? { type: 'idle' as const })
+                    : { type: 'idle' as const },
             inTheatres: state.inTheatres,
         })),
     );
@@ -126,13 +134,18 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                     return of(undefined);
                 }
 
-                const providers: StreamingProviderConfig[] = topProviders.map((p) => ({
-                    id: p.id,
-                    label: p.name,
-                }));
+                const providers: StreamingProviderConfig[] = topProviders.map(
+                    (p) => ({
+                        id: p.id,
+                        label: p.name,
+                    }),
+                );
 
                 const loadingState = providers.reduce(
-                    (acc, p) => ({ ...acc, [p.id]: { type: 'loading' as const } }),
+                    (acc, p) => ({
+                        ...acc,
+                        [p.id]: { type: 'loading' as const },
+                    }),
                     {} as Record<number, LoadableItems<CardItem>>,
                 );
 
@@ -156,13 +169,16 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         this.patchState({
                             streamingByProviderId: providers.reduce(
                                 (acc, provider, index) => {
-                                    const results = streamingGroups[index] ?? [];
+                                    const results =
+                                        streamingGroups[index] ?? [];
                                     return {
                                         ...acc,
                                         [provider.id]: {
                                             type: 'loaded' as const,
                                             value: results
-                                                .map((item) => toCardItem(item, 'tv'))
+                                                .map((item) =>
+                                                    toCardItem(item, 'tv'),
+                                                )
                                                 .slice(0, PAGE_SIZE),
                                         },
                                     };

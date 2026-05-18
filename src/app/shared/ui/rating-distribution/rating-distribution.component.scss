@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .rating-distribution {
     display: grid;
     grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
@@ -76,10 +72,6 @@
     margin-left: var(--space-1);
 }
 
-.rating-distribution__meta {
-    display: block;
-}
-
 .rating-distribution__bars {
     display: grid;
     grid-template-columns: repeat(10, minmax(0, 1fr));
@@ -100,7 +92,7 @@
     min-height: 0.2rem;
     align-self: end;
     border-radius: var(--radius-sm);
-    background: var(--color-rating-bar);
+    background: var(--color-brand);
 }
 
 .rating-distribution__bar-label {

@@ -21,36 +21,27 @@
                 }
                 @if (languageOptions$ | async; as languageOptions) {
                     @if (languageOptions.length > 1) {
-                        <div class="photos-browser__language-filter">
-                            <mat-select
-                                class="photos-browser__language-select text-caption"
-                                aria-label="Filter by language"
-                                placeholder="Languages"
-                                multiple
-                                [value]="(selectedLanguages$ | async) ?? []"
-                                (selectionChange)="
-                                    setSelectedLanguages($event.value)
-                                "
-                            >
-                                @if (hasSelectedLanguages$ | async) {
-                                    <mat-select-trigger>
-                                        <span
-                                            class="photos-browser__language-trigger"
-                                        >
-                                            {{ selectedLanguageLabel$ | async }}
-                                        </span>
-                                    </mat-select-trigger>
-                                }
-                                @for (
-                                    option of languageOptions;
-                                    track option.value
-                                ) {
-                                    <mat-option [value]="option.value">
-                                        {{ option.label }}
-                                    </mat-option>
-                                }
-                            </mat-select>
-                        </div>
+                        <mat-select
+                            class="photos-browser__language-select text-caption"
+                            aria-label="Filter by language"
+                            placeholder="Languages"
+                            multiple
+                            [value]="(selectedLanguages$ | async) ?? []"
+                            (selectionChange)="setSelectedLanguages($event.value)"
+                        >
+                            @if (hasSelectedLanguages$ | async) {
+                                <mat-select-trigger>
+                                    <span class="photos-browser__language-trigger">
+                                        {{ selectedLanguageLabel$ | async }}
+                                    </span>
+                                </mat-select-trigger>
+                            }
+                            @for (option of languageOptions; track option.value) {
+                                <mat-option [value]="option.value">
+                                    {{ option.label }}
+                                </mat-option>
+                            }
+                        </mat-select>
                     }
                 }
             </div>

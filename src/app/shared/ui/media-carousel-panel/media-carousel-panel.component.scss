@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .media-carousel-panel--backdrop {
     --carousel-columns: 3;
 

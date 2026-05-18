@@ -13,6 +13,7 @@ import {
     RatingComponent,
     SkeletonComponent,
     SubPageHeaderComponent,
+    RepeatPipe,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
 import { MediaDetailStoreService } from '../media-detail-store.service';
@@ -43,6 +44,7 @@ interface CastCrewToolbarVm {
         EmptyStateComponent,
         SubPageHeaderComponent,
         MinutesToHours,
+        RepeatPipe,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './media-cast-crew.component.html',
@@ -62,30 +64,32 @@ export class MediaCastCrewComponent {
         map((crew) => groupCrewMembers(crew)),
     );
     readonly creditToolbar$ = this.castCrew$.pipe(
-        map((castCrew): CastCrewToolbarVm => ({
-            filterOptions: [
-                {
-                    label: 'All',
-                    value: 'all',
-                },
-                ...(castCrew.cast.length
-                    ? [
-                          {
-                              label: 'Cast',
-                              value: 'cast' as const,
-                          },
-                      ]
-                    : []),
-                ...(castCrew.crew.length
-                    ? [
-                          {
-                              label: 'Crew',
-                              value: 'crew' as const,
-                          },
-                      ]
-                    : []),
-            ],
-        })),
+        map(
+            (castCrew): CastCrewToolbarVm => ({
+                filterOptions: [
+                    {
+                        label: 'All',
+                        value: 'all',
+                    },
+                    ...(castCrew.cast.length
+                        ? [
+                              {
+                                  label: 'Cast',
+                                  value: 'cast' as const,
+                              },
+                          ]
+                        : []),
+                    ...(castCrew.crew.length
+                        ? [
+                              {
+                                  label: 'Crew',
+                                  value: 'crew' as const,
+                              },
+                          ]
+                        : []),
+                ],
+            }),
+        ),
     );
 
     constructor(

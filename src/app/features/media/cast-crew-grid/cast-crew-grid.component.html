@@ -7,7 +7,6 @@
         >
             <button
                 class="accordion-header credit-section__toggle"
-                aria-labelledby="cast-crew-grid-cast-title"
                 (click)="castItem.toggle()"
             >
                 <span class="credit-section__group-label">
@@ -75,11 +74,7 @@
     }
 
     @if (showCrew) {
-        @for (
-            group of groupedCrew;
-            track group.department;
-            let i = $index
-        ) {
+        @for (group of groupedCrew; track group.department; let i = $index) {
             <cdk-accordion-item
                 #crewItem="cdkAccordionItem"
                 class="credit-section accordion-section"
@@ -96,15 +91,15 @@
                         <span class="credit-section__count text-caption">
                             {{ group.members.length }}
                             {{
-                                group.members.length === 1
-                                    ? "person"
-                                    : "people"
+                                group.members.length === 1 ? "person" : "people"
                             }}
                         </span>
                     </span>
                     <i
                         class="fa-solid fa-chevron-down accordion-chevron"
-                        [class.accordion-chevron--collapsed]="!crewItem.expanded"
+                        [class.accordion-chevron--collapsed]="
+                            !crewItem.expanded
+                        "
                         aria-hidden="true"
                     ></i>
                 </button>

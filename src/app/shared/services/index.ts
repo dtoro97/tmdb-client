@@ -3,6 +3,7 @@ export * from './config-store.service';
 export * from './genre.service';
 export * from './locale-store.service';
 export * from './media-rating.service';
+export * from './recently-viewed-store.service';
 export * from './tmdb-list.service';
 export * from './tmdb-user-account.service';
 export * from './tmdb-user-auth.service';

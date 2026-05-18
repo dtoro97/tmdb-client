@@ -66,7 +66,7 @@
                                     />
                                 </div>
                                 <div class="credit-skeleton-list">
-                                    @for (row of [0, 1, 2, 3, 4]; track row) {
+                                    @for (row of 5 | repeat; track row) {
                                         <div class="credit-row-skeleton">
                                             <app-skeleton
                                                 class="credit-avatar-skeleton"
@@ -110,9 +110,7 @@
                                                 [options]="
                                                     creditToolbar.filterOptions
                                                 "
-                                                [selectedValue]="
-                                                    visibleSection
-                                                "
+                                                [selectedValue]="visibleSection"
                                                 variant="subtle"
                                                 (selected)="
                                                     onVisibleSectionsChange(

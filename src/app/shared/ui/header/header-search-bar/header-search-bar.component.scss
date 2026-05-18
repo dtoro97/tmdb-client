@@ -16,17 +16,18 @@
 .header-search__bar {
     display: flex;
     align-items: center;
-    background: var(--surface-panel);
+    background: var(--control-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     min-height: var(--header-search-bar-height);
     overflow: hidden;
     transition:
+        background-color var(--motion-fast),
         border-color var(--motion-fast),
         box-shadow var(--motion-fast);
 
     &:hover {
-        border-color: var(--text-muted);
+        background: var(--control-surface-hover);
     }
 
     @include focus-within-ring();
@@ -35,6 +36,25 @@
 .header-search__filter-field {
     flex-shrink: 0;
     border-inline-end: 1px solid var(--color-border);
+}
+
+.header-search__filter-select {
+    min-height: unset;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+
+    &:hover {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    &:focus-within {
+        border-color: transparent;
+        box-shadow: none;
+    }
 }
 
 .header-search__input-field {

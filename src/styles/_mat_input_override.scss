@@ -1,21 +1,17 @@
 :root {
-    --mat-form-field-container-height: 36px;
-    --mat-form-field-container-vertical-padding: 6px;
-    --mat-form-field-error-text-color: var(--color-danger-text);
     --mdc-outlined-text-field-label-text-size: 0.8rem;
 
-    --mat-select-trigger-text-size: 0.8rem;
-    --mat-select-trigger-text-weight: 500;
-    --mat-select-enabled-trigger-text-color: var(--text-muted);
-    --mat-select-enabled-arrow-color: var(--text-muted);
-    --mat-select-focused-arrow-color: var(--text-muted);
-    --mat-select-placeholder-text-color: var(--text-muted);
+    --mat-select-trigger-text-size: var(--text-xs);
+    --mat-select-trigger-text-line-height: 1;
+    --mat-select-enabled-trigger-text-color: var(--control-text-hover);
+    --mat-select-enabled-arrow-color: var(--control-text);
+    --mat-select-focused-arrow-color: var(--control-text);
+    --mat-select-placeholder-text-color: var(--control-text);
 
     --mat-select-panel-background-color: var(--mat-sys-surface-container);
     --mat-select-container-elevation-shadow: var(--shadow-lg);
 
     --mat-option-label-text-size: 0.875rem;
-    --mat-option-label-text-weight: 400;
     --mat-option-label-text-color: var(--mat-sys-on-surface);
     --mat-option-hover-state-layer-color: transparent;
     --mat-option-focus-state-layer-color: transparent;
@@ -107,6 +103,31 @@
 }
 
 .mat-mdc-select {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    min-height: var(--control-height-sm);
+    padding-inline: var(--space-4) var(--space-3);
+    border: 1px solid var(--control-border);
+    border-radius: var(--control-radius);
+    background: var(--control-surface);
+    box-sizing: border-box;
+    transition: var(--control-transition);
+
+    .mat-mdc-select-trigger {
+        min-height: calc(var(--control-height-sm) - 2px);
+    }
+
+    &:hover {
+        background: var(--control-surface-hover);
+        border-color: var(--control-border-hover);
+    }
+
+    &:focus-within {
+        border-color: var(--control-focus-border);
+        box-shadow: 0 0 0 1px var(--control-focus-ring-inner);
+    }
+
     .mat-mdc-select-arrow-wrapper {
         width: 0.875rem;
     }
@@ -124,13 +145,6 @@
 }
 
 .mat-mdc-form-field-type-mat-select {
-    --mat-select-trigger-text-size: var(--text-xs);
-    --mat-select-trigger-text-weight: var(--weight-medium);
-    --mat-select-enabled-trigger-text-color: var(--text-muted);
-    --mat-select-focused-arrow-color: var(--text-muted);
-    --mat-select-enabled-arrow-color: var(--text-muted);
-    --mat-select-placeholder-text-color: var(--text-muted);
-
     .mat-mdc-form-field-infix {
         width: auto;
     }
@@ -167,15 +181,4 @@
     &.mat-mdc-option-active {
         background: var(--control-surface-hover) !important;
     }
-}
-
-.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
-    .mdc-list-item__primary-text {
-        color: var(--text-accent) !important;
-        font-weight: 600 !important;
-    }
-}
-
-.mat-pseudo-checkbox-minimal {
-    --mat-minimal-pseudo-checkbox-selected-checkmark-color: var(--color-brand);
 }

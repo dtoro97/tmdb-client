@@ -1,9 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
 .lists-section {
     display: flex;
     flex-direction: column;

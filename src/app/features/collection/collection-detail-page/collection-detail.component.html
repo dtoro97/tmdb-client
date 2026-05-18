@@ -103,7 +103,9 @@
 
                         <p
                             class="collection-detail__overview text-body"
-                            [class.muted]="!collection.overview"
+                            [class.collection-detail__overview--empty]="
+                                !collection.overview
+                            "
                         >
                             {{
                                 collection.overview ||
@@ -208,7 +210,8 @@
                                                                 "
                                                             />
                                                             @if (
-                                                                entry.item.voteCount
+                                                                entry.item
+                                                                    .voteCount
                                                             ) {
                                                                 <span
                                                                     class="collection-detail__arc-vote-count text-caption"
@@ -229,7 +232,9 @@
 
                                         <p
                                             class="collection-detail__arc-overview text-body-sm"
-                                            [class.muted]="!entry.item.overview"
+                                            [class.collection-detail__arc-overview--empty]="
+                                                !entry.item.overview
+                                            "
                                         >
                                             {{
                                                 entry.item.overview ||
@@ -266,7 +271,7 @@
                         }
 
                         <div class="catalog-panel">
-                            <div class="result-list">
+                            <div>
                                 <app-media-list
                                     [state]="partsState"
                                     routeType="movie"
@@ -277,7 +282,7 @@
                 } @else if (
                     partsState.type === "loaded" && !partsState.value.length
                 ) {
-                    <p class="muted empty-text">
+                    <p class="collection-detail__empty-text empty-text">
                         No movies in this collection.
                     </p>
                 }

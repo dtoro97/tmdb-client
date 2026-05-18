@@ -24,11 +24,10 @@
 
     &:hover {
         background: var(--control-surface-hover);
+        border-color: var(--control-border-hover);
     }
 
-    &:focus-within {
-        border-color: var(--control-focus-border);
-    }
+    @include focus-within-ring();
 }
 
 .sort-button__select-shell {
@@ -40,16 +39,25 @@
 }
 
 .sort-button__select {
-    --mat-select-trigger-text-size: var(--text-xs);
-    --mat-select-trigger-text-weight: var(--weight-semibold);
-    --mat-select-enabled-trigger-text-color: var(--control-text-hover);
-    --mat-select-focused-arrow-color: var(--control-text);
-    --mat-select-enabled-arrow-color: var(--control-text);
-    --mat-select-placeholder-text-color: var(--control-text);
-
     width: auto;
     max-width: 100%;
     min-width: 0;
+    min-height: unset;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+
+    &:hover {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    &:focus-within {
+        border-color: transparent;
+        box-shadow: none;
+    }
 }
 
 .sort-button__divider {
@@ -57,6 +65,12 @@
     align-self: stretch;
     background: var(--control-border);
     flex-shrink: 0;
+    transition: background-color var(--motion-fast);
+}
+
+.sort-button__control:hover .sort-button__divider,
+.sort-button__control:focus-within .sort-button__divider {
+    background: var(--control-border-hover);
 }
 
 .sort-button__direction {

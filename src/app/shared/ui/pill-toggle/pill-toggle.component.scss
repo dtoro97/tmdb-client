@@ -1,13 +1,5 @@
 @use "breakpoints" as *;
 
-:host {
-    display: block;
-}
-
-:host:empty {
-    display: none;
-}
-
 .pill-toggle {
     display: flex;
     flex-wrap: wrap;
@@ -88,4 +80,3 @@
         font-size: var(--text-sm);
     }
 }
-

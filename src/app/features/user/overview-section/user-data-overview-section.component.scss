@@ -1,10 +1,6 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    display: block;
-}
-
 .user-data-overview__hero {
     display: flex;
     flex-direction: column;

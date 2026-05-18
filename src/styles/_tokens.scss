@@ -48,13 +48,10 @@
 
     --control-surface: var(--mat-sys-surface-container-high);
     --control-surface-hover: #333333;
-    --control-surface-active: var(--surface-panel);
     --control-border: var(--color-border-subtle);
     --control-border-hover: var(--color-border);
-    --control-border-active: var(--color-border);
     --control-text: var(--text-secondary);
     --control-text-hover: var(--text-primary);
-    --control-text-active: var(--text-primary);
     --control-focus-border: var(--color-brand);
     --control-focus-outline: #d76a6a;
     --control-focus-ring-inner: rgba(198, 40, 40, 0.25);
@@ -73,13 +70,9 @@
 
     --control-accent-surface: var(--color-brand);
     --control-accent-surface-hover: var(--color-brand-hover);
-    --control-accent-surface-active: var(--color-brand-active);
     --control-accent-border: var(--color-brand);
     --control-accent-border-hover: var(--color-brand-hover);
-    --control-accent-border-active: var(--color-brand-active);
     --control-accent-text: #ffffff;
-    --control-accent-text-hover: #ffffff;
-    --control-accent-text-active: #ffffff;
     --control-accent-ripple: rgba(255, 255, 255, 0.15);
 
     --radius-sm: 0.375rem;
@@ -103,8 +96,6 @@
     --brightness-sm: 1.12;
 
     --transition-color: color var(--motion-fast);
-    --transition-bg: background-color var(--motion-base);
-    --transition-opacity: opacity var(--motion-base);
 
     --transition-bg-color:
         background-color var(--motion-base), color var(--motion-fast);
@@ -122,7 +113,6 @@
     --color-brand-hover: var(--color-brand-400);
     --color-brand-active: var(--color-brand-600);
     --color-brand-light: var(--color-brand-300);
-    --color-brand-dark: var(--color-brand-700);
 
     --color-surface: #111111;
     --color-surface-dim: #161616;
@@ -140,22 +130,16 @@
     --text-accent: var(--color-brand-light);
     --color-danger-text: var(--color-brand-300);
 
-    --color-success-300: #78d79f;
-    --color-success-500: #2f8f52;
-    --color-success: var(--color-success-500);
-    --color-success-light: var(--color-success-300);
+    --color-success: #2f8f52;
+    --color-success-light: #78d79f;
 
     --color-rating: #f5c518;
-    --color-rating-bar: var(--color-brand);
-
     --color-rank: #f1bc16;
     --color-on-rank: #231900;
 
     --color-rank-border: #a98712;
 
     --color-rank-cap: #dcaa12;
-
-    --text-rating: var(--color-rating);
 
     --surface-page: var(--color-surface);
     --surface-panel: var(--color-surface-raised);
@@ -167,11 +151,9 @@
     --border-overlay-soft: rgba(255, 255, 255, 0.15);
     --border-success-soft: rgba(47, 143, 82, 0.3);
     --ripple-success-soft: rgba(120, 215, 159, 0.22);
-    --text-index-muted: rgba(255, 255, 255, 0.7);
+    --text-faint: rgba(255, 255, 255, 0.5);
 
-    --color-on-surface-faint: rgba(255, 255, 255, 0.5);
-
-    --color-on-surface-medium: rgba(255, 255, 255, 0.7);
+    --text-soft: rgba(255, 255, 255, 0.7);
 
     --skeleton-base: rgba(255, 255, 255, 0.08);
     --skeleton-highlight: rgba(255, 255, 255, 0.16);
@@ -196,9 +178,6 @@
 
     --shadow-text-hero: 0 1px 3px rgba(17, 17, 17, 0.4);
 
-    --shadow-filter-media: drop-shadow(0 4px 10px rgba(17, 17, 17, 0.2));
-
-    --z-base: 1;
     --z-overlay: 1000;
     --z-dialog: 1100;
     --z-toast: 1200;
@@ -208,5 +187,7 @@
     :root {
         --text-2xs: 0.8125rem;
         --text-xs: 0.875rem;
+        --text-sm: 1rem;
+        --control-height-sm: 2.5rem;
     }
 }

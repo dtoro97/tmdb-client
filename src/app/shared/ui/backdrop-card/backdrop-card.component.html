@@ -24,9 +24,9 @@
             }
             @if ((showDate || dateFormat) && item.date) {
                 @if (showRating && item.rating) {
-                    <span class="muted">&middot;</span>
+                    <span class="backdrop-card__meta-muted">&middot;</span>
                 }
-                <span class="muted">{{
+                <span class="backdrop-card__meta-muted">{{
                     item.date
                         | date: (dateFormat === "dayMonth" ? "MMM d" : "yyyy")
                 }}</span>

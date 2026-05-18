@@ -1,30 +1,9 @@
-@keyframes app-fade-up {
-    from {
-        opacity: 0;
-        transform: translateY(var(--fade-up-distance, 20px));
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @mixin line-clamp($lines: 2) {
     display: -webkit-box;
     -webkit-line-clamp: $lines;
     line-clamp: $lines;
     -webkit-box-orient: vertical;
     overflow: hidden;
-}
-
-@mixin fade-up(
-    $duration: 0.4s,
-    $distance: 20px,
-    $timing: ease-out
-) {
-    --fade-up-distance: #{$distance};
-    animation: app-fade-up $duration $timing both;
 }
 
 @mixin text-link($color: var(--mat-sys-on-surface)) {
@@ -73,7 +52,7 @@
     min-width: 1.75rem;
     flex-shrink: 0;
     text-align: right;
-    color: var(--text-index-muted);
+    color: var(--text-soft);
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
     font-variant-numeric: tabular-nums;
@@ -129,7 +108,6 @@
 
 @mixin focus-ring(
     $color: var(--control-focus-border),
-    $opacity: 70%,
     $offset: 2px
 ) {
     &:focus-visible {
