@@ -36,6 +36,6 @@ jobs:
           --base-href https://dtoro97.github.io/tmdb-client/
 
       - name: Deploy to gh-pages
-        run: npx angular-cli-ghpages --dir=dist/tmdb-client/
+        run: npx angular-cli-ghpages --no-silent --dir=dist/tmdb-client/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
