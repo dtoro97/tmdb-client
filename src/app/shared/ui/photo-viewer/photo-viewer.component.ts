@@ -81,11 +81,11 @@ export class PhotoViewerComponent {
         this.dialogRef.close();
 
         if (typeof photosLink !== 'string') {
-            void this.router.navigate(photosLink);
+            this.router.navigate(photosLink);
             return;
         }
 
-        void this.router.navigateByUrl(photosLink);
+        this.router.navigateByUrl(photosLink);
     }
 
     @HostListener('document:keydown', ['$event'])

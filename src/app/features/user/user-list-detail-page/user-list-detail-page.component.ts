@@ -71,7 +71,7 @@ const SORT_OPTIONS = [
 })
 export class UserListDetailPageComponent {
     readonly vm$ = this.store.userListDetailVm$;
-    readonly backLink = '/me/lists';
+    backLink = ['/', 'me', 'lists'];
     readonly initialSkeletonCount = 6;
     readonly loadingMoreSkeletonCount = 4;
     readonly sortOptions = SORT_OPTIONS;
@@ -243,7 +243,7 @@ export class UserListDetailPageComponent {
                     confirmed ? this.store.deleteList$() : EMPTY,
                 ),
                 tap(() => {
-                    void this.router.navigateByUrl(this.backLink);
+                    this.router.navigate(this.backLink);
                     this.showSuccess('List deleted.');
                 }),
                 catchError((error) =>

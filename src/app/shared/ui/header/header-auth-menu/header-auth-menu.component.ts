@@ -1,5 +1,10 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    DestroyRef,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 
@@ -146,11 +151,13 @@ export class HeaderAuthMenuComponent {
             .pipe(
                 switchMap(() =>
                     this.router.url.startsWith('/me')
-                        ? from(this.router.navigateByUrl('/'))
+                        ? from(this.router.navigate(['/']))
                         : of(true),
                 ),
                 catchError(() => EMPTY),
-                finalize(() => this.patchPendingState({ logoutPending: false })),
+                finalize(() =>
+                    this.patchPendingState({ logoutPending: false }),
+                ),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();

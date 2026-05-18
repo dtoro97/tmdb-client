@@ -31,52 +31,6 @@ const LAST_AUTH_ERROR_KEY = 'tmdb_last_auth_error';
 const PENDING_V4_REQUEST_TOKEN_KEY = 'tmdb_pending_v4_request_token';
 const PENDING_V4_REDIRECT_URL_KEY = 'tmdb_pending_v4_redirect_url';
 
-function ensureV4RequestToken(tokenResponse: V4RequestTokenResponse): string {
-    const requestToken = tokenResponse.request_token?.trim();
-
-    if (!requestToken) {
-        throw new Error(
-            tokenResponse.status_message ||
-                'TMDb did not return a v4 request token.',
-        );
-    }
-
-    return requestToken;
-}
-
-function ensureV4AccessToken(tokenResponse: V4AccessTokenResponse): string {
-    const accessToken = tokenResponse.access_token?.trim();
-
-    if (!accessToken) {
-        throw new Error(
-            tokenResponse.status_message ||
-                'TMDb did not return a v4 access token.',
-        );
-    }
-
-    return accessToken;
-}
-
-function ensureV4AccountId(tokenResponse: V4AccessTokenResponse): string {
-    const accountId = tokenResponse.account_id?.trim();
-
-    if (!accountId) {
-        throw new Error('TMDb did not return a v4 account id.');
-    }
-
-    return accountId;
-}
-
-function ensureSessionId(sessionResponse: SessionResponse): string {
-    const sessionId = sessionResponse.session_id?.trim();
-
-    if (!sessionId) {
-        throw new Error('TMDb did not return a session id.');
-    }
-
-    return sessionId;
-}
-
 @Injectable({ providedIn: 'root' })
 export class TmdbUserAuthService {
     constructor(
@@ -115,7 +69,10 @@ export class TmdbUserAuthService {
     }
 
     startLogin$(returnUrl: string): Observable<void> {
-        const redirectTo = new URL(returnUrl, this.document.baseURI).toString();
+        const redirectTo = new URL(
+            `.${returnUrl}`,
+            this.document.baseURI,
+        ).toString();
 
         return this.authenticationV4Service
             .authenticationV4CreateRequestToken(
@@ -126,7 +83,7 @@ export class TmdbUserAuthService {
             )
             .pipe(
                 tap((response) => {
-                    const requestToken = ensureV4RequestToken(response);
+                    const requestToken = this.ensureV4RequestToken(response);
                     this.storePendingLogin(requestToken, redirectTo);
                     this.navigateToTmdbApproval(requestToken);
                 }),
@@ -162,8 +119,8 @@ export class TmdbUserAuthService {
             )
             .pipe(
                 map((response) => ({
-                    v4AccessToken: ensureV4AccessToken(response),
-                    v4AccountId: ensureV4AccountId(response),
+                    v4AccessToken: this.ensureV4AccessToken(response),
+                    v4AccountId: this.ensureV4AccountId(response),
                 })),
                 switchMap(({ v4AccessToken, v4AccountId }) =>
                     this.authenticationService
@@ -174,7 +131,7 @@ export class TmdbUserAuthService {
                             API_JSON_OPTIONS,
                         )
                         .pipe(
-                            map((response) => ensureSessionId(response)),
+                            map((response) => this.ensureSessionId(response)),
                             map((sessionId) => ({
                                 sessionId,
                                 v4AccessToken,
@@ -296,6 +253,54 @@ export class TmdbUserAuthService {
     private clearPendingLogin(): void {
         this.browserStorage.removeItem(PENDING_V4_REQUEST_TOKEN_KEY);
         this.browserStorage.removeItem(PENDING_V4_REDIRECT_URL_KEY);
+    }
+
+    private ensureV4RequestToken(
+        tokenResponse: V4RequestTokenResponse,
+    ): string {
+        const requestToken = tokenResponse.request_token?.trim();
+
+        if (!requestToken) {
+            throw new Error(
+                tokenResponse.status_message ||
+                    'TMDb did not return a v4 request token.',
+            );
+        }
+
+        return requestToken;
+    }
+
+    private ensureV4AccessToken(tokenResponse: V4AccessTokenResponse): string {
+        const accessToken = tokenResponse.access_token?.trim();
+
+        if (!accessToken) {
+            throw new Error(
+                tokenResponse.status_message ||
+                    'TMDb did not return a v4 access token.',
+            );
+        }
+
+        return accessToken;
+    }
+
+    private ensureV4AccountId(tokenResponse: V4AccessTokenResponse): string {
+        const accountId = tokenResponse.account_id?.trim();
+
+        if (!accountId) {
+            throw new Error('TMDb did not return a v4 account id.');
+        }
+
+        return accountId;
+    }
+
+    private ensureSessionId(sessionResponse: SessionResponse): string {
+        const sessionId = sessionResponse.session_id?.trim();
+
+        if (!sessionId) {
+            throw new Error('TMDb did not return a session id.');
+        }
+
+        return sessionId;
     }
 
     private isSameCallbackTarget(
