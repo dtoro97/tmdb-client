@@ -11,7 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { take, tap } from 'rxjs';
+import { distinctUntilChanged, map, take, tap } from 'rxjs';
 
 import {
     AgePipe,
@@ -22,6 +22,7 @@ import {
     PhotosGridComponent,
     ExternalLinksComponent,
     MediaCarouselPanelComponent,
+    RecentlyViewedStoreService,
 } from '../../../shared';
 import { MAX_VISIBLE_PHOTOS } from '../../../constants';
 import {
@@ -66,6 +67,7 @@ export class PersonDetailsComponent {
         private titleService: Title,
         private route: ActivatedRoute,
         private dialog: MatDialog,
+        private recentlyViewedStore: RecentlyViewedStoreService,
         private router: Router,
         private destroyRef: DestroyRef,
     ) {
@@ -78,12 +80,25 @@ export class PersonDetailsComponent {
         this.personDetailStore.personDetailVm$
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                tap((vm) => {
-                    if (vm.person.type === 'loaded' && vm.person.value) {
-                        this.titleService.setTitle(
-                            `${vm.person.value.name} | People`,
-                        );
+                map((vm) =>
+                    vm.person.type === 'loaded' ? vm.person.value : null,
+                ),
+                distinctUntilChanged(
+                    (previous, current) => previous?.id === current?.id,
+                ),
+                tap((person) => {
+                    if (!person || typeof person.id !== 'number') {
+                        return;
                     }
+
+                    this.titleService.setTitle(`${person.name} | People`);
+                    this.recentlyViewedStore.addItem({
+                        kind: 'person',
+                        id: person.id,
+                        name: person.name ?? '',
+                        imagePath: person.profile_path ?? null,
+                        subtitle: person.known_for_department ?? '',
+                    });
                 }),
             )
             .subscribe();

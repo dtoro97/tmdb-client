@@ -15,6 +15,10 @@
     text-align: center;
 }
 
+.footer__recently-viewed {
+    width: 100%;
+}
+
 .footer__links {
     display: flex;
     flex-direction: column;
@@ -40,7 +44,7 @@
         color: var(--text-accent);
     }
 
-    @include focus-ring(var(--color-brand), 70%, var(--space-1));
+    @include focus-ring();
 }
 
 .footer__brand {
@@ -58,7 +62,7 @@
 .footer__brand-link {
     display: inline-flex;
     align-items: center;
-    @include focus-ring(var(--color-brand), 70%, var(--space-1));
+    @include focus-ring();
 }
 
 .footer__logo {
