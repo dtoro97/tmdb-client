@@ -42,6 +42,7 @@ jobs:
                   --no-silent \
                   --name "github-actions[bot]" \
                   --email "41898282+github-actions[bot]@users.noreply.github.com" \
+                  --message "deploy: publish production build" \
                   --dir=dist/tmdb-client/
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
