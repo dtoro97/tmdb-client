@@ -1,7 +1,7 @@
 <div class="home-top-picks">
-    @if (state.type === "loading") {
+    @if (loading) {
         <div class="home-top-picks__featured">
-            @for (item of featuredSkeletonItems; track item) {
+            @for (item of featuredSkeletonCount | repeat; track item) {
                 <article
                     class="home-top-picks__feature home-top-picks__feature--skeleton"
                 >
@@ -40,7 +40,7 @@
         </div>
 
         <div class="home-top-picks__grid">
-            @for (item of secondarySkeletonItems; track item) {
+            @for (item of secondarySkeletonCount | repeat; track item) {
                 <article class="home-top-picks__tile">
                     <app-skeleton class="home-top-picks__tile-rank-skeleton" />
 
@@ -96,9 +96,7 @@
 
                                 <div class="home-top-picks__feature-meta">
                                     @if (entry.item.date) {
-                                        <span
-                                            class="home-top-picks__feature-meta-item text-meta"
-                                        >
+                                        <span class="text-meta">
                                             {{ entry.item.date | date: "yyyy" }}
                                         </span>
                                     }

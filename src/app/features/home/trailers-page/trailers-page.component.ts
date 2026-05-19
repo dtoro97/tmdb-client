@@ -4,10 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 
 import { PAGE_SIZE } from '../../../constants';
-import {
-    SkeletonComponent,
-    YoutubeVideoCardComponent,
-} from '../../../shared';
+import { SkeletonComponent, YoutubeVideoCardComponent } from '../../../shared';
 import { RepeatPipe } from '../../../shared/pipes/repeat.pipe';
 import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.component';
 import { TrailersPageStoreService } from './trailers-page-store.service';

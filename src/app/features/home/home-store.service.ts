@@ -1,19 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import {
-    Observable,
-    catchError,
-    forkJoin,
-    map,
-    of,
-    switchMap,
-    tap,
-} from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
     DiscoverRestControllerService,
-    MovieListRestControllerService,
     MultiListItem,
     PersonListRestControllerService,
     TrendingRestControllerService,
@@ -31,7 +22,7 @@ import {
     toCardItem,
     toPersonCardItem,
 } from '../../shared';
-import { SpotlightItem, toSpotlightItem } from './home-spotlight-models';
+import { SpotlightItem } from './spotlight-item';
 import { TrailerDataStoreService } from './trailer-data-store.service';
 import { WatchProviderStoreService } from '../../shared/services';
 
@@ -40,13 +31,15 @@ export interface StreamingProviderConfig {
     label: string;
 }
 
+const TOP_PICKS_MAX_ITEMS = 10;
+const TOP_PICKS_FEATURED_COUNT = 3;
+
 interface HomeState {
     spotlight: LoadableValue<SpotlightItem | null>;
     whatToWatch: LoadableItems<CardItem>;
     popularPeople: LoadableItems<PersonCardItem>;
     trendingToday: LoadableItems<CardItem>;
     airingToday: LoadableItems<CardItem>;
-    topRated: LoadableItems<CardItem>;
     selectedStreamingProviderId: number | null;
     streamingProviders: StreamingProviderConfig[];
     streamingByProviderId: Record<number, LoadableItems<CardItem>>;
@@ -59,7 +52,6 @@ const INITIAL_STATE: HomeState = {
     popularPeople: { type: 'loading' },
     trendingToday: { type: 'loading' },
     airingToday: { type: 'loading' },
-    topRated: { type: 'loading' },
     selectedStreamingProviderId: null,
     streamingProviders: [],
     streamingByProviderId: {},
@@ -68,38 +60,39 @@ const INITIAL_STATE: HomeState = {
 
 @Injectable()
 export class HomeStoreService extends ComponentStore<HomeState> {
-    readonly homeVM$ = this.state$.pipe(
-        map((state) => ({
-            spotlight: state.spotlight,
-            whatToWatch: state.whatToWatch,
-            popularPeople: state.popularPeople,
-            trendingToday: state.trendingToday,
-            airingToday: state.airingToday,
-            topRated: state.topRated,
-            selectedStreamingProviderId: state.selectedStreamingProviderId,
-            selectedStreamingProviderLabel:
-                state.streamingProviders.find(
-                    (provider) =>
-                        provider.id === state.selectedStreamingProviderId,
-                )?.label ?? null,
-            streamingProviders: state.streamingProviders.map((p) => ({
-                label: p.label,
-                value: p.id,
-            })),
-            streamingNow:
-                state.selectedStreamingProviderId !== null
-                    ? (state.streamingByProviderId[
-                          state.selectedStreamingProviderId
-                      ] ?? { type: 'idle' as const })
-                    : { type: 'idle' as const },
-            inTheatres: state.inTheatres,
+    readonly homeVM$ = this.select((state) => ({
+        spotlight: state.spotlight,
+        whatToWatch: state.whatToWatch,
+        whatToWatchLoading: state.whatToWatch.type === 'loading',
+        whatToWatchTopPicks: this.toTopPickGroups(state.whatToWatch),
+        popularPeople: state.popularPeople,
+        trendingToday: state.trendingToday,
+        airingToday: state.airingToday,
+        airingTonightPreview:
+            state.airingToday.type === 'loaded'
+                ? state.airingToday.value.slice(0, 12)
+                : [],
+        selectedStreamingProviderId: state.selectedStreamingProviderId,
+        selectedStreamingProviderLabel:
+            state.streamingProviders.find(
+                (provider) => provider.id === state.selectedStreamingProviderId,
+            )?.label ?? null,
+        streamingProviders: state.streamingProviders.map((p) => ({
+            label: p.label,
+            value: p.id,
         })),
-    );
+        streamingNow:
+            state.selectedStreamingProviderId !== null
+                ? (state.streamingByProviderId[
+                      state.selectedStreamingProviderId
+                  ] ?? { type: 'idle' as const })
+                : { type: 'idle' as const },
+        inTheatres: state.inTheatres,
+    }));
 
     private readonly opts = API_JSON_OPTIONS;
 
     constructor(
-        private readonly movieListService: MovieListRestControllerService,
         private readonly tvListService: TvSeriesListRestControllerService,
         private readonly discoverService: DiscoverRestControllerService,
         private readonly personListService: PersonListRestControllerService,
@@ -119,7 +112,6 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             this.loadAiringToday$(),
             this.loadStreamingProviders$(),
             this.loadInTheatres$(),
-            this.loadTopRated$(),
         ]);
     }
 
@@ -127,11 +119,11 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         this.patchState({ selectedStreamingProviderId: providerId });
     }
 
-    private loadStreamingProviders$(): Observable<void> {
+    private loadStreamingProviders$() {
         return this.watchProviderStore.topTvProviders$.pipe(
             switchMap((topProviders) => {
                 if (!topProviders.length) {
-                    return of(undefined);
+                    return of([]);
                 }
 
                 const providers: StreamingProviderConfig[] = topProviders.map(
@@ -187,13 +179,12 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                             ),
                         }),
                     ),
-                    map(() => undefined),
                 );
             }),
         );
     }
 
-    private loadWhatToWatch$(): Observable<void> {
+    private loadWhatToWatch$() {
         this.patchState({ whatToWatch: { type: 'loading' } });
 
         const movieMinScore = 6.8;
@@ -298,11 +289,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                     whatToWatch: { type: 'loaded', value: whatToWatch },
                 }),
             ),
-            map(() => undefined),
         );
     }
 
-    private loadPopularPeople$(): Observable<void> {
+    private loadPopularPeople$() {
         this.patchState({ popularPeople: { type: 'loading' } });
 
         return this.personListService
@@ -319,11 +309,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         popularPeople: { type: 'loaded', value: popularPeople },
                     }),
                 ),
-                map(() => undefined),
             );
     }
 
-    private loadTrendingToday$(): Observable<void> {
+    private loadTrendingToday$() {
         this.patchState({
             spotlight: { type: 'loading' },
             trendingToday: { type: 'loading' },
@@ -343,7 +332,9 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         (item) => !!item.backdrop_path,
                     );
                     const picked = shuffle(candidates)[0];
-                    const spotlight = picked ? toSpotlightItem(picked) : null;
+                    const spotlight = picked
+                        ? this.toSpotlightItem(picked)
+                        : null;
                     const carouselItems = mediaItems.filter(
                         (item) => item !== picked,
                     );
@@ -374,11 +365,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         },
                     }),
                 ),
-                map(() => undefined),
             );
     }
 
-    private loadAiringToday$(): Observable<void> {
+    private loadAiringToday$() {
         this.patchState({ airingToday: { type: 'loading' } });
 
         return this.tvListService
@@ -405,52 +395,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         },
                     }),
                 ),
-                map(() => undefined),
             );
     }
 
-    private loadTopRated$(): Observable<void> {
-        this.patchState({ topRated: { type: 'loading' } });
-
-        return forkJoin({
-            movies: this.movieListService.movieTopRatedList(
-                undefined,
-                1,
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
-            tv: this.tvListService.tvSeriesTopRatedList(
-                undefined,
-                1,
-                'body',
-                undefined,
-                this.opts,
-            ),
-        }).pipe(
-            map(({ movies, tv }) =>
-                shuffle([
-                    ...(movies.results ?? []).map((item) =>
-                        toCardItem(item, 'movie'),
-                    ),
-                    ...(tv.results ?? []).map((item) => toCardItem(item, 'tv')),
-                ]).slice(0, PAGE_SIZE),
-            ),
-            catchError(() => of([] as CardItem[])),
-            tap((topRated) =>
-                this.patchState({
-                    topRated: {
-                        type: 'loaded',
-                        value: topRated,
-                    },
-                }),
-            ),
-            map(() => undefined),
-        );
-    }
-
-    private loadInTheatres$(): Observable<void> {
+    private loadInTheatres$() {
         this.patchState({ inTheatres: { type: 'loading' } });
 
         const releaseDateGte = getISODate(0);
@@ -512,7 +460,42 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                         inTheatres: { type: 'loaded', value: inTheatres },
                     }),
                 ),
-                map(() => undefined),
             );
+    }
+
+    private toSpotlightItem(item: MultiListItem): SpotlightItem | null {
+        if (!item.backdrop_path || !item.id) {
+            return null;
+        }
+
+        const isMovie = item.media_type === 'movie';
+        const title = isMovie ? item.title : item.name;
+        const date = isMovie ? item.release_date : item.first_air_date;
+
+        return {
+            id: item.id,
+            mediaType: isMovie ? 'movie' : 'tv',
+            title: title ?? '',
+            overview: item.overview ?? '',
+            backdropPath: item.backdrop_path,
+            rating: item.vote_average ?? null,
+            year: (date ?? '').slice(0, 4),
+            mediaTypeLabel: isMovie ? 'Movie' : 'TV Series',
+        };
+    }
+
+    private toTopPickGroups(state: LoadableItems<CardItem>) {
+        const rankedItems =
+            state.type === 'loaded' || state.type === 'loading-more'
+                ? state.value.slice(0, TOP_PICKS_MAX_ITEMS).map((item, index) => ({
+                      item,
+                      rank: index + 1,
+                  }))
+                : [];
+
+        return {
+            featured: rankedItems.slice(0, TOP_PICKS_FEATURED_COUNT),
+            secondary: rankedItems.slice(TOP_PICKS_FEATURED_COUNT),
+        };
     }
 }

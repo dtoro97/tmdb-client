@@ -5,55 +5,60 @@
         [alt]="s.title"
     >
         @if (backLink) {
-            <a class="spotlight-back text-caption" [routerLink]="backLink">
+            <a
+                class="hero-spotlight__back-link text-caption"
+                [routerLink]="backLink"
+            >
                 <i
-                    class="spotlight-back__icon fa-solid fa-chevron-left"
+                    class="hero-spotlight__back-icon fa-solid fa-chevron-left"
                     aria-hidden="true"
                 ></i>
                 {{ backLabel }}
             </a>
         }
 
-        <section class="spotlight">
-            <div class="spotlight-content">
-                <span class="spotlight-badge text-overline">{{ badge }}</span>
+        <section class="hero-spotlight">
+            <div class="hero-spotlight__content">
+                <span class="hero-spotlight__badge text-overline">{{
+                    badge
+                }}</span>
 
                 <a [routerLink]="['/title', s.id, s.mediaType]">
-                    <h1 class="spotlight-title text-hero-title">
+                    <h1 class="hero-spotlight__title text-hero-title">
                         {{ s.title }}
                     </h1>
                 </a>
 
-                <div class="spotlight-meta">
+                <div class="hero-spotlight__meta">
                     @if (s.rating) {
                         <app-rating [value]="s.rating" />
                     }
                     @if (s.mediaTypeLabel) {
-                        <span class="spotlight-meta-item text-meta">{{
+                        <span class="hero-spotlight__meta-item text-meta">{{
                             s.mediaTypeLabel
                         }}</span>
                     }
                     @if (s.year) {
                         @if (s.mediaTypeLabel) {
                             <span
-                                class="spotlight-meta-divider"
+                                class="hero-spotlight__meta-divider"
                                 aria-hidden="true"
                                 >&#x2022;</span
                             >
                         }
-                        <span class="spotlight-meta-item text-meta">{{
+                        <span class="hero-spotlight__meta-item text-meta">{{
                             s.year
                         }}</span>
                     }
                 </div>
 
                 @if (s.overview) {
-                    <p class="spotlight-overview text-body">
+                    <p class="hero-spotlight__overview text-body">
                         {{ s.overview }}
                     </p>
                 }
 
-                <div class="spotlight-actions">
+                <div class="hero-spotlight__actions">
                     <ng-content />
                     <app-watchlist-toggle
                         variant="labeled"
@@ -66,16 +71,16 @@
         </section>
     </app-hero-surface>
 } @else if (loading) {
-    <div class="spotlight-skeleton" aria-hidden="true">
-        <div class="spotlight-skeleton-content">
-            <div class="spotlight-skeleton-badge skeleton"></div>
-            <div class="spotlight-skeleton-title skeleton"></div>
-            <div class="spotlight-skeleton-meta skeleton"></div>
-            <div class="spotlight-skeleton-overview skeleton"></div>
-            <div class="spotlight-skeleton-actions">
-                <div class="spotlight-skeleton-button skeleton"></div>
+    <div class="hero-spotlight-skeleton" aria-hidden="true">
+        <div class="hero-spotlight-skeleton__content">
+            <div class="hero-spotlight-skeleton__badge skeleton"></div>
+            <div class="hero-spotlight-skeleton__title skeleton"></div>
+            <div class="hero-spotlight-skeleton__meta skeleton"></div>
+            <div class="hero-spotlight-skeleton__overview skeleton"></div>
+            <div class="hero-spotlight-skeleton__actions">
+                <div class="hero-spotlight-skeleton__button skeleton"></div>
                 <div
-                    class="spotlight-skeleton-button spotlight-skeleton-button--watchlist skeleton"
+                    class="hero-spotlight-skeleton__button hero-spotlight-skeleton__button--watchlist skeleton"
                 ></div>
             </div>
         </div>

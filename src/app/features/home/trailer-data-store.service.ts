@@ -90,7 +90,10 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             seeds.map((seed) =>
                 this.getVideosForMedia$(seed.mediaId, seed.mediaType).pipe(
                     map((videos) =>
-                        toVideoCardItem(seed, pickBestYoutubeTrailer(videos)),
+                        this.toVideoCardItem(
+                            seed,
+                            pickBestYoutubeTrailer(videos),
+                        ),
                     ),
                 ),
             ),
@@ -216,36 +219,32 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             .filter((seed) => seed.mediaId > 0)
             .slice(0, TRAILERS_PAGE_SEED_COUNT);
     }
+
+    private toVideoCardItem(
+        seed: VideoTrailerSeedItem,
+        video: Video | null,
+    ): VideoCardItem | null {
+        if (!video?.id || !video.key) {
+            return null;
+        }
+
+        const videoName = video.name ?? seed.mediaTitle;
+        const videoTypeLabel =
+            video.type && video.official
+                ? `Official ${video.type}`
+                : (video.type ?? 'Trailer');
+
+        return {
+            ...seed,
+            video,
+            videoId: video.id,
+            videoKey: video.key,
+            videoName,
+            videoPublishedAt: video.published_at,
+            mediaLink: ['/title', seed.mediaId, seed.mediaType],
+            openVideoLabel: `Open video: ${videoName}`,
+            videoTypeLabel,
+            videoUrl: buildYoutubeWatchUrl(video.key),
+        };
+    }
 }
-
-const toVideoCardItem = (
-    seed: VideoTrailerSeedItem,
-    video: Video | null,
-): VideoCardItem | null => {
-    if (!video?.id || !video.key) {
-        return null;
-    }
-
-    const videoName = video.name ?? seed.mediaTitle;
-
-    return {
-        ...seed,
-        video,
-        videoId: video.id,
-        videoKey: video.key,
-        videoName,
-        videoPublishedAt: video.published_at,
-        mediaLink: ['/title', seed.mediaId, seed.mediaType],
-        openVideoLabel: `Open video: ${videoName}`,
-        videoTypeLabel: toVideoTypeLabel(video),
-        videoUrl: buildYoutubeWatchUrl(video.key),
-    };
-};
-
-const toVideoTypeLabel = (video: Video): string => {
-    if (video.type && video.official) {
-        return `Official ${video.type}`;
-    }
-
-    return video.type || 'Trailer';
-};

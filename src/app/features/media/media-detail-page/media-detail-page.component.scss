@@ -349,20 +349,6 @@
     --skeleton-radius: var(--radius-md);
 }
 
-.media-detail-page__recommendations-band {
-    margin-inline: calc(-1 * var(--space-6));
-    padding: var(--space-8) 0;
-    background: var(--color-surface-dim);
-}
-
-.media-detail-page__recommendations-inner {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: var(--layout-content-max-width);
-    margin: 0 auto;
-    padding: 0 var(--space-6);
-}
-
 .media-detail-page__section-link {
     display: inline-flex;
     align-items: center;
@@ -690,15 +676,6 @@
     .media-detail-page__reviews-distribution-skeleton-bars {
         gap: var(--space-1);
         height: 4rem;
-    }
-
-    .media-detail-page__recommendations-band {
-        margin-inline: calc(-1 * var(--space-4));
-        padding: var(--space-6) 0;
-    }
-
-    .media-detail-page__recommendations-inner {
-        padding: 0 var(--space-4);
     }
 
     .media-detail-page__details-list {

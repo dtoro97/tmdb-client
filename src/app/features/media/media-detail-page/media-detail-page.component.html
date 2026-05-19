@@ -619,18 +619,17 @@
                     vm.recommendations.type !== "loaded" ||
                     vm.recommendations.value.length
                 ) {
-                    <section class="media-detail-page__recommendations-band">
-                        <div class="media-detail-page__recommendations-inner">
-                            <app-page-section title="More Like This">
-                                <app-media-carousel-panel
-                                    [state]="vm.recommendations"
-                                    variant="backdrop"
-                                    [showRating]="true"
-                                    [showDate]="true"
-                                ></app-media-carousel-panel>
-                            </app-page-section>
-                        </div>
-                    </section>
+                    <app-page-section
+                        class="surface-panel"
+                        title="More Like This"
+                    >
+                        <app-media-carousel-panel
+                            [state]="vm.recommendations"
+                            variant="backdrop"
+                            [showRating]="true"
+                            [showDate]="true"
+                        ></app-media-carousel-panel>
+                    </app-page-section>
                 }
 
                 @if (

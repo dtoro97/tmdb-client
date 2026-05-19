@@ -1,7 +1,7 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-.spotlight-back {
+.hero-spotlight__back-link {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
@@ -9,57 +9,57 @@
     @include text-link-underline(var(--text-secondary));
 }
 
-.spotlight-back__icon {
+.hero-spotlight__back-icon {
     font-size: var(--text-2xs);
 }
 
-.spotlight {
+.hero-spotlight {
     padding-block: var(--space-12) var(--space-10);
 }
 
-.spotlight-content {
+.hero-spotlight__content {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     max-width: 640px;
 }
 
-.spotlight-badge {
+.hero-spotlight__badge {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     color: var(--color-brand);
 }
 
-.spotlight-title {
+.hero-spotlight__title {
     max-width: 11ch;
     margin: 0;
     text-shadow: var(--shadow-text-hero);
 }
 
-.spotlight-meta {
+.hero-spotlight__meta {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-3);
 }
 
-.spotlight-meta-item {
+.hero-spotlight__meta-item {
     white-space: nowrap;
 }
 
-.spotlight-meta-divider {
+.hero-spotlight__meta-divider {
     color: var(--text-muted);
 }
 
-.spotlight-overview {
+.hero-spotlight__overview {
     max-width: 52ch;
     margin: 0;
     @include line-clamp(3);
     text-shadow: var(--shadow-text-hero);
 }
 
-.spotlight-actions {
+.hero-spotlight__actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -69,13 +69,13 @@
 
 // Skeleton
 
-.spotlight-skeleton {
+.hero-spotlight-skeleton {
     min-height: 520px;
     display: flex;
     align-items: flex-end;
 }
 
-.spotlight-skeleton-content {
+.hero-spotlight-skeleton__content {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -86,40 +86,40 @@
     padding: 0 var(--space-6) var(--space-10);
 }
 
-.spotlight-skeleton-badge {
+.hero-spotlight-skeleton__badge {
     width: 90px;
     height: 13px;
     border-radius: var(--radius-sm);
 }
 
-.spotlight-skeleton-title {
+.hero-spotlight-skeleton__title {
     width: 340px;
     max-width: 80%;
     height: 36px;
     border-radius: var(--radius-md);
 }
 
-.spotlight-skeleton-meta {
+.hero-spotlight-skeleton__meta {
     width: 180px;
     height: 20px;
     border-radius: var(--radius-sm);
 }
 
-.spotlight-skeleton-overview {
+.hero-spotlight-skeleton__overview {
     width: 520px;
     max-width: 90%;
     height: 77px;
     border-radius: var(--radius-md);
 }
 
-.spotlight-skeleton-actions {
+.hero-spotlight-skeleton__actions {
     display: flex;
     align-items: center;
     gap: var(--space-3);
     margin-top: var(--space-2);
 }
 
-.spotlight-skeleton-button {
+.hero-spotlight-skeleton__button {
     width: 110px;
     height: 40px;
     border-radius: var(--radius-pill);
@@ -130,41 +130,39 @@
 }
 
 @include mobile() {
-    .spotlight {
+    .hero-spotlight {
         padding-block: var(--space-8) var(--space-6);
     }
 
-    .spotlight-content {
+    .hero-spotlight__content {
         max-width: none;
     }
 
-    .spotlight-title {
+    .hero-spotlight__title {
         max-width: 100%;
     }
 
-    .spotlight-overview {
+    .hero-spotlight__overview {
         max-width: 100%;
     }
 
-    .spotlight-skeleton {
+    .hero-spotlight-skeleton {
         min-height: 360px;
     }
 
-    .spotlight-skeleton-content {
+    .hero-spotlight-skeleton__content {
         padding: 0 var(--space-4) var(--space-6);
     }
 
-    .spotlight-skeleton-title {
+    .hero-spotlight-skeleton__title {
         height: 30px;
     }
 
-    .spotlight-skeleton-overview {
+    .hero-spotlight-skeleton__overview {
         height: 58px;
     }
-}
 
-@include mobile() {
-    .spotlight-actions {
+    .hero-spotlight__actions {
         flex-direction: column;
         align-items: start;
     }

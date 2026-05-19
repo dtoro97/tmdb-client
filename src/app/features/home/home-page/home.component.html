@@ -1,5 +1,5 @@
 @if (homeVM$ | async; as homeVM) {
-    <div class="page-container">
+    <main class="home-page page-container">
         @if (
             homeVM.spotlight.type === "loaded" && homeVM.spotlight.value;
             as spotlight
@@ -16,7 +16,7 @@
             <app-hero-spotlight [loading]="true" />
         }
 
-        <div class="page-sections">
+        <div class="page-sections home-page__sections">
             <app-page-section
                 title="Now Trending"
                 subtitle="The titles movie and TV fans are opening first."
@@ -29,7 +29,7 @@
                 ></app-media-carousel-panel>
             </app-page-section>
 
-            <section class="home-page__feature-band">
+            <section class="surface-panel">
                 <app-page-section
                     title="Worth Watching"
                     subtitle="Handpicked recommendations worth your time."
@@ -40,15 +40,22 @@
                             routerLink="/discover"
                             [queryParams]="{ type: 'movie' }"
                         >
-                            Browse more titles
-                            <i class="fa-solid fa-chevron-right"></i>
+                            <span>Browse more titles</span>
+                            <i
+                                class="fa-solid fa-chevron-right"
+                                aria-hidden="true"
+                            ></i>
                         </a>
                     </ng-container>
-                    <app-home-top-picks [state]="homeVM.whatToWatch" />
+                    <app-home-top-picks
+                        [loading]="homeVM.whatToWatchLoading"
+                        [featuredItems]="homeVM.whatToWatchTopPicks.featured"
+                        [secondaryItems]="homeVM.whatToWatchTopPicks.secondary"
+                    />
                 </app-page-section>
             </section>
 
-            <section class="home-page__utility-band">
+            <section class="surface-panel">
                 <app-page-section
                     title="Tonight's TV"
                     subtitle="Series airing fresh episodes today."
@@ -59,19 +66,18 @@
                             routerLink="/discover"
                             [queryParams]="{ type: 'tv' }"
                         >
-                            Browse TV
-                            <i class="fa-solid fa-chevron-right"></i>
+                            <span>Browse TV</span>
+                            <i
+                                class="fa-solid fa-chevron-right"
+                                aria-hidden="true"
+                            ></i>
                         </a>
                     </ng-container>
                     @if (homeVM.airingToday.type === "loaded") {
-                        <div class="tonight-grid">
-                            @for (
-                                item of homeVM.airingToday.value
-                                    | slice: 0 : 12;
-                                track item.id
-                            ) {
+                        <div class="home-page__tonight-grid">
+                            @for (item of homeVM.airingTonightPreview; track item.id) {
                                 <a
-                                    class="tonight-row"
+                                    class="home-page__tonight-row"
                                     [routerLink]="[
                                         '/title',
                                         item.id,
@@ -80,26 +86,26 @@
                                     [attr.aria-label]="item.title"
                                 >
                                     <app-image
-                                        class="tonight-row__poster"
+                                        class="home-page__tonight-poster"
                                         [src]="item.imagePath"
                                         [alt]="item.title"
                                         type="media"
                                     />
 
-                                    <div class="tonight-row__content">
+                                    <div class="home-page__tonight-content">
                                         <span
-                                            class="tonight-row__eyebrow text-overline"
+                                            class="home-page__tonight-eyebrow text-overline"
                                         >
                                             Airing today
                                         </span>
                                         <span
-                                            class="tonight-row__title text-body-sm u-truncate"
+                                            class="home-page__tonight-title text-body-sm u-truncate"
                                         >
                                             {{ item.title }}
                                         </span>
 
                                         <span
-                                            class="tonight-row__meta tonight-row__meta--muted text-caption"
+                                            class="home-page__tonight-meta text-caption"
                                         >
                                             @if (item.rating) {
                                                 <app-rating
@@ -128,8 +134,8 @@
                     routerLink="/discover"
                     [queryParams]="{ type: 'person' }"
                 >
-                    Browse people
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <span>Browse people</span>
+                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                 </a>
                 <app-person-carousel-panel
                     [state]="homeVM.popularPeople"
@@ -138,7 +144,7 @@
             </app-page-section>
 
             @if (homeVM.streamingProviders.length) {
-                <section class="home-page__streaming-band">
+                <section class="surface-panel">
                     <app-page-section
                         title="Now Streaming"
                         subtitle="What's new on your favorite streaming services."
@@ -163,9 +169,14 @@
                                             homeVM.selectedStreamingProviderId,
                                     }"
                                 >
-                                    See more on
-                                    {{ homeVM.selectedStreamingProviderLabel }}
-                                    <i class="fa-solid fa-chevron-right"></i>
+                                    <span>
+                                        See more on
+                                        {{ homeVM.selectedStreamingProviderLabel }}
+                                    </span>
+                                    <i
+                                        class="fa-solid fa-chevron-right"
+                                        aria-hidden="true"
+                                    ></i>
                                 </a>
                             </div>
                         }
@@ -183,8 +194,8 @@
                     routerLink="/discover"
                     [queryParams]="{ type: 'movie' }"
                 >
-                    Browse movies
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <span>Browse movies</span>
+                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                 </a>
                 <app-media-carousel-panel
                     [state]="homeVM.inTheatres"
@@ -195,5 +206,5 @@
                 ></app-media-carousel-panel>
             </app-page-section>
         </div>
-    </div>
+    </main>
 }

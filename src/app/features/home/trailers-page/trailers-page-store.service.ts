@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, map, of, switchMap, tap } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 
 import { PAGE_SIZE } from '../../../constants';
 import {
@@ -8,23 +8,11 @@ import {
     VideoCardItem,
     VideoTrailerSeedItem,
 } from '../../../shared';
-import type { SpotlightItem } from '../home-spotlight-models';
 import { TrailerDataStoreService } from '../trailer-data-store.service';
 
 interface TrailersPageState {
     readonly trailers: LoadableItems<VideoCardItem>;
     readonly pendingSeeds: readonly VideoTrailerSeedItem[];
-}
-
-interface FeaturedSpotlight {
-    readonly spotlight: SpotlightItem;
-    readonly videoUrl: string;
-}
-
-interface TrailersPageViewModel {
-    readonly trailersState: LoadableItems<VideoCardItem>;
-    readonly featuredSpotlight: FeaturedSpotlight | null;
-    readonly showMore: boolean;
 }
 
 const INITIAL_STATE: TrailersPageState = {
@@ -34,7 +22,7 @@ const INITIAL_STATE: TrailersPageState = {
 
 @Injectable()
 export class TrailersPageStoreService extends ComponentStore<TrailersPageState> {
-    readonly vm$ = this.select((state): TrailersPageViewModel => {
+    readonly vm$ = this.select((state) => {
         const items =
             state.trailers.type === 'loaded' ||
             state.trailers.type === 'loading-more'
@@ -68,11 +56,11 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         super(INITIAL_STATE);
     }
 
-    load$(): Observable<void> {
+    load$() {
         const { trailers } = this.get();
 
         if (this.hasLoadedOrLoading(trailers)) {
-            return of(undefined);
+            return of([]);
         }
 
         this.patchState({
@@ -98,17 +86,16 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                                 ),
                             });
                         }),
-                        map(() => undefined),
                     );
             }),
         );
     }
 
-    showMoreSelected$(): Observable<void> {
+    showMoreSelected$() {
         const state = this.get();
 
         if (state.trailers.type !== 'loaded' || !state.pendingSeeds.length) {
-            return of(undefined);
+            return of([]);
         }
 
         const nextSeeds = state.pendingSeeds.slice(0, PAGE_SIZE);
@@ -133,7 +120,6 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                     pendingSeeds: remainingSeeds,
                 }),
             ),
-            map(() => undefined),
         );
     }
 

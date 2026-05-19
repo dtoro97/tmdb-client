@@ -6,11 +6,16 @@ import {
     RatingComponent,
     WatchlistToggleComponent,
 } from '../../../shared';
-import type { SpotlightItem } from '../home-spotlight-models';
+import type { SpotlightItem } from '../spotlight-item';
 
 @Component({
     selector: 'app-hero-spotlight',
-    imports: [RouterLink, HeroSurfaceComponent, RatingComponent, WatchlistToggleComponent],
+    imports: [
+        RouterLink,
+        HeroSurfaceComponent,
+        RatingComponent,
+        WatchlistToggleComponent,
+    ],
     templateUrl: './hero-spotlight.component.html',
     styleUrl: './hero-spotlight.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,5 +26,4 @@ export class HeroSpotlightComponent {
     @Input() spotlight: SpotlightItem | null = null;
     @Input() backLink: string | null = null;
     @Input() backLabel = '';
-
 }
