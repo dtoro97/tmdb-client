@@ -2,7 +2,7 @@
 
 .mat-mdc-snack-bar-container {
     --mat-snack-bar-container-color: var(--mat-sys-surface-container-high);
-    --mat-snack-bar-container-shape: var(--radius-2xl);
+    --mat-snack-bar-container-shape: var(--radius-lg);
     --mat-snack-bar-supporting-text-color: var(--text-primary);
     --mat-snack-bar-supporting-text-font: inherit;
     --mat-snack-bar-supporting-text-size: var(--text-sm);
@@ -28,10 +28,6 @@
         letter-spacing: 0.02em;
         min-width: auto;
         padding-inline: var(--space-3);
-
-        &:hover {
-            color: var(--text-primary);
-        }
     }
 }
 

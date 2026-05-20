@@ -1,3 +1,5 @@
+@use "mixins" as *;
+
 .stepper-input {
     display: flex;
     align-items: center;
@@ -19,17 +21,13 @@
     width: 30px;
     height: 32px;
     padding: 0;
-    background: var(--mat-sys-surface-container-high);
+    background: var(--control-surface);
     border: none;
     color: var(--text-primary);
     font-size: var(--text-md);
     cursor: pointer;
     flex-shrink: 0;
-    transition: background-color var(--motion-fast);
-
-    &:hover {
-        background: var(--control-surface-hover);
-    }
+    @include surface-hover-subtle();
 }
 
 .stepper-input__field {

@@ -19,8 +19,8 @@
                     {{
                         (vm.favoriteMoviesTotal > 0 ? 1 : 0) +
                             " - " +
-                            ((vm.favoriteMoviesState.type === "loaded" ||
-                                vm.favoriteMoviesState.type === "loading-more")
+                            (vm.favoriteMoviesState.type === "loaded" ||
+                            vm.favoriteMoviesState.type === "loading-more"
                                 ? vm.favoriteMoviesState.value.length
                                 : 0) +
                             " of " +
@@ -30,8 +30,8 @@
                     {{
                         (vm.favoriteTvTotal > 0 ? 1 : 0) +
                             " - " +
-                            ((vm.favoriteTvState.type === "loaded" ||
-                                vm.favoriteTvState.type === "loading-more")
+                            (vm.favoriteTvState.type === "loaded" ||
+                            vm.favoriteTvState.type === "loading-more"
                                 ? vm.favoriteTvState.value.length
                                 : 0) +
                             " of " +
@@ -42,14 +42,17 @@
         </app-browse-toolbar>
 
         <div class="favorites-section__list">
-            <div class="catalog-panel">
+            <div>
                 @if (selectedTab === "movies") {
                     <app-media-list
                         [state]="vm.favoriteMoviesState"
                         routeType="movie"
                     />
 
-                    @if (vm.favoriteMoviesState.type === "loaded" && !vm.hasFavoriteMovies) {
+                    @if (
+                        vm.favoriteMoviesState.type === "loaded" &&
+                        !vm.hasFavoriteMovies
+                    ) {
                         <div class="empty-panel favorites-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-heart"
@@ -59,9 +62,15 @@
                         </div>
                     }
                 } @else {
-                    <app-media-list [state]="vm.favoriteTvState" routeType="tv" />
+                    <app-media-list
+                        [state]="vm.favoriteTvState"
+                        routeType="tv"
+                    />
 
-                    @if (vm.favoriteTvState.type === "loaded" && !vm.hasFavoriteTv) {
+                    @if (
+                        vm.favoriteTvState.type === "loaded" &&
+                        !vm.hasFavoriteTv
+                    ) {
                         <div class="empty-panel favorites-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-heart"
@@ -75,4 +84,3 @@
         </div>
     </div>
 }
-

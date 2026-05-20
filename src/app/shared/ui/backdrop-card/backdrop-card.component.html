@@ -13,14 +13,12 @@
         />
     </div>
 
-    <div class="backdrop-card__scrim"></div>
-
     <div class="backdrop-card__content">
-        <span class="backdrop-card__title text-title">{{ item.title }}</span>
+        <span class="backdrop-card__title text-subtitle">{{ item.title }}</span>
 
         <div class="backdrop-card__meta text-caption">
             @if (showRating && item.rating) {
-                <app-rating [value]="item.rating | number: '1.1-1'" />
+                <app-rating [value]="item.rating"></app-rating>
             }
             @if ((showDate || dateFormat) && item.date) {
                 @if (showRating && item.rating) {

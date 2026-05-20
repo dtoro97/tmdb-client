@@ -102,9 +102,12 @@
                                     }
 
                                     @if (entry.item.rating !== null) {
-                                        <app-rating-badge
+                                        <!-- <app-rating-badge
                                             [value]="entry.item.rating"
-                                        />
+                                        /> -->
+                                        <app-rating
+                                            [value]="entry.item.rating"
+                                        ></app-rating>
                                     }
                                 </div>
 

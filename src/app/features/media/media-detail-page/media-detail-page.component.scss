@@ -99,7 +99,7 @@
 
 .media-detail-page__hero-rating-summary {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: var(--space-3);
     min-height: 1.75rem;
 }
@@ -205,8 +205,7 @@
 
 .media-detail-page__hero-next-episode {
     align-self: flex-start;
-    @include text-link-underline(inherit);
-    @include focus-ring();
+    @include text-link(inherit);
 }
 
 .media-detail-page__hero-actions {
@@ -281,12 +280,6 @@
     height: 2rem;
     flex: 0 0 auto;
     text-decoration: none;
-    transition: var(--transition-lift);
-    @include focus-ring();
-
-    &:is(:hover, :focus-visible) {
-        transform: translateY(-1px);
-    }
 }
 
 .media-detail-page__provider-preview-logo {
@@ -295,6 +288,7 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
+    @include media-hover();
 }
 
 .media-detail-page__provider-preview-more {
@@ -307,15 +301,7 @@
     border-radius: var(--radius-pill);
     background: var(--color-surface-overlay);
     text-decoration: none;
-    transition:
-        color var(--motion-fast),
-        background-color var(--motion-base);
-    @include focus-ring();
-
-    &:is(:hover, :focus-visible) {
-        background: var(--mat-sys-surface-container-high);
-        color: var(--text-primary);
-    }
+    @include surface-hover-subtle();
 }
 
 .media-detail-page__provider-label-skeleton,
@@ -350,12 +336,7 @@
 }
 
 .media-detail-page__section-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    white-space: nowrap;
-    @include text-link-underline(inherit);
-    @include focus-ring();
+    @include text-link();
 }
 
 .media-detail-page__section-link--muted {
@@ -370,18 +351,9 @@
     overflow: hidden;
     background: var(--surface-panel);
     border-radius: var(--radius-xl);
-    color: inherit;
     text-decoration: none;
-    @include lift-surface-hover();
-    @include focus-ring();
 
-    &:is(:hover, :focus-visible) .media-detail-page__collection-title {
-        color: var(--text-accent);
-    }
-
-    &:is(:hover, :focus-visible) .media-detail-page__collection-backdrop {
-        opacity: 0.85;
-    }
+    @include media-hover();
 }
 
 .media-detail-page__collection-skeleton {
@@ -391,7 +363,6 @@
 
 .media-detail-page__collection-backdrop {
     @include absolute-fill;
-    transition: opacity var(--motion-base);
 }
 
 .media-detail-page__collection-overlay {
@@ -408,14 +379,9 @@
     padding: var(--space-8);
 }
 
-.media-detail-page__collection-title {
-    transition: var(--transition-color);
-}
-
 .media-detail-page__reviews-section {
     padding: var(--space-6);
     background: var(--surface-panel-soft);
-    border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-xl);
 }
 
@@ -581,6 +547,9 @@
 }
 
 @include mobile() {
+    .media-detail-page__hero-next-episode {
+        align-self: stretch;
+    }
     .media-detail-page__hero-cinematic {
         padding-top: var(--space-16);
         gap: var(--space-3);

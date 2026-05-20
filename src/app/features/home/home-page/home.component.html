@@ -29,7 +29,7 @@
                 ></app-media-carousel-panel>
             </app-page-section>
 
-            <section class="surface-panel">
+            <section>
                 <app-page-section
                     title="Worth Watching"
                     subtitle="Handpicked recommendations worth your time."
@@ -75,7 +75,10 @@
                     </ng-container>
                     @if (homeVM.airingToday.type === "loaded") {
                         <div class="home-page__tonight-grid">
-                            @for (item of homeVM.airingTonightPreview; track item.id) {
+                            @for (
+                                item of homeVM.airingTonightPreview;
+                                track item.id
+                            ) {
                                 <a
                                     class="home-page__tonight-row"
                                     [routerLink]="[
@@ -94,11 +97,6 @@
 
                                     <div class="home-page__tonight-content">
                                         <span
-                                            class="home-page__tonight-eyebrow text-overline"
-                                        >
-                                            Airing today
-                                        </span>
-                                        <span
                                             class="home-page__tonight-title text-body-sm u-truncate"
                                         >
                                             {{ item.title }}
@@ -107,14 +105,7 @@
                                         <span
                                             class="home-page__tonight-meta text-caption"
                                         >
-                                            @if (item.rating) {
-                                                <app-rating
-                                                    [value]="
-                                                        item.rating
-                                                            | number: '1.1-1'
-                                                    "
-                                                />
-                                            }
+                                            <app-rating [value]="item.rating" />
                                         </span>
                                     </div>
                                 </a>
@@ -171,7 +162,9 @@
                                 >
                                     <span>
                                         See more on
-                                        {{ homeVM.selectedStreamingProviderLabel }}
+                                        {{
+                                            homeVM.selectedStreamingProviderLabel
+                                        }}
                                     </span>
                                     <i
                                         class="fa-solid fa-chevron-right"

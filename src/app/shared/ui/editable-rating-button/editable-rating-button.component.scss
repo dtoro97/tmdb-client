@@ -15,26 +15,17 @@
     cursor: pointer;
     box-shadow: inset 0 0 0 1px transparent;
     transition:
-        transform var(--motion-fast),
         border-color var(--motion-fast),
         background-color var(--motion-fast),
         box-shadow var(--motion-fast),
         color var(--motion-fast);
 }
 
-.editable-rating-button:hover:not(:disabled),
-.editable-rating-button:focus-visible {
-    transform: translateY(-1px);
-    border-color: var(--border-brand-soft);
-    background: var(--surface-brand-strong);
-    box-shadow:
-        0 0 0 1px var(--border-brand-soft),
-        0 8px 18px rgba(0, 0, 0, 0.18);
-}
-
-.editable-rating-button:focus-visible {
-    outline: 2px solid var(--control-focus-outline);
-    outline-offset: 2px;
+@media (hover: hover) and (pointer: fine) {
+    .editable-rating-button:not(:disabled):hover {
+        background: var(--control-accent-surface-hover);
+        border-color: var(--control-accent-border-hover);
+    }
 }
 
 .editable-rating-button:disabled {

@@ -1,5 +1,5 @@
 @use "breakpoints" as *;
-
+@use "mixins" as *;
 .pill-toggle {
     display: flex;
     flex-wrap: wrap;
@@ -16,20 +16,7 @@
     cursor: pointer;
     transition: var(--control-transition);
     box-shadow: none;
-
-    &:hover {
-        background: var(--control-surface-hover);
-        color: var(--control-text-hover);
-        border-color: var(--control-border-hover);
-    }
-
-    &:focus-visible {
-        outline: none;
-        border-color: var(--control-focus-border);
-        box-shadow:
-            0 0 0 1px var(--control-focus-ring-inner),
-            0 0 0 4px var(--control-focus-ring-outer);
-    }
+    @include surface-hover();
 }
 
 .pill-toggle__button--active {
@@ -39,26 +26,19 @@
     font-weight: var(--weight-semibold);
 }
 
-.pill-toggle__button--active:hover {
-    background: var(--control-accent-surface);
-    color: var(--control-accent-text);
-    border-color: var(--control-accent-border);
+@media (hover: hover) and (pointer: fine) {
+    .pill-toggle__button--active:hover {
+        background: var(--control-accent-surface);
+        color: var(--control-accent-text);
+        border-color: var(--control-accent-border);
+    }
 }
 
 .pill-toggle--subtle .pill-toggle__button {
     background: var(--control-subtle-surface);
     color: var(--control-subtle-text);
     border-color: var(--control-subtle-border);
-
-    &:hover {
-        background: var(--control-subtle-surface-hover);
-        color: var(--control-subtle-text-hover);
-        border-color: var(--control-subtle-border-hover);
-    }
-
-    &:focus-visible {
-        border-color: var(--control-subtle-focus-border);
-    }
+    @include surface-hover-subtle();
 }
 
 .pill-toggle--subtle .pill-toggle__button--active {
@@ -68,10 +48,12 @@
     box-shadow: var(--control-subtle-shadow-active);
 }
 
-.pill-toggle--subtle .pill-toggle__button--active:hover {
-    background: var(--control-subtle-surface-active);
-    color: var(--control-subtle-text-active);
-    border-color: var(--color-border-subtle);
+@media (hover: hover) and (pointer: fine) {
+    .pill-toggle--subtle .pill-toggle__button--active:hover {
+        background: var(--control-subtle-surface-active);
+        color: var(--control-subtle-text-active);
+        border-color: var(--color-border-subtle);
+    }
 }
 
 @include mobile() {

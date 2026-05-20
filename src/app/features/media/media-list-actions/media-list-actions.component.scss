@@ -1,4 +1,5 @@
 @use "breakpoints" as *;
+@use "mixins" as *;
 
 .media-list-actions {
     display: inline-flex;
@@ -10,6 +11,8 @@
 }
 
 .media-list-actions__segment {
+    @include surface-hover-subtle();
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -28,15 +31,6 @@
         border-left: 1px solid var(--control-subtle-border);
     }
 
-    &:hover:not(:disabled) {
-        background: var(--control-subtle-surface-hover);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--control-focus-outline);
-        outline-offset: -2px;
-    }
-
     &:disabled {
         cursor: wait;
         opacity: 0.7;
@@ -50,11 +44,9 @@
         color: var(--color-brand);
     }
 
-    &:hover:not(:disabled) {
-        background: var(--surface-brand-strong);
-
-        .media-list-actions__icon {
-            color: var(--color-brand-hover);
+    @media (hover: hover) and (pointer: fine) {
+        &:hover:not(:disabled) {
+            background: var(--surface-brand-soft);
         }
     }
 

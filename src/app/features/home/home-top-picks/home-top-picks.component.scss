@@ -31,7 +31,7 @@
     min-height: 100%;
     color: inherit;
     text-decoration: none;
-    @include lift-surface-hover();
+    @include surface-hover();
 }
 
 .home-top-picks__feature-media,
@@ -46,6 +46,7 @@
 .home-top-picks__feature-media {
     align-self: start;
     box-shadow: var(--shadow-md);
+    @include media-hover();
 
     app-image {
         @include absolute-fill;

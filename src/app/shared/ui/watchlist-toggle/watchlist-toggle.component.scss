@@ -5,84 +5,45 @@
 }
 
 .watchlist-toggle {
-    @include icon-button-shell(
-        $color: var(--text-accent),
-        $hover-color: var(--color-brand-hover)
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-height-lg);
+    padding-inline: var(--space-4) var(--space-5);
+    background: var(--control-subtle-surface);
+    color: var(--text-primary);
+    border-color: var(--control-subtle-border);
+    --mat-button-outlined-container-height: var(--control-height-lg);
+    --mat-button-outlined-label-text-color: var(--text-primary);
+    --mat-button-outlined-outline-color: var(--control-subtle-border);
+    --mat-button-outlined-hover-container-color: var(
+        --control-subtle-surface-hover
     );
-    font: inherit;
+    --mat-button-outlined-hover-label-text-color: var(--text-primary);
+    --mat-button-outlined-hover-outline-color: var(
+        --control-subtle-border-hover
+    );
+    --mat-button-outlined-hover-state-layer-opacity: 0;
+    --mat-button-outlined-focus-state-layer-opacity: 0;
+    --mat-button-outlined-pressed-state-layer-opacity: 0;
+    @include surface-hover-subtle();
 
-    --mat-icon-button-state-layer-color: transparent;
-    --mat-icon-button-ripple-color: transparent;
+    &--active {
+        .watchlist-toggle__icon {
+            color: var(--color-brand);
+        }
+    }
+
+    &__icon {
+        margin-right: var(--space-2);
+    }
 
     &:active:not(:disabled) {
         background: var(--control-subtle-surface-active);
-        color: var(--color-brand-active);
-    }
-
-    &--active {
-        color: var(--color-brand);
-
-        &:hover:not(:disabled) {
-            color: var(--color-brand-hover);
-        }
-
-        &:active:not(:disabled) {
-            color: var(--color-brand-active);
-        }
-    }
-
-    &--labeled {
-        inline-size: auto;
-        block-size: auto;
-        gap: var(--space-2);
-        min-height: var(--control-height-lg);
-        padding-inline: var(--space-4) var(--space-5);
-        border: 1px solid var(--control-subtle-border);
-        border-radius: var(--radius-pill);
-        background: var(--control-subtle-surface);
         color: var(--text-primary);
-
-        &:hover:not(:disabled) {
-            background: var(--control-subtle-surface-hover);
-            color: var(--text-primary);
-        }
-
-        &:active:not(:disabled) {
-            color: var(--text-primary);
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--control-focus-outline);
-            outline-offset: -2px;
-        }
-
-        &.watchlist-toggle--active {
-            color: var(--text-primary);
-
-            .fa-bookmark {
-                color: var(--color-brand);
-            }
-
-            &:hover:not(:disabled) {
-                color: var(--text-primary);
-
-                .fa-bookmark {
-                    color: var(--color-brand-hover);
-                }
-            }
-        }
     }
 
-    &:disabled {
-        cursor: wait;
-        opacity: 0.35;
+    &:focus:not(:disabled) {
+        color: var(--text-primary);
     }
-}
-
-.watchlist-toggle__label {
-    font-size: var(--text-sm);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1;
-    white-space: nowrap;
 }

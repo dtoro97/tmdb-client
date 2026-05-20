@@ -14,20 +14,7 @@
 
 .episode-list-item--navigable {
     cursor: pointer;
-    @include list-row-hover($title-selector: ".episode-list-item__title");
-    @include focus-ring();
-    transition:
-        background-color var(--motion-base),
-        border-color var(--motion-base);
-
-    &:is(:hover, :focus-within) {
-        border-color: var(--color-border);
-    }
-
-    &:is(:hover, :focus-within) .episode-list-item__still {
-        filter: brightness(var(--brightness-sm));
-        transform: scale(var(--scale-sm));
-    }
+    @include surface-hover();
 }
 
 .episode-list-item--loading {
@@ -40,9 +27,7 @@
     aspect-ratio: var(--backdrop-ratio);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    transition:
-        filter var(--motion-base),
-        transform var(--motion-base);
+    @include media-hover();
 }
 
 .episode-list-item__still-skeleton {
@@ -78,7 +63,6 @@
     color: var(--text-primary);
     font-weight: var(--weight-bold);
     line-height: var(--lh-normal);
-    transition: color var(--motion-base);
 }
 
 .episode-list-item__meta {
@@ -169,19 +153,5 @@
     .episode-list-item__overview {
         line-height: var(--lh-normal);
         @include line-clamp(2);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .episode-list-item--navigable,
-    .episode-list-item__still,
-    .episode-list-item__title {
-        transition: none;
-    }
-
-    .episode-list-item--navigable:is(:hover, :focus-within)
-        .episode-list-item__still {
-        filter: none;
-        transform: none;
     }
 }

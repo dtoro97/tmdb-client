@@ -7,13 +7,6 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     background: var(--surface-panel);
-
-    app-image {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-    }
 }
 
 .media-card {
@@ -21,10 +14,10 @@
     position: relative;
     overflow: hidden;
     border-radius: var(--radius-lg);
-    cursor: pointer;
     color: inherit;
     text-decoration: none;
-    @include lift-surface-hover();
+    box-shadow: var(--shadow-sm);
+    @include media-hover();
 }
 
 .media-card__rating {
@@ -43,60 +36,28 @@
     bottom: 0;
     left: 0;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
     padding: var(--space-8) var(--space-3) var(--space-3);
     background: var(--gradient-overlay-bottom);
 }
 
 .media-card__title {
-    margin-bottom: var(--space-1);
-    color: var(--mat-sys-on-surface);
-    font-weight: var(--weight-semibold);
-    line-height: var(--lh-tight);
-    opacity: 0.7;
     text-shadow: var(--shadow-text-hero);
-    transition:
-        color var(--motion-fast),
-        opacity var(--motion-fast);
     @include line-clamp(2);
-}
-
-.media-card__meta {
-    color: var(--text-soft);
-    opacity: 0.72;
-    transition:
-        color var(--motion-fast),
-        opacity var(--motion-fast);
 }
 
 .media-card__role {
     display: block;
-    margin-top: var(--space-1);
     overflow: hidden;
-    color: var(--text-faint);
     text-overflow: ellipsis;
     white-space: nowrap;
-    opacity: 0.72;
-    transition:
-        color var(--motion-fast),
-        opacity var(--motion-fast);
-}
-
-.media-card:is(:hover, :focus-visible, :focus-within) .media-card__title {
-    color: var(--color-brand);
-    opacity: 1;
-}
-
-.media-card:is(:hover, :focus-visible, :focus-within) .media-card__meta,
-.media-card:is(:hover, :focus-visible, :focus-within) .media-card__role {
-    opacity: 1;
 }
 
 @include mobile() {
     .media-card__content {
-        padding: var(--space-8) var(--space-2) var(--space-2);
-    }
-
-    .media-card__title {
-        font-size: var(--text-sm);
+        padding: var(--space-8) 0 var(--space-1);
+        gap: 0;
     }
 }

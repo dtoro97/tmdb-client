@@ -26,8 +26,7 @@
 .episodes-page__featured-card {
     color: inherit;
     text-decoration: none;
-    will-change: transform;
-    @include hover-raise(-3px, var(--shadow-lg));
+    @include surface-hover();
 }
 
 .episodes-page__featured-media {
@@ -38,6 +37,10 @@
 .episodes-page__featured-image-skeleton {
     width: 100%;
     aspect-ratio: var(--backdrop-ratio);
+}
+
+.episodes-page__featured-image {
+    @include media-hover();
 }
 
 .episodes-page__featured-image-skeleton {
@@ -66,11 +69,6 @@
 .episodes-page__featured-title {
     margin: 0;
     @include line-clamp(1);
-    transition: var(--transition-color);
-}
-
-.episodes-page__featured-card:hover .episodes-page__featured-title {
-    color: var(--text-accent);
 }
 
 .episodes-page__featured-meta {

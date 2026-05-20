@@ -31,7 +31,6 @@ export * from './person-list-item/person-list-item.component';
 export * from './person-list/person-list.component';
 export * from './youtube-video/youtube-video.component';
 export * from './youtube-video-card/youtube-video-card.component';
-export * from './video-card/video-card.component';
 export * from './videos-grid/videos-grid.component';
 export * from './page-section/page-section.component';
 export * from './empty-state/empty-state.component';

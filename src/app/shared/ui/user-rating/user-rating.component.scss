@@ -1,3 +1,5 @@
+@use "mixins" as *;
+
 :host {
     display: flex;
     flex-direction: column;
@@ -17,20 +19,9 @@
     color: var(--text-primary);
     text-align: left;
     cursor: pointer;
-    transition:
-        color var(--motion-fast),
-        opacity var(--motion-fast);
-}
+    transition: opacity var(--motion-fast);
 
-.user-rating:hover:not(:disabled) .user-rating__value,
-.user-rating:focus-visible .user-rating__value {
-    color: var(--text-accent);
-}
-
-.user-rating:focus-visible {
-    outline: 2px solid var(--control-focus-outline);
-    outline-offset: 4px;
-    border-radius: var(--radius-md);
+    @include media-hover();
 }
 
 .user-rating:disabled {
@@ -73,7 +64,6 @@
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    transition: color var(--motion-fast);
 }
 
 .user-rating__scale {

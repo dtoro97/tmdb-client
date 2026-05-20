@@ -21,18 +21,12 @@
 }
 
 .video-theater__back {
-    @include text-link-underline(var(--text-muted));
+    @include text-link(var(--text-muted));
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
-    @include focus-ring();
-
     i {
         font-size: var(--text-2xs);
-    }
-
-    &:is(:hover, :focus-visible) {
-        color: var(--text-primary);
     }
 }
 
@@ -70,7 +64,7 @@
 }
 
 .video-theater__media-link {
-    @include text-link-underline(var(--text-muted));
+    @include text-link(var(--text-muted));
 }
 
 .video-theater__meta {
@@ -166,6 +160,10 @@
     gap: var(--space-2);
 }
 
+.video-detail-page__related-list {
+    display: none;
+}
+
 .video-detail-page__carousel-skeleton-media {
     height: auto;
     aspect-ratio: var(--backdrop-ratio);
@@ -240,6 +238,16 @@
     .video-detail-page__related {
         gap: var(--space-5);
         padding: var(--space-5) var(--space-4);
+    }
+
+    .video-detail-page__related-carousel {
+        display: none;
+    }
+
+    .video-detail-page__related-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
     }
 
     .video-detail-page__related-section + .video-detail-page__related-section {

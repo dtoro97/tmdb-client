@@ -6,7 +6,11 @@ import {
     HostListener,
     ViewChild,
 } from '@angular/core';
-import { IsActiveMatchOptions, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+    IsActiveMatchOptions,
+    RouterLink,
+    RouterLinkActive,
+} from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
 
@@ -49,7 +53,7 @@ export class HeaderComponent {
             },
         },
         {
-            label: 'TV Shows',
+            label: 'TV Series',
             routerLink: '/discover',
             queryParams: { type: 'tv' },
             activeOptions: {

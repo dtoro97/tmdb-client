@@ -28,28 +28,14 @@
     background: none;
     text-align: left;
     cursor: pointer;
-    transition: background-color var(--motion-fast);
-
-    &:is(:hover, :focus-visible) {
-        background: var(--mat-sys-surface-container-high);
-
-        .header-search-results__title {
-            color: var(--text-accent);
-        }
-
-        .header-search-results__thumb {
-            box-shadow: var(--shadow-sm);
-        }
-    }
-
-    @include focus-ring();
+    @include surface-hover();
 }
 
 .header-search-results__thumb {
     width: 3.375rem;
     height: 5rem;
     flex-shrink: 0;
-    transition: box-shadow var(--motion-fast);
+    @include media-hover();
 }
 
 .header-search-results__thumb--skeleton {
@@ -76,7 +62,6 @@
     min-width: 0;
     font-weight: var(--weight-semibold);
     color: var(--text-primary);
-    transition: color var(--motion-fast);
     @include line-clamp(1);
 }
 

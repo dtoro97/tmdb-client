@@ -22,6 +22,5 @@
     background: transparent;
     cursor: pointer;
     white-space: nowrap;
-    @include text-link-underline();
-    @include focus-ring();
+    @include text-link();
 }

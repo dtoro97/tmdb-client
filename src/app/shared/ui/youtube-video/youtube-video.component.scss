@@ -1,7 +1,7 @@
 @use "mixins" as *;
 
 .youtube-video {
-    color: inherit;
+    @include media-hover();
 }
 
 .youtube-video__frame {
@@ -9,7 +9,6 @@
     overflow: hidden;
     border-radius: var(--radius-lg);
     background: var(--mat-sys-surface-container-lowest);
-    @include media-frame-hover("&");
 }
 
 .youtube-video__embed {

@@ -40,7 +40,14 @@
     @if (data.authMode === "anonymous") {
         <div class="media-rating-dialog__footer" mat-dialog-actions>
             <div class="media-rating-dialog__footer-actions">
-                <button matButton type="button" mat-dialog-close>Cancel</button>
+                <button
+                    matButton
+                    class="text-button"
+                    type="button"
+                    mat-dialog-close
+                >
+                    Cancel
+                </button>
                 <button
                     matButton="filled"
                     type="button"
@@ -71,7 +78,14 @@
             }
 
             <div class="media-rating-dialog__footer-actions">
-                <button matButton type="button" mat-dialog-close>Cancel</button>
+                <button
+                    matButton
+                    class="text-button"
+                    type="button"
+                    mat-dialog-close
+                >
+                    Cancel
+                </button>
                 <button matButton="filled" type="button" (click)="save()">
                     @if (data.currentRating !== null) {
                         Update

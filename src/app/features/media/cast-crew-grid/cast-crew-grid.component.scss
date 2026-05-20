@@ -1,5 +1,5 @@
 @use "breakpoints" as *;
-@use "mixins" as appMixins;
+@use "mixins" as *;
 
 :host {
     display: flex;
@@ -28,10 +28,6 @@
     font-size: var(--text-sm);
     letter-spacing: 0;
     text-transform: none;
-
-    &:hover {
-        color: var(--text-primary);
-    }
 }
 
 .credit-section__group-label {
@@ -87,15 +83,7 @@
     color: inherit;
     border-radius: var(--radius-sm);
     border: 1px solid transparent;
-    @include appMixins.list-row-hover($title-selector: ".credit-row__name");
-    @include appMixins.focus-ring();
-    transition:
-        background-color var(--motion-base),
-        border-color var(--motion-base);
-
-    &:is(:hover, :focus-visible, :focus-within) {
-        border-color: var(--color-border-subtle);
-    }
+    @include surface-hover();
 }
 
 .credit-row__thumb {
@@ -105,17 +93,8 @@
     overflow: hidden;
     flex-shrink: 0;
     border: 1px solid var(--color-border-subtle);
-    transition:
-        box-shadow var(--motion-base),
-        transform var(--motion-base),
-        filter var(--motion-base);
     box-shadow: var(--shadow-sm);
-
-    .credit-row:is(:hover, :focus-visible, :focus-within) & {
-        transform: scale(1.04);
-        filter: brightness(var(--brightness-sm));
-        box-shadow: var(--shadow-md);
-    }
+    @include media-hover();
 }
 
 .credit-row__body {
@@ -128,13 +107,12 @@
 }
 
 .credit-row__name {
-    transition: color var(--motion-fast);
     min-width: 0;
     color: var(--text-primary);
     font-weight: var(--weight-bold);
     line-height: 1.3;
     letter-spacing: -0.01em;
-    @include appMixins.line-clamp(1);
+    @include line-clamp(1);
 }
 
 .credit-row__meta {
@@ -142,7 +120,7 @@
     color: var(--text-secondary);
     line-height: 1.35;
     overflow-wrap: anywhere;
-    @include appMixins.line-clamp(2);
+    @include line-clamp(2);
 }
 
 .credit-row__count {
@@ -198,13 +176,5 @@
 
     .credit-row__count {
         justify-self: start;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .credit-row,
-    .credit-row__thumb,
-    .credit-row__name {
-        transition: none;
     }
 }

@@ -23,20 +23,13 @@
 }
 
 .media-list-dialog__new-list-button {
+    @include text-link();
+
     align-self: flex-start;
     border: 0;
     background: transparent;
-    color: var(--text-accent);
-    font: inherit;
-    font-weight: var(--weight-medium);
     cursor: pointer;
     padding: 0;
-
-    &:hover {
-        color: var(--text-primary);
-    }
-
-    @include focus-ring();
 }
 
 .media-list-dialog__create-form {
@@ -80,6 +73,8 @@
 }
 
 .media-list-dialog__list-item {
+    @include surface-hover();
+
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -92,12 +87,6 @@
     text-align: left;
     font: inherit;
     cursor: pointer;
-
-    &:hover {
-        background: var(--control-surface-hover);
-    }
-
-    @include focus-ring();
 }
 
 .media-list-dialog__list-item-head {

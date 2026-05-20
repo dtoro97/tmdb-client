@@ -1,7 +1,11 @@
 @use "breakpoints" as *;
 
 :host {
-    --hero-fallback-bg: linear-gradient(to bottom, #000000, #0d0d0d);
+    --hero-fallback-bg: linear-gradient(
+        to bottom,
+        #000000,
+        var(--surface-page)
+    );
     --gradient-hero-scrim: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.1) 0%,
@@ -11,8 +15,8 @@
     --gradient-hero-lateral: linear-gradient(
         to right,
         var(--color-surface) 0%,
-        rgba(17, 17, 17, 0.8) 25%,
-        rgba(17, 17, 17, 0.2) 55%,
+        color-mix(in srgb, var(--surface-page) 80%, transparent) 25%,
+        color-mix(in srgb, var(--surface-page) 20%, transparent) 55%,
         transparent 75%
     );
 }

@@ -9,37 +9,15 @@
 @mixin text-link($color: var(--mat-sys-on-surface)) {
     color: $color;
     text-decoration: none;
-    transition: var(--transition-color);
+    text-underline-offset: 0.2rem;
+    transition:
+        color var(--motion-base),
+        text-decoration-color var(--motion-base);
 
-    &:is(:hover, :focus-visible) {
-        color: var(--text-accent);
-    }
-}
-
-@mixin text-link-underline($color: var(--mat-sys-on-surface)) {
-    @include text-link($color);
-    position: relative;
-
-    &::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -1px;
-        width: 100%;
-        height: 1px;
-        background: var(--text-accent);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform var(--motion-base);
-    }
-
-    &:is(:hover, :focus-visible)::after {
-        transform: scaleX(1);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        &::after {
-            transition: none;
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            color: var(--text-accent);
+            text-decoration: underline;
         }
     }
 }
@@ -60,9 +38,8 @@
 
 @mixin surface-panel($bg: var(--mat-sys-surface-dim)) {
     background: $bg;
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
 }
 
 @mixin absolute-fill {
@@ -82,8 +59,6 @@
     $size: 2.5rem,
     $surface: var(--control-subtle-surface),
     $color: var(--control-subtle-text),
-    $hover-surface: var(--control-subtle-surface-hover),
-    $hover-color: var(--control-subtle-text-hover),
     $radius: var(--radius-full)
 ) {
     display: inline-flex;
@@ -97,145 +72,44 @@
     background: $surface;
     color: $color;
     cursor: pointer;
-    transition: var(--control-transition);
-    @include focus-ring();
-
-    &:hover:not(:disabled) {
-        background: $hover-surface;
-        color: $hover-color;
-    }
 }
 
-@mixin focus-ring(
-    $color: var(--control-focus-border),
-    $offset: 2px
-) {
-    &:focus-visible {
-        outline: 2px solid $color;
-        outline-offset: $offset;
-    }
-}
-
-@mixin focus-within-ring(
-    $border-color: var(--control-focus-border),
-    $ring-color: var(--control-focus-ring-inner)
-) {
-    &:focus-within {
-        border-color: $border-color;
-        box-shadow: 0 0 0 1px $ring-color;
-    }
-}
-
-@mixin lift-surface-hover($shadow-selector: null) {
+@mixin surface-hover() {
     transition:
-        transform var(--motion-base),
-        box-shadow var(--motion-base);
+        background-color var(--motion-base),
+        border-color var(--motion-base),
+        color var(--motion-base);
 
-    @if $shadow-selector == null {
-        box-shadow: var(--shadow-sm);
-    } @else {
-        #{$shadow-selector} {
-            transition: box-shadow var(--motion-base);
-        }
-    }
-
-    &:is(:hover, :focus-visible, :focus-within) {
-        transform: translateY(-4px);
-
-        @if $shadow-selector == null {
-            box-shadow: var(--shadow-lg);
-        } @else {
-            #{$shadow-selector} {
-                box-shadow: var(--shadow-lg);
-            }
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            cursor: pointer;
+            background: var(--mat-sys-surface-container-low);
         }
     }
 }
 
-@mixin list-row-hover(
-    $hover-bg: var(--mat-sys-surface-container-low),
-    $title-selector: null
-) {
-    transition: background-color var(--motion-base);
+@mixin surface-hover-subtle() {
+    transition:
+        background-color var(--motion-base),
+        border-color var(--motion-base),
+        color var(--motion-base);
 
-    &:is(:hover, :focus-visible, :focus-within) {
-        background-color: $hover-bg;
-
-        @if $title-selector != null {
-            #{$title-selector} {
-                transition: color var(--motion-base);
-                color: var(--text-accent);
-            }
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            cursor: pointer;
+            background: var(--control-subtle-surface-hover);
+            border-color: var(--control-subtle-border-hover);
         }
     }
 }
 
-@mixin hover-raise($y: -3px, $shadow: var(--shadow-md)) {
-    transition: var(--transition-lift);
+@mixin media-hover() {
+    transition: opacity var(--motion-base);
 
-    &:hover {
-        transform: translateY($y);
-        box-shadow: $shadow;
-    }
-}
-
-@mixin media-surface-hover($surface-selector, $media-selector) {
-    #{$surface-selector} {
-        position: relative;
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
-        transition: box-shadow var(--motion-base);
-
-        &::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            background: linear-gradient(
-                to top,
-                var(--color-surface-overlay) 0%,
-                transparent 72%
-            );
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--motion-base);
-        }
-    }
-
-    #{$media-selector} {
-        transform-origin: center;
-        opacity: 1;
-        will-change: transform;
-        transition:
-            transform var(--motion-slow),
-            opacity var(--motion-base);
-    }
-
-    &:is(:hover, :focus-visible, :focus-within) {
-        #{$surface-selector} {
-            box-shadow: var(--shadow-md);
-
-            &::after {
-                opacity: 0.18;
-            }
-        }
-
-        #{$media-selector} {
-            transform: scale(1.04);
-            opacity: 0.9;
-        }
-    }
-}
-
-@mixin media-frame-hover($surface-selector: "&") {
-    #{$surface-selector} {
-        box-shadow: var(--shadow-sm);
-        transition: box-shadow var(--motion-base);
-    }
-
-    &:is(:hover, :focus-within) {
-        #{$surface-selector} {
-            box-shadow: var(--shadow-md);
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            cursor: pointer;
+            opacity: var(--interactive-media-hover-opacity);
         }
     }
 }

@@ -3,6 +3,7 @@
 .media-list {
     display: flex;
     flex-direction: column;
+    gap: var(--space-2);
 }
 
 .media-list__skeleton-row {
@@ -12,6 +13,8 @@
     padding: var(--space-3) var(--space-4);
     min-width: 0;
     border-radius: var(--radius-md);
+    border: 1px solid var(--mat-sys-outline-variant);
+    background: var(--mat-sys-surface-container-lowest);
 }
 
 .media-list__index-skeleton {
@@ -59,10 +62,6 @@
 .media-list__line--cast {
     width: 42%;
     height: 0.78rem;
-}
-
-.media-list__skeleton-row:not(:last-child) {
-    border-bottom: 1px solid var(--color-border-subtle);
 }
 
 @include mobile() {

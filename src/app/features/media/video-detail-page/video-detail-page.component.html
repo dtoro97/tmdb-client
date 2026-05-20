@@ -158,8 +158,31 @@
                 <main class="video-detail-page__related">
                     <section class="video-detail-page__related-section">
                         <app-page-section subtitle="More from this title">
-                            <app-carousel [items]="5 | repeat" [columns]="5">
-                                <ng-template>
+                            <div
+                                class="video-detail-page__related-carousel"
+                                aria-hidden="true"
+                            >
+                                <app-carousel [items]="5 | repeat" [columns]="5">
+                                    <ng-template>
+                                        <div
+                                            class="video-detail-page__carousel-skeleton"
+                                        >
+                                            <app-skeleton
+                                                class="video-detail-page__carousel-skeleton-media"
+                                            />
+                                            <app-skeleton
+                                                class="video-detail-page__carousel-skeleton-title"
+                                            />
+                                            <app-skeleton
+                                                class="video-detail-page__carousel-skeleton-meta"
+                                            />
+                                        </div>
+                                    </ng-template>
+                                </app-carousel>
+                            </div>
+
+                            <div class="video-detail-page__related-list">
+                                @for (index of 5 | repeat; track index) {
                                     <div
                                         class="video-detail-page__carousel-skeleton"
                                     >
@@ -173,8 +196,8 @@
                                             class="video-detail-page__carousel-skeleton-meta"
                                         />
                                     </div>
-                                </ng-template>
-                            </app-carousel>
+                                }
+                            </div>
                         </app-page-section>
                     </section>
                 </main>
@@ -189,19 +212,39 @@
                                     <app-page-section
                                         subtitle="More from this title"
                                     >
-                                        <app-carousel
-                                            [items]="relatedVideos"
-                                            [columns]="5"
+                                        <div
+                                            class="video-detail-page__related-carousel"
                                         >
-                                            <ng-template let-video>
+                                            <app-carousel
+                                                [items]="relatedVideos"
+                                                [columns]="5"
+                                            >
+                                                <ng-template let-video>
+                                                    <app-youtube-video-card
+                                                        [video]="video"
+                                                        [mediaId]="vm.id"
+                                                        [mediaType]="vm.mediaType"
+                                                        destination="detail"
+                                                    />
+                                                </ng-template>
+                                            </app-carousel>
+                                        </div>
+
+                                        <div
+                                            class="video-detail-page__related-list"
+                                        >
+                                            @for (
+                                                video of relatedVideos;
+                                                track video.id
+                                            ) {
                                                 <app-youtube-video-card
                                                     [video]="video"
                                                     [mediaId]="vm.id"
                                                     [mediaType]="vm.mediaType"
                                                     destination="detail"
                                                 />
-                                            </ng-template>
-                                        </app-carousel>
+                                            }
+                                        </div>
                                     </app-page-section>
                                 </section>
                             </main>

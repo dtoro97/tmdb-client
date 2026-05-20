@@ -16,7 +16,9 @@
         </div>
 
         <div class="media-card__content">
-            <span class="media-card__title text-body-sm">{{ item.title }}</span>
+            <span class="media-card__title text-subtitle">{{
+                item.title
+            }}</span>
 
             @if (item.date) {
                 <span class="media-card__meta text-caption">
@@ -31,7 +33,9 @@
             }
 
             @if (item.role) {
-                <span class="media-card__role text-caption">{{ item.role }}</span>
+                <span class="media-card__role text-caption">{{
+                    item.role
+                }}</span>
             }
         </div>
     </a>

@@ -1,5 +1,4 @@
 @use "breakpoints" as *;
-@use "mixins" as *;
 
 :host {
     display: inline-flex;
@@ -14,13 +13,23 @@
 }
 
 .header-auth-menu__trigger--signed-in {
-    @include icon-button-shell(
-        $surface: transparent,
-        $color: var(--text-primary),
-        $hover-surface: var(--control-subtle-surface),
-        $hover-color: var(--text-primary)
-    );
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--text-primary);
+    transition: opacity var(--motion-base);
     min-width: 0;
+    cursor: pointer;
+
+    @media (hover: hover) and (pointer: fine) {
+        &:hover:not(:disabled) {
+            opacity: 0.88;
+        }
+    }
 
     &:disabled {
         cursor: progress;
@@ -38,46 +47,6 @@
     cursor: pointer;
     border: 0;
     background: transparent;
-
-    &:hover,
-    &:focus-visible {
-        color: var(--color-brand-light);
-    }
-}
-
-.header-auth-menu__label {
-    position: relative;
-
-    &::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -2px;
-        width: 100%;
-        height: 1.5px;
-        background: var(--color-brand-light);
-        border-radius: 1px;
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform var(--motion-base);
-    }
-
-    .header-auth-menu__trigger--anonymous:hover &::after,
-    .header-auth-menu__trigger--anonymous:focus-visible &::after {
-        transform: scaleX(1);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        &::after {
-            transition: none;
-        }
-    }
-}
-
-.header-auth-menu__trigger--signed-in {
-    &[aria-expanded="true"] {
-        background: var(--control-subtle-surface);
-    }
 }
 
 .header-auth-menu__badge {

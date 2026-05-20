@@ -7,9 +7,9 @@ import {
     CardComponent,
     CardItem,
     ImageComponent,
-    RatingBadgeComponent,
     SkeletonComponent,
     RepeatPipe,
+    RatingComponent,
 } from '../../../shared';
 
 interface RankedTopPickItem {
@@ -25,9 +25,9 @@ interface RankedTopPickItem {
         BadgeComponent,
         CardComponent,
         ImageComponent,
-        RatingBadgeComponent,
         SkeletonComponent,
         RepeatPipe,
+        RatingComponent,
     ],
     templateUrl: './home-top-picks.component.html',
     styleUrl: './home-top-picks.component.scss',

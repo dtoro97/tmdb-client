@@ -1,11 +1,9 @@
-<button
-    class="locale-button"
-    type="button"
+<app-icon-button
     [matMenuTriggerFor]="localeMenu"
-    aria-label="Change language and region"
+    ariaLabel="Change language and region"
 >
-    <mat-icon class="locale-button-icon">language</mat-icon>
-</button>
+    <i class="fa-solid fa-earth-europe locale-button-icon"></i>
+</app-icon-button>
 
 <mat-menu #localeMenu="matMenu">
     <div class="locale-panel" (click)="$event.stopPropagation()">

@@ -1,7 +1,7 @@
 @if (vm$ | async; as vm) {
     @if (vm.isAuthenticated) {
         <button
-            class="header-auth-menu__trigger header-auth-menu__trigger--signed-in text-body-sm"
+            class="header-auth-menu__trigger header-auth-menu__trigger--signed-in"
             type="button"
             [matMenuTriggerFor]="authMenu"
             [matMenuTriggerRestoreFocus]="false"

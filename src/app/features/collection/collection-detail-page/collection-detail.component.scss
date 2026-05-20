@@ -178,17 +178,7 @@
     background: var(--surface-panel);
     color: inherit;
     text-decoration: none;
-    @include lift-surface-hover();
-    @include focus-ring();
-
-    &:is(:hover, :focus-visible) .collection-detail__arc-title {
-        color: var(--text-accent);
-    }
-
-    &:is(:hover, :focus-visible) .collection-detail__arc-poster {
-        transform: scale(1.02);
-        filter: brightness(1.05);
-    }
+    @include surface-hover();
 }
 
 .collection-detail__arc-poster {
@@ -198,9 +188,7 @@
     overflow: hidden;
     background: var(--mat-sys-surface-container-high);
     box-shadow: var(--shadow-sm);
-    transition:
-        transform var(--motion-base),
-        filter var(--motion-base);
+    @include media-hover();
 }
 
 .collection-detail__arc-copy {
@@ -224,21 +212,8 @@
     align-self: flex-start;
 }
 
-.collection-detail__arc-title,
-.collection-detail__arc-meta,
-.empty-text {
-    margin: 0;
-}
-
-.collection-detail__arc-title {
-    max-width: 16ch;
-    line-height: 1.05;
-    transition: color var(--motion-base);
-}
-
 .collection-detail__arc-meta {
     gap: var(--space-2);
-    color: var(--text-secondary);
 }
 
 .collection-detail__arc-rating {

@@ -1,9 +1,5 @@
 @use "mixins" as *;
 
-.locale-button {
-    @include icon-button-shell();
-}
-
 .locale-button-icon {
     @include icon-size(1rem);
 }

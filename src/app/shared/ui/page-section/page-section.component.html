@@ -3,15 +3,15 @@
         <header class="page-section__header">
             <div class="page-section__heading">
                 @if (title) {
-                    <h2 class="page-section__title">{{ title }}</h2>
+                    <h2 class="page-section__title text-headline">{{ title }}</h2>
                 }
 
                 @if (subtitle) {
                     @if (title) {
-                        <p class="page-section__subtitle">{{ subtitle }}</p>
+                        <p class="page-section__subtitle text-body">{{ subtitle }}</p>
                     } @else {
                         <h2
-                            class="page-section__subtitle page-section__subtitle--standalone"
+                            class="page-section__subtitle page-section__subtitle--standalone text-title"
                         >
                             {{ subtitle }}
                         </h2>

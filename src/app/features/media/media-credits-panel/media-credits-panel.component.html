@@ -97,9 +97,13 @@
         class="media-credits-panel__row media-credits-panel__row--all"
         [routerLink]="['cast']"
     >
-        <span class="media-credits-panel__label text-body-sm">
+        <span
+            class="media-credits-panel__label media-credits-panel__label--all text-body-sm"
+        >
             All cast & crew
+            <i
+                class="fa-solid fa-chevron-right media-credits-panel__chevron"
+            ></i>
         </span>
-        <i class="fa-solid fa-chevron-right media-credits-panel__chevron"></i>
     </a>
 }

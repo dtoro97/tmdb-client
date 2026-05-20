@@ -1,17 +1,25 @@
 @use "mixins" as *;
 
-:host {
-    display: inline-flex;
-}
-
 .icon-button {
-    @include icon-button-shell();
+    --mat-icon-button-state-layer-size: 2.5rem;
+    --mdc-icon-button-state-layer-size: 2.5rem;
+    --mat-icon-button-icon-size: 1rem;
+    --mat-icon-button-icon-color: var(--text-primary);
+    --mat-icon-button-state-layer-color: var(--control-subtle-text);
+    --mat-icon-button-ripple-color: transparent;
+    --mat-icon-button-hover-state-layer-opacity: 0;
+    --mat-icon-button-focus-state-layer-opacity: 0;
+    --mat-icon-button-pressed-state-layer-opacity: 0;
+    --mat-icon-button-disabled-icon-color: var(--text-disabled);
 
-    &:disabled {
-        opacity: 0.35;
-        cursor: default;
-        pointer-events: none;
-    }
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--control-subtle-surface);
+    transition: opacity var(--motion-base);
+
+    @include media-hover();
 }
 
 .icon-button :is(mat-icon, i) {

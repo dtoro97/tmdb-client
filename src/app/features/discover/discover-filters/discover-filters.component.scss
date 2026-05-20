@@ -58,19 +58,15 @@
 }
 
 .discover-filters__clear {
+    @include text-link(var(--text-muted));
+
     background: none;
     border: none;
     padding: 0;
     cursor: pointer;
     font-size: var(--text-xs);
-    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    transition: color var(--motion-fast);
-
-    &:hover {
-        color: var(--color-brand);
-    }
 }
 
 .discover-filters__chips {

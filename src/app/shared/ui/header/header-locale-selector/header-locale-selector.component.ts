@@ -15,6 +15,7 @@ import { ConfigStoreService } from '../../../services/config-store.service';
 import { LocaleStoreService } from '../../../services/locale-store.service';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { FormsModule } from '@angular/forms';
+import { IconButtonComponent } from '../../icon-button/icon-button.component';
 
 interface SelectOption {
     readonly value: string;
@@ -30,6 +31,7 @@ interface SelectOption {
         AsyncPipe,
         NgxMatSelectSearchModule,
         FormsModule,
+        IconButtonComponent,
     ],
     templateUrl: './header-locale-selector.component.html',
     styleUrl: './header-locale-selector.component.scss',

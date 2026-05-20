@@ -12,11 +12,6 @@
     font-weight: var(--weight-semibold);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: color var(--motion-fast);
-
-    &:hover {
-        color: var(--text-primary);
-    }
 }
 
 .accordion-chevron {

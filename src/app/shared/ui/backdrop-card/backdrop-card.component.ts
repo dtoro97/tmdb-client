@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -11,13 +11,7 @@ export type BackdropCardDateFormat = 'year' | 'dayMonth';
 @Component({
     selector: 'app-backdrop-card',
     templateUrl: './backdrop-card.component.html',
-    imports: [
-        DatePipe,
-        DecimalPipe,
-        RouterLink,
-        ImageComponent,
-        RatingComponent,
-    ],
+    imports: [DatePipe, RouterLink, ImageComponent, RatingComponent],
     styleUrl: './backdrop-card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

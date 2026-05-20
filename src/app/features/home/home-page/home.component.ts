@@ -1,4 +1,4 @@
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -31,7 +31,6 @@ import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.compone
         HomeTopPicksComponent,
         ImageComponent,
         RatingComponent,
-        DecimalPipe,
     ],
     providers: [HomeStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,

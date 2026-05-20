@@ -10,5 +10,5 @@ import { MatIconModule } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RatingComponent {
-    @Input({ required: true }) value!: number;
+    @Input({ required: true }) value: number;
 }

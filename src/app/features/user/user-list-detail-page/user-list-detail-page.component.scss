@@ -28,8 +28,7 @@
     align-self: flex-start;
     align-items: center;
     gap: var(--space-1);
-    @include text-link-underline(var(--text-secondary));
-    @include focus-ring();
+    @include text-link(var(--text-secondary));
 }
 
 .user-list-detail__back-icon {
@@ -150,10 +149,6 @@
     gap: var(--space-2);
 }
 
-.user-list-detail__items-heading .text-title {
-    margin: 0;
-}
-
 .user-list-detail__items-count {
     color: var(--text-muted);
 }
@@ -205,12 +200,6 @@
     background: var(--mat-sys-surface-container-high);
     color: var(--text-primary);
     cursor: pointer;
-    transition: background-color var(--motion-fast);
-    @include focus-ring();
-
-    &:hover {
-        background: var(--color-surface-raised);
-    }
 }
 
 .user-list-detail__card-skeleton {

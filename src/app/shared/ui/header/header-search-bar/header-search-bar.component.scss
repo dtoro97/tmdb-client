@@ -21,16 +21,11 @@
     border-radius: var(--radius-md);
     min-height: var(--header-search-bar-height);
     overflow: hidden;
-    transition:
-        background-color var(--motion-fast),
-        border-color var(--motion-fast),
-        box-shadow var(--motion-fast);
 
-    &:hover {
-        background: var(--control-surface-hover);
+    &:focus-within {
+        outline: auto;
+        outline-offset: 2px;
     }
-
-    @include focus-within-ring();
 }
 
 .header-search__filter-field {
@@ -45,16 +40,6 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-
-    &:hover {
-        background: transparent;
-        border-color: transparent;
-    }
-
-    &:focus-within {
-        border-color: transparent;
-        box-shadow: none;
-    }
 }
 
 .header-search__input-field {
@@ -101,10 +86,16 @@
 .header-search__toggle-button {
     display: none;
     color: var(--text-muted);
-    @include focus-ring();
+}
 
-    &:is(:hover, :focus-visible) {
-        color: var(--text-accent);
+.header-search__close-button,
+.header-search__toggle-button {
+    transition: opacity var(--motion-base);
+
+    @media (hover: hover) and (pointer: fine) {
+        &:hover:not(:disabled) {
+            opacity: 0.88;
+        }
     }
 }
 

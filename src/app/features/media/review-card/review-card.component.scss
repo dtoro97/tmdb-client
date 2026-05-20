@@ -1,4 +1,5 @@
 @use "mixins" as *;
+@use "breakpoints" as *;
 
 .review-card {
     display: flex;
@@ -81,17 +82,17 @@
 }
 
 .review-card__toggle {
+    @include text-link(var(--color-brand));
+
     align-self: flex-start;
     border: 0;
     background: transparent;
     padding: 0;
     cursor: pointer;
-    color: var(--color-brand);
-    transition: color var(--motion-fast);
+}
 
-    &:is(:hover, :focus-visible) {
-        color: var(--text-accent);
+@include mobile() {
+    .review-card__toggle {
+        align-self: stretch;
     }
-
-    @include focus-ring(var(--color-brand), 4px);
 }

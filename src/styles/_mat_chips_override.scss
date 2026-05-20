@@ -36,6 +36,12 @@
     --mat-chip-outline-color: var(--tmdb-chip-border);
 }
 
+.mat-mdc-standard-chip,
+.mat-mdc-standard-chip .mdc-evolution-chip__cell,
+.mat-mdc-standard-chip .mdc-evolution-chip__action {
+    transition: var(--control-transition);
+}
+
 .mat-mdc-standard-chip .mdc-evolution-chip__text-label {
     color: inherit;
     text-transform: uppercase;
@@ -92,10 +98,6 @@
     &::before,
     &::after {
         display: none !important;
-    }
-
-    &:hover {
-        opacity: 1;
     }
 }
 

@@ -36,7 +36,7 @@ export class SearchPageComponent {
     readonly typeOptions = [
         { label: 'All', value: 'all' },
         { label: 'Movies', value: 'movie' },
-        { label: 'TV Shows', value: 'tv' },
+        { label: 'TV Series', value: 'tv' },
         { label: 'People', value: 'person' },
     ] satisfies { label: string; value: SearchType }[];
 
@@ -55,8 +55,7 @@ export class SearchPageComponent {
     }).pipe(
         map((vm) => ({
             ...vm,
-            listSkeletonCount:
-                vm.type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE,
+            listSkeletonCount: vm.type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE,
         })),
     );
 

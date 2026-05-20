@@ -5,9 +5,11 @@ import {
     Input,
     Output,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-icon-button',
+    imports: [MatButtonModule],
     templateUrl: './icon-button.component.html',
     styleUrl: './icon-button.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

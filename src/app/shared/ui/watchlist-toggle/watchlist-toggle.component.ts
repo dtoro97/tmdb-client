@@ -11,7 +11,6 @@ import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { EMPTY, Subject, catchError, switchMap, take } from 'rxjs';
 
@@ -25,56 +24,29 @@ import type { MediaType } from '../../types';
 
 @Component({
     selector: 'app-watchlist-toggle',
-    imports: [MatButtonModule, MatTooltipModule],
+    imports: [MatButtonModule],
     template: `
-        @if (variant === 'icon') {
-            <button
-                mat-icon-button
-                type="button"
-                class="watchlist-toggle"
-                [class.watchlist-toggle--active]="isInWatchlist"
-                [disabled]="pending"
-                [attr.aria-label]="
-                    isInWatchlist
-                        ? title + ' is on your watchlist'
-                        : 'Add ' + title + ' to watchlist'
-                "
-                [matTooltip]="
-                    isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'
-                "
-                (click)="toggle($event)"
-            >
-                <i
-                    [class.fa-solid]="isInWatchlist"
-                    [class.fa-regular]="!isInWatchlist"
-                    class="fa-bookmark"
-                    aria-hidden="true"
-                ></i>
-            </button>
-        } @else {
-            <button
-                type="button"
-                class="watchlist-toggle watchlist-toggle--labeled"
-                [class.watchlist-toggle--active]="isInWatchlist"
-                [disabled]="pending"
-                [attr.aria-label]="
-                    isInWatchlist
-                        ? title + ' is on your watchlist'
-                        : 'Add ' + title + ' to watchlist'
-                "
-                (click)="toggle($event)"
-            >
-                <i
-                    [class.fa-solid]="isInWatchlist"
-                    [class.fa-regular]="!isInWatchlist"
-                    class="fa-bookmark"
-                    aria-hidden="true"
-                ></i>
-                <span class="watchlist-toggle__label">{{
-                    watchlistLabel
-                }}</span>
-            </button>
-        }
+        <button
+            mat-stroked-button
+            type="button"
+            class="watchlist-toggle"
+            [class.watchlist-toggle--active]="isInWatchlist"
+            [disabled]="pending"
+            [attr.aria-label]="
+                isInWatchlist
+                    ? title + ' is on your watchlist'
+                    : 'Add ' + title + ' to watchlist'
+            "
+            (click)="toggle($event)"
+        >
+            <i
+                [class.fa-solid]="isInWatchlist"
+                [class.fa-regular]="!isInWatchlist"
+                class="watchlist-toggle__icon fa-bookmark"
+                aria-hidden="true"
+            ></i>
+            <span class="watchlist-toggle__label">{{ watchlistLabel }}</span>
+        </button>
     `,
     styleUrl: './watchlist-toggle.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,7 +55,6 @@ export class WatchlistToggleComponent implements OnChanges {
     @Input({ required: true }) mediaId!: number;
     @Input({ required: true }) mediaType!: Extract<MediaType, 'movie' | 'tv'>;
     @Input({ required: true }) title!: string;
-    @Input() variant: 'icon' | 'labeled' = 'icon';
 
     isInWatchlist = false;
     watchlistLabel = 'Add to Watchlist';

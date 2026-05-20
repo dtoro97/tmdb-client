@@ -61,7 +61,7 @@
 
 .media-rating-dialog__login-link {
     align-self: flex-start;
-    @include text-link-underline(var(--text-secondary));
+    @include text-link(var(--text-secondary));
 }
 
 .media-rating-dialog__remove {

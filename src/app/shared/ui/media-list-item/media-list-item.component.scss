@@ -1,32 +1,18 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-:host {
-    --media-list-item-year-font-size: 0.9em;
-    --media-list-item-year-opacity: 0.8;
-}
-
-:host:not(:last-child) {
-    border-bottom: 1px solid var(--color-border-subtle);
-}
-
 .media-list-item {
     position: relative;
     display: flex;
     align-items: flex-start;
     gap: var(--space-3);
     padding: var(--space-4);
+    border: 1px solid var(--mat-sys-outline-variant);
     border-radius: var(--radius-md);
+    background: var(--mat-sys-surface-container-lowest);
     min-width: 0;
     cursor: pointer;
-    @include list-row-hover($title-selector: ".media-list-item__title");
-    @include focus-ring();
-    transition: background-color var(--motion-base);
-
-    &:is(:hover, :focus-within) .media-list-item__poster {
-        filter: brightness(var(--brightness-sm));
-        transform: scale(var(--scale-sm));
-    }
+    @include surface-hover-subtle();
 }
 
 .media-list-item__index {
@@ -39,9 +25,6 @@
     flex-shrink: 0;
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-sm);
-    transition:
-        filter var(--motion-base),
-        transform var(--motion-base);
 }
 
 .media-list-item__content {
@@ -58,15 +41,7 @@
     color: var(--mat-sys-on-surface);
     font-weight: var(--weight-bold);
     line-height: var(--lh-normal);
-    transition: color var(--motion-base);
     @include line-clamp(1);
-}
-
-.media-list-item__year {
-    color: var(--text-muted);
-    font-size: var(--media-list-item-year-font-size);
-    font-weight: var(--weight-regular);
-    opacity: var(--media-list-item-year-opacity);
 }
 
 .media-list-item__genres {
@@ -92,7 +67,7 @@
 }
 
 .media-list-item__actor-link {
-    @include text-link-underline(var(--mat-sys-on-surface));
+    @include text-link(var(--mat-sys-on-surface));
 }
 
 .media-list-item__score-badge {
@@ -144,18 +119,5 @@
         grid-area: date;
         align-self: start;
         justify-self: end;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .media-list-item,
-    .media-list-item__poster,
-    .media-list-item__title {
-        transition: none;
-    }
-
-    .media-list-item:is(:hover, :focus-within) .media-list-item__poster {
-        filter: none;
-        transform: none;
     }
 }

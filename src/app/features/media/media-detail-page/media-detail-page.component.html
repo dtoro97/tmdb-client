@@ -51,26 +51,26 @@
                     <div class="media-detail-page__info-content">
                         @if (media.voteAverage || vm.canRateTitle) {
                             <div class="media-detail-page__hero-ratings">
-                                @if (media.voteAverage) {
+                                <div
+                                    class="media-detail-page__hero-rating-stat"
+                                >
+                                    <span
+                                        class="media-detail-page__hero-rating-label text-overline"
+                                    >
+                                        TMDb rating
+                                    </span>
+
                                     <div
-                                        class="media-detail-page__hero-rating-stat"
+                                        class="media-detail-page__hero-rating-summary"
                                     >
                                         <span
-                                            class="media-detail-page__hero-rating-label text-overline"
+                                            class="media-detail-page__hero-rating-primary"
                                         >
-                                            TMDb rating
-                                        </span>
-
-                                        <div
-                                            class="media-detail-page__hero-rating-summary"
-                                        >
-                                            <span
-                                                class="media-detail-page__hero-rating-primary"
-                                            >
-                                                <i
-                                                    class="media-detail-page__hero-rating-icon fa-solid fa-star"
-                                                    aria-hidden="true"
-                                                ></i>
+                                            <i
+                                                class="media-detail-page__hero-rating-icon fa-solid fa-star"
+                                                aria-hidden="true"
+                                            ></i>
+                                            @if (media.voteAverage) {
                                                 <span
                                                     class="media-detail-page__hero-rating-value text-title"
                                                 >
@@ -80,25 +80,28 @@
                                                     }}
                                                 </span>
                                                 <span
-                                                    class="media-detail-page__hero-rating-scale text-caption"
+                                                    class="media-detail-page__hero-rating-scale text-meta"
                                                 >
                                                     /10
                                                 </span>
-                                            </span>
-
-                                            @if (media.voteCount) {
-                                                <span
-                                                    class="media-detail-page__hero-rating-meta text-caption"
-                                                >
-                                                    ({{
-                                                        media.voteCount
-                                                            | voteCount
-                                                    }})
+                                            } @else {
+                                                <span class="text-meta">
+                                                    No ratings yet
                                                 </span>
                                             }
-                                        </div>
+                                        </span>
+
+                                        @if (media.voteCount) {
+                                            <span
+                                                class="media-detail-page__hero-rating-meta text-meta"
+                                            >
+                                                ({{
+                                                    media.voteCount | voteCount
+                                                }})
+                                            </span>
+                                        }
                                     </div>
-                                }
+                                </div>
 
                                 @if (vm.canRateTitle) {
                                     <app-user-rating

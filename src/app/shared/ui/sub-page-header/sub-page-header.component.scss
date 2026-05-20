@@ -12,8 +12,7 @@
     align-self: flex-start;
     align-items: center;
     gap: var(--space-1);
-    @include text-link-underline(var(--text-secondary));
-    @include focus-ring();
+    @include text-link(var(--text-secondary));
 }
 
 .sub-page-header__back-icon {

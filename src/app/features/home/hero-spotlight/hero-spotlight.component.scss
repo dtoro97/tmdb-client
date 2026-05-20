@@ -6,7 +6,7 @@
     align-items: center;
     gap: var(--space-1);
     padding: var(--space-4) 0 0;
-    @include text-link-underline(var(--text-secondary));
+    @include text-link();
 }
 
 .hero-spotlight__back-icon {

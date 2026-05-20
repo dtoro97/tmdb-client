@@ -46,10 +46,10 @@
         background-color var(--motion-fast), color var(--motion-fast),
         border-color var(--motion-fast), box-shadow var(--motion-fast);
 
-    --control-surface: var(--mat-sys-surface-container-high);
-    --control-surface-hover: #333333;
+    --control-surface: #181818;
+    --control-surface-hover: #212121;
     --control-border: var(--color-border-subtle);
-    --control-border-hover: var(--color-border);
+    --control-border-hover: #313131;
     --control-text: var(--text-secondary);
     --control-text-hover: var(--text-primary);
     --control-focus-border: var(--color-brand);
@@ -57,14 +57,14 @@
     --control-focus-ring-inner: rgba(198, 40, 40, 0.25);
     --control-focus-ring-outer: rgba(198, 40, 40, 0.15);
 
-    --control-subtle-surface: rgba(30, 30, 30, 0.8);
-    --control-subtle-surface-hover: var(--surface-panel);
-    --control-subtle-surface-active: var(--mat-sys-surface-container-high);
+    --control-subtle-surface: rgba(18, 18, 20, 0.82);
+    --control-subtle-surface-hover: rgba(33, 33, 37, 0.98);
+    --control-subtle-surface-active: #202023;
     --control-subtle-border: var(--color-border-subtle);
     --control-subtle-border-hover: var(--color-border);
     --control-subtle-text: var(--text-muted);
     --control-subtle-text-hover: var(--text-primary);
-    --control-subtle-text-active: #ffffff;
+    --control-subtle-text-active: var(--text-primary);
     --control-subtle-focus-border: var(--color-border);
     --control-subtle-shadow-active: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
@@ -88,14 +88,7 @@
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
     --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.38);
 
-    --motion-fast: 0.15s ease-out;
-    --motion-base: 0.2s ease-out;
-    --motion-slow: 0.3s ease-out;
-
-    --scale-sm: 1.02;
-    --brightness-sm: 1.12;
-
-    --transition-color: color var(--motion-fast);
+    --motion-base: 0.1s ease-out;
 
     --transition-bg-color:
         background-color var(--motion-base), color var(--motion-fast);
@@ -114,18 +107,18 @@
     --color-brand-active: var(--color-brand-600);
     --color-brand-light: var(--color-brand-300);
 
-    --color-surface: #111111;
-    --color-surface-dim: #161616;
-    --color-surface-raised: #1e1e1e;
-    --color-surface-overlay: rgba(10, 10, 10, 0.82);
+    --color-surface: #080808;
+    --color-surface-dim: #0d0d0d;
+    --color-surface-raised: #151515;
+    --color-surface-overlay: rgba(10, 10, 10, 0.88);
 
-    --color-border: #313131;
-    --color-border-subtle: rgba(255, 255, 255, 0.08);
+    --color-border: #232323;
+    --color-border-subtle: rgba(255, 255, 255, 0.05);
 
-    --text-primary: #ffffff;
-    --text-secondary: #b0b0b0;
-    --text-muted: #9a9a9a;
-    --text-disabled: #6b6b6b;
+    --text-primary: #f5f3ef;
+    --text-secondary: #b4afa7;
+    --text-muted: #8f8a83;
+    --text-disabled: #68645f;
 
     --text-accent: var(--color-brand-light);
     --color-danger-text: var(--color-brand-300);
@@ -142,21 +135,22 @@
     --color-rank-cap: #dcaa12;
 
     --surface-page: var(--color-surface);
-    --surface-panel: var(--color-surface-raised);
-    --surface-panel-soft: rgba(30, 30, 30, 0.8);
-    --surface-brand-soft: rgba(198, 40, 40, 0.1);
-    --surface-brand-strong: #401d1d;
+    --surface-panel: #131313;
+    --surface-panel-soft: #101010;
+    --surface-brand-soft: rgba(198, 40, 40, 0.08);
+    --surface-brand-strong: #351919;
     --surface-success-soft: #183626;
-    --border-brand-soft: rgba(198, 40, 40, 0.3);
-    --border-overlay-soft: rgba(255, 255, 255, 0.15);
+    --border-brand-soft: rgba(198, 40, 40, 0.24);
+    --border-overlay-soft: rgba(255, 255, 255, 0.1);
     --border-success-soft: rgba(47, 143, 82, 0.3);
     --ripple-success-soft: rgba(120, 215, 159, 0.22);
-    --text-faint: rgba(255, 255, 255, 0.5);
+    --interactive-media-hover-opacity: 0.75;
+    --text-faint: rgba(245, 243, 239, 0.45);
 
-    --text-soft: rgba(255, 255, 255, 0.7);
+    --text-soft: rgba(245, 243, 239, 0.68);
 
-    --skeleton-base: rgba(255, 255, 255, 0.08);
-    --skeleton-highlight: rgba(255, 255, 255, 0.16);
+    --skeleton-base: rgba(255, 255, 255, 0.06);
+    --skeleton-highlight: rgba(255, 255, 255, 0.12);
 
     --poster-ratio: 2 / 3;
     --backdrop-ratio: 16 / 9;
@@ -183,7 +177,7 @@
     --z-toast: 1200;
 }
 
-@include mobile() {
+/* @include mobile() {
     :root {
         --text-2xs: 0.8125rem;
         --text-xs: 0.875rem;
@@ -191,3 +185,4 @@
         --control-height-sm: 2.5rem;
     }
 }
+ */

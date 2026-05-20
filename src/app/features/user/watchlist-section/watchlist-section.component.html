@@ -20,8 +20,8 @@
                         {{
                             (vm.movies.total > 0 ? 1 : 0) +
                                 " - " +
-                                ((vm.movies.state.type === "loaded" ||
-                                    vm.movies.state.type === "loading-more")
+                                (vm.movies.state.type === "loaded" ||
+                                vm.movies.state.type === "loading-more"
                                     ? vm.movies.state.value.length
                                     : 0) +
                                 " of " +
@@ -31,8 +31,8 @@
                         {{
                             (vm.tv.total > 0 ? 1 : 0) +
                                 " - " +
-                                ((vm.tv.state.type === "loaded" ||
-                                    vm.tv.state.type === "loading-more")
+                                (vm.tv.state.type === "loaded" ||
+                                vm.tv.state.type === "loading-more"
                                     ? vm.tv.state.value.length
                                     : 0) +
                                 " of " +
@@ -50,11 +50,17 @@
         </app-browse-toolbar>
 
         <div class="watchlist-section__list">
-            <div class="catalog-panel">
+            <div>
                 @if (selectedTab === "movies") {
-                    <app-media-list [state]="vm.movies.state" routeType="movie" />
+                    <app-media-list
+                        [state]="vm.movies.state"
+                        routeType="movie"
+                    />
 
-                    @if (vm.movies.state.type === "loaded" && vm.movies.state.value.length === 0) {
+                    @if (
+                        vm.movies.state.type === "loaded" &&
+                        vm.movies.state.value.length === 0
+                    ) {
                         <div class="empty-panel watchlist-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-bookmark"
@@ -83,7 +89,10 @@
                 } @else {
                     <app-media-list [state]="vm.tv.state" routeType="tv" />
 
-                    @if (vm.tv.state.type === "loaded" && vm.tv.state.value.length === 0) {
+                    @if (
+                        vm.tv.state.type === "loaded" &&
+                        vm.tv.state.value.length === 0
+                    ) {
                         <div class="empty-panel watchlist-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-bookmark"
@@ -114,4 +123,3 @@
         </div>
     </div>
 }
-

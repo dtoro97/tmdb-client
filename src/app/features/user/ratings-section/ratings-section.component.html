@@ -20,8 +20,8 @@
                         {{
                             (vm.movies.total > 0 ? 1 : 0) +
                                 " - " +
-                                ((vm.movies.state.type === "loaded" ||
-                                    vm.movies.state.type === "loading-more")
+                                (vm.movies.state.type === "loaded" ||
+                                vm.movies.state.type === "loading-more"
                                     ? vm.movies.state.value.length
                                     : 0) +
                                 " of " +
@@ -31,8 +31,8 @@
                         {{
                             (vm.tv.total > 0 ? 1 : 0) +
                                 " - " +
-                                ((vm.tv.state.type === "loaded" ||
-                                    vm.tv.state.type === "loading-more")
+                                (vm.tv.state.type === "loaded" ||
+                                vm.tv.state.type === "loading-more"
                                     ? vm.tv.state.value.length
                                     : 0) +
                                 " of " +
@@ -42,8 +42,8 @@
                         {{
                             (vm.episodes.total > 0 ? 1 : 0) +
                                 " - " +
-                                ((vm.episodes.state.type === "loaded" ||
-                                    vm.episodes.state.type === "loading-more")
+                                (vm.episodes.state.type === "loaded" ||
+                                vm.episodes.state.type === "loading-more"
                                     ? vm.episodes.state.value.length
                                     : 0) +
                                 " of " +
@@ -62,14 +62,16 @@
 
         <div class="ratings-section__list">
             @if (selectedTab === "movies") {
-                <div class="catalog-panel">
+                <div>
                     <app-media-list
                         [state]="vm.movies.state"
                         [userRatings]="vm.movies.userRatings"
                         routeType="movie"
                     />
 
-                    @if (vm.movies.state.type === "loaded" && !vm.movies.hasItems) {
+                    @if (
+                        vm.movies.state.type === "loaded" && !vm.movies.hasItems
+                    ) {
                         <div class="empty-panel ratings-section__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-star"
@@ -97,7 +99,7 @@
                     }
                 </div>
             } @else if (selectedTab === "tv") {
-                <div class="catalog-panel">
+                <div>
                     <app-media-list
                         [state]="vm.tv.state"
                         [userRatings]="vm.tv.userRatings"
@@ -134,7 +136,9 @@
             } @else {
                 <app-episode-rating-list [state]="vm.episodes.state" />
 
-                @if (vm.episodes.state.type === "loaded" && !vm.episodes.hasItems) {
+                @if (
+                    vm.episodes.state.type === "loaded" && !vm.episodes.hasItems
+                ) {
                     <div class="empty-panel ratings-section__empty">
                         <app-empty-state
                             iconClass="fa-solid fa-star"
@@ -164,4 +168,3 @@
         </div>
     </div>
 }
-

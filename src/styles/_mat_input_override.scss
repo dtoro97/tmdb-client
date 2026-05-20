@@ -43,16 +43,11 @@
         padding: 0;
         border: 1px solid var(--color-border-subtle);
         border-radius: var(--radius-md);
-        transition: border-color var(--motion-fast);
+        transition: border-color var(--motion-base);
     }
 
     &:hover .mat-mdc-text-field-wrapper {
-        border-color: var(--text-muted);
-    }
-
-    &.mat-focused .mat-mdc-text-field-wrapper {
         border-color: var(--control-focus-border);
-        box-shadow: 0 0 0 1px var(--control-focus-ring-inner);
     }
 
     .mat-mdc-form-field-flex {
@@ -123,11 +118,6 @@
         border-color: var(--control-border-hover);
     }
 
-    &:focus-within {
-        border-color: var(--control-focus-border);
-        box-shadow: 0 0 0 1px var(--control-focus-ring-inner);
-    }
-
     .mat-mdc-select-arrow-wrapper {
         width: 0.875rem;
     }
@@ -173,8 +163,8 @@
     min-height: var(--control-height-md) !important;
     color: var(--mat-sys-on-surface) !important;
     transition:
-        background-color var(--motion-fast),
-        color var(--motion-fast);
+        background-color var(--motion-base),
+        color var(--motion-base);
 
     &:hover,
     &.mdc-list-item--selected:hover,
