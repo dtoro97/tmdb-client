@@ -553,7 +553,7 @@ const buildCreditsDisplay = (
         (item): PersonCreditsDisplayItemVm => ({
             ...item,
             roleLabel: buildCreditRoleLabel(item),
-            mediaTypeLabel: item.mediaType === 'tv' ? 'TV Series' : 'Movie',
+            mediaTypeLabel: item.mediaType === 'tv' ? 'TV Shows' : 'Movie',
             episodeLabel:
                 item.mediaType === 'tv' && item.episodeCount
                     ? `${item.episodeCount} ep`
@@ -594,4 +594,3 @@ const buildCreditsDisplay = (
         },
     };
 };
-

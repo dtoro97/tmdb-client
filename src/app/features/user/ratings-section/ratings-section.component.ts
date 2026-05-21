@@ -17,7 +17,7 @@ type RatingsTab = 'movies' | 'tv' | 'episodes';
 
 const RATINGS_TABS = [
     { label: 'Movies', value: 'movies' as const },
-    { label: 'TV Series', value: 'tv' as const },
+    { label: 'TV Shows', value: 'tv' as const },
     { label: 'Episodes', value: 'episodes' as const },
 ];
 

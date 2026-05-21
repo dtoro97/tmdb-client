@@ -1,15 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import {
-    Observable,
-    catchError,
-    filter,
-    forkJoin,
-    map,
-    of,
-    take,
-    tap,
-} from 'rxjs';
+import { Observable, catchError, filter, forkJoin, map, of, take, tap } from 'rxjs';
 
 import { API_JSON_OPTIONS, TRAILERS_PAGE_SEED_COUNT } from '../../constants';
 import {
@@ -54,34 +45,17 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
 
     getTrendingTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {
         return forkJoin({
-            trendingMovies: this.trendingService.trendingMovies(
-                'week',
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
-            trendingTv: this.trendingService.trendingTv(
-                'week',
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
+            trendingMovies: this.trendingService.trendingMovies('week', undefined, 'body', undefined, this.opts),
+            trendingTv: this.trendingService.trendingTv('week', undefined, 'body', undefined, this.opts),
         }).pipe(
             map(({ trendingMovies, trendingTv }) =>
-                this.getVideoTrailerSeeds(
-                    trendingMovies.results ?? [],
-                    trendingTv.results ?? [],
-                ),
+                this.getVideoTrailerSeeds(trendingMovies.results ?? [], trendingTv.results ?? []),
             ),
             catchError(() => of([] as readonly VideoTrailerSeedItem[])),
         );
     }
 
-    loadVideoCardsForSeeds$(
-        seeds: readonly VideoTrailerSeedItem[],
-    ): Observable<VideoCardItem[]> {
+    loadVideoCardsForSeeds$(seeds: readonly VideoTrailerSeedItem[]): Observable<VideoCardItem[]> {
         if (!seeds.length) {
             return of([]);
         }
@@ -89,20 +63,13 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         return forkJoin(
             seeds.map((seed) =>
                 this.getVideosForMedia$(seed.mediaId, seed.mediaType).pipe(
-                    map((videos) =>
-                        this.toVideoCardItem(
-                            seed,
-                            pickBestYoutubeTrailer(videos),
-                        ),
-                    ),
+                    map((videos) => this.toVideoCardItem(seed, pickBestYoutubeTrailer(videos))),
                 ),
             ),
         ).pipe(map((items) => shuffle(items.filter(isDefined))));
     }
 
-    discoverStreamingTvByProviderId$(
-        providerId: number,
-    ): Observable<{ results?: TvSeriesListItem[] }> {
+    discoverStreamingTvByProviderId$(providerId: number): Observable<{ results?: TvSeriesListItem[] }> {
         return this.discoverService.discoverTv(
             undefined,
             undefined,
@@ -143,10 +110,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         );
     }
 
-    private getVideosForMedia$(
-        mediaId: number,
-        mediaType: MediaType,
-    ): Observable<Video[]> {
+    private getVideosForMedia$(mediaId: number, mediaType: MediaType): Observable<Video[]> {
         const cacheKey = `${mediaType}:${mediaId}`;
         const cached = this.get().videoCache[cacheKey];
 
@@ -181,27 +145,11 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         );
     }
 
-    private fetchVideosForMedia$(
-        mediaId: number,
-        mediaType: MediaType,
-    ): Observable<Video[]> {
+    private fetchVideosForMedia$(mediaId: number, mediaType: MediaType): Observable<Video[]> {
         return (
             mediaType === 'movie'
-                ? this.movieService.movieVideos(
-                      mediaId,
-                      undefined,
-                      'body',
-                      undefined,
-                      this.opts,
-                  )
-                : this.tvService.tvSeriesVideos(
-                      mediaId,
-                      undefined,
-                      undefined,
-                      'body',
-                      undefined,
-                      this.opts,
-                  )
+                ? this.movieService.movieVideos(mediaId, undefined, 'body', undefined, this.opts)
+                : this.tvService.tvSeriesVideos(mediaId, undefined, undefined, 'body', undefined, this.opts)
         ).pipe(
             map((response) => response.results ?? []),
             catchError(() => of([] as Video[])),
@@ -220,30 +168,25 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             .slice(0, TRAILERS_PAGE_SEED_COUNT);
     }
 
-    private toVideoCardItem(
-        seed: VideoTrailerSeedItem,
-        video: Video | null,
-    ): VideoCardItem | null {
+    private toVideoCardItem(seed: VideoTrailerSeedItem, video: Video | null): VideoCardItem | null {
         if (!video?.id || !video.key) {
             return null;
         }
 
         const videoName = video.name ?? seed.mediaTitle;
-        const videoTypeLabel =
-            video.type && video.official
-                ? `Official ${video.type}`
-                : (video.type ?? 'Trailer');
 
         return {
             ...seed,
-            video,
+            video: {
+                ...video,
+                type: undefined,
+            },
             videoId: video.id,
             videoKey: video.key,
             videoName,
             videoPublishedAt: video.published_at,
             mediaLink: ['/title', seed.mediaId, seed.mediaType],
             openVideoLabel: `Open video: ${videoName}`,
-            videoTypeLabel,
             videoUrl: buildYoutubeWatchUrl(video.key),
         };
     }

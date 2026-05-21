@@ -1,8 +1,8 @@
 <div class="search-page page-container">
     @if (vm$ | async; as vm) {
-        <div class="search-header inner-container">
-            <div class="search-header-top">
-                <h1 class="search-title">Results for "{{ vm.query }}"</h1>
+        <div class="search-header inner-container u-flex-column u-gap-4">
+            <div class="header-row">
+                <h1 class="text-headline">Results for "{{ vm.query }}"</h1>
             </div>
             <app-pill-toggle
                 [options]="typeOptions"
@@ -12,14 +12,14 @@
             />
         </div>
 
-        <div class="search-main inner-container">
+        <div class="results inner-container u-flex-column u-gap-8">
             @if (
-                vm.movieState.type === "loading" ||
-                vm.movieState.type === "loading-more" ||
-                (vm.movieState.type === "loaded" && vm.movieState.value.length)
+                vm.movieState.type === 'loading' ||
+                vm.movieState.type === 'loading-more' ||
+                (vm.movieState.type === 'loaded' && vm.movieState.value.length)
             ) {
                 <section>
-                    <h2>Movies</h2>
+                    <h2 class="section-title text-title">Movies</h2>
                     <div>
                         <app-media-list
                             [state]="vm.movieState"
@@ -33,24 +33,19 @@
                     </div>
                     @if (vm.movieHasMore) {
                         <div class="catalog-panel-footer">
-                            <button
-                                mat-stroked-button
-                                (click)="loadMoreMovies()"
-                            >
-                                Show more movies
-                            </button>
+                            <button mat-stroked-button (click)="loadMoreMovies()">Show more movies</button>
                         </div>
                     }
                 </section>
             }
 
             @if (
-                vm.tvState.type === "loading" ||
-                vm.tvState.type === "loading-more" ||
-                (vm.tvState.type === "loaded" && vm.tvState.value.length)
+                vm.tvState.type === 'loading' ||
+                vm.tvState.type === 'loading-more' ||
+                (vm.tvState.type === 'loaded' && vm.tvState.value.length)
             ) {
                 <section>
-                    <h2>TV Series</h2>
+                    <h2 class="section-title text-title">TV Shows</h2>
                     <div>
                         <app-media-list
                             [state]="vm.tvState"
@@ -64,22 +59,19 @@
                     </div>
                     @if (vm.tvHasMore) {
                         <div class="catalog-panel-footer">
-                            <button mat-stroked-button (click)="loadMoreTv()">
-                                Show more TV series
-                            </button>
+                            <button mat-stroked-button (click)="loadMoreTv()">Show more TV shows</button>
                         </div>
                     }
                 </section>
             }
 
             @if (
-                vm.personState.type === "loading" ||
-                vm.personState.type === "loading-more" ||
-                (vm.personState.type === "loaded" &&
-                    vm.personState.value.length)
+                vm.personState.type === 'loading' ||
+                vm.personState.type === 'loading-more' ||
+                (vm.personState.type === 'loaded' && vm.personState.value.length)
             ) {
                 <section>
-                    <h2>People</h2>
+                    <h2 class="section-title text-title">People</h2>
                     <div>
                         <app-person-list
                             [state]="vm.personState"
@@ -90,19 +82,14 @@
                     </div>
                     @if (vm.personHasMore) {
                         <div class="catalog-panel-footer">
-                            <button
-                                mat-stroked-button
-                                (click)="loadMorePeople()"
-                            >
-                                Show more people
-                            </button>
+                            <button mat-stroked-button (click)="loadMorePeople()">Show more people</button>
                         </div>
                     }
                 </section>
             }
 
             @if (vm.noSearchResults) {
-                <div class="empty-panel search-empty-state">
+                <div class="empty-panel">
                     <app-empty-state
                         iconClass="fa-solid fa-magnifying-glass"
                         title="No results found"

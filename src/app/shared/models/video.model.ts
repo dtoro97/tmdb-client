@@ -17,6 +17,5 @@ export interface VideoCardItem {
     videoDurationLabel?: string;
     mediaLink: [string, number, MediaType];
     openVideoLabel: string;
-    videoTypeLabel: string;
     videoUrl: string;
 }

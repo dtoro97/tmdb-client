@@ -1,13 +1,10 @@
-@use "breakpoints" as *;
+@use 'breakpoints' as *;
 
 .search-header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
     padding-block: var(--space-6);
 }
 
-.search-header-top {
+.header-row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -15,37 +12,20 @@
     gap: var(--space-3);
 }
 
-.search-title {
-    margin: 0;
-    font-size: var(--text-2xl);
-    font-weight: var(--weight-bold);
-    color: var(--text-primary);
-}
-
-.search-main {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
+.results {
     padding-block: 0 var(--space-8);
 }
 
-.search-empty-state {
-    border-radius: var(--radius-xl);
-}
-
-section {
-    h2 {
-        margin: 0 0 var(--space-4);
-    }
+.section-title {
+    margin: 0 0 var(--space-4);
 }
 
 @include mobile() {
     .search-header {
-        gap: var(--space-3);
         padding-block: var(--space-5);
     }
 
-    .search-main {
+    .results {
         gap: var(--space-6);
     }
 }

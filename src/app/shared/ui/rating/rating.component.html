@@ -1,9 +1,9 @@
-<span class="rating text-meta">
+<span class="rating">
     <mat-icon class="rating__icon" aria-hidden="true">star</mat-icon>
 
     @if (value) {
         <span>{{ value | number: "1.1-1" }}</span>
     } @else {
-        <span class="text-caption"> No ratings yet </span>
+        <span class="rating__empty"> No ratings yet </span>
     }
 </span>

@@ -135,7 +135,7 @@ export class MediaDetailsComponent {
                 ),
                 tap((mediaDetail) => {
                     const typeLabel =
-                        mediaDetail.mediaType === 'tv' ? 'TV Series' : 'Movie';
+                        mediaDetail.mediaType === 'tv' ? 'TV Shows' : 'Movie';
                     this.title.setTitle(`${mediaDetail.title} | ${typeLabel}`);
                     this.recentlyViewedStore.addItem({
                         kind: 'media',

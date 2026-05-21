@@ -58,7 +58,6 @@ const DEFAULT_CREDITS_UI = {
 })
 export class PersonCreditsComponent implements OnChanges {
     readonly defaultExpandedCount = 3;
-    summaryText = '';
     hasActiveFilters = false;
     emptyStateTitle = 'No filmography available yet';
     emptyStateText = 'We do not have any film or TV credits to show right now.';
@@ -88,7 +87,7 @@ export class PersonCreditsComponent implements OnChanges {
         [
             { label: 'All media', value: 'all' },
             { label: 'Movies', value: 'movie' },
-            { label: 'TV Series', value: 'tv' },
+            { label: 'TV Shows', value: 'tv' },
         ];
 
     readonly sortOptions: { label: string; value: PersonCreditsSortBy }[] = [
@@ -103,14 +102,6 @@ export class PersonCreditsComponent implements OnChanges {
             this.mediaType !== DEFAULT_CREDITS_UI.mediaType ||
             this.sortBy !== DEFAULT_CREDITS_UI.sortBy ||
             this.sortDirection !== DEFAULT_CREDITS_UI.sortDirection;
-
-        this.summaryText = buildCreditsSummary(
-            this.state,
-            this.section,
-            this.mediaType,
-            this.sortBy,
-            this.sortDirection,
-        );
 
         this.emptyStateTitle = this.hasActiveFilters
             ? 'No filmography matches these filters'
@@ -136,37 +127,3 @@ export class PersonCreditsComponent implements OnChanges {
         this.resetFilters.emit();
     }
 }
-
-const buildCreditsSummary = (
-    state: LoadableValue<PersonCreditsDisplayVm>,
-    section: PersonCreditsSection,
-    mediaType: PersonCreditsMediaType,
-    sortBy: PersonCreditsSortBy,
-    sortDirection: SortDirection,
-): string => {
-    if (state.type !== 'loaded' || !state.value.totalCount) {
-        return '';
-    }
-
-    const count = state.value.totalCount;
-    const creditsLabel =
-        section === 'cast'
-            ? 'acting credits'
-            : section === 'production'
-              ? 'production credits'
-              : 'credits';
-    const mediaLabel =
-        mediaType === 'movie'
-            ? 'in movies'
-            : mediaType === 'tv'
-              ? 'in TV series'
-              : 'across film and TV';
-    const organizationLabel =
-        sortBy === 'date'
-            ? 'grouped by year'
-            : sortBy === 'rating'
-              ? `sorted by rating (${sortDirection === 'desc' ? 'highest first' : 'lowest first'})`
-              : `sorted alphabetically (${sortDirection === 'asc' ? 'A-Z' : 'Z-A'})`;
-
-    return `${count} ${creditsLabel} ${mediaLabel}, ${organizationLabel}.`;
-};

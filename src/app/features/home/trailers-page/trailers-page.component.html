@@ -1,140 +1,86 @@
 <div class="page-container">
     @if (vm$ | async; as vm) {
-        <main class="trailers-page">
-            @if (vm.featuredSpotlight; as featured) {
-                <app-hero-spotlight
-                    badge="Featured Trailer"
-                    backLink="/"
-                    backLabel="Home"
-                    [spotlight]="featured.spotlight"
-                >
-                    <button
-                        matButton="filled"
-                        type="button"
-                        (click)="openTrailer(featured.videoUrl)"
-                    >
-                        <i class="fa-solid fa-play" aria-hidden="true"></i>
-                        Play Trailer
-                    </button>
-                </app-hero-spotlight>
-            } @else {
-                <app-hero-spotlight [loading]="true" />
-            }
+        @if (vm.featuredSpotlight; as featured) {
+            <app-hero-spotlight badge="Featured Trailer" backLink="/" backLabel="Home" [spotlight]="featured.spotlight">
+                <button matButton="filled" type="button" (click)="openTrailer(featured.videoUrl)">
+                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                    Play Trailer
+                </button>
+            </app-hero-spotlight>
+        } @else {
+            <app-hero-spotlight [loading]="true" />
+        }
 
-            <div class="page-main">
-                <section class="trailers-page__content">
-                    @if (
-                        vm.trailersState.type === "idle" ||
-                        vm.trailersState.type === "loading"
-                    ) {
-                        <ul class="trailers-page__grid" aria-hidden="true">
-                            @for (i of skeletonCount | repeat; track i) {
-                                <li class="trailers-page__grid-item">
-                                    <div class="trailers-page__thumb-skeleton">
-                                        <div
-                                            class="trailers-page__thumb-skeleton-art-frame aspect-landscape"
-                                        >
-                                            <app-skeleton
-                                                class="trailers-page__thumb-skeleton-art"
-                                            />
+        <div class="page-main">
+            <section class="u-gap-4 u-flex-column">
+                @if (vm.trailersState.type === 'idle' || vm.trailersState.type === 'loading') {
+                    <ul class="grid u-list-none" aria-hidden="true">
+                        @for (i of skeletonCount | repeat; track i) {
+                            <li>
+                                <div class="thumb u-flex-column">
+                                    <div class="thumb__frame aspect-landscape">
+                                        <app-skeleton class="thumb__art" />
+                                    </div>
+                                    <app-skeleton class="thumb__line thumb__line--primary" />
+                                    <app-skeleton class="thumb__line thumb__line--secondary" />
+                                    <app-skeleton class="thumb__line thumb__line--tertiary" />
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                } @else if (vm.trailersState.type === 'loaded' || vm.trailersState.type === 'loading-more') {
+                    <ul class="grid u-list-none" role="list">
+                        @for (
+                            trailer of vm.trailersState.value;
+                            track trailer.videoId + trailer.mediaType;
+                            let idx = $index
+                        ) {
+                            <li>
+                                @if (trailer.video; as video) {
+                                    <app-youtube-video-card
+                                        [video]="video"
+                                        [mediaTitle]="trailer.mediaTitle"
+                                        [mediaYear]="trailer.mediaYear ?? ''"
+                                        [mediaId]="trailer.mediaId"
+                                        [mediaType]="trailer.mediaType"
+                                        [linkToMedia]="true"
+                                        destination="youtube"
+                                        metaVariant="detailed"
+                                    />
+                                }
+                            </li>
+                        }
+
+                        @if (vm.trailersState.type === 'loading-more') {
+                            @for (i of vm.trailersState.placeholderCount | repeat; track i) {
+                                <li>
+                                    <div class="thumb u-flex-column">
+                                        <div class="thumb__frame aspect-landscape">
+                                            <app-skeleton class="thumb__art" />
                                         </div>
-                                        <app-skeleton
-                                            class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--primary"
-                                        />
-                                        <app-skeleton
-                                            class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--secondary"
-                                        />
-                                        <app-skeleton
-                                            class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--tertiary"
-                                        />
+                                        <app-skeleton class="thumb__line thumb__line--primary" />
+                                        <app-skeleton class="thumb__line thumb__line--secondary" />
+                                        <app-skeleton class="thumb__line thumb__line--tertiary" />
                                     </div>
                                 </li>
                             }
-                        </ul>
-                    } @else if (
-                        vm.trailersState.type === "loaded" ||
-                        vm.trailersState.type === "loading-more"
-                    ) {
-                        <ul class="trailers-page__grid" role="list">
-                            @for (
-                                trailer of vm.trailersState.value;
-                                track trailer.videoId + trailer.mediaType;
-                                let idx = $index
-                            ) {
-                                <li class="trailers-page__grid-item">
-                                    @if (trailer.video; as video) {
-                                        <app-youtube-video-card
-                                            [video]="video"
-                                            [mediaTitle]="trailer.mediaTitle"
-                                            [mediaYear]="
-                                                trailer.mediaYear ?? ''
-                                            "
-                                            [mediaId]="trailer.mediaId"
-                                            [mediaType]="trailer.mediaType"
-                                            [linkToMedia]="true"
-                                            destination="youtube"
-                                            metaVariant="detailed"
-                                        />
-                                    }
-                                </li>
-                            }
-
-                            @if (vm.trailersState.type === "loading-more") {
-                                @for (
-                                    i of vm.trailersState.placeholderCount
-                                        | repeat;
-                                    track i
-                                ) {
-                                    <li class="trailers-page__grid-item">
-                                        <div
-                                            class="trailers-page__thumb-skeleton"
-                                        >
-                                            <div
-                                                class="trailers-page__thumb-skeleton-art-frame aspect-landscape"
-                                            >
-                                                <app-skeleton
-                                                    class="trailers-page__thumb-skeleton-art"
-                                                />
-                                            </div>
-                                            <app-skeleton
-                                                class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--primary"
-                                            />
-                                            <app-skeleton
-                                                class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--secondary"
-                                            />
-                                            <app-skeleton
-                                                class="trailers-page__thumb-skeleton-line trailers-page__thumb-skeleton-line--tertiary"
-                                            />
-                                        </div>
-                                    </li>
-                                }
-                            }
-                        </ul>
-
-                        @if (
-                            vm.showMore ||
-                            vm.trailersState.type === "loading-more"
-                        ) {
-                            <footer class="trailers-page__footer">
-                                <button
-                                    mat-stroked-button
-                                    type="button"
-                                    [disabled]="
-                                        vm.trailersState.type === 'loading-more'
-                                    "
-                                    (click)="showMoreSelected()"
-                                >
-                                    {{
-                                        vm.trailersState.type === "loading-more"
-                                            ? "Loading more"
-                                            : "Show more"
-                                    }}
-                                </button>
-                            </footer>
                         }
+                    </ul>
+
+                    @if (vm.showMore || vm.trailersState.type === 'loading-more') {
+                        <footer class="u-justify-center u-flex">
+                            <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="vm.trailersState.type === 'loading-more'"
+                                (click)="showMoreSelected()"
+                            >
+                                {{ vm.trailersState.type === 'loading-more' ? 'Loading more' : 'Show more' }}
+                            </button>
+                        </footer>
                     }
-                </section>
-            </div>
-        </main>
+                }
+            </section>
+        </div>
     }
 </div>

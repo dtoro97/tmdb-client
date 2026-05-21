@@ -1,136 +1,90 @@
-<div class="collection-detail page-container">
+<div class="page-container">
     @if (store.collection$ | async; as collectionState) {
         <app-hero-surface
             [backdropPath]="
-                collectionState.type === 'loaded' && collectionState.value
-                    ? (store.backdropPath$ | async)
-                    : null
+                collectionState.type === 'loaded' && collectionState.value ? (store.backdropPath$ | async) : null
             "
             [alt]="
-                collectionState.type === 'loaded' && collectionState.value
-                    ? collectionState.value.name
-                    : 'Collection'
+                collectionState.type === 'loaded' && collectionState.value ? collectionState.value.name : 'Collection'
             "
             variant="detail"
         >
-            <div class="collection-detail__hero-cinematic">
-                @if (
-                    collectionState.type === "loaded"
-                        ? collectionState.value
-                        : null;
-                    as collection
-                ) {
-                    <p class="collection-detail__hero-kicker text-overline">
+            <div class="hero-cinematic u-flex-column u-gap-4">
+                @if (collectionState.type === 'loaded' ? collectionState.value : null; as collection) {
+                    <p class="text-overline">
                         Collection
                         @if (store.timelineLabel$ | async; as timelineLabel) {
                             &#x2022; {{ timelineLabel }}
                         }
                     </p>
-                    <h1 class="collection-detail__hero-title text-hero-title">
+                    <h1 class="hero-title text-hero-title">
                         {{ collection.name }}
                     </h1>
                 } @else {
-                    <app-skeleton
-                        class="collection-detail__hero-kicker-skeleton"
-                    />
-                    <app-skeleton
-                        class="collection-detail__hero-title-skeleton"
-                    />
+                    <app-skeleton class="hero-kicker-skeleton" />
+                    <app-skeleton class="hero-title-skeleton" />
                 }
             </div>
         </app-hero-surface>
 
-        <div class="collection-detail__info-shelf">
-            <div class="collection-detail__info-shelf-inner inner-container">
-                <div class="collection-detail__poster-column">
+        <div class="info-shelf">
+            <div class="info-shelf-inner inner-container">
+                <div class="poster-column">
                     @if (store.posterPath$ | async; as posterPath) {
                         <app-image
-                            class="collection-detail__poster"
+                            class="poster aspect-poster"
                             [src]="posterPath"
                             type="media"
                             [alt]="
-                                collectionState.type === 'loaded' &&
-                                collectionState.value
+                                collectionState.type === 'loaded' && collectionState.value
                                     ? collectionState.value.name
                                     : 'Collection poster'
                             "
                         />
                     } @else {
-                        <app-skeleton
-                            class="collection-detail__poster collection-detail__poster--skeleton"
-                        />
+                        <app-skeleton class="poster poster--skeleton aspect-poster" />
                     }
                 </div>
 
-                <div class="collection-detail__info-content">
-                    @if (
-                        collectionState.type === "loaded"
-                            ? collectionState.value
-                            : null;
-                        as collection
-                    ) {
-                        <div class="collection-detail__summary-row">
+                <div class="info-content u-flex-column">
+                    @if (collectionState.type === 'loaded' ? collectionState.value : null; as collection) {
+                        <div class="summary-row">
                             @if (store.averageRating$ | async; as rating) {
                                 @if (rating > 0) {
-                                    <span
-                                        class="collection-detail__summary-pill"
-                                    >
-                                        <app-rating [value]="rating" />
-                                    </span>
+                                    <app-rating class="summary-rating__value" [value]="rating" />
                                 }
                             }
 
                             @if (store.partsCount$ | async; as count) {
-                                <span
-                                    class="collection-detail__summary-meta text-body-sm"
-                                >
+                                <span class="text-meta">
                                     {{ count }}
-                                    {{ count === 1 ? "movie" : "movies" }}
+                                    {{ count === 1 ? 'movie' : 'movies' }}
                                 </span>
                             }
 
-                            @if (
-                                store.timelineLabel$ | async;
-                                as timelineLabel
-                            ) {
-                                <span
-                                    class="collection-detail__summary-meta text-body-sm"
-                                >
+                            @if (store.timelineLabel$ | async; as timelineLabel) {
+                                <span class="text-meta">
                                     {{ timelineLabel }}
                                 </span>
                             }
                         </div>
 
-                        <p
-                            class="collection-detail__overview text-body"
-                            [class.collection-detail__overview--empty]="
-                                !collection.overview
-                            "
-                        >
-                            {{
-                                collection.overview ||
-                                    "We don't have an overview for this collection yet."
-                            }}
-                        </p>
+                        @if (collection.overview) {
+                            <p class="overview text-body">
+                                {{ collection.overview }}
+                            </p>
+                        } @else {
+                            <p class="text-meta">We don't have an overview for this collection yet.</p>
+                        }
                     } @else {
-                        <div class="collection-detail__summary-skeleton-row">
-                            <app-skeleton
-                                class="collection-detail__summary-pill-skeleton"
-                            />
-                            <app-skeleton
-                                class="collection-detail__summary-pill-skeleton collection-detail__summary-pill-skeleton--wide"
-                            />
+                        <div class="summary-skeleton-row">
+                            <app-skeleton class="summary-pill-skeleton" />
+                            <app-skeleton class="summary-pill-skeleton summary-pill-skeleton--wide" />
                         </div>
-                        <div class="collection-detail__overview-skeleton">
-                            <app-skeleton
-                                class="collection-detail__overview-line"
-                            />
-                            <app-skeleton
-                                class="collection-detail__overview-line collection-detail__overview-line--wide"
-                            />
-                            <app-skeleton
-                                class="collection-detail__overview-line collection-detail__overview-line--medium"
-                            />
+                        <div class="overview-skeleton">
+                            <app-skeleton class="overview-line" />
+                            <app-skeleton class="overview-line overview-line--wide" />
+                            <app-skeleton class="overview-line overview-line--medium" />
                         </div>
                     }
                 </div>
@@ -142,86 +96,43 @@
                 @if (arcEntries.length) {
                     <app-page-section
                         title="Collection Highlights"
-                        [subtitle]="
-                            (store.collectionArcSummary$ | async) ?? undefined
-                        "
+                        [subtitle]="(store.collectionArcSummary$ | async) ?? undefined"
                     >
-                        <div class="collection-detail__arc-grid">
+                        <div class="arc-grid">
                             @for (entry of arcEntries; track entry.id) {
-                                <a
-                                    class="collection-detail__arc-card"
-                                    [routerLink]="[
-                                        '/title',
-                                        entry.item.id,
-                                        entry.item.mediaType,
-                                    ]"
-                                >
+                                <a class="arc-card" [routerLink]="['/title', entry.item.id, entry.item.mediaType]">
                                     <app-image
-                                        class="collection-detail__arc-poster"
+                                        class="arc-poster aspect-poster"
                                         [src]="entry.item.thumb"
                                         [alt]="entry.item.title"
                                         type="media"
                                     />
 
-                                    <div class="collection-detail__arc-copy">
-                                        <div
-                                            class="collection-detail__arc-header"
-                                        >
-                                            <app-badge
-                                                class="collection-detail__arc-badge"
-                                                [label]="entry.label"
-                                                [variant]="
-                                                    entry.label === 'Top rated'
-                                                        ? 'accent'
-                                                        : 'neutral'
-                                                "
-                                            />
-
-                                            <h3
-                                                class="collection-detail__arc-title text-title"
-                                            >
-                                                {{ entry.item.title }}
-                                            </h3>
-                                            @if (
-                                                entry.item.date ||
-                                                entry.item.rating
-                                            ) {
-                                                <p
-                                                    class="collection-detail__arc-meta text-body-sm"
-                                                >
+                                    <div class="u-flex-column u-gap-1">
+                                        <div class="arc-header">
+                                            <div class="arc-title-row">
+                                                <h3 class="text-title">
+                                                    {{ entry.item.title }}
+                                                </h3>
+                                                <app-badge
+                                                    [label]="entry.label"
+                                                    [variant]="entry.label === 'Top rated' ? 'accent' : 'neutral'"
+                                                />
+                                            </div>
+                                            @if (entry.item.date || entry.item.rating) {
+                                                <p class="arc-meta text-meta">
                                                     @if (entry.item.date) {
-                                                        <span>{{
-                                                            entry.item.date
-                                                        }}</span>
+                                                        <span>{{ entry.item.date }}</span>
                                                     }
                                                     @if (entry.item.rating) {
                                                         @if (entry.item.date) {
-                                                            <span
-                                                                >&#x2022;</span
-                                                            >
+                                                            <span>&#x2022;</span>
                                                         }
-                                                        <span
-                                                            class="collection-detail__arc-rating"
-                                                        >
-                                                            <app-rating
-                                                                [value]="
-                                                                    entry.item
-                                                                        .rating
-                                                                "
-                                                            />
-                                                            @if (
-                                                                entry.item
-                                                                    .voteCount
-                                                            ) {
-                                                                <span
-                                                                    class="collection-detail__arc-vote-count text-caption"
-                                                                >
-                                                                    ({{
-                                                                        entry
-                                                                            .item
-                                                                            .voteCount
-                                                                            | voteCount
-                                                                    }})
+                                                        <span class="u-flex u-items-center u-gap-2">
+                                                            <app-rating [value]="entry.item.rating" />
+                                                            @if (entry.item.voteCount) {
+                                                                <span class="text-caption">
+                                                                    ({{ entry.item.voteCount | voteCount }})
                                                                 </span>
                                                             }
                                                         </span>
@@ -229,18 +140,13 @@
                                                 </p>
                                             }
                                         </div>
-
-                                        <p
-                                            class="collection-detail__arc-overview text-body-sm"
-                                            [class.collection-detail__arc-overview--empty]="
-                                                !entry.item.overview
-                                            "
-                                        >
-                                            {{
-                                                entry.item.overview ||
-                                                    "No overview available yet."
-                                            }}
-                                        </p>
+                                        @if (entry.item.overview) {
+                                            <p class="arc-overview text-body-sm">
+                                                {{ entry.item.overview }}
+                                            </p>
+                                        } @else {
+                                            <p class="text-meta">We don't have an overview for this movie yet.</p>
+                                        }
                                     </div>
                                 </a>
                             }
@@ -250,41 +156,20 @@
             }
 
             @if (store.mappedPartsState$ | async; as partsState) {
-                @if (
-                    partsState.type === "loading" ||
-                    (partsState.type === "loaded" && partsState.value.length)
-                ) {
+                @if (partsState.type === 'loading' || (partsState.type === 'loaded' && partsState.value.length)) {
                     <app-page-section subtitle="Movies">
-                        @if (partsState.type === "loaded") {
-                            <span
-                                section-controls
-                                class="collection-detail__section-count text-body-sm"
-                            >
-                                {{ partsState.value.length }} total
-                            </span>
+                        @if (partsState.type === 'loaded') {
+                            <span section-controls class="text-meta"> {{ partsState.value.length }} total </span>
                         } @else {
                             <span section-controls>
-                                <app-skeleton
-                                    class="collection-detail__section-count-skeleton"
-                                />
+                                <app-skeleton class="section-count-skeleton" />
                             </span>
                         }
 
-                        <div>
-                            <div>
-                                <app-media-list
-                                    [state]="partsState"
-                                    routeType="movie"
-                                />
-                            </div>
-                        </div>
+                        <app-media-list [state]="partsState" routeType="movie" />
                     </app-page-section>
-                } @else if (
-                    partsState.type === "loaded" && !partsState.value.length
-                ) {
-                    <p class="collection-detail__empty-text empty-text">
-                        No movies in this collection.
-                    </p>
+                } @else if (partsState.type === 'loaded' && !partsState.value.length) {
+                    <p class="empty-text">No movies in this collection.</p>
                 }
             }
         </div>

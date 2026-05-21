@@ -36,7 +36,7 @@ export class SearchPageComponent {
     readonly typeOptions = [
         { label: 'All', value: 'all' },
         { label: 'Movies', value: 'movie' },
-        { label: 'TV Series', value: 'tv' },
+        { label: 'TV Shows', value: 'tv' },
         { label: 'People', value: 'person' },
     ] satisfies { label: string; value: SearchType }[];
 

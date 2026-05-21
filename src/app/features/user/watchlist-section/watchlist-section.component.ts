@@ -16,7 +16,7 @@ type WatchlistTab = 'movies' | 'tv';
 
 const WATCHLIST_TABS = [
     { label: 'Movies', value: 'movies' as const },
-    { label: 'TV Series', value: 'tv' as const },
+    { label: 'TV Shows', value: 'tv' as const },
 ];
 
 const SORT_OPTIONS = [{ label: 'Date Added', value: 'created_at' }];

@@ -1,139 +1,81 @@
-<div class="home-top-picks">
+<div class="top-picks u-flex-column u-gap-4">
     @if (loading) {
-        <div class="home-top-picks__featured">
+        <div class="featured-grid">
             @for (item of featuredSkeletonCount | repeat; track item) {
-                <article
-                    class="home-top-picks__feature home-top-picks__feature--skeleton"
-                >
-                    <div class="home-top-picks__feature-media">
-                        <app-skeleton
-                            class="home-top-picks__feature-media-skeleton"
-                        />
+                <article class="feature-card--skeleton">
+                    <div class="feature-media aspect-poster">
+                        <app-skeleton class="feature-media-skeleton" />
                     </div>
 
-                    <div class="home-top-picks__feature-body">
-                        <app-skeleton
-                            class="home-top-picks__rank-badge-skeleton"
-                        />
-                        <app-skeleton
-                            class="home-top-picks__feature-title-skeleton"
-                        />
+                    <div class="feature-body u-flex-column u-items-start">
+                        <app-skeleton class="rank-skeleton" />
+                        <app-skeleton class="feature-title-skeleton" />
 
-                        <div class="home-top-picks__feature-meta">
-                            <app-skeleton
-                                class="home-top-picks__feature-meta-skeleton"
-                            />
-                            <app-skeleton
-                                class="home-top-picks__feature-meta-skeleton home-top-picks__feature-meta-skeleton--badge"
-                            />
+                        <div class="feature-meta u-flex u-items-center u-gap-2">
+                            <app-skeleton class="feature-meta-skeleton" />
+                            <app-skeleton class="feature-meta-skeleton feature-meta-skeleton--badge" />
                         </div>
 
-                        <app-skeleton
-                            class="home-top-picks__feature-copy-skeleton"
-                        />
-                        <app-skeleton
-                            class="home-top-picks__feature-copy-skeleton home-top-picks__feature-copy-skeleton--short"
-                        />
+                        <app-skeleton class="feature-copy-skeleton" />
+                        <app-skeleton class="feature-copy-skeleton feature-copy-skeleton--short" />
                     </div>
                 </article>
             }
         </div>
 
-        <div class="home-top-picks__grid">
+        <div class="tiles-grid">
             @for (item of secondarySkeletonCount | repeat; track item) {
-                <article class="home-top-picks__tile">
-                    <app-skeleton class="home-top-picks__tile-rank-skeleton" />
-
-                    <div class="home-top-picks__tile-card-skeleton">
-                        <app-skeleton
-                            class="home-top-picks__tile-card-fill-skeleton"
-                        />
-
-                        <div class="home-top-picks__tile-content-skeleton">
-                            <app-skeleton
-                                class="home-top-picks__tile-title-skeleton"
-                            />
-                            <app-skeleton
-                                class="home-top-picks__tile-meta-skeleton"
-                            />
-                        </div>
+                <article class="tile">
+                    <div class="tile-card-skeleton aspect-poster">
+                        <app-skeleton class="tile-card-fill-skeleton" />
                     </div>
                 </article>
             }
         </div>
     } @else {
         @if (featuredItems.length) {
-            <div class="home-top-picks__featured">
+            <div class="featured-grid">
                 @for (entry of featuredItems; track entry.item.id) {
-                    <article class="home-top-picks__feature">
-                        <a
-                            class="home-top-picks__feature-link"
-                            [routerLink]="[
-                                '/title',
-                                entry.item.id,
-                                entry.item.mediaType,
-                            ]"
-                        >
-                            <div class="home-top-picks__feature-media">
-                                <app-image
-                                    [src]="entry.item.imagePath"
-                                    [alt]="entry.item.title"
-                                />
-                            </div>
+                    <a class="feature-card" [routerLink]="['/title', entry.item.id, entry.item.mediaType]">
+                        <div class="feature-media aspect-poster">
+                            <app-image [src]="entry.item.imagePath" [alt]="entry.item.title" />
+                        </div>
 
-                            <div class="home-top-picks__feature-body">
-                                <app-badge
-                                    class="home-top-picks__rank-badge home-top-picks__rank-badge--featured"
-                                    [label]="'#' + entry.rank"
-                                    variant="rank"
-                                />
+                        <div class="feature-body u-flex-column u-items-start">
+                            <app-badge class="rank rank--featured" [label]="'#' + entry.rank" variant="rank" />
 
-                                <span
-                                    class="home-top-picks__feature-title text-title"
-                                >
-                                    {{ entry.item.title }}
-                                </span>
+                            <span class="feature-title text-title">
+                                {{ entry.item.title }}
+                            </span>
 
-                                <div class="home-top-picks__feature-meta">
-                                    @if (entry.item.date) {
-                                        <span class="text-meta">
-                                            {{ entry.item.date | date: "yyyy" }}
-                                        </span>
-                                    }
+                            <div class="feature-meta u-flex u-items-center u-gap-2">
+                                @if (entry.item.date) {
+                                    <span class="text-meta">
+                                        {{ entry.item.date | date: 'yyyy' }}
+                                    </span>
+                                }
 
-                                    @if (entry.item.rating !== null) {
-                                        <!-- <app-rating-badge
-                                            [value]="entry.item.rating"
-                                        /> -->
-                                        <app-rating
-                                            [value]="entry.item.rating"
-                                        ></app-rating>
-                                    }
-                                </div>
-
-                                @if (entry.item.overview) {
-                                    <p
-                                        class="home-top-picks__feature-overview text-body-sm"
-                                    >
-                                        {{ entry.item.overview }}
-                                    </p>
+                                @if (entry.item.rating !== null) {
+                                    <app-rating [value]="entry.item.rating"></app-rating>
                                 }
                             </div>
-                        </a>
-                    </article>
+
+                            @if (entry.item.overview) {
+                                <p class="feature-overview text-body-sm">
+                                    {{ entry.item.overview }}
+                                </p>
+                            }
+                        </div>
+                    </a>
                 }
             </div>
         }
 
         @if (secondaryItems.length) {
-            <div class="home-top-picks__grid">
+            <div class="tiles-grid">
                 @for (entry of secondaryItems; track entry.item.id) {
-                    <article class="home-top-picks__tile">
-                        <app-badge
-                            class="home-top-picks__rank-badge home-top-picks__rank-badge--tile"
-                            [label]="'#' + entry.rank"
-                            variant="rank"
-                        />
+                    <article class="tile">
+                        <app-badge class="rank rank--tile" [label]="'#' + entry.rank" variant="rank" />
 
                         <app-card [item]="entry.item" [showRating]="false" />
                     </article>

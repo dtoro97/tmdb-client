@@ -68,24 +68,18 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         popularPeople: state.popularPeople,
         trendingToday: state.trendingToday,
         airingToday: state.airingToday,
-        airingTonightPreview:
-            state.airingToday.type === 'loaded'
-                ? state.airingToday.value.slice(0, 12)
-                : [],
+        airingTonightPreview: state.airingToday.type === 'loaded' ? state.airingToday.value.slice(0, 12) : [],
         selectedStreamingProviderId: state.selectedStreamingProviderId,
         selectedStreamingProviderLabel:
-            state.streamingProviders.find(
-                (provider) => provider.id === state.selectedStreamingProviderId,
-            )?.label ?? null,
+            state.streamingProviders.find((provider) => provider.id === state.selectedStreamingProviderId)?.label ??
+            null,
         streamingProviders: state.streamingProviders.map((p) => ({
             label: p.label,
             value: p.id,
         })),
         streamingNow:
             state.selectedStreamingProviderId !== null
-                ? (state.streamingByProviderId[
-                      state.selectedStreamingProviderId
-                  ] ?? { type: 'idle' as const })
+                ? (state.streamingByProviderId[state.selectedStreamingProviderId] ?? { type: 'idle' as const })
                 : { type: 'idle' as const },
         inTheatres: state.inTheatres,
     }));
@@ -126,12 +120,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                     return of([]);
                 }
 
-                const providers: StreamingProviderConfig[] = topProviders.map(
-                    (p) => ({
-                        id: p.id,
-                        label: p.name,
-                    }),
-                );
+                const providers: StreamingProviderConfig[] = topProviders.map((p) => ({
+                    id: p.id,
+                    label: p.name,
+                }));
 
                 const loadingState = providers.reduce(
                     (acc, p) => ({
@@ -149,29 +141,22 @@ export class HomeStoreService extends ComponentStore<HomeState> {
 
                 return forkJoin(
                     providers.map((provider) =>
-                        this.trailerDataStore
-                            .discoverStreamingTvByProviderId$(provider.id)
-                            .pipe(
-                                map((response) => response.results ?? []),
-                                catchError(() => of([] as TvSeriesListItem[])),
-                            ),
+                        this.trailerDataStore.discoverStreamingTvByProviderId$(provider.id).pipe(
+                            map((response) => response.results ?? []),
+                            catchError(() => of([] as TvSeriesListItem[])),
+                        ),
                     ),
                 ).pipe(
                     tap((streamingGroups) =>
                         this.patchState({
                             streamingByProviderId: providers.reduce(
                                 (acc, provider, index) => {
-                                    const results =
-                                        streamingGroups[index] ?? [];
+                                    const results = streamingGroups[index] ?? [];
                                     return {
                                         ...acc,
                                         [provider.id]: {
                                             type: 'loaded' as const,
-                                            value: results
-                                                .map((item) =>
-                                                    toCardItem(item, 'tv'),
-                                                )
-                                                .slice(0, PAGE_SIZE),
+                                            value: results.map((item) => toCardItem(item, 'tv')).slice(0, PAGE_SIZE),
                                         },
                                     };
                                 },
@@ -277,9 +262,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         }).pipe(
             map(({ movie, tv }) =>
                 shuffle([
-                    ...(movie.results ?? []).map((item) =>
-                        toCardItem(item, 'movie'),
-                    ),
+                    ...(movie.results ?? []).map((item) => toCardItem(item, 'movie')),
                     ...(tv.results ?? []).map((item) => toCardItem(item, 'tv')),
                 ]).slice(0, PAGE_SIZE),
             ),
@@ -295,21 +278,15 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     private loadPopularPeople$() {
         this.patchState({ popularPeople: { type: 'loading' } });
 
-        return this.personListService
-            .personPopularList(undefined, 1, 'body', undefined, this.opts)
-            .pipe(
-                map((response) =>
-                    (response.results ?? [])
-                        .map((item) => toPersonCardItem(item))
-                        .slice(0, PAGE_SIZE),
-                ),
-                catchError(() => of([] as PersonCardItem[])),
-                tap((popularPeople) =>
-                    this.patchState({
-                        popularPeople: { type: 'loaded', value: popularPeople },
-                    }),
-                ),
-            );
+        return this.personListService.personPopularList(undefined, 1, 'body', undefined, this.opts).pipe(
+            map((response) => (response.results ?? []).map((item) => toPersonCardItem(item)).slice(0, PAGE_SIZE)),
+            catchError(() => of([] as PersonCardItem[])),
+            tap((popularPeople) =>
+                this.patchState({
+                    popularPeople: { type: 'loaded', value: popularPeople },
+                }),
+            ),
+        );
     }
 
     private loadTrendingToday$() {
@@ -318,84 +295,59 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             trendingToday: { type: 'loading' },
         });
 
-        return this.trendingService
-            .trendingAll('day', undefined, 'body', undefined, this.opts)
-            .pipe(
-                map((response) => {
-                    const mediaItems = (response.results ?? []).filter(
-                        (item: MultiListItem) =>
-                            item.media_type === 'movie' ||
-                            item.media_type === 'tv',
-                    );
+        return this.trendingService.trendingAll('day', undefined, 'body', undefined, this.opts).pipe(
+            map((response) => {
+                const mediaItems = (response.results ?? []).filter(
+                    (item: MultiListItem) => item.media_type === 'movie' || item.media_type === 'tv',
+                );
 
-                    const candidates = mediaItems.filter(
-                        (item) => !!item.backdrop_path,
-                    );
-                    const picked = shuffle(candidates)[0];
-                    const spotlight = picked
-                        ? this.toSpotlightItem(picked)
-                        : null;
-                    const carouselItems = mediaItems.filter(
-                        (item) => item !== picked,
-                    );
+                const candidates = mediaItems.filter((item) => !!item.backdrop_path);
+                const picked = shuffle(candidates)[0];
+                const spotlight = picked ? this.toSpotlightItem(picked) : null;
+                const carouselItems = mediaItems.filter((item) => item !== picked);
 
-                    return {
-                        spotlight,
-                        trendingToday: carouselItems
-                            .map((item) =>
-                                item.media_type === 'movie'
-                                    ? toCardItem(item, 'movie')
-                                    : toCardItem(item, 'tv'),
-                            )
-                            .slice(0, PAGE_SIZE),
-                    };
+                return {
+                    spotlight,
+                    trendingToday: carouselItems
+                        .map((item) =>
+                            item.media_type === 'movie' ? toCardItem(item, 'movie') : toCardItem(item, 'tv'),
+                        )
+                        .slice(0, PAGE_SIZE),
+                };
+            }),
+            catchError(() =>
+                of({
+                    spotlight: null as SpotlightItem | null,
+                    trendingToday: [] as CardItem[],
                 }),
-                catchError(() =>
-                    of({
-                        spotlight: null as SpotlightItem | null,
-                        trendingToday: [] as CardItem[],
-                    }),
-                ),
-                tap(({ spotlight, trendingToday }) =>
-                    this.patchState({
-                        spotlight: { type: 'loaded', value: spotlight },
-                        trendingToday: {
-                            type: 'loaded',
-                            value: trendingToday,
-                        },
-                    }),
-                ),
-            );
+            ),
+            tap(({ spotlight, trendingToday }) =>
+                this.patchState({
+                    spotlight: { type: 'loaded', value: spotlight },
+                    trendingToday: {
+                        type: 'loaded',
+                        value: trendingToday,
+                    },
+                }),
+            ),
+        );
     }
 
     private loadAiringToday$() {
         this.patchState({ airingToday: { type: 'loading' } });
 
-        return this.tvListService
-            .tvSeriesAiringTodayList(
-                undefined,
-                1,
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            )
-            .pipe(
-                map((response) =>
-                    (response.results ?? [])
-                        .map((item) => toCardItem(item, 'tv'))
-                        .slice(0, PAGE_SIZE),
-                ),
-                catchError(() => of([] as CardItem[])),
-                tap((airingToday) =>
-                    this.patchState({
-                        airingToday: {
-                            type: 'loaded',
-                            value: airingToday,
-                        },
-                    }),
-                ),
-            );
+        return this.tvListService.tvSeriesAiringTodayList(undefined, 1, undefined, 'body', undefined, this.opts).pipe(
+            map((response) => (response.results ?? []).map((item) => toCardItem(item, 'tv')).slice(0, PAGE_SIZE)),
+            catchError(() => of([] as CardItem[])),
+            tap((airingToday) =>
+                this.patchState({
+                    airingToday: {
+                        type: 'loaded',
+                        value: airingToday,
+                    },
+                }),
+            ),
+        );
     }
 
     private loadInTheatres$() {
@@ -450,9 +402,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             )
             .pipe(
                 map((response) =>
-                    (response.results ?? [])
-                        .map((item) => toCardItem(item, 'movie'))
-                        .slice(0, PAGE_SIZE),
+                    (response.results ?? []).map((item) => toCardItem(item, 'movie')).slice(0, PAGE_SIZE),
                 ),
                 catchError(() => of([] as CardItem[])),
                 tap((inTheatres) =>
@@ -480,7 +430,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             backdropPath: item.backdrop_path,
             rating: item.vote_average ?? null,
             year: (date ?? '').slice(0, 4),
-            mediaTypeLabel: isMovie ? 'Movie' : 'TV Series',
+            mediaTypeLabel: isMovie ? 'Movie' : 'TV Show',
         };
     }
 

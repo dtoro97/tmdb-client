@@ -1,27 +1,19 @@
-@if (state.type === "loading") {
-    <app-skeleton class="person-credits__toolbar-skeleton" />
-    <div class="person-credits__skeleton-list">
+@if (state.type === 'loading') {
+    <app-skeleton class="loading__toolbar" />
+    <div class="loading">
         @for (row of 8 | repeat; track row) {
-            <div class="person-credits__skeleton-row">
-                <app-skeleton class="person-credits__skeleton-thumb" />
-                <div class="person-credits__skeleton-lines">
-                    <app-skeleton
-                        class="person-credits__skeleton-line person-credits__skeleton-line--title"
-                    />
-                    <app-skeleton
-                        class="person-credits__skeleton-line person-credits__skeleton-line--meta"
-                    />
+            <div class="loading__row">
+                <app-skeleton class="loading__thumb" />
+                <div class="loading__lines u-flex-column u-gap-2">
+                    <app-skeleton class="loading__line loading__line--title" />
+                    <app-skeleton class="loading__line loading__line--meta" />
                 </div>
             </div>
         }
     </div>
 } @else {
-    @if (summaryText) {
-        <div class="person-credits__intro">
-            <p class="person-credits__summary text-body-sm">
-                {{ summaryText }}
-            </p>
-        </div>
+    @if (state.type === 'loaded' && state.value.totalCount) {
+        <p class="summary text-body-sm">Showing {{ state.value.totalCount }} credits.</p>
     }
     <app-browse-toolbar>
         <app-pill-toggle
@@ -48,101 +40,65 @@
             (directionToggle)="sortDirectionToggle.emit()"
         />
     </app-browse-toolbar>
-    @if (state.type === "loaded" && state.value.totalCount) {
-        <cdk-accordion class="person-credits__groups" multi>
-            @for (
-                group of state.value.groups;
-                track group.year;
-                let i = $index
-            ) {
+    @if (state.type === 'loaded' && state.value.totalCount) {
+        <cdk-accordion class="u-flex-column" multi>
+            @for (group of state.value.groups; track group.year; let i = $index) {
                 <cdk-accordion-item
                     #item="cdkAccordionItem"
                     class="accordion-section"
                     [expanded]="i < defaultExpandedCount"
                 >
-                    <button
-                        class="accordion-header"
-                        type="button"
-                        (click)="item.toggle()"
-                    >
-                        <span class="person-credits__group-label">
-                            <h3 class="person-credits__group-year text-meta">
+                    <button class="accordion-header" type="button" (click)="item.toggle()">
+                        <span class="u-flex u-items-center u-gap-2">
+                            <h3 class="text-body-sm">
                                 {{ group.year }}
                             </h3>
-                            <span
-                                class="person-credits__group-count text-caption"
-                            >
+                            &#x2022;
+                            <span class="text-caption">
                                 {{ group.items.length }}
-                                {{
-                                    group.items.length === 1
-                                        ? "title"
-                                        : "titles"
-                                }}
+                                {{ group.items.length === 1 ? 'title' : 'titles' }}
                             </span>
                         </span>
                         <i
                             class="fa-solid fa-chevron-down accordion-chevron"
-                            [class.accordion-chevron--collapsed]="
-                                !item.expanded
-                            "
+                            [class.accordion-chevron--collapsed]="!item.expanded"
                         ></i>
                     </button>
                     @if (item.expanded) {
                         <div class="accordion-body">
-                            @for (
-                                credit of group.items;
-                                track credit.id;
-                                let last = $last
-                            ) {
+                            @for (credit of group.items; track credit.id; let last = $last) {
                                 <a
-                                    class="person-credits__row"
-                                    [class.person-credits__row--last]="last"
-                                    [routerLink]="[
-                                        '/title',
-                                        credit.id,
-                                        credit.mediaType,
-                                    ]"
+                                    class="row"
+                                    [class.row--last]="last"
+                                    [routerLink]="['/title', credit.id, credit.mediaType]"
                                 >
                                     <app-image
-                                        class="person-credits__thumb aspect-poster"
+                                        class="thumb aspect-poster"
                                         [src]="credit.posterPath"
                                         [alt]="credit.title"
                                         type="media"
                                     />
 
-                                    <div class="person-credits__body">
-                                        <span
-                                            class="person-credits__title text-body-sm"
-                                        >
+                                    <div class="u-flex-column u-gap-2 w-100">
+                                        <span class="title text-body-strong">
                                             {{ credit.title }}
                                         </span>
                                         @if (credit.roleLabel) {
-                                            <span
-                                                class="person-credits__role text-caption"
-                                            >
+                                            <span class="role text-caption">
                                                 {{ credit.roleLabel }}
                                             </span>
                                         }
-                                        <div class="person-credits__secondary">
+                                        <div class="u-flex u-items-center u-gap-2">
                                             @if (credit.rating) {
-                                                <app-rating
-                                                    class="person-credits__rating"
-                                                    [value]="credit.rating"
-                                                />
+                                                <app-rating [value]="credit.rating" />
                                             }
-                                            <span class="person-credits__meta">
+                                            <span class="meta">
                                                 @if (credit.episodeLabel) {
-                                                    <span
-                                                        class="person-credits__episodes text-caption"
-                                                    >
-                                                        {{
-                                                            credit.episodeLabel
-                                                        }}
+                                                    <span class="episodes text-caption">
+                                                        {{ credit.episodeLabel }}
                                                     </span>
                                                 }
-                                                <mat-chip
-                                                    class="chip--accent chip--wide"
-                                                >
+                                                <mat-chip class="chip--accent chip--wide">
                                                     {{ credit.mediaTypeLabel }}
                                                 </mat-chip>
                                             </span>
@@ -156,20 +112,10 @@
             }
         </cdk-accordion>
     } @else {
-        <div class="empty-panel person-credits__empty">
-            <app-empty-state
-                iconClass="fa-solid fa-sliders"
-                [title]="emptyStateTitle"
-                [text]="emptyStateText"
-            />
+        <div class="empty-panel u-flex-column u-items-center u-gap-3">
+            <app-empty-state iconClass="fa-solid fa-sliders" [title]="emptyStateTitle" [text]="emptyStateText" />
             @if (hasActiveFilters) {
-                <button
-                    class="person-credits__reset text-caption"
-                    type="button"
-                    (click)="onResetFilters()"
-                >
-                    Reset filters
-                </button>
+                <button class="reset text-caption" type="button" (click)="onResetFilters()">Reset filters</button>
             }
         </div>
     }

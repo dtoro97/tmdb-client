@@ -1,87 +1,65 @@
-@if (!loading && spotlight; as s) {
-    <app-hero-surface
-        variant="detail"
-        [backdropPath]="s.backdropPath"
-        [alt]="s.title"
-    >
+@if (loading) {
+    <div class="skeleton-block" aria-hidden="true">
+        <div class="skeleton-block__content">
+            <app-skeleton class="skeleton-block__badge" />
+            <app-skeleton class="skeleton-block__title" />
+            <app-skeleton class="skeleton-block__meta" />
+            <app-skeleton class="skeleton-block__overview" />
+            <div class="skeleton-block__actions">
+                <app-skeleton class="skeleton-block__button" />
+                <app-skeleton class="skeleton-block__button skeleton-block__button--watchlist" />
+            </div>
+        </div>
+    </div>
+} @else if (spotlight) {
+    <app-hero-surface variant="detail" [backdropPath]="spotlight.backdropPath" [alt]="spotlight.title">
         @if (backLink) {
-            <a
-                class="hero-spotlight__back-link text-caption"
-                [routerLink]="backLink"
-            >
-                <i
-                    class="hero-spotlight__back-icon fa-solid fa-chevron-left"
-                    aria-hidden="true"
-                ></i>
+            <a class="back-link text-caption" [routerLink]="backLink">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 {{ backLabel }}
             </a>
         }
 
-        <section class="hero-spotlight">
-            <div class="hero-spotlight__content">
-                <span class="hero-spotlight__badge text-overline">{{
-                    badge
-                }}</span>
+        <section class="hero">
+            <div class="hero__content u-flex-column u-gap-4">
+                <span class="badge text-overline">{{ badge }}</span>
 
-                <a [routerLink]="['/title', s.id, s.mediaType]">
-                    <h1 class="hero-spotlight__title text-hero-title">
-                        {{ s.title }}
+                <a [routerLink]="['/title', spotlight.id, spotlight.mediaType]">
+                    <h1 class="title text-hero-title">
+                        {{ spotlight.title }}
                     </h1>
                 </a>
 
-                <div class="hero-spotlight__meta">
-                    @if (s.rating) {
-                        <app-rating [value]="s.rating" />
+                <div class="meta">
+                    @if (spotlight.rating) {
+                        <app-rating [value]="spotlight.rating" />
                     }
-                    @if (s.mediaTypeLabel) {
-                        <span class="hero-spotlight__meta-item text-meta">{{
-                            s.mediaTypeLabel
-                        }}</span>
+                    @if (spotlight.mediaTypeLabel) {
+                        <span class="meta-item text-meta">{{ spotlight.mediaTypeLabel }}</span>
                     }
-                    @if (s.year) {
-                        @if (s.mediaTypeLabel) {
-                            <span
-                                class="hero-spotlight__meta-divider"
-                                aria-hidden="true"
-                                >&#x2022;</span
-                            >
+                    @if (spotlight.year) {
+                        @if (spotlight.mediaTypeLabel) {
+                            <span class="meta-divider" aria-hidden="true">&#x2022;</span>
                         }
-                        <span class="hero-spotlight__meta-item text-meta">{{
-                            s.year
-                        }}</span>
+                        <span class="meta-item text-meta">{{ spotlight.year }}</span>
                     }
                 </div>
 
-                @if (s.overview) {
-                    <p class="hero-spotlight__overview text-body">
-                        {{ s.overview }}
+                @if (spotlight.overview) {
+                    <p class="overview text-body">
+                        {{ spotlight.overview }}
                     </p>
                 }
 
-                <div class="hero-spotlight__actions">
+                <div class="actions">
                     <ng-content />
                     <app-watchlist-toggle
-                        [mediaId]="s.id"
-                        [mediaType]="s.mediaType"
-                        [title]="s.title"
+                        [mediaId]="spotlight.id"
+                        [mediaType]="spotlight.mediaType"
+                        [title]="spotlight.title"
                     />
                 </div>
             </div>
         </section>
     </app-hero-surface>
-} @else if (loading) {
-    <div class="hero-spotlight-skeleton" aria-hidden="true">
-        <div class="hero-spotlight-skeleton__content">
-            <div class="hero-spotlight-skeleton__badge skeleton"></div>
-            <div class="hero-spotlight-skeleton__title skeleton"></div>
-            <div class="hero-spotlight-skeleton__meta skeleton"></div>
-            <div class="hero-spotlight-skeleton__overview skeleton"></div>
-            <div class="hero-spotlight-skeleton__actions">
-                <div class="hero-spotlight-skeleton__button skeleton"></div>
-                <div
-                    class="hero-spotlight-skeleton__button hero-spotlight-skeleton__button--watchlist skeleton"
-                ></div>
-            </div>
-        </div>
-    </div>
 }

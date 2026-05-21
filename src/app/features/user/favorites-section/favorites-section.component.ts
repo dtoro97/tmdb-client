@@ -14,7 +14,7 @@ type FavoritesTab = 'movies' | 'tv';
 
 const FAVORITES_TABS = [
     { label: 'Movies', value: 'movies' as const },
-    { label: 'TV Series', value: 'tv' as const },
+    { label: 'TV shows', value: 'tv' as const },
 ];
 
 @Component({

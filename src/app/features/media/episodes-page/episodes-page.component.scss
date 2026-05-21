@@ -26,7 +26,7 @@
 .episodes-page__featured-card {
     color: inherit;
     text-decoration: none;
-    @include surface-hover();
+    @include media-hover();
 }
 
 .episodes-page__featured-media {
@@ -38,11 +38,6 @@
     width: 100%;
     aspect-ratio: var(--backdrop-ratio);
 }
-
-.episodes-page__featured-image {
-    @include media-hover();
-}
-
 .episodes-page__featured-image-skeleton {
     --skeleton-height: auto;
     --skeleton-radius: 0;

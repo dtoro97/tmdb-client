@@ -27,7 +27,6 @@
     aspect-ratio: var(--backdrop-ratio);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    @include media-hover();
 }
 
 .episode-list-item__still-skeleton {

@@ -1,90 +1,67 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
-.home-page {
-    display: block;
-}
-
-.home-page__sections {
+.sections {
     gap: var(--space-12);
     padding-bottom: var(--space-10);
 }
 
-.home-page__section-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    white-space: nowrap;
+.section-link {
     @include text-link(inherit);
 }
 
-.home-page__streaming-footer {
+.streaming-footer {
     display: flex;
     justify-content: flex-end;
     padding-top: var(--space-3);
 }
 
-.home-page__tonight-grid {
+.tonight-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-2);
 }
 
-.home-page__tonight-row {
+.tonight-row {
     display: flex;
     align-items: flex-start;
-    gap: var(--space-3);
+    gap: var(--space-2);
     min-width: 0;
-    padding: var(--space-3);
+    padding: var(--space-2);
     border-radius: var(--radius-md);
-    border: 1px solid transparent;
-    background-color: transparent;
-    color: inherit;
-    text-decoration: none;
     @include surface-hover();
 }
 
-.home-page__tonight-poster {
+.tonight-poster {
     width: 48px;
     aspect-ratio: var(--poster-ratio);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
     flex-shrink: 0;
     overflow: hidden;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
 }
 
-.home-page__tonight-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
+.tonight-content {
     min-width: 0;
 }
 
-.home-page__tonight-title {
-    color: var(--text-primary);
-    font-weight: var(--weight-semibold);
-}
-
-.home-page__tonight-meta {
-    display: flex;
-    align-items: center;
+.tonight-meta {
     gap: var(--space-1-5);
-    color: var(--text-muted);
 }
 
 @include tablet() {
-    .home-page__tonight-grid {
+    .tonight-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @include mobile() {
-    .home-page__sections {
+    .sections {
         gap: var(--space-10);
         padding-bottom: var(--space-8);
     }
 
-    .home-page__tonight-grid {
+    .tonight-grid {
         grid-template-columns: 1fr;
     }
 }

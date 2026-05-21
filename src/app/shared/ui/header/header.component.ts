@@ -53,7 +53,7 @@ export class HeaderComponent {
             },
         },
         {
-            label: 'TV Series',
+            label: 'TV shows',
             routerLink: '/discover',
             queryParams: { type: 'tv' },
             activeOptions: {

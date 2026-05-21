@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import {
     HeroSurfaceComponent,
     RatingComponent,
+    SkeletonComponent,
     WatchlistToggleComponent,
 } from '../../../shared';
 import type { SpotlightItem } from '../spotlight-item';
@@ -14,6 +15,7 @@ import type { SpotlightItem } from '../spotlight-item';
         RouterLink,
         HeroSurfaceComponent,
         RatingComponent,
+        SkeletonComponent,
         WatchlistToggleComponent,
     ],
     templateUrl: './hero-spotlight.component.html',

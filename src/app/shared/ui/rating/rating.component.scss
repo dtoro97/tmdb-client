@@ -1,13 +1,27 @@
 :host {
     display: inline-flex;
     align-items: center;
+    --rating-font-size: var(--text-sm);
+    --rating-font-weight: var(--weight-medium);
+    --rating-color: var(--text-muted);
 }
 
 .rating {
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
-    color: var(--text-muted);
+    font-size: var(--rating-font-size);
+    font-weight: var(--rating-font-weight);
+    line-height: 1.4;
+    letter-spacing: 0;
+    color: var(--rating-color);
+}
+
+.rating__empty {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    line-height: 1.4;
+    letter-spacing: 0;
 }
 
 .rating__icon {

@@ -1,5 +1,5 @@
-@use "./breakpoints" as *;
-@use "./mixins" as *;
+@use './breakpoints' as *;
+@use './mixins' as *;
 
 .surface-panel {
     @include surface-panel();
@@ -30,7 +30,7 @@
 
 @include mobile() {
     .surface-panel {
-        padding: var(--space-4);
+        padding: var(--space-3);
     }
 
     .catalog-panel {

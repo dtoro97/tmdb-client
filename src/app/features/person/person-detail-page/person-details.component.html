@@ -1,71 +1,47 @@
 @if (personDetailStore.personDetailVm$ | async; as vm) {
     <div class="page-container">
-        @if (vm.person.type === "loaded" && vm.person.value; as person) {
+        @if (vm.person.type === 'loaded' && vm.person.value; as person) {
             <app-hero-surface [alt]="person.name" variant="detail">
-                <div class="person-hero">
+                <div class="hero">
                     <app-image
-                        class="person-hero__portrait aspect-poster"
+                        class="portrait aspect-poster"
                         [src]="person.profile_path"
                         type="person"
                         [alt]="person.name"
                     />
-                    <div class="person-hero__body">
-                        <header class="person-hero__header">
-                            <div class="person-hero__title-block">
-                                <p
-                                    class="person-hero__department text-overline"
-                                >
-                                    {{ person.known_for_department }}
-                                </p>
-                                <h1 class="person-hero__name text-display">
-                                    {{ person.name }}
-                                </h1>
-                            </div>
-                        </header>
+                    <div class="u-flex-column u-gap-4">
+                        <div class="u-flex-column u-gap-2">
+                            <span class="text-overline">
+                                {{ person.known_for_department }}
+                            </span>
+                            <h1 class="text-display">
+                                {{ person.name }}
+                            </h1>
+                        </div>
 
-                        <div class="person-hero__biography-block">
-                            <p
-                                class="person-hero__biography text-body"
-                                [class.person-hero__biography--collapsed]="
-                                    !!person.biography && !bioExpanded
-                                "
-                                [class.person-hero__biography--empty]="
-                                    !person.biography
-                                "
-                            >
-                                {{
-                                    person.biography ||
-                                        "No biography available."
-                                }}
-                            </p>
-                            @if (
-                                person.biography &&
-                                person.biography.length > bioPreviewThreshold
-                            ) {
-                                <button
-                                    class="person-hero__bio-toggle text-caption"
-                                    (click)="toggleBio()"
+                        <div class="biography u-flex-column u-items-start u-gap-3">
+                            @if (person.biography) {
+                                <p
+                                    class="biography__copy text-body-strong"
+                                    [class.biography__copy--collapsed]="!bioExpanded"
                                 >
-                                    {{
-                                        bioExpanded
-                                            ? "Hide biography"
-                                            : "Read full biography"
-                                    }}
-                                </button>
+                                    {{ person.biography }}
+                                </p>
+                            } @else {
+                                <p class="text-meta">No biography available for this person.</p>
+                            }
+
+                            @if (person.biography && person.biography.length > bioPreviewThreshold) {
+                                <a class="biography__toggle text-caption-strong" (click)="toggleBio()">
+                                    {{ bioExpanded ? 'Hide biography' : 'Read full biography' }}
+                                </a>
                             }
                         </div>
 
                         @if (vm.externalLinks) {
-                            <div class="person-hero__footer">
-                                <span
-                                    class="person-hero__footer-label text-overline"
-                                >
-                                    Profiles
-                                </span>
-                                <app-external-links
-                                    class="person-hero__socials"
-                                    [externalLinks]="vm.externalLinks"
-                                />
+                            <div class="footer">
+                                <span class="text-overline">Profiles</span>
+                                <app-external-links [externalLinks]="vm.externalLinks" />
                             </div>
                         }
                     </div>
@@ -73,21 +49,13 @@
             </app-hero-surface>
 
             <div class="page-sections">
-                @if (
-                    vm.knownFor.type === "loading" ||
-                    (vm.knownFor.type === "loaded" && vm.knownFor.value.length)
-                ) {
+                @if (vm.knownFor.type === 'loading' || (vm.knownFor.type === 'loaded' && vm.knownFor.value.length)) {
                     <app-page-section subtitle="Known For">
-                        <app-media-carousel-panel
-                            [state]="vm.knownFor"
-                        ></app-media-carousel-panel>
+                        <app-media-carousel-panel [state]="vm.knownFor"></app-media-carousel-panel>
                     </app-page-section>
                 }
 
-                @if (
-                    vm.creditsDisplay.type === "loading" ||
-                    vm.creditsDisplay.type === "loaded"
-                ) {
+                @if (vm.creditsDisplay.type === 'loading' || vm.creditsDisplay.type === 'loaded') {
                     <section class="surface-panel">
                         <app-page-section subtitle="Filmography">
                             <app-person-credits
@@ -97,159 +65,81 @@
                                 [sortBy]="vm.creditsUi.sortBy"
                                 [sortDirection]="vm.creditsUi.sortDirection"
                                 (sectionChange)="onCreditsSectionChange($event)"
-                                (mediaTypeChange)="
-                                    onCreditsMediaTypeChange($event)
-                                "
+                                (mediaTypeChange)="onCreditsMediaTypeChange($event)"
                                 (sortByChange)="onCreditsSortByChange($event)"
                                 (resetFilters)="resetCreditsFilters()"
-                                (sortDirectionToggle)="
-                                    toggleCreditsSortDirection()
-                                "
+                                (sortDirectionToggle)="toggleCreditsSortDirection()"
                             />
                         </app-page-section>
                     </section>
                 }
 
-                @if (
-                    vm.photos.type === "loading" ||
-                    (vm.photos.type === "loaded" && vm.photos.value.length > 0)
-                ) {
+                @if (vm.photos.type === 'loading' || (vm.photos.type === 'loaded' && vm.photos.value.length > 0)) {
                     <app-page-section subtitle="Photos">
                         <ng-container section-controls>
-                            @if (
-                                vm.photos.type === "loaded" &&
-                                vm.photos.value.length
-                            ) {
-                                <a
-                                    class="person-details__browse-link text-body-sm"
-                                    [routerLink]="[
-                                        '/name',
-                                        person.id,
-                                        'photos',
-                                    ]"
-                                >
-                                    Browse all photos ({{
-                                        vm.photos.value.length
-                                    }})
+                            @if (vm.photos.type === 'loaded' && vm.photos.value.length) {
+                                <a class="browse-link text-body-sm" [routerLink]="['/name', person.id, 'photos']">
+                                    Browse all photos ({{ vm.photos.value.length }})
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
                             }
                         </ng-container>
                         <app-photos-grid
                             [state]="vm.photos"
-                            [totalCount]="
-                                vm.photos.type === 'loaded'
-                                    ? vm.photos.value.length
-                                    : 0
-                            "
+                            [totalCount]="vm.photos.type === 'loaded' ? vm.photos.value.length : 0"
                             (photoClick)="openPhotoViewer($event)"
                         />
                     </app-page-section>
                 }
 
-                @if (
-                    person.birthday ||
-                    person.deathday ||
-                    person.place_of_birth ||
-                    person.also_known_as?.length
-                ) {
+                @if (person.birthday || person.deathday || person.place_of_birth || person.also_known_as?.length) {
                     <app-page-section subtitle="Personal Details">
-                        <ul class="person-facts" aria-label="Personal details">
+                        <ul class="facts u-list-none" aria-label="Personal details">
                             @if (person.birthday) {
-                                <li class="person-facts__item">
-                                    <span
-                                        class="person-facts__label text-overline"
-                                    >
-                                        Born
-                                    </span>
-                                    <span
-                                        class="person-facts__value person-facts__value--inline text-body"
-                                    >
+                                <li class="fact u-flex-column u-gap-2">
+                                    <span class="text-overline">Born</span>
+                                    <span class="text-body-strong">
                                         {{ person.birthday | date }}
                                         @if (!person.deathday) {
-                                            <span
-                                                class="person-facts__meta text-caption"
-                                            >
-                                                (age {{ person | age }})
-                                            </span>
+                                            <span class="text-caption"> (age {{ person | age }}) </span>
                                         }
                                     </span>
                                 </li>
                             }
                             @if (person.deathday) {
-                                <li class="person-facts__item">
-                                    <span
-                                        class="person-facts__label text-overline"
-                                    >
-                                        Died
-                                    </span>
-                                    <span
-                                        class="person-facts__value person-facts__value--inline text-body"
-                                    >
+                                <li class="fact u-flex-column u-gap-2">
+                                    <span class="text-overline">Died</span>
+                                    <span class="text-body-strong">
                                         {{ person.deathday | date }}
-                                        <span
-                                            class="person-facts__meta text-caption"
-                                        >
-                                            (age {{ person | age }})
-                                        </span>
+                                        <span class="text-caption"> (age {{ person | age }}) </span>
                                     </span>
                                 </li>
                             }
                             @if (person.place_of_birth) {
-                                <li class="person-facts__item">
-                                    <span
-                                        class="person-facts__label text-overline"
-                                    >
-                                        Birthplace
-                                    </span>
-                                    <span class="person-facts__value text-body">
-                                        {{ person.place_of_birth }}
-                                    </span>
+                                <li class="fact u-flex-column u-gap-2">
+                                    <span class="text-overline">Birthplace</span>
+                                    <span class="text-body-strong">{{ person.place_of_birth }}</span>
                                 </li>
                             }
                             @if (person.also_known_as; as aliases) {
                                 @if (aliases.length) {
-                                    <li class="person-facts__item">
-                                        <span
-                                            class="person-facts__label text-overline"
-                                        >
-                                            {{
-                                                aliases.length === 1
-                                                    ? "Alternative name"
-                                                    : "Alternative names"
-                                            }}
+                                    <li class="fact u-flex-column u-gap-2">
+                                        <span class="text-overline">
+                                            {{ aliases.length === 1 ? 'Alternative name' : 'Alternative names' }}
                                         </span>
-                                        <div class="person-facts__value">
-                                            <ul class="person-facts__aliases">
-                                                @for (
-                                                    alias of aliases
-                                                        | slice
-                                                            : 0
-                                                            : aliasPreviewCount;
-                                                    track alias
-                                                ) {
-                                                    <li
-                                                        class="person-facts__alias text-body"
-                                                    >
-                                                        {{ alias }}
-                                                    </li>
-                                                }
-                                                @if (
-                                                    aliases.length >
-                                                    aliasPreviewCount
-                                                ) {
-                                                    <li
-                                                        class="person-facts__alias person-facts__alias--muted text-caption"
-                                                    >
-                                                        +{{
-                                                            aliases.length -
-                                                                aliasPreviewCount
-                                                        }}
-                                                        more
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </div>
+                                        <ul class="u-list-none u-flex-column u-gap-2">
+                                            @for (alias of aliases | slice: 0 : aliasPreviewCount; track alias) {
+                                                <li class="text-body-strong">
+                                                    {{ alias }}
+                                                </li>
+                                            }
+                                            @if (aliases.length > aliasPreviewCount) {
+                                                <li class="text-caption">
+                                                    +{{ aliases.length - aliasPreviewCount }}
+                                                    more
+                                                </li>
+                                            }
+                                        </ul>
                                     </li>
                                 }
                             }

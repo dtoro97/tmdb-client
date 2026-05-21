@@ -1,9 +1,5 @@
 import { AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    DestroyRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -56,8 +52,6 @@ import { PersonCreditsComponent } from '../person-credits/person-credits.compone
 })
 export class PersonDetailsComponent {
     private readonly maxVisiblePhotos = MAX_VISIBLE_PHOTOS;
-    readonly knownForSkeletonCount = [1, 2, 3, 4];
-
     readonly aliasPreviewCount = 3;
     readonly bioPreviewThreshold = 300;
     bioExpanded = false;
@@ -71,21 +65,15 @@ export class PersonDetailsComponent {
         private router: Router,
         private destroyRef: DestroyRef,
     ) {
-        this.route.paramMap
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(() => {
-                this.bioExpanded = false;
-            });
+        this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.bioExpanded = false;
+        });
 
         this.personDetailStore.personDetailVm$
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                map((vm) =>
-                    vm.person.type === 'loaded' ? vm.person.value : null,
-                ),
-                distinctUntilChanged(
-                    (previous, current) => previous?.id === current?.id,
-                ),
+                map((vm) => (vm.person.type === 'loaded' ? vm.person.value : null)),
+                distinctUntilChanged((previous, current) => previous?.id === current?.id),
                 tap((person) => {
                     if (!person || typeof person.id !== 'number') {
                         return;
@@ -106,11 +94,7 @@ export class PersonDetailsComponent {
 
     openPhotoViewer(index: number): void {
         this.personDetailStore.personDetailVm$.pipe(take(1)).subscribe((vm) => {
-            if (
-                vm.person.type !== 'loaded' ||
-                !vm.person.value ||
-                vm.photos.type !== 'loaded'
-            ) {
+            if (vm.person.type !== 'loaded' || !vm.person.value || vm.photos.type !== 'loaded') {
                 return;
             }
 
@@ -118,9 +102,7 @@ export class PersonDetailsComponent {
             const allPhotos = vm.photos.value;
             const totalCount = allPhotos.length;
             const visibleCount = Math.min(totalCount, this.maxVisiblePhotos);
-            const isShowMoreTile =
-                index === visibleCount - 1 &&
-                totalCount > this.maxVisiblePhotos;
+            const isShowMoreTile = index === visibleCount - 1 && totalCount > this.maxVisiblePhotos;
             if (isShowMoreTile) {
                 this.router.navigate(['/name', person.id, 'photos']);
                 return;
