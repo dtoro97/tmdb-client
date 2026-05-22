@@ -21,7 +21,13 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: 20
-
+            - name: Debug lockfile
+              run: |
+                  node -v
+                  npm -v
+                  grep -n '"chokidar"' package-lock.json || true
+                  grep -n '"readdirp"' package-lock.json || true
+                  grep -n '"picomatch"' package-lock.json || true
             - name: Install dependencies
               run: npm ci
 
@@ -43,6 +49,6 @@ jobs:
                   --name "github-actions[bot]" \
                   --email "41898282+github-actions[bot]@users.noreply.github.com" \
                   --message "deploy: publish production build" \
-                  --dir=dist/tmdb-client/
+                  --dir=dist/tmdb-client/browser
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
