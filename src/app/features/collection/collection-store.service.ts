@@ -2,27 +2,11 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ComponentStore } from '@ngrx/component-store';
-import {
-    catchError,
-    delay,
-    EMPTY,
-    filter,
-    forkJoin,
-    map,
-    Observable,
-    of,
-    switchMap,
-    tap,
-} from 'rxjs';
+import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
 
-import {
-    CollectionDetails,
-    CollectionRestControllerService,
-    MovieRestControllerService,
-} from '../../api';
+import { CollectionDetails, CollectionRestControllerService, MovieRestControllerService } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
-    isDefined,
     LoadableItems,
     LoadableValue,
     MediaListItem,
@@ -51,9 +35,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
     mappedPartsState$ = this.select((state) => state.parts);
 
-    partsCount$ = this.select((state) =>
-        state.parts.type === 'loaded' ? state.parts.value.length : 0,
-    );
+    partsCount$ = this.select((state) => (state.parts.type === 'loaded' ? state.parts.value.length : 0));
 
     timelineLabel$ = this.select((state) => {
         if (state.parts.type !== 'loaded' || !state.parts.value.length) {
@@ -110,16 +92,12 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
             entries.push({
                 id: `highest-rated-${highestRated.id}`,
                 label: 'Top rated',
-                description:
-                    'The strongest-rated entry across the full collection.',
+                description: 'The strongest-rated entry across the full collection.',
                 item: highestRated,
             });
         }
 
-        if (
-            latestReleased &&
-            !entries.some((entry) => entry.item.id === latestReleased.id)
-        ) {
+        if (latestReleased && !entries.some((entry) => entry.item.id === latestReleased.id)) {
             entries.push({
                 id: `latest-released-${latestReleased.id}`,
                 label: 'Latest',
@@ -132,11 +110,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
     });
 
     backdropPath$ = this.collection$.pipe(
-        map((state) =>
-            state.type === 'loaded' && state.value
-                ? state.value.backdrop_path
-                : null,
-        ),
+        map((state) => (state.type === 'loaded' && state.value ? state.value.backdrop_path : null)),
     );
 
     posterPath$ = this.collection$.pipe(
@@ -146,10 +120,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
             }
 
             return (
-                state.value.poster_path ??
-                state.value.parts?.find((part) => !!part.poster_path)
-                    ?.poster_path ??
-                null
+                state.value.poster_path ?? state.value.parts?.find((part) => !!part.poster_path)?.poster_path ?? null
             );
         }),
     );
@@ -160,10 +131,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
             const rated = parts.value.filter((p) => (p.rating ?? 0) > 0);
             if (!rated.length) return 0;
-            return (
-                rated.reduce((sum, p) => sum + (p.rating ?? 0), 0) /
-                rated.length
-            );
+            return rated.reduce((sum, p) => sum + (p.rating ?? 0), 0) / rated.length;
         }),
     );
 
@@ -186,18 +154,12 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         return this.collectionRestControllerService
             .collectionDetails(id, undefined, undefined, undefined, this.opts)
             .pipe(
-                delay(1000),
                 switchMap((collection) => {
-                    const mappedItems = sortByDate(
-                        collection.parts ?? [],
-                        (part) => part.release_date,
-                    ).map((part) =>
+                    const mappedItems = sortByDate(collection.parts ?? [], (part) => part.release_date).map((part) =>
                         toCollectionPartMediaListItem(part, 'year'),
                     );
 
-                    return this.enrichCastLinks$(mappedItems).pipe(
-                        map((items) => ({ collection, items })),
-                    );
+                    return this.enrichCastLinks$(mappedItems).pipe(map((items) => ({ collection, items })));
                 }),
                 tap(({ collection, items }) =>
                     this.patchState({
@@ -219,9 +181,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
             );
     }
 
-    private enrichCastLinks$(
-        items: MediaListItem[],
-    ): Observable<MediaListItem[]> {
+    private enrichCastLinks$(items: MediaListItem[]): Observable<MediaListItem[]> {
         if (!items.length) {
             return of([]);
         }
@@ -237,22 +197,17 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
     }
 
     private fetchTopCast$(mediaId: number): Observable<PersonLink[]> {
-        return this.movieRestControllerService
-            .movieCredits(mediaId, undefined, undefined, undefined, this.opts)
-            .pipe(
-                map((credits) =>
-                    (credits.cast ?? [])
-                        .filter(
-                            (person): person is { id: number; name: string } =>
-                                !!person.id && !!person.name,
-                        )
-                        .slice(0, 3)
-                        .map((person) => ({
-                            id: person.id,
-                            name: person.name,
-                        })),
-                ),
-            );
+        return this.movieRestControllerService.movieCredits(mediaId, undefined, undefined, undefined, this.opts).pipe(
+            map((credits) =>
+                (credits.cast ?? [])
+                    .filter((person): person is { id: number; name: string } => !!person.id && !!person.name)
+                    .slice(0, 3)
+                    .map((person) => ({
+                        id: person.id,
+                        name: person.name,
+                    })),
+            ),
+        );
     }
 }
 
@@ -270,9 +225,7 @@ function getHighestRatedPart(items: MediaListItem[]): MediaListItem | null {
             return currentRating > bestRating ? current : best;
         }
 
-        return (current.voteCount ?? 0) > (best.voteCount ?? 0)
-            ? current
-            : best;
+        return (current.voteCount ?? 0) > (best.voteCount ?? 0) ? current : best;
     });
 }
 
@@ -283,9 +236,7 @@ function getLatestReleasedPart(items: MediaListItem[]): MediaListItem | null {
             return false;
         }
 
-        const timestamp = Date.parse(
-            item.date.length === 4 ? `${item.date}-01-01` : item.date,
-        );
+        const timestamp = Date.parse(item.date.length === 4 ? `${item.date}-01-01` : item.date);
         return !Number.isNaN(timestamp) && timestamp <= now;
     });
 
@@ -294,12 +245,8 @@ function getLatestReleasedPart(items: MediaListItem[]): MediaListItem | null {
     }
 
     return releasedItems.reduce((latest, current) => {
-        const latestTimestamp = Date.parse(
-            latest.date.length === 4 ? `${latest.date}-01-01` : latest.date,
-        );
-        const currentTimestamp = Date.parse(
-            current.date.length === 4 ? `${current.date}-01-01` : current.date,
-        );
+        const latestTimestamp = Date.parse(latest.date.length === 4 ? `${latest.date}-01-01` : latest.date);
+        const currentTimestamp = Date.parse(current.date.length === 4 ? `${current.date}-01-01` : current.date);
         return currentTimestamp > latestTimestamp ? current : latest;
     });
 }

@@ -1,12 +1,13 @@
 import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 
-import { combineLatest, switchMap, take, tap } from 'rxjs';
+import { combineLatest, map, switchMap, take, tap } from 'rxjs';
 
 import { RATING_ACTIONS, ViewerImage } from '../../../shared';
 import {
@@ -57,7 +58,40 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
     styleUrl: './episode-detail.component.scss',
 })
 export class EpisodeDetailComponent {
-    readonly vm$ = this.episodeStore.vm$;
+    readonly vm$ = combineLatest({
+        detail: this.episodeStore.vm$,
+        routeMeta: this.route.parent!.paramMap.pipe(
+            map((params) => ({
+                seriesId: Number(params.get('id')),
+                mediaType: params.get('type') ?? 'tv',
+            })),
+        ),
+    }).pipe(
+        map(({ detail, routeMeta }) => ({
+            ...detail,
+            episodesLink: ['/title', routeMeta.seriesId, routeMeta.mediaType, 'episodes'] as const,
+            previousEpisodeLink: detail.previousEpisode
+                ? ([
+                      '/title',
+                      routeMeta.seriesId,
+                      routeMeta.mediaType,
+                      'episodes',
+                      detail.previousEpisode.season_number,
+                      detail.previousEpisode.episode_number,
+                  ] as const)
+                : null,
+            nextEpisodeLink: detail.nextEpisode
+                ? ([
+                      '/title',
+                      routeMeta.seriesId,
+                      routeMeta.mediaType,
+                      'episodes',
+                      detail.nextEpisode.season_number,
+                      detail.nextEpisode.episode_number,
+                  ] as const)
+                : null,
+        })),
+    );
 
     constructor(
         public episodeStore: EpisodeDetailStoreService,
@@ -70,13 +104,14 @@ export class EpisodeDetailComponent {
     ) {
         combineLatest([this.route.paramMap, this.route.parent!.paramMap])
             .pipe(
+                takeUntilDestroyed(),
                 switchMap(([params, parentParams]) => {
                     const seriesId = Number(parentParams.get('id'));
                     const seasonNumber = Number(params.get('seasonNumber'));
                     const episodeNumber = Number(params.get('episodeNumber'));
                     this.mediaSeasonsStore.setSeriesId(seriesId);
                     this.mediaSeasonsStore.updateSelectedSeason(seasonNumber);
-                    this.episodeActionsStore.setEpisodeContext(
+                    this.episodeActionsStore.setEpisode(
                         seriesId,
                         seasonNumber,
                         episodeNumber,
@@ -92,6 +127,7 @@ export class EpisodeDetailComponent {
 
         this.mediaStore.rawMedia$
             .pipe(
+                takeUntilDestroyed(),
                 tap((media) => {
                     if (media && 'seasons' in media) {
                         this.mediaSeasonsStore.initializeFromSeries(media);
@@ -102,6 +138,7 @@ export class EpisodeDetailComponent {
 
         this.vm$
             .pipe(
+                takeUntilDestroyed(),
                 tap((vm) => {
                     if (vm.episode) {
                         this.titleService.setTitle(

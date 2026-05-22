@@ -5,11 +5,7 @@ import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 
 import { Review, ReviewPage } from '../../api';
 import { PAGE_SIZE } from '../../constants';
-import {
-    LoadableItems,
-    normalizeAllReviews,
-    sortReviewsForPreview,
-} from '../../shared';
+import { LoadableItems } from '../../shared';
 import type { MediaType } from '../../shared';
 import { MediaApiService } from './media-api.service';
 
@@ -40,23 +36,15 @@ const INITIAL_STATE: MediaReviewsState = {
 export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> {
     readonly reviewsState$ = this.select((state) => state.reviews);
 
-    readonly totalResults$ = this.select(
-        (state) => state.pagination.totalResults,
-    );
+    readonly totalResults$ = this.select((state) => state.pagination.totalResults);
 
-    readonly hasMore$ = this.select(
-        (state) => state.pagination.page < state.pagination.totalPages,
-    );
+    readonly hasMore$ = this.select((state) => state.pagination.page < state.pagination.totalPages);
 
     readonly previewReviews$ = this.reviewsState$.pipe(
         map((state) => {
             const reviews = state.type === 'loaded' ? state.value : [];
-            return sortReviewsForPreview(
-                reviews.filter(
-                    (review) =>
-                        (review.content?.trim().length ?? 0) >=
-                        REVIEW_PREVIEW_MIN_CONTENT_LENGTH,
-                ),
+            return this.sortReviews(
+                reviews.filter((review) => (review.content?.trim().length ?? 0) >= REVIEW_PREVIEW_MIN_CONTENT_LENGTH),
             ).slice(0, REVIEW_PREVIEW_COUNT);
         }),
     );
@@ -69,7 +57,7 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
         this.setState(INITIAL_STATE);
     }
 
-    loadReviews$(id: number, type: MediaType): Observable<void> {
+    loadReviews$(id: number, type: MediaType): Observable<ReviewPage | null> {
         this.patchState({
             reviews: { type: 'loading' },
             mediaId: id,
@@ -83,7 +71,7 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
                 this.patchState({
                     reviews: {
                         type: 'loaded',
-                        value: normalizeAllReviews(reviewPage),
+                        value: reviewPage?.results ?? [],
                     },
                     pagination: {
                         page: reviewPage?.page ?? 1,
@@ -92,23 +80,14 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
                     },
                 });
             }),
-            map(() => undefined),
         );
     }
 
-    loadMoreReviews$(): Observable<void> {
+    loadMoreReviews$(): Observable<ReviewPage | undefined> {
         const { pagination, reviews, mediaId, mediaType } = this.get();
-        const currentReviews =
-            reviews.type === 'loaded' || reviews.type === 'loading-more'
-                ? reviews.value
-                : [];
+        const currentReviews = reviews.type === 'loaded' || reviews.type === 'loading-more' ? reviews.value : [];
 
-        if (
-            !mediaId ||
-            !mediaType ||
-            pagination.page >= pagination.totalPages ||
-            reviews.type === 'loading-more'
-        ) {
+        if (!mediaId || !mediaType || pagination.page >= pagination.totalPages || reviews.type === 'loading-more') {
             return of(undefined);
         }
 
@@ -120,35 +99,39 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
             },
         });
 
-        return this.mediaApiService
-            .getReviews$(mediaId, mediaType as MediaType, pagination.page + 1)
-            .pipe(
-                tap((reviewPage) => {
-                    this.patchState({
-                        reviews: {
-                            type: 'loaded',
-                            value: [
-                                ...currentReviews,
-                                ...normalizeAllReviews(reviewPage),
-                            ],
-                        },
-                        pagination: {
-                            page: reviewPage?.page ?? pagination.page + 1,
-                            totalPages:
-                                reviewPage?.total_pages ?? pagination.totalPages,
-                            totalResults:
-                                reviewPage?.total_results ??
-                                pagination.totalResults,
-                        },
-                    });
-                }),
-                map(() => undefined),
-                catchError((error) => {
-                    this.patchState({
-                        reviews: { type: 'loaded', value: currentReviews },
-                    });
-                    return throwError(() => error);
-                }),
-            );
+        return this.mediaApiService.getReviews$(mediaId, mediaType as MediaType, pagination.page + 1).pipe(
+            tap((reviewPage) => {
+                this.patchState({
+                    reviews: {
+                        type: 'loaded',
+                        value: [...currentReviews, ...(reviewPage.results ?? [])],
+                    },
+                    pagination: {
+                        page: reviewPage?.page ?? pagination.page + 1,
+                        totalPages: reviewPage?.total_pages ?? pagination.totalPages,
+                        totalResults: reviewPage?.total_results ?? pagination.totalResults,
+                    },
+                });
+            }),
+            catchError((error) => {
+                this.patchState({
+                    reviews: { type: 'loaded', value: currentReviews },
+                });
+                return throwError(() => error);
+            }),
+        );
+    }
+
+    private sortReviews(reviews: Review[]): Review[] {
+        return [...reviews].sort((left, right) => {
+            const leftHasRating = typeof left.author_details?.rating === 'number';
+            const rightHasRating = typeof right.author_details?.rating === 'number';
+
+            if (leftHasRating === rightHasRating) {
+                return 0;
+            }
+
+            return leftHasRating ? -1 : 1;
+        });
     }
 }

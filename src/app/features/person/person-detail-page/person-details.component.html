@@ -47,51 +47,81 @@
                     </div>
                 </div>
             </app-hero-surface>
+        } @else if (vm.person.type === 'loading' || vm.person.type === 'idle') {
+            <app-hero-surface variant="detail">
+                <div class="hero" aria-hidden="true">
+                    <app-skeleton class="portrait portrait--skeleton aspect-poster" />
 
-            <div class="page-sections">
-                @if (vm.knownFor.type === 'loading' || (vm.knownFor.type === 'loaded' && vm.knownFor.value.length)) {
-                    <app-page-section subtitle="Known For">
-                        <app-media-carousel-panel [state]="vm.knownFor"></app-media-carousel-panel>
-                    </app-page-section>
-                }
+                    <div class="u-flex-column u-gap-4">
+                        <div class="u-flex-column u-gap-2">
+                            <app-skeleton class="hero__eyebrow-skeleton" />
+                            <app-skeleton class="hero__title-skeleton" />
+                        </div>
 
-                @if (vm.creditsDisplay.type === 'loading' || vm.creditsDisplay.type === 'loaded') {
-                    <section class="surface-panel">
-                        <app-page-section subtitle="Filmography">
-                            <app-person-credits
-                                [state]="vm.creditsDisplay"
-                                [section]="vm.creditsUi.section"
-                                [mediaType]="vm.creditsUi.mediaType"
-                                [sortBy]="vm.creditsUi.sortBy"
-                                [sortDirection]="vm.creditsUi.sortDirection"
-                                (sectionChange)="onCreditsSectionChange($event)"
-                                (mediaTypeChange)="onCreditsMediaTypeChange($event)"
-                                (sortByChange)="onCreditsSortByChange($event)"
-                                (resetFilters)="resetCreditsFilters()"
-                                (sortDirectionToggle)="toggleCreditsSortDirection()"
-                            />
-                        </app-page-section>
-                    </section>
-                }
+                        <div class="biography u-flex-column u-items-start u-gap-3">
+                            <app-skeleton class="biography__line-skeleton biography__line-skeleton--wide" />
+                            <app-skeleton class="biography__line-skeleton" />
+                            <app-skeleton class="biography__line-skeleton biography__line-skeleton--short" />
+                        </div>
 
-                @if (vm.photos.type === 'loading' || (vm.photos.type === 'loaded' && vm.photos.value.length > 0)) {
-                    <app-page-section subtitle="Photos">
-                        <ng-container section-controls>
-                            @if (vm.photos.type === 'loaded' && vm.photos.value.length) {
-                                <a class="browse-link text-body-sm" [routerLink]="['/name', person.id, 'photos']">
-                                    Browse all photos ({{ vm.photos.value.length }})
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </a>
-                            }
-                        </ng-container>
-                        <app-photos-grid
-                            [state]="vm.photos"
-                            [totalCount]="vm.photos.type === 'loaded' ? vm.photos.value.length : 0"
-                            (photoClick)="openPhotoViewer($event)"
+                        <div class="footer" aria-hidden="true">
+                            <app-skeleton class="footer__label-skeleton" />
+                            <div class="u-flex u-items-center u-gap-2">
+                                <app-skeleton class="footer__icon-skeleton" />
+                                <app-skeleton class="footer__icon-skeleton" />
+                                <app-skeleton class="footer__icon-skeleton" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </app-hero-surface>
+        }
+
+        <div class="page-sections">
+            @if (vm.knownFor.type === 'loading' || (vm.knownFor.type === 'loaded' && vm.knownFor.value.length)) {
+                <app-page-section subtitle="Known For">
+                    <app-media-carousel-panel [state]="vm.knownFor"></app-media-carousel-panel>
+                </app-page-section>
+            }
+
+            @if (vm.creditsDisplay.type === 'loading' || vm.creditsDisplay.type === 'loaded') {
+                <section class="surface-panel">
+                    <app-page-section subtitle="Filmography">
+                        <app-person-credits
+                            [state]="vm.creditsDisplay"
+                            [section]="vm.creditsUi.section"
+                            [mediaType]="vm.creditsUi.mediaType"
+                            [sortBy]="vm.creditsUi.sortBy"
+                            [sortDirection]="vm.creditsUi.sortDirection"
+                            (sectionChange)="onCreditsSectionChange($event)"
+                            (mediaTypeChange)="onCreditsMediaTypeChange($event)"
+                            (sortByChange)="onCreditsSortByChange($event)"
+                            (resetFilters)="resetCreditsFilters()"
+                            (sortDirectionToggle)="toggleCreditsSortDirection()"
                         />
                     </app-page-section>
-                }
+                </section>
+            }
 
+            @if (vm.photos.type === 'loading' || (vm.photos.type === 'loaded' && vm.photos.value.length > 0)) {
+                <app-page-section subtitle="Photos">
+                    <ng-container section-controls>
+                        @if (vm.person.type === 'loaded' && vm.person.value && vm.photos.type === 'loaded' && vm.photos.value.length) {
+                            <a class="browse-link text-body-sm" [routerLink]="['/name', vm.person.value.id, 'photos']">
+                                Browse all photos ({{ vm.photos.value.length }})
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        }
+                    </ng-container>
+                    <app-photos-grid
+                        [state]="vm.photos"
+                        [totalCount]="vm.photos.type === 'loaded' ? vm.photos.value.length : 0"
+                        (photoClick)="openPhotoViewer($event)"
+                    />
+                </app-page-section>
+            }
+
+            @if (vm.person.type === 'loaded' && vm.person.value; as person) {
                 @if (person.birthday || person.deathday || person.place_of_birth || person.also_known_as?.length) {
                     <app-page-section subtitle="Personal Details">
                         <ul class="facts u-list-none" aria-label="Personal details">
@@ -146,7 +176,7 @@
                         </ul>
                     </app-page-section>
                 }
-            </div>
-        }
+            }
+        </div>
     </div>
 }

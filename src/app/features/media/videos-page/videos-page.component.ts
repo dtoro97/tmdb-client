@@ -51,7 +51,6 @@ export class VideosPageComponent {
 
     readonly sortField$ = this.sortFieldSubject.asObservable();
     readonly sortDirection$ = this.sortDirectionSubject.asObservable();
-    readonly videosState$ = this.mediaVideoStoreService.videosState$;
 
     readonly videos$ = combineLatest([
         this.mediaVideoStoreService.allVideos$,
@@ -66,6 +65,24 @@ export class VideosPageComponent {
             });
             return direction === 'desc' ? sorted.reverse() : sorted;
         }),
+    );
+
+    readonly vm$ = combineLatest({
+        mediaState: this.mediaStoreService.mediaDetailsState$,
+        videosState: this.mediaVideoStoreService.videosState$,
+        videos: this.videos$,
+        sortField: this.sortField$,
+        sortDirection: this.sortDirection$,
+    }).pipe(
+        map(({ mediaState, videosState, videos, sortField, sortDirection }) => ({
+            media: mediaState.type === 'loaded' ? mediaState.value : null,
+            videosState,
+            videos,
+            sortField,
+            sortDirection,
+            isLoading:
+                videosState.type === 'loading' || videosState.type === 'idle',
+        })),
     );
 
     constructor(

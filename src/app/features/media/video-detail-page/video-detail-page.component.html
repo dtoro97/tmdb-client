@@ -1,257 +1,148 @@
 <div class="page-container">
     @if (vm$ | async; as vm) {
-        @if (videosState$ | async; as videosState) {
-            <div class="video-theater">
-                <div class="video-theater__inner">
-                    <nav class="video-theater__nav">
-                        <a
-                            class="video-theater__back text-caption"
-                            [routerLink]="['../']"
-                        >
-                            <i
-                                class="fa-solid fa-chevron-left"
-                                aria-hidden="true"
-                            ></i>
-                            All videos
-                        </a>
-                    </nav>
+        <div class="player">
+            <div class="player__inner">
+                <nav class="player__nav">
+                    <a class="player__back text-caption" [routerLink]="['../']">
+                        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                        All videos
+                    </a>
+                </nav>
 
-                    @if (
-                        videosState.type === "loading" ||
-                        videosState.type === "idle"
-                    ) {
-                        <div class="video-theater__stage">
-                            <app-skeleton
-                                class="video-theater__player-skeleton"
+                @if (vm.isLoading) {
+                    <div class="player__stage">
+                        <app-skeleton class="player__stage-skeleton" />
+                    </div>
+
+                    <div class="player__info">
+                        <div class="player__summary">
+                            <app-skeleton class="player__title-skeleton" />
+                            <app-skeleton class="player__link-skeleton" />
+                        </div>
+                        <div class="player__meta">
+                            <app-skeleton class="player__badge-skeleton" />
+                            <app-skeleton class="player__badge-skeleton player__badge-skeleton--short" />
+                            <app-skeleton class="player__date-skeleton" />
+                        </div>
+                    </div>
+                } @else if (vm.media; as media) {
+                    @if (vm.selected.video; as selectedVideo) {
+                        <div class="player__stage">
+                            <app-youtube-video [video]="selectedVideo" [showTypeBadge]="false" />
+                        </div>
+
+                        <div class="player__info">
+                            <div class="player__summary">
+                                <h1 class="player__title text-headline">
+                                    {{ selectedVideo.name || media.title }}
+                                </h1>
+                                <a
+                                    class="player__link text-body-sm"
+                                    [routerLink]="['/title', media.id, media.mediaType]"
+                                >
+                                    {{ media.title }}
+                                    @if (media.year) {
+                                        ({{ media.year }})
+                                    }
+                                </a>
+                            </div>
+
+                            <div class="player__meta">
+                                <div class="player__badges">
+                                    @if (selectedVideo.type) {
+                                        <app-badge [label]="selectedVideo.type" />
+                                    }
+                                    @if (selectedVideo.official !== undefined) {
+                                        <app-badge
+                                            [label]="selectedVideo.official ? 'Official' : 'Unofficial'"
+                                            [variant]="selectedVideo.official ? 'accent' : 'neutral'"
+                                        />
+                                    }
+                                </div>
+                                <div class="player__details">
+                                    @if (selectedVideo.published_at) {
+                                        <span class="player__date text-caption">
+                                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                                            {{ selectedVideo.published_at | date: 'mediumDate' }}
+                                        </span>
+                                    }
+                                    @if (selectedVideo.size) {
+                                        <span class="text-caption"> {{ selectedVideo.size }}p </span>
+                                    }
+                                    @if (vm.selected.languageName) {
+                                        <span class="text-caption">
+                                            {{ vm.selected.languageName }}
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    } @else {
+                        <section class="player__empty">
+                            <app-empty-state
+                                iconClass="fa-regular fa-circle-play"
+                                text="This video is no longer available."
                             />
-                        </div>
-
-                        <div class="video-theater__info">
-                            <div class="video-theater__summary">
-                                <app-skeleton
-                                    class="video-theater__title-skeleton"
-                                />
-                                <app-skeleton
-                                    class="video-theater__media-link-skeleton"
-                                />
-                            </div>
-                            <div class="video-theater__meta">
-                                <app-skeleton
-                                    class="video-theater__badge-skeleton"
-                                />
-                                <app-skeleton
-                                    class="video-theater__badge-skeleton video-theater__badge-skeleton--short"
-                                />
-                                <app-skeleton
-                                    class="video-theater__date-skeleton"
-                                />
-                            </div>
-                        </div>
-                    } @else if (selectedVideoMeta$ | async; as selected) {
-                        @if (selected.video; as selectedVideo) {
-                            <div class="video-theater__stage">
-                                <app-youtube-video
-                                    [video]="selectedVideo"
-                                    [showTypeBadge]="false"
-                                />
-                            </div>
-
-                            <div class="video-theater__info">
-                                <div class="video-theater__summary">
-                                    <h1
-                                        class="video-theater__title text-headline"
-                                    >
-                                        {{ selectedVideo.name || vm.title }}
-                                    </h1>
-                                    <a
-                                        class="video-theater__media-link text-body-sm"
-                                        [routerLink]="[
-                                            '/title',
-                                            vm.id,
-                                            vm.mediaType,
-                                        ]"
-                                    >
-                                        {{ vm.title }}
-                                        @if (vm.year) {
-                                            ({{ vm.year }})
-                                        }
-                                    </a>
-                                </div>
-
-                                <div class="video-theater__meta">
-                                    <div class="video-theater__meta-primary">
-                                        @if (selectedVideo.type) {
-                                            <app-badge
-                                                [label]="selectedVideo.type"
-                                            />
-                                        }
-                                        @if (
-                                            selectedVideo.official !== undefined
-                                        ) {
-                                            <app-badge
-                                                [label]="
-                                                    selectedVideo.official
-                                                        ? 'Official'
-                                                        : 'Unofficial'
-                                                "
-                                                [variant]="
-                                                    selectedVideo.official
-                                                        ? 'accent'
-                                                        : 'neutral'
-                                                "
-                                            />
-                                        }
-                                    </div>
-
-                                    <span
-                                        class="video-theater__meta-separator"
-                                        aria-hidden="true"
-                                    ></span>
-
-                                    <div class="video-theater__meta-secondary">
-                                        @if (selectedVideo.published_at) {
-                                            <span
-                                                class="video-theater__date text-caption"
-                                            >
-                                                <i
-                                                    class="fa-regular fa-calendar"
-                                                    aria-hidden="true"
-                                                ></i>
-                                                {{
-                                                    selectedVideo.published_at
-                                                        | date: "mediumDate"
-                                                }}
-                                            </span>
-                                        }
-                                        @if (selectedVideo.size) {
-                                            <span
-                                                class="video-theater__quality text-caption"
-                                            >
-                                                {{ selectedVideo.size }}p
-                                            </span>
-                                        }
-                                        @if (selected.languageName) {
-                                            <span
-                                                class="video-theater__lang text-caption"
-                                            >
-                                                {{ selected.languageName }}
-                                            </span>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        } @else {
-                            <section class="video-theater__empty">
-                                <app-empty-state
-                                    iconClass="fa-regular fa-circle-play"
-                                    text="This video is no longer available."
-                                />
-                            </section>
-                        }
+                        </section>
                     }
-                </div>
+                }
             </div>
+        </div>
 
-            @if (
-                videosState.type === "loading" || videosState.type === "idle"
-            ) {
-                <main class="video-detail-page__related">
-                    <section class="video-detail-page__related-section">
-                        <app-page-section subtitle="More from this title">
-                            <div
-                                class="video-detail-page__related-carousel"
-                                aria-hidden="true"
-                            >
+        @if (vm.isLoading || (vm.media && vm.selected.video && vm.relatedVideos.length)) {
+            <main class="more">
+                <section>
+                    <app-page-section subtitle="More from this title">
+                        @if (vm.isLoading) {
+                            <div class="more__carousel" aria-hidden="true">
                                 <app-carousel [items]="5 | repeat" [columns]="5">
                                     <ng-template>
-                                        <div
-                                            class="video-detail-page__carousel-skeleton"
-                                        >
-                                            <app-skeleton
-                                                class="video-detail-page__carousel-skeleton-media"
-                                            />
-                                            <app-skeleton
-                                                class="video-detail-page__carousel-skeleton-title"
-                                            />
-                                            <app-skeleton
-                                                class="video-detail-page__carousel-skeleton-meta"
-                                            />
+                                        <div class="more__skeleton">
+                                            <app-skeleton class="more__skeleton-media" />
+                                            <app-skeleton class="more__skeleton-title" />
+                                            <app-skeleton class="more__skeleton-meta" />
                                         </div>
                                     </ng-template>
                                 </app-carousel>
                             </div>
 
-                            <div class="video-detail-page__related-list">
+                            <div class="more__list" aria-hidden="true">
                                 @for (index of 5 | repeat; track index) {
-                                    <div
-                                        class="video-detail-page__carousel-skeleton"
-                                    >
-                                        <app-skeleton
-                                            class="video-detail-page__carousel-skeleton-media"
-                                        />
-                                        <app-skeleton
-                                            class="video-detail-page__carousel-skeleton-title"
-                                        />
-                                        <app-skeleton
-                                            class="video-detail-page__carousel-skeleton-meta"
-                                        />
+                                    <div class="more__skeleton">
+                                        <app-skeleton class="more__skeleton-media" />
+                                        <app-skeleton class="more__skeleton-title" />
+                                        <app-skeleton class="more__skeleton-meta" />
                                     </div>
                                 }
                             </div>
-                        </app-page-section>
-                    </section>
-                </main>
-            } @else if (selectedVideoMeta$ | async; as selected) {
-                @if (selected.video) {
-                    @if (relatedVideos$ | async; as relatedVideos) {
-                        @if (relatedVideos.length) {
-                            <main class="video-detail-page__related">
-                                <section
-                                    class="video-detail-page__related-section"
-                                >
-                                    <app-page-section
-                                        subtitle="More from this title"
-                                    >
-                                        <div
-                                            class="video-detail-page__related-carousel"
-                                        >
-                                            <app-carousel
-                                                [items]="relatedVideos"
-                                                [columns]="5"
-                                            >
-                                                <ng-template let-video>
-                                                    <app-youtube-video-card
-                                                        [video]="video"
-                                                        [mediaId]="vm.id"
-                                                        [mediaType]="vm.mediaType"
-                                                        destination="detail"
-                                                    />
-                                                </ng-template>
-                                            </app-carousel>
-                                        </div>
+                        } @else if (vm.media; as media) {
+                            <div class="more__carousel">
+                                <app-carousel [items]="vm.relatedVideos" [columns]="5">
+                                    <ng-template let-video>
+                                        <app-youtube-video-card
+                                            [video]="video"
+                                            [mediaId]="media.id"
+                                            [mediaType]="media.mediaType"
+                                            destination="detail"
+                                        />
+                                    </ng-template>
+                                </app-carousel>
+                            </div>
 
-                                        <div
-                                            class="video-detail-page__related-list"
-                                        >
-                                            @for (
-                                                video of relatedVideos;
-                                                track video.id
-                                            ) {
-                                                <app-youtube-video-card
-                                                    [video]="video"
-                                                    [mediaId]="vm.id"
-                                                    [mediaType]="vm.mediaType"
-                                                    destination="detail"
-                                                />
-                                            }
-                                        </div>
-                                    </app-page-section>
-                                </section>
-                            </main>
+                            <div class="more__list">
+                                @for (video of vm.relatedVideos; track video.id) {
+                                    <app-youtube-video-card
+                                        [video]="video"
+                                        [mediaId]="media.id"
+                                        [mediaType]="media.mediaType"
+                                        destination="detail"
+                                    />
+                                }
+                            </div>
                         }
-                    }
-                }
-            }
+                    </app-page-section>
+                </section>
+            </main>
         }
     }
 </div>

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import {
+    LoadableValue,
     PersonCarouselPanelComponent,
     SkeletonComponent,
 } from '../../../shared';
@@ -19,5 +20,5 @@ import { MediaCreditsPanelData } from '../media-detail.models';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaCreditsPanelComponent {
-    @Input({ required: true }) data!: MediaCreditsPanelData;
+    @Input({ required: true }) data!: LoadableValue<MediaCreditsPanelData | null>;
 }

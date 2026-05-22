@@ -11,9 +11,9 @@ export interface RatingVm {
 
 export interface RatingActions {
     readonly ratingVm$: Observable<RatingVm>;
-    submitUserRating$(value: number): Observable<void>;
-    deleteUserRating$(): Observable<void>;
-    ensureGuestSessionForRating$(): Observable<void>;
+    submitUserRating$(value: number): Observable<unknown>;
+    deleteUserRating$(): Observable<unknown>;
+    ensureGuestSessionForRating$(): Observable<unknown>;
 }
 
 export const RATING_ACTIONS = new InjectionToken<RatingActions>('RATING_ACTIONS');

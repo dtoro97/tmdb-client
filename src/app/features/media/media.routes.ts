@@ -4,7 +4,7 @@ import { EpisodeDetailComponent } from './episode-detail-page/episode-detail.com
 import { EpisodesPageComponent } from './episodes-page/episodes-page.component';
 import { MediaWrapperComponent } from './media-wrapper/media-wrapper.component';
 import { VideosPageComponent } from './videos-page/videos-page.component';
-import { MediaCastCrewComponent } from './cast-crew-page/media-cast-crew.component';
+import { MediaCastPageComponent } from './media-cast-page/media-cast-page.component';
 import { MediaPhotosPageComponent } from './photos-page/media-photos-page.component';
 import { MediaReviewsPageComponent } from './reviews-page/reviews-page.component';
 import { VideoDetailPageComponent } from './video-detail-page/video-detail-page.component';
@@ -20,7 +20,7 @@ export const mediaRoutes: Routes = [
             },
             {
                 path: 'cast',
-                component: MediaCastCrewComponent,
+                component: MediaCastPageComponent,
             },
             {
                 path: 'episodes',

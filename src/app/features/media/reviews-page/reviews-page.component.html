@@ -21,14 +21,12 @@
                     reviewsState.type === "loading" ||
                     reviewsState.type === "idle"
                 ) {
-                    <section class="media-reviews-page__content">
-                        <div class="media-reviews-page__toolbar">
-                            <app-skeleton
-                                class="media-reviews-page__toolbar-count-skeleton"
-                            />
+                    <section class="content u-flex-column">
+                        <div class="toolbar">
+                            <app-skeleton class="toolbar-count-skeleton" />
                         </div>
 
-                        <div class="media-reviews-page__list">
+                        <div class="list u-flex-column">
                             <ng-container
                                 *ngTemplateOutlet="
                                     reviewSkeletonList;
@@ -42,8 +40,8 @@
                     reviewsState.type === "loading-more"
                 ) {
                     @if (reviewsState.value.length) {
-                        <section class="media-reviews-page__content">
-                            <div class="media-reviews-page__toolbar">
+                        <section class="content u-flex-column">
+                            <div class="toolbar">
                                 @if (
                                     mediaReviewsStoreService.totalResults$ | async;
                                     as reviewTotalResults
@@ -58,7 +56,7 @@
                                 }
                             </div>
 
-                            <div class="media-reviews-page__list">
+                            <div class="list u-flex-column">
                                 @for (
                                     review of reviewsState.value;
                                     track review.id
@@ -79,7 +77,7 @@
                             </div>
 
                             @if (mediaReviewsStoreService.hasMore$ | async) {
-                                <div class="media-reviews-page__actions">
+                                <div class="u-flex u-justify-center">
                                     <button
                                         mat-stroked-button
                                         type="button"
@@ -91,7 +89,7 @@
                             }
                         </section>
                     } @else {
-                        <section class="media-reviews-page__empty">
+                        <section class="empty">
                             <app-empty-state
                                 iconClass="fa-regular fa-comment-dots"
                                 text="No reviews available yet"
@@ -106,40 +104,7 @@
 
 <ng-template #reviewSkeletonList let-count="count">
     @for (i of count | repeat; track i) {
-        <article class="media-reviews-page__review-skeleton">
-            <div class="media-reviews-page__review-skeleton-header">
-                <app-skeleton
-                    class="media-reviews-page__review-skeleton-avatar"
-                />
-                <div class="media-reviews-page__review-skeleton-meta">
-                    <app-skeleton
-                        class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--author"
-                    />
-                    <app-skeleton
-                        class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--meta"
-                    />
-                </div>
-            </div>
-            <div class="media-reviews-page__review-skeleton-body">
-                <app-skeleton
-                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--full"
-                />
-                <app-skeleton
-                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--wide"
-                />
-                <app-skeleton
-                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--medium"
-                />
-                <app-skeleton
-                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--short"
-                />
-            </div>
-            <div class="media-reviews-page__review-skeleton-footer">
-                <app-skeleton
-                    class="media-reviews-page__review-skeleton-line media-reviews-page__review-skeleton-line--footer"
-                />
-            </div>
-        </article>
+        <app-skeleton class="review-skeleton" />
     }
 </ng-template>
 

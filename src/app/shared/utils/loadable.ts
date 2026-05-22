@@ -1,20 +1,14 @@
 import type { LoadableItems, LoadableValue } from '../types';
 
-export const loadedItems = <T>(state: LoadableItems<T>): T[] =>
-    state.type === 'loaded' ? state.value : [];
+export const loadedItems = <T>(state: LoadableItems<T>): T[] => (state.type === 'loaded' ? state.value : []);
 
 export function loaded<T>(value: T[]): LoadableItems<T>;
 export function loaded<T>(value: T): LoadableValue<T>;
-export function loaded<T>(
-    value: T | T[],
-): LoadableItems<T> | LoadableValue<T> {
+export function loaded<T>(value: T | T[]): LoadableItems<T> | LoadableValue<T> {
     return { type: 'loaded', value } as LoadableItems<T> | LoadableValue<T>;
 }
 
-export const mapLoadableValue = <T, U>(
-    state: LoadableValue<T>,
-    mapValue: (value: T) => U,
-): LoadableValue<U> => {
+export const mapLoadableValue = <T, U>(state: LoadableValue<T>, mapValue: (value: T) => U): LoadableValue<U> => {
     if (state.type !== 'loaded') {
         return state;
     }
@@ -25,10 +19,11 @@ export const mapLoadableValue = <T, U>(
     };
 };
 
-export function mapLoadableItems<T, U>(
-    state: LoadableItems<T>,
-    transform: (item: T) => U,
-): LoadableItems<U> {
+export const loadedValue = <T>(state: LoadableItems<T>) => {
+    return state.type === 'loaded' ? state.value : [];
+};
+
+export function mapLoadableItems<T, U>(state: LoadableItems<T>, transform: (item: T) => U): LoadableItems<U> {
     if (state.type === 'loaded') {
         return loaded(state.value.map(transform));
     }
@@ -44,10 +39,7 @@ export function mapLoadableItems<T, U>(
     return state;
 }
 
-export function updateLoadableItems<T>(
-    state: LoadableItems<T>,
-    updater: (items: T[]) => T[],
-): LoadableItems<T> {
+export function updateLoadableItems<T>(state: LoadableItems<T>, updater: (items: T[]) => T[]): LoadableItems<T> {
     if (state.type === 'loaded') {
         return loaded(updater(state.value));
     }
@@ -82,11 +74,7 @@ export function combineLoadablePreviewItems<T>(
         return loaded(loadedValues.slice(0, previewCount));
     }
 
-    if (
-        states.every(
-            (state) => state.type === 'loaded' || state.type === 'loading-more',
-        )
-    ) {
+    if (states.every((state) => state.type === 'loaded' || state.type === 'loading-more')) {
         return loaded([]);
     }
 

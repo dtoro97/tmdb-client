@@ -1,53 +1,47 @@
-<article class="review-card">
-    <header class="review-card__header">
-        @if (avatarPath; as avatarPath) {
-            <img
-                class="review-card__avatar"
-                [src]="avatarPath | imgSrc: 'w185'"
-                [alt]="displayName"
-            />
-        } @else {
-            <div class="review-card__avatar review-card__avatar--fallback">
-                {{ fallbackInitial }}
-            </div>
-        }
+@if (review) {
+    <article class="card">
+        <header class="u-flex u-items-start u-gap-3">
+            @if (review.author_details?.avatar_path; as avatarPath) {
+                <img class="avatar" [src]="avatarPath | imgSrc: 'w185'" [alt]="review.author ?? ''" />
+            } @else {
+                <div class="avatar avatar--fallback">
+                    {{ initial }}
+                </div>
+            }
 
-        <div class="review-card__meta">
-            <div class="review-card__meta-top">
-                <h3 class="review-card__author text-body-sm">
-                    {{ displayName }}
-                </h3>
+            <div class="u-flex-column u-gap-1 u-flex-1">
+                <div class="u-flex u-space-between">
+                    <h3 class="author text-body-sm">
+                        {{ review.author }}
+                    </h3>
 
-                @if (userRating !== null) {
-                    <app-rating-badge [value]="userRating" />
-                } @else {
-                    <span class="text-caption"> No user rating </span>
+                    @if (review.author_details?.rating !== null && review.author_details?.rating !== undefined) {
+                        <app-rating-badge [value]="review.author_details?.rating ?? 0" />
+                    } @else {
+                        <span class="text-caption"> No user rating </span>
+                    }
+                </div>
+
+                @if (review.created_at) {
+                    <p class="text-caption">
+                        {{ review.created_at | date: 'MMM d, y' }}
+                    </p>
                 }
             </div>
+        </header>
 
-            @if (createdAt) {
-                <p class="text-caption">
-                    {{ createdAt | date: "MMM d, y" }}
-                </p>
+        <div class="u-flex-column u-gap-3">
+            @if (expanded) {
+                <div class="content text-body" [innerHTML]="contentHtml"></div>
+            } @else {
+                <div class="content content--collapsed text-body" [innerHTML]="contentPreviewHtml"></div>
+            }
+
+            @if (expandable) {
+                <button class="toggle text-caption" type="button" (click)="toggleExpanded()">
+                    {{ expanded ? 'Show less' : 'Read more' }}
+                </button>
             }
         </div>
-    </header>
-
-    <div class="review-card__body">
-        <p
-            class="review-card__content text-body"
-            [class.review-card__content--collapsed]="!expanded"
-            [innerHTML]="contentHtml"
-        ></p>
-
-        @if (canExpand || expanded) {
-            <button
-                class="review-card__toggle text-caption"
-                type="button"
-                (click)="toggleExpanded()"
-            >
-                {{ expanded ? "Show less" : "Read more" }}
-            </button>
-        }
-    </div>
-</article>
+    </article>
+}

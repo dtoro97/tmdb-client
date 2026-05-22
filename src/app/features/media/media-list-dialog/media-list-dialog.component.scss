@@ -1,110 +1,69 @@
-@use "mixins" as *;
+@use 'mixins' as *;
 
 .media-list-dialog {
-    display: flex;
-    flex-direction: column;
-}
-
-.media-list-dialog__header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-}
-
-.media-list-dialog__subtitle {
-    margin: 0;
-}
-
-.media-list-dialog__content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.media-list-dialog__new-list-button {
-    @include text-link();
-
-    align-self: flex-start;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    padding: 0;
-}
-
-.media-list-dialog__create-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-3);
-    border-radius: var(--radius-lg);
-    background: var(--surface-panel);
-}
-
-.media-list-dialog__field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.media-list-dialog__textarea {
-    --mat-form-field-container-height: auto;
-
-    textarea.mat-mdc-input-element {
-        resize: vertical;
+    &__header {
+        margin-bottom: var(--space-3);
     }
-}
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    &__new-list-button {
+        @include text-link();
 
-.media-list-dialog__create-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--space-2);
-}
+        align-self: flex-start;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+    }
 
-.media-list-dialog__list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-2);
-    border-radius: var(--radius-lg);
-    background: var(--surface-panel);
-    max-height: 350px;
-    overflow: auto;
-}
+    &__create-form,
+    &__list {
+        padding: var(--space-3);
+        border-radius: var(--radius-lg);
+        background: var(--surface-panel);
+    }
 
-.media-list-dialog__list-item {
-    @include surface-hover();
+    &__textarea {
+        --mat-form-field-container-height: auto;
 
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    width: 100%;
-    padding: var(--space-2) var(--space-3);
-    border: 0;
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--text-primary);
-    text-align: left;
-    font: inherit;
-    cursor: pointer;
-}
+        textarea.mat-mdc-input-element {
+            resize: vertical;
+        }
+    }
 
-.media-list-dialog__list-item-head {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-2);
-}
+    &__create-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+    }
 
-.media-list-dialog__count {
-    margin-left: auto;
-    color: var(--text-secondary);
-}
+    &__list {
+        max-height: 350px;
+        overflow: auto;
+    }
 
-.media-list-dialog__description,
-.media-list-dialog__empty {
-    color: var(--text-muted);
-}
+    &__list-item {
+        @include surface-hover();
 
-.media-list-dialog__empty {
-    margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        border: 0;
+        border-radius: var(--radius-md);
+        background: transparent;
+        text-align: left;
+    }
+
+    &__list-item-head {
+        align-items: flex-start;
+    }
+
+    &__count {
+        margin-left: auto;
+    }
 }

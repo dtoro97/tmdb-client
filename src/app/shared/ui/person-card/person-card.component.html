@@ -1,26 +1,21 @@
 <a class="person-card" [routerLink]="['/name', person.id]">
     <div class="person-card__photo-shell">
         <div class="person-card__photo">
-            <app-image
-                [src]="person.imagePath"
-                type="person"
-                [alt]="person.name"
-                params="w185"
-            />
+            <app-image [src]="person.imagePath" type="person" [alt]="person.name" params="w185" />
         </div>
     </div>
 
     <p class="person-card__name text-subtitle">{{ person.name }}</p>
-    @if (person.subtitle) {
-        <p class="text-caption">
+
+    <p class="text-caption">
+        @if (person.subtitle) {
             {{ person.subtitle }}
-        </p>
-    }
+        } @else {
+            unknown
+        }
+    </p>
+
     @if (rank) {
-        <app-badge
-            class="person-card__rank-badge"
-            [label]="'#' + rank"
-            variant="rank"
-        />
+        <app-badge class="person-card__rank-badge" [label]="'#' + rank" variant="rank" />
     }
 </a>

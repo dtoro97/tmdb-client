@@ -10,17 +10,13 @@
     "
 >
     <ng-template let-item>
-        @if (state.type === "loading") {
+        @if (state.type === 'loading') {
             <div class="media-carousel-panel__skeleton-media">
                 <app-skeleton class="media-carousel-panel__skeleton-fill" />
             </div>
         } @else {
-            @if (variant === "card") {
-                <app-card
-                    [item]="item"
-                    [showRating]="showRating"
-                    [dateFormat]="dateFormat"
-                />
+            @if (variant === 'card') {
+                <app-card [item]="item" [showRating]="showRating" [dateFormat]="dateFormat" />
             } @else {
                 <app-backdrop-card
                     [item]="item"

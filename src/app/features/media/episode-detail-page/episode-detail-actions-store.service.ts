@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { ComponentStore } from '@ngrx/component-store';
 
-import { Observable, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
+import { catchError, of, switchMap, tap, throwError } from 'rxjs';
 
 import {
     LoadableValue,
@@ -13,20 +13,18 @@ import {
     normalizeRatingValue,
 } from '../../../shared';
 
-interface EpisodeActionsContext {
-    seriesId: number;
-    seasonNumber: number;
-    episodeNumber: number;
-}
-
 interface EpisodeActionsState {
-    context: EpisodeActionsContext | null;
+    seriesId: number | null;
+    seasonNumber: number | null;
+    episodeNumber: number | null;
     userRating: LoadableValue<number | null>;
     ratingPending: boolean;
 }
 
 const INITIAL_STATE: EpisodeActionsState = {
-    context: null,
+    seriesId: null,
+    seasonNumber: null,
+    episodeNumber: null,
     userRating: { type: 'idle' },
     ratingPending: false,
 };
@@ -52,23 +50,21 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
         super(INITIAL_STATE);
     }
 
-    setEpisodeContext(
-        seriesId: number,
-        seasonNumber: number,
-        episodeNumber: number,
-    ): void {
-        const currentContext = this.get().context;
+    setEpisode(seriesId: number, seasonNumber: number, episodeNumber: number): void {
+        const state = this.get();
 
         if (
-            currentContext?.seriesId === seriesId &&
-            currentContext.seasonNumber === seasonNumber &&
-            currentContext.episodeNumber === episodeNumber
+            state.seriesId === seriesId &&
+            state.seasonNumber === seasonNumber &&
+            state.episodeNumber === episodeNumber
         ) {
             return;
         }
 
         this.patchState({
-            context: { seriesId, seasonNumber, episodeNumber },
+            seriesId,
+            seasonNumber,
+            episodeNumber,
             userRating: { type: 'loading' },
             ratingPending: false,
         });
@@ -76,28 +72,21 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
         this.fetchEpisodeRating$().subscribe();
     }
 
-    ensureGuestSessionForRating$(): Observable<void> {
-        return this.tmdbUserAuthService
-            .ensureGuestSession$()
-            .pipe(switchMap(() => this.fetchEpisodeRating$()));
+    ensureGuestSessionForRating$() {
+        return this.tmdbUserAuthService.ensureGuestSession$().pipe(switchMap(() => this.fetchEpisodeRating$()));
     }
 
-    submitUserRating$(value: number): Observable<void> {
-        const context = this.requireContext();
+    submitUserRating$(value: number) {
+        const state = this.get();
 
-        if (context instanceof Error) {
-            return throwError(() => context);
+        if (state.seriesId === null || state.seasonNumber === null || state.episodeNumber === null) {
+            return throwError(() => new Error('No episode action context is available.'));
         }
 
         this.patchState({ ratingPending: true });
 
         return this.mediaRatingService
-            .rateEpisode$(
-                context.seriesId,
-                context.seasonNumber,
-                context.episodeNumber,
-                value,
-            )
+            .rateEpisode$(state.seriesId, state.seasonNumber, state.episodeNumber, value)
             .pipe(
                 tap(() => {
                     this.patchState({
@@ -108,7 +97,6 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
                         ratingPending: false,
                     });
                 }),
-                map(() => undefined),
                 catchError((error) => {
                     this.patchState({ ratingPending: false });
                     return throwError(() => error);
@@ -116,21 +104,17 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
             );
     }
 
-    deleteUserRating$(): Observable<void> {
-        const context = this.requireContext();
+    deleteUserRating$() {
+        const state = this.get();
 
-        if (context instanceof Error) {
-            return throwError(() => context);
+        if (state.seriesId === null || state.seasonNumber === null || state.episodeNumber === null) {
+            return throwError(() => new Error('No episode action context is available.'));
         }
 
         this.patchState({ ratingPending: true });
 
         return this.mediaRatingService
-            .deleteEpisodeRating$(
-                context.seriesId,
-                context.seasonNumber,
-                context.episodeNumber,
-            )
+            .deleteEpisodeRating$(state.seriesId, state.seasonNumber, state.episodeNumber)
             .pipe(
                 tap(() => {
                     this.patchState({
@@ -138,7 +122,6 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
                         ratingPending: false,
                     });
                 }),
-                map(() => undefined),
                 catchError((error) => {
                     this.patchState({ ratingPending: false });
                     return throwError(() => error);
@@ -146,44 +129,27 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
             );
     }
 
-    private fetchEpisodeRating$(): Observable<void> {
-        const context = this.requireContext();
+    private fetchEpisodeRating$() {
+        const state = this.get();
 
-        if (context instanceof Error) {
-            return throwError(() => context);
+        if (state.seriesId === null || state.seasonNumber === null || state.episodeNumber === null) {
+            return throwError(() => new Error('No episode action context is available.'));
         }
 
-        return this.mediaRatingService
-            .getEpisodeRating$(
-                context.seriesId,
-                context.seasonNumber,
-                context.episodeNumber,
-            )
-            .pipe(
-                tap((rating) => {
-                    this.patchState({
-                        userRating: { type: 'loaded', value: rating },
-                        ratingPending: false,
-                    });
-                }),
-                map(() => undefined),
-                catchError(() => {
-                    this.patchState({
-                        userRating: { type: 'loaded', value: null },
-                        ratingPending: false,
-                    });
-                    return of(undefined);
-                }),
-            );
-    }
-
-    private requireContext(): EpisodeActionsContext | Error {
-        const context = this.get().context;
-
-        if (!context) {
-            return new Error('No episode action context is available.');
-        }
-
-        return context;
+        return this.mediaRatingService.getEpisodeRating$(state.seriesId, state.seasonNumber, state.episodeNumber).pipe(
+            tap((rating) => {
+                this.patchState({
+                    userRating: { type: 'loaded', value: rating },
+                    ratingPending: false,
+                });
+            }),
+            catchError(() => {
+                this.patchState({
+                    userRating: { type: 'loaded', value: null },
+                    ratingPending: false,
+                });
+                return of(undefined);
+            }),
+        );
     }
 }

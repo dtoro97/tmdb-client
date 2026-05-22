@@ -19,6 +19,7 @@ import {
     ExternalLinksComponent,
     MediaCarouselPanelComponent,
     RecentlyViewedStoreService,
+    SkeletonComponent,
 } from '../../../shared';
 import { MAX_VISIBLE_PHOTOS } from '../../../constants';
 import {
@@ -45,6 +46,7 @@ import { PersonCreditsComponent } from '../person-credits/person-credits.compone
         PageSectionComponent,
         PersonCreditsComponent,
         MediaCarouselPanelComponent,
+        SkeletonComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './person-details.component.html',

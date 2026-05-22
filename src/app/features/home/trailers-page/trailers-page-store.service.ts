@@ -3,11 +3,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { of, switchMap, tap } from 'rxjs';
 
 import { PAGE_SIZE } from '../../../constants';
-import {
-    LoadableItems,
-    VideoCardItem,
-    VideoTrailerSeedItem,
-} from '../../../shared';
+import { LoadableItems, VideoCardItem, VideoTrailerSeedItem } from '../../../shared';
 import { TrailerDataStoreService } from '../trailer-data-store.service';
 
 interface TrailersPageState {
@@ -24,10 +20,7 @@ const INITIAL_STATE: TrailersPageState = {
 export class TrailersPageStoreService extends ComponentStore<TrailersPageState> {
     readonly vm$ = this.select((state) => {
         const items =
-            state.trailers.type === 'loaded' ||
-            state.trailers.type === 'loading-more'
-                ? state.trailers.value
-                : [];
+            state.trailers.type === 'loaded' || state.trailers.type === 'loading-more' ? state.trailers.value : [];
 
         const featured = items[0] ?? null;
 
@@ -72,21 +65,17 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
             switchMap((trendingSeeds) => {
                 const initialSeeds = trendingSeeds.slice(0, PAGE_SIZE);
 
-                return this.trailerDataStore
-                    .loadVideoCardsForSeeds$(initialSeeds)
-                    .pipe(
-                        tap((nextTrailers) => {
-                            this.patchState({
-                                trailers: {
-                                    type: 'loaded',
-                                    value: nextTrailers,
-                                },
-                                pendingSeeds: trendingSeeds.slice(
-                                    initialSeeds.length,
-                                ),
-                            });
-                        }),
-                    );
+                return this.trailerDataStore.loadVideoCardsForSeeds$(initialSeeds).pipe(
+                    tap((nextTrailers) => {
+                        this.patchState({
+                            trailers: {
+                                type: 'loaded',
+                                value: nextTrailers,
+                            },
+                            pendingSeeds: trendingSeeds.slice(initialSeeds.length),
+                        });
+                    }),
+                );
             }),
         );
     }
@@ -124,10 +113,6 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
     }
 
     private hasLoadedOrLoading<T>(state: LoadableItems<T>): boolean {
-        return (
-            state.type === 'loading' ||
-            state.type === 'loading-more' ||
-            state.type === 'loaded'
-        );
+        return state.type === 'loading' || state.type === 'loading-more' || state.type === 'loaded';
     }
 }

@@ -39,12 +39,21 @@ import { MediaVideoStoreService } from '../media-video-store.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VideoDetailPageComponent {
-    readonly vm$ = this.mediaStoreService.mediaDetails$;
-
-    readonly selectedVideoMeta$ =
-        this.mediaVideoStoreService.selectedVideoMeta$;
-    readonly videosState$ = this.mediaVideoStoreService.videosState$;
-    readonly relatedVideos$ = this.mediaVideoStoreService.relatedVideos$;
+    readonly vm$ = combineLatest({
+        mediaState: this.mediaStoreService.mediaDetailsState$,
+        selected: this.mediaVideoStoreService.selectedVideoMeta$,
+        videosState: this.mediaVideoStoreService.videosState$,
+        relatedVideos: this.mediaVideoStoreService.relatedVideos$,
+    }).pipe(
+        map(({ mediaState, selected, videosState, relatedVideos }) => ({
+            media: mediaState.type === 'loaded' ? mediaState.value : null,
+            selected,
+            videosState,
+            relatedVideos,
+            isLoading:
+                videosState.type === 'loading' || videosState.type === 'idle',
+        })),
+    );
 
     constructor(
         private mediaStoreService: MediaDetailStoreService,

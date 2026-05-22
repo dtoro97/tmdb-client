@@ -1,5 +1,5 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
 .media-card__media {
     position: relative;
@@ -57,7 +57,6 @@
 
 @include mobile() {
     .media-card__content {
-        padding: var(--space-8) 0 var(--space-1);
         gap: 0;
     }
 }

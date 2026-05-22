@@ -1,63 +1,25 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
-
-.media-list-actions {
-    display: inline-flex;
-    align-items: stretch;
-    border: 1px solid var(--control-subtle-border);
-    border-radius: var(--radius-pill);
-    background: var(--control-subtle-surface);
-    overflow: hidden;
-}
-
-.media-list-actions__segment {
-    @include surface-hover-subtle();
-
+.actions {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    min-width: 2.75rem;
-    min-height: var(--control-height-lg);
-    padding-inline: var(--space-2);
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--text-primary);
-    font: inherit;
-    cursor: pointer;
-    transition: var(--control-transition);
-
-    & + & {
-        border-left: 1px solid var(--control-subtle-border);
-    }
-
-    &:disabled {
-        cursor: wait;
-        opacity: 0.7;
-    }
+    flex-wrap: wrap;
+    gap: var(--space-2);
 }
 
-.media-list-actions__segment--active {
-    background: var(--surface-brand-soft);
-
-    .media-list-actions__icon {
-        color: var(--color-brand);
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-        &:hover:not(:disabled) {
-            background: var(--surface-brand-soft);
-        }
-    }
-
-    &:active:not(:disabled) .media-list-actions__icon {
-        color: var(--color-brand-active);
-    }
+.action {
+    display: inline-flex;
 }
 
-.media-list-actions__icon {
-    flex: 0 0 auto;
-    font-size: 1rem;
+.action--active {
+    --control-subtle-surface: var(--surface-brand-soft);
+    --control-subtle-surface-hover: var(--surface-brand-soft);
+    --control-subtle-surface-active: var(--surface-brand-soft);
+}
+
+.icon {
     color: var(--text-accent);
     transition: color var(--motion-fast);
+}
+
+.action--active .icon {
+    color: var(--color-brand);
 }

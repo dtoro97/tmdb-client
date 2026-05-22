@@ -1,120 +1,69 @@
 <div class="page-container">
-    @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+    @if (vm$ | async; as vm) {
         <app-sub-page-header
-            [backdropPath]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.backdropPath
-                    : undefined
-            "
-            [parentTitle]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.title
-                    : undefined
-            "
+            [backdropPath]="vm.media?.backdropPath"
+            [parentTitle]="vm.media?.title"
             [backLink]="['../']"
             pageTitle="Videos"
         />
 
         <main class="page-main">
-            @if (videosState$ | async; as videosState) {
-                @if (
-                    videosState.type === "loading" ||
-                    videosState.type === "idle"
-                ) {
-                    <section class="media-videos-page__content">
-                        <app-browse-toolbar class="media-videos-page__toolbar">
-                            <app-skeleton
-                                start
-                                class="media-videos-page__count-skeleton"
-                            />
-                            <app-skeleton
-                                end
-                                class="media-videos-page__sort-skeleton"
-                            />
-                        </app-browse-toolbar>
+            @if (vm.isLoading) {
+                <section class="videos">
+                    <app-browse-toolbar class="videos__toolbar">
+                        <app-skeleton start class="videos__count-skeleton" />
+                        <app-skeleton end class="videos__sort-skeleton" />
+                    </app-browse-toolbar>
 
-                        <div class="media-videos-page__grid">
-                            @for (i of skeletonCount | repeat; track i) {
-                                <div class="media-videos-page__card-skeleton">
-                                    <app-skeleton
-                                        class="media-videos-page__card-skeleton-media"
-                                    />
-                                    <app-skeleton
-                                        class="media-videos-page__card-skeleton-line media-videos-page__card-skeleton-line--title"
-                                    />
-                                    <app-skeleton
-                                        class="media-videos-page__card-skeleton-line media-videos-page__card-skeleton-line--meta"
-                                    />
-                                    <app-skeleton
-                                        class="media-videos-page__card-skeleton-line media-videos-page__card-skeleton-line--short"
-                                    />
-                                </div>
-                            }
-                        </div>
-                    </section>
-                } @else if (videosState.type === "loaded") {
-                    @if (videos$ | async; as videos) {
-                        @if (videos.length) {
-                            <section class="media-videos-page__content">
-                                <app-browse-toolbar class="media-videos-page__toolbar">
-                                    <span start class="text-caption">
-                                        1 - {{ videos.length }} of
-                                        {{ videos.length }}
-                                    </span>
-                                    <app-sort-button
-                                        end
-                                        [options]="sortOptions"
-                                        [selectedValue]="sortField$ | async"
-                                        [direction]="
-                                            (sortDirection$ | async) ?? 'desc'
-                                        "
-                                        (sortChange)="setSortField($event)"
-                                        (directionToggle)="toggleSortDirection()"
-                                    />
-                                </app-browse-toolbar>
-
-                                <div class="media-videos-page__grid">
-                                    @for (video of videos; track video.id) {
-                                        <app-youtube-video-card
-                                            [video]="video"
-                                            [mediaTitle]="
-                                                mediaState.type === 'loaded'
-                                                    ? mediaState.value?.title
-                                                    : undefined
-                                            "
-                                            [mediaYear]="
-                                                mediaState.type === 'loaded'
-                                                    ? mediaState.value?.year
-                                                    : undefined
-                                            "
-                                            [mediaId]="
-                                                mediaState.type === 'loaded'
-                                                    ? mediaState.value?.id
-                                                    : undefined
-                                            "
-                                            [mediaType]="
-                                                mediaState.type === 'loaded'
-                                                    ? mediaState.value?.mediaType
-                                                    : undefined
-                                            "
-                                            destination="detail"
-                                            metaVariant="detailed"
-                                        />
-                                    }
-                                </div>
-                            </section>
-                        } @else {
-                            <section class="media-videos-page__empty">
-                                <app-empty-state
-                                    iconClass="fa-regular fa-circle-play"
-                                    text="No videos available for this title."
-                                />
-                            </section>
+                    <div class="videos__grid">
+                        @for (i of skeletonCount | repeat; track i) {
+                            <div class="videos__card-skeleton">
+                                <app-skeleton class="videos__card-media-skeleton" />
+                                <app-skeleton class="videos__card-line-skeleton videos__card-line-skeleton--title" />
+                                <app-skeleton class="videos__card-line-skeleton videos__card-line-skeleton--meta" />
+                                <app-skeleton class="videos__card-line-skeleton videos__card-line-skeleton--short" />
+                            </div>
                         }
-                    }
-                }
+                    </div>
+                </section>
+            } @else if (vm.videos.length) {
+                <section class="videos">
+                    <app-browse-toolbar class="videos__toolbar">
+                        <span start class="text-caption">
+                            1 - {{ vm.videos.length }} of {{ vm.videos.length }}
+                        </span>
+                        <app-sort-button
+                            end
+                            [options]="sortOptions"
+                            [selectedValue]="vm.sortField"
+                            [direction]="vm.sortDirection"
+                            (sortChange)="setSortField($event)"
+                            (directionToggle)="toggleSortDirection()"
+                        />
+                    </app-browse-toolbar>
+
+                    <div class="videos__grid">
+                        @for (video of vm.videos; track video.id) {
+                            <app-youtube-video-card
+                                [video]="video"
+                                [mediaTitle]="vm.media?.title"
+                                [mediaYear]="vm.media?.year"
+                                [mediaId]="vm.media?.id"
+                                [mediaType]="vm.media?.mediaType"
+                                destination="detail"
+                                metaVariant="detailed"
+                            />
+                        }
+                    </div>
+                </section>
+            } @else {
+                <section class="videos__empty">
+                    <app-empty-state
+                        iconClass="fa-regular fa-circle-play"
+                        text="No videos available for this title."
+                    />
+                </section>
             }
         </main>
     }
 </div>
-

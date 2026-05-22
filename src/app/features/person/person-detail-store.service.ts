@@ -1,19 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ComponentStore } from '@ngrx/component-store';
-import type {
-    Person,
-    PersonExternalIds,
-    PersonImages,
-    TaggedImagePage,
-} from '../../api';
+import type { Person, PersonExternalIds, PersonImages, TaggedImagePage } from '../../api';
 import {
     PersonCombinedCastCredit,
     PersonCombinedCredits,
     PersonCombinedCrewCredit,
     PersonRestControllerService,
 } from '../../api';
-import { EMPTY, catchError, map, of, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, delay, map, of, switchMap, tap } from 'rxjs';
 import {
     CardItem,
     ExternalLinks,
@@ -154,15 +149,9 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         });
 
         return this.personRestControllerService
-            .personDetails(
-                id,
-                'external_ids,images,tagged_images',
-                undefined,
-                undefined,
-                undefined,
-                API_JSON_OPTIONS,
-            )
+            .personDetails(id, 'external_ids,images,tagged_images', undefined, undefined, undefined, API_JSON_OPTIONS)
             .pipe(
+                delay(3000),
                 map((person) => person as PersonWithExternalIds),
                 tap((person) => {
                     this.patchState({
@@ -181,26 +170,16 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
 
     private loadCredits$(id: number) {
         return this.personRestControllerService
-            .personCombinedCredits(
-                String(id),
-                undefined,
-                undefined,
-                undefined,
-                API_JSON_OPTIONS,
-            )
+            .personCombinedCredits(String(id), undefined, undefined, undefined, API_JSON_OPTIONS)
             .pipe(
-                catchError(() =>
-                    of({ cast: [], crew: [] } as PersonCombinedCredits),
-                ),
+                catchError(() => of({ cast: [], crew: [] } as PersonCombinedCredits)),
                 tap((raw) => {
                     this.patchState({
                         credits: {
                             type: 'loaded',
                             value: {
                                 cast: buildCastCredits(raw.cast ?? []),
-                                production: buildProductionCredits(
-                                    raw.crew ?? [],
-                                ),
+                                production: buildProductionCredits(raw.crew ?? []),
                             },
                         },
                     });
@@ -227,8 +206,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                             vote_count: img.vote_count,
                             iso_639_1: img.iso_639_1,
                             caption:
-                                (img.media as { title?: string; name?: string })
-                                    ?.title ??
+                                (img.media as { title?: string; name?: string })?.title ??
                                 (img.media as { name?: string })?.name,
                             photoType: 'tagged',
                         }),
@@ -288,8 +266,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
             ...state,
             creditsUi: {
                 ...state.creditsUi,
-                sortDirection:
-                    state.creditsUi.sortDirection === 'desc' ? 'asc' : 'desc',
+                sortDirection: state.creditsUi.sortDirection === 'desc' ? 'asc' : 'desc',
             },
         }));
     }
@@ -309,9 +286,7 @@ const toCastCreditItem = (credit: PersonCombinedCastCredit): CreditItem => ({
     episodeCount: credit.media_type === 'tv' ? credit.episode_count : undefined,
 });
 
-const toProductionCreditItem = (
-    credit: PersonCombinedCrewCredit,
-): CreditItem => ({
+const toProductionCreditItem = (credit: PersonCombinedCrewCredit): CreditItem => ({
     id: credit.id!,
     title: credit.title || credit.name || '',
     kind: 'production',
@@ -334,13 +309,9 @@ const buildCreditRoleLabel = (item: Pick<CreditItem, 'character' | 'job'>) =>
     mergeText(item.character, item.job) ?? null;
 
 const sortCredits = (a: CreditItem, b: CreditItem): number =>
-    (b.releaseDate ?? '').localeCompare(a.releaseDate ?? '') ||
-    a.title.localeCompare(b.title);
+    (b.releaseDate ?? '').localeCompare(a.releaseDate ?? '') || a.title.localeCompare(b.title);
 
-const mergeById = <T extends { id?: number }>(
-    items: T[],
-    merge: (existing: T, incoming: T) => T,
-): T[] => {
+const mergeById = <T extends { id?: number }>(items: T[], merge: (existing: T, incoming: T) => T): T[] => {
     const byId = new Map<number, T>();
 
     for (const item of items) {
@@ -364,25 +335,17 @@ const mergeById = <T extends { id?: number }>(
 const buildCastCredits = (items: PersonCombinedCastCredit[]): CreditItem[] => {
     const merged = mergeById(items, (existing, incoming) => ({
         ...existing,
-        episode_count: Math.max(
-            existing.episode_count ?? 0,
-            incoming.episode_count ?? 0,
-        ),
+        episode_count: Math.max(existing.episode_count ?? 0, incoming.episode_count ?? 0),
         character: mergeText(existing.character, incoming.character),
     }));
 
     return merged.map(toCastCreditItem).sort(sortCredits);
 };
 
-const buildProductionCredits = (
-    items: PersonCombinedCrewCredit[],
-): CreditItem[] => {
+const buildProductionCredits = (items: PersonCombinedCrewCredit[]): CreditItem[] => {
     const merged = mergeById(items, (existing, incoming) => ({
         ...existing,
-        episode_count: Math.max(
-            existing.episode_count ?? 0,
-            incoming.episode_count ?? 0,
-        ),
+        episode_count: Math.max(existing.episode_count ?? 0, incoming.episode_count ?? 0),
         job: mergeText(existing.job, incoming.job),
     }));
 
@@ -397,18 +360,11 @@ const buildKnownFor = (
         return { type: 'loading' };
     }
 
-    if (
-        person.type !== 'loaded' ||
-        credits.type !== 'loaded' ||
-        !person.value
-    ) {
+    if (person.type !== 'loaded' || credits.type !== 'loaded' || !person.value) {
         return { type: 'idle' };
     }
 
-    const seed =
-        person.value.known_for_department === 'Acting'
-            ? credits.value.cast
-            : credits.value.production;
+    const seed = person.value.known_for_department === 'Acting' ? credits.value.cast : credits.value.production;
 
     const cards: CardItem[] = [...seed]
         .sort((a, b) => b.voteCount - a.voteCount)
@@ -428,18 +384,12 @@ const buildKnownFor = (
     return { type: 'loaded', value: cards };
 };
 
-const buildPersonExternalLinks = (
-    person: LoadableValue<PersonWithExternalIds | null>,
-): ExternalLinks | null => {
+const buildPersonExternalLinks = (person: LoadableValue<PersonWithExternalIds | null>): ExternalLinks | null => {
     if (person.type !== 'loaded' || !person.value) {
         return null;
     }
 
-    return buildExternalLinks(
-        person.value.external_ids ?? null,
-        person.value.homepage ?? null,
-        'name',
-    );
+    return buildExternalLinks(person.value.external_ids ?? null, person.value.homepage ?? null, 'name');
 };
 
 const mergeCreditsForAllSection = (items: CreditItem[]): CreditItem[] => {
@@ -459,22 +409,11 @@ const mergeCreditsForAllSection = (items: CreditItem[]): CreditItem[] => {
 
         byKey.set(key, {
             ...existing,
-            kind:
-                mergedCharacter && mergedJob
-                    ? 'mixed'
-                    : mergedCharacter
-                      ? 'cast'
-                      : 'production',
+            kind: mergedCharacter && mergedJob ? 'mixed' : mergedCharacter ? 'cast' : 'production',
             character: mergedCharacter,
             job: mergedJob,
-            episodeCount: Math.max(
-                existing.episodeCount ?? 0,
-                item.episodeCount ?? 0,
-            ),
-            rating:
-                (existing.voteCount ?? 0) >= (item.voteCount ?? 0)
-                    ? existing.rating
-                    : item.rating,
+            episodeCount: Math.max(existing.episodeCount ?? 0, item.episodeCount ?? 0),
+            rating: (existing.voteCount ?? 0) >= (item.voteCount ?? 0) ? existing.rating : item.rating,
             voteCount: Math.max(existing.voteCount ?? 0, item.voteCount ?? 0),
             posterPath: existing.posterPath ?? item.posterPath,
             backdropPath: existing.backdropPath ?? item.backdropPath,
@@ -492,11 +431,7 @@ const getSortableDate = (value: string | null): string => {
     return value;
 };
 
-const compareCreditsBySort = (
-    left: CreditItem,
-    right: CreditItem,
-    sortBy: PersonCreditsSortBy,
-): number => {
+const compareCreditsBySort = (left: CreditItem, right: CreditItem, sortBy: PersonCreditsSortBy): number => {
     if (sortBy === 'title') {
         return left.title.localeCompare(right.title);
     }
@@ -510,9 +445,8 @@ const compareCreditsBySort = (
     }
 
     return (
-        getSortableDate(left.releaseDate).localeCompare(
-            getSortableDate(right.releaseDate),
-        ) || left.title.localeCompare(right.title)
+        getSortableDate(left.releaseDate).localeCompare(getSortableDate(right.releaseDate)) ||
+        left.title.localeCompare(right.title)
     );
 };
 
@@ -535,38 +469,25 @@ const buildCreditsDisplay = (
               ? credits.value.cast
               : credits.value.production;
 
-    const seed =
-        ui.section === 'all' ? mergeCreditsForAllSection(source) : source;
+    const seed = ui.section === 'all' ? mergeCreditsForAllSection(source) : source;
 
-    const mediaFiltered =
-        ui.mediaType === 'all'
-            ? seed
-            : seed.filter((item) => item.mediaType === ui.mediaType);
+    const mediaFiltered = ui.mediaType === 'all' ? seed : seed.filter((item) => item.mediaType === ui.mediaType);
 
     const direction = ui.sortDirection === 'desc' ? -1 : 1;
-    const sorted = [...mediaFiltered].sort(
-        (left, right) =>
-            compareCreditsBySort(left, right, ui.sortBy) * direction,
-    );
+    const sorted = [...mediaFiltered].sort((left, right) => compareCreditsBySort(left, right, ui.sortBy) * direction);
 
     const displayItems = sorted.map(
         (item): PersonCreditsDisplayItemVm => ({
             ...item,
             roleLabel: buildCreditRoleLabel(item),
             mediaTypeLabel: item.mediaType === 'tv' ? 'TV Shows' : 'Movie',
-            episodeLabel:
-                item.mediaType === 'tv' && item.episodeCount
-                    ? `${item.episodeCount} ep`
-                    : null,
+            episodeLabel: item.mediaType === 'tv' && item.episodeCount ? `${item.episodeCount} ep` : null,
         }),
     );
 
     const groups = new Map<string, PersonCreditsDisplayItemVm[]>();
     for (const item of displayItems) {
-        const year =
-            ui.sortBy === 'date'
-                ? item.releaseDate?.slice(0, 4) || 'Unknown'
-                : 'All Years';
+        const year = ui.sortBy === 'date' ? item.releaseDate?.slice(0, 4) || 'Unknown' : 'All Years';
         const existing = groups.get(year) ?? [];
         existing.push(item);
         groups.set(year, existing);
@@ -577,12 +498,8 @@ const buildCreditsDisplay = (
         value: {
             totalCount: displayItems.length,
             groups: [...groups.entries()].map(([year, items]) => {
-                const movieCount = items.filter(
-                    (item) => item.mediaType === 'movie',
-                ).length;
-                const tvCount = items.filter(
-                    (item) => item.mediaType === 'tv',
-                ).length;
+                const movieCount = items.filter((item) => item.mediaType === 'movie').length;
+                const tvCount = items.filter((item) => item.mediaType === 'tv').length;
 
                 return {
                     year,

@@ -1,25 +1,6 @@
 @if (loading) {
-    <div
-        class="episode-list-item episode-list-item--loading"
-        aria-hidden="true"
-    >
-        <app-skeleton
-            class="episode-list-item__still episode-list-item__still-skeleton"
-        />
-        <div class="episode-list-item__content">
-            <div class="episode-list-item__label">
-                <app-skeleton class="episode-list-item__label-skeleton" />
-            </div>
-            <h3 class="episode-list-item__title">
-                <app-skeleton class="episode-list-item__title-skeleton" />
-            </h3>
-            <div class="episode-list-item__meta">
-                <app-skeleton class="episode-list-item__meta-skeleton" />
-            </div>
-            <p class="episode-list-item__overview">
-                <app-skeleton class="episode-list-item__overview-skeleton" />
-            </p>
-        </div>
+    <div class="episode-list-item episode-list-item--loading" aria-hidden="true">
+        <app-skeleton class="episode-list-item__row-skeleton" />
     </div>
 } @else if (item; as currentItem) {
     <div
@@ -27,30 +8,17 @@
         [class.episode-list-item--navigable]="currentItem.routeCommands"
         [attr.role]="currentItem.routeCommands ? 'link' : null"
         [attr.tabindex]="currentItem.routeCommands ? 0 : null"
-        [attr.aria-label]="
-            currentItem.routeCommands ? 'Open ' + currentItem.name : null
-        "
+        [attr.aria-label]="currentItem.routeCommands ? 'Open ' + currentItem.name : null"
         (click)="onRowClick($event)"
         (keydown)="onRowKeydown($event)"
     >
-        <app-image
-            class="episode-list-item__still"
-            [src]="currentItem.stillPath"
-            [alt]="currentItem.name"
-        />
+        <app-image class="episode-list-item__still" [src]="currentItem.stillPath" [alt]="currentItem.name" />
         <div class="episode-list-item__content">
-            @if (
-                currentItem.seasonNumber !== null &&
-                currentItem.episodeNumber !== null
-            ) {
+            @if (currentItem.seasonNumber !== null && currentItem.episodeNumber !== null) {
                 <span class="episode-list-item__label text-caption">
-                    S{{ currentItem.seasonNumber }}E{{
-                        currentItem.episodeNumber
-                    }}
+                    S{{ currentItem.seasonNumber }}E{{ currentItem.episodeNumber }}
                     @if (currentItem.subtitle) {
-                        <span class="episode-list-item__subtitle text-caption">
-                            · {{ currentItem.subtitle }}
-                        </span>
+                        <span class="episode-list-item__subtitle text-caption"> · {{ currentItem.subtitle }} </span>
                     }
                 </span>
             } @else if (currentItem.subtitle) {
@@ -73,7 +41,7 @@
                 }
             </div>
             <p class="episode-list-item__overview">
-                {{ currentItem.overview || "No overview available." }}
+                {{ currentItem.overview || 'No overview available.' }}
             </p>
         </div>
         <div class="episode-list-item__actions">

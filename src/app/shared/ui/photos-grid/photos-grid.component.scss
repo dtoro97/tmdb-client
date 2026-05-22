@@ -1,5 +1,5 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
 :host {
     --photos-grid-tile-height-desktop: 180px;
@@ -16,9 +16,6 @@
     flex-wrap: wrap;
     align-content: flex-start;
     gap: var(--photos-grid-gap);
-    max-height: calc(
-        (2 * var(--photos-grid-row-height)) + var(--photos-grid-gap)
-    );
 }
 
 .photos-grid__row {
@@ -42,27 +39,15 @@
     background: transparent;
     min-width: 0;
     height: var(--photos-grid-row-height);
-    flex-basis: calc(
-        var(--photos-grid-aspect-ratio) * var(--photos-grid-row-height)
-    );
+    flex-basis: calc(var(--photos-grid-aspect-ratio) * var(--photos-grid-row-height));
     flex-grow: var(--photos-grid-aspect-ratio);
 }
 
 .photos-grid > .photos-grid__item:only-child {
     max-height: none;
     height: auto;
-    flex: 0 1
-        calc(
-            var(--photos-grid-aspect-ratio) *
-                var(--photos-grid-single-max-height)
-        );
-    width: min(
-        100%,
-        calc(
-            var(--photos-grid-aspect-ratio) *
-                var(--photos-grid-single-max-height)
-        )
-    );
+    flex: 0 1 calc(var(--photos-grid-aspect-ratio) * var(--photos-grid-single-max-height));
+    width: min(100%, calc(var(--photos-grid-aspect-ratio) * var(--photos-grid-single-max-height)));
     max-height: var(--photos-grid-single-max-height);
     aspect-ratio: var(--photos-grid-aspect-ratio);
 }

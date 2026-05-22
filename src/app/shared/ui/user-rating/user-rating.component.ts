@@ -1,11 +1,5 @@
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    DestroyRef,
-    Inject,
-    Input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Inject, Input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
@@ -19,7 +13,10 @@ import { RATING_ACTIONS, RatingActions } from '../../types';
 import { toUserFacingErrorMessage } from '../../utils';
 import { TmdbUserAuthService } from '../../services/tmdb-user-auth.service';
 import { UserSessionStoreService } from '../../services/user-session-store.service';
-import { MediaRatingDialogComponent, MediaRatingDialogResult } from '../media-rating-dialog/media-rating-dialog.component';
+import {
+    MediaRatingDialogComponent,
+    MediaRatingDialogResult,
+} from '../media-rating-dialog/media-rating-dialog.component';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
 
 @Component({
@@ -49,11 +46,8 @@ export class UserRatingComponent {
             .pipe(
                 take(1),
                 switchMap((rating) => {
-                    if (
-                        rating.pending ||
-                        rating.value.type === 'loading' ||
-                        rating.value.type === 'idle'
-                    ) {
+                    console.log(rating);
+                    if (rating.pending || rating.value.type === 'loading' || rating.value.type === 'idle') {
                         return EMPTY;
                     }
 
@@ -70,10 +64,7 @@ export class UserRatingComponent {
                         .afterClosed()
                         .pipe(
                             take(1),
-                            switchMap(
-                                (result: MediaRatingDialogResult | undefined) =>
-                                    this.handleDialogResult(result),
-                            ),
+                            switchMap((result: MediaRatingDialogResult | undefined) => this.handleDialogResult(result)),
                         );
                 }),
                 takeUntilDestroyed(this.destroyRef),
@@ -89,55 +80,36 @@ export class UserRatingComponent {
         if (result === 'remove') {
             return this.ratingActions
                 .deleteUserRating$()
-                .pipe(
-                    catchError((error) =>
-                        this.showError(error, 'Could not remove your rating.'),
-                    ),
-                );
+                .pipe(catchError((error) => this.showError(error, 'Could not remove your rating.')));
         }
 
         if (result === 'login') {
             return this.tmdbUserAuthService
                 .startLogin$(this.router.url)
-                .pipe(
-                    catchError((error) =>
-                        this.showError(error, 'Could not start sign-in.'),
-                    ),
-                );
+                .pipe(catchError((error) => this.showError(error, 'Could not start sign-in.')));
         }
 
         if (typeof result === 'object' && 'guestValue' in result) {
-            return this.ratingActions
-                .ensureGuestSessionForRating$()
-                .pipe(
-                    switchMap(() =>
-                        this.ratingActions.submitUserRating$(result.guestValue),
-                    ),
-                    catchError((error) =>
-                        this.showError(error, 'Could not save your rating.'),
-                    ),
-                );
+            return this.ratingActions.ensureGuestSessionForRating$().pipe(
+                switchMap(() => this.ratingActions.submitUserRating$(result.guestValue)),
+                catchError((error) => this.showError(error, 'Could not save your rating.')),
+            );
         }
 
         if (typeof result === 'number') {
             return this.ratingActions
                 .submitUserRating$(result)
-                .pipe(
-                    catchError((error) =>
-                        this.showError(error, 'Could not save your rating.'),
-                    ),
-                );
+                .pipe(catchError((error) => this.showError(error, 'Could not save your rating.')));
         }
 
         return EMPTY;
     }
 
     private showError(error: unknown, fallback: string) {
-        this.snackBar.open(
-            toUserFacingErrorMessage(error, fallback),
-            'Dismiss',
-            { duration: 5000, panelClass: 'snackbar-error' },
-        );
+        this.snackBar.open(toUserFacingErrorMessage(error, fallback), 'Dismiss', {
+            duration: 5000,
+            panelClass: 'snackbar-error',
+        });
         return EMPTY;
     }
 }

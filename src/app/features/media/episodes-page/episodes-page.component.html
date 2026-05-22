@@ -1,205 +1,112 @@
 <div class="page-container">
-    @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+    @if (vm$ | async; as vm) {
         <app-sub-page-header
-            [backdropPath]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.backdropPath
-                    : undefined
-            "
-            [parentTitle]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.title
-                    : undefined
-            "
+            [backdropPath]="vm.media?.backdropPath"
+            [parentTitle]="vm.media?.title"
             [backLink]="['../']"
             pageTitle="Episodes"
         />
 
-        <main class="page-main episodes-page__main">
-            <section class="episodes-page__featured">
-                @if (
-                    mediaSeasonsStoreService.topRatedEpisode$ | async;
-                    as state
-                ) {
-                    @if (state.type === "loading" || state.type === "idle") {
-                        <article class="episodes-page__featured-card-skeleton">
-                            <app-skeleton
-                                class="episodes-page__featured-image-skeleton"
-                            />
+        <main class="page-main episodes">
+            <section class="highlights">
+                @if (vm.topState.type === 'loading' || vm.topState.type === 'idle') {
+                    <article class="highlights__card highlights__card--skeleton">
+                        <div class="highlights__media">
+                            <app-skeleton class="highlights__image-skeleton" />
+                        </div>
+                    </article>
+                } @else if (vm.topState.type === 'loaded' && vm.topState.value; as top) {
+                    <a class="highlights__card" [routerLink]="[top.season_number, top.episode_number]">
+                        <div class="highlights__media">
+                            <app-badge class="highlights__badge" label="Top Rated" variant="accent" />
+                            <app-image class="highlights__image" [src]="top.still_path ?? null" params="original" />
 
-                            <div class="episodes-page__featured-rail">
-                                <app-skeleton />
-                            </div>
-                        </article>
-                    } @else if (
-                        state.type === "loaded" && state.value;
-                        as top
-                    ) {
-                        <a
-                            class="episodes-page__featured-card"
-                            [routerLink]="[
-                                top.season_number,
-                                top.episode_number,
-                            ]"
-                        >
-                            <div class="episodes-page__featured-media">
-                                <app-badge
-                                    class="episodes-page__featured-badge"
-                                    label="Top Rated"
-                                    variant="accent"
-                                />
-                                <app-image
-                                    class="episodes-page__featured-image"
-                                    [src]="top.still_path ?? null"
-                                    params="original"
-                                />
-                                <div class="episodes-page__featured-overlay">
-                                    <span
-                                        class="episodes-page__featured-label text-overline"
-                                    >
-                                        S{{ top.season_number }}E{{
-                                            top.episode_number
-                                        }}
-                                    </span>
-                                    <span
-                                        class="episodes-page__featured-title text-title"
-                                    >
-                                        {{ top.name }}
-                                    </span>
-                                    <span
-                                        class="episodes-page__featured-meta text-caption"
-                                    >
-                                        @if (top.vote_average) {
-                                            <app-rating-badge
-                                                [value]="top.vote_average"
-                                            />
-                                        }
-                                        @if (top.air_date) {
-                                            <span>{{
-                                                top.air_date | date: "MMM d, y"
-                                            }}</span>
-                                        }
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="episodes-page__featured-rail">
-                                <p
-                                    class="episodes-page__featured-hook text-body-sm"
-                                >
-                                    {{
-                                        top.overview || "No overview available."
-                                    }}
-                                </p>
-                            </div>
-                        </a>
-                    }
-                }
-
-                @if (
-                    mediaState.type === "loaded" &&
-                        mediaState.value &&
-                        mediaState.value.lastEpisode;
-                    as latest
-                ) {
-                    <a
-                        class="episodes-page__featured-card"
-                        [routerLink]="[
-                            latest.season_number,
-                            latest.episode_number,
-                        ]"
-                    >
-                        <div class="episodes-page__featured-media">
-                            <app-badge
-                                class="episodes-page__featured-badge"
-                                label="Most Recent"
-                            />
-                            <app-image
-                                class="episodes-page__featured-image"
-                                [src]="latest.still_path ?? null"
-                                params="original"
-                            />
-                            <div class="episodes-page__featured-overlay">
-                                <span
-                                    class="episodes-page__featured-label text-overline"
-                                >
-                                    S{{ latest.season_number }}E{{
-                                        latest.episode_number
-                                    }}
+                            <div class="highlights__overlay">
+                                <span class="text-overline"> S{{ top.season_number }}E{{ top.episode_number }} </span>
+                                <span class="highlights__title text-title">
+                                    {{ top.name }}
                                 </span>
-                                <span
-                                    class="episodes-page__featured-title text-title"
-                                >
-                                    {{ latest.name }}
-                                </span>
-                                <span
-                                    class="episodes-page__featured-meta text-caption"
-                                >
-                                    @if (latest.air_date) {
-                                        <span>{{
-                                            latest.air_date | date: "MMM d, y"
-                                        }}</span>
+                                <span class="highlights__meta text-caption">
+                                    @if (top.vote_average) {
+                                        <app-rating-badge [value]="top.vote_average" />
+                                    }
+                                    @if (top.air_date) {
+                                        <span>{{ top.air_date | date: 'MMM d, y' }}</span>
                                     }
                                 </span>
                             </div>
                         </div>
-                        <div class="episodes-page__featured-rail">
-                            <p
-                                class="episodes-page__featured-hook text-body-sm"
-                            >
-                                {{
-                                    latest.overview || "No overview available."
-                                }}
+
+                        <div class="highlights__body">
+                            <p class="highlights__hook text-body-sm">
+                                {{ top.overview || 'No overview available.' }}
+                            </p>
+                        </div>
+                    </a>
+                }
+
+                @if (vm.latest; as latest) {
+                    <a class="highlights__card" [routerLink]="[latest.season_number, latest.episode_number]">
+                        <div class="highlights__media">
+                            <app-badge class="highlights__badge" label="Most Recent" />
+                            <app-image class="highlights__image" [src]="latest.still_path ?? null" params="original" />
+
+                            <div class="highlights__overlay">
+                                <span class="text-overline">
+                                    S{{ latest.season_number }}E{{ latest.episode_number }}
+                                </span>
+                                <span class="highlights__title text-title">
+                                    {{ latest.name }}
+                                </span>
+                                <span class="highlights__meta text-caption">
+                                    @if (latest.air_date) {
+                                        <span>{{ latest.air_date | date: 'MMM d, y' }}</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="highlights__body">
+                            <p class="highlights__hook text-body-sm">
+                                {{ latest.overview || 'No overview available.' }}
                             </p>
                         </div>
                     </a>
                 } @else {
-                    <article class="episodes-page__featured-card-skeleton">
-                        <app-skeleton
-                            class="episodes-page__featured-image-skeleton"
-                        />
-
-                        <div class="episodes-page__featured-rail">
-                            <app-skeleton />
+                    <article class="highlights__card highlights__card--skeleton">
+                        <div class="highlights__media">
+                            <app-skeleton class="highlights__image-skeleton" />
                         </div>
                     </article>
                 }
             </section>
 
-            @if (
-                mediaSeasonsStoreService.selectedSeasonInfo$ | async;
-                as seasonInfo
-            ) {
-                <header class="episodes-page__season-header">
-                    <h2 class="text-title">{{ seasonInfo.name }}</h2>
-                    <span class="text-caption">
-                        {{ seasonInfo.episodeCount }} episodes
-                    </span>
-                </header>
-            }
+            <section class="season">
+                @if (vm.seasonInfo; as seasonInfo) {
+                    <header class="season__head">
+                        <h2 class="text-title">{{ seasonInfo.name }}</h2>
+                        <span class="text-caption">{{ seasonInfo.episodeCount }} episodes</span>
+                    </header>
+                } @else {
+                    <div class="season__head-skeleton" aria-hidden="true">
+                        <app-skeleton class="season__line-skeleton season__line-skeleton--head" />
+                    </div>
+                }
 
-            <div>
-                <app-pill-toggle
-                    [options]="
-                        (mediaSeasonsStoreService.seasonPillOptions$ | async) ??
-                        []
-                    "
-                    [selectedValue]="
-                        mediaSeasonsStoreService.selectedSeason$ | async
-                    "
-                    (selected)="changeSeason($event)"
-                />
-            </div>
+                @if (vm.seasonOptions.length) {
+                    <app-pill-toggle
+                        [options]="vm.seasonOptions"
+                        [selectedValue]="vm.selectedSeason"
+                        (selected)="changeSeason($event)"
+                    />
+                } @else {
+                    <div class="season__pills-skeleton" aria-hidden="true">
+                        <app-skeleton class="season__line-skeleton season__line-skeleton--pills" />
+                    </div>
+                }
 
-            <section>
-                <app-episode-list
-                    [state]="
-                        (mediaSeasonsStoreService.seasonEpisodesState$ | async)!
-                    "
-                    [skeletonCount]="(skeletonRows$ | async)?.length ?? 5"
-                    [routePrefix]="(episodeRoutePrefix$ | async) ?? []"
-                />
+                <app-episode-list [state]="vm.episodesState" [skeletonCount]="5" [routePrefix]="vm.routePrefix" />
             </section>
         </main>
     }
 </div>
-

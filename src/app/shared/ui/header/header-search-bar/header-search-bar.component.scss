@@ -1,5 +1,5 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
 :host {
     --header-search-bar-height: var(--control-height-md);
@@ -21,10 +21,12 @@
     border-radius: var(--radius-md);
     min-height: var(--header-search-bar-height);
     overflow: hidden;
+    transition: border-color var(--motion-base);
 
-    &:focus-within {
-        outline: auto;
-        outline-offset: 2px;
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            border-color: var(--control-focus-border);
+        }
     }
 }
 

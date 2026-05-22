@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { marked } from 'marked';
 
 import { Review } from '../../../api';
 import { ImagePipe, RatingBadgeComponent } from '../../../shared';
@@ -12,43 +13,39 @@ import { ImagePipe, RatingBadgeComponent } from '../../../shared';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewCardComponent {
+    private readonly EXPAND_THRESHOLD = 500;
+
     @Input({ required: true })
     set review(review: Review) {
-        this.contentHtml = review.content ?? '';
-        this.createdAt = review.created_at ?? null;
-        this.userRating = review.author_details?.rating ?? null;
-        this.avatarPath = review.author_details?.avatar_path?.trim() || null;
+        const contentMarkdown = review.content ?? '';
 
-        const displayName =
-            review.author?.trim() ||
-            review.author_details?.username?.trim() ||
-            'Anonymous';
-        this.displayName = displayName;
-        this.fallbackInitial = displayName.charAt(0).toUpperCase() || 'A';
-
-        this.expanded = false;
-        this.canExpand = this.isReviewLong(this.contentHtml);
+        this._review = review;
+        this.contentHtml = this.renderMarkdown(contentMarkdown);
+        this.contentPreviewHtml = contentMarkdown;
+        this.initial = review.author!.trim().charAt(0).toUpperCase();
+        this.expandable = (review.content?.length || 0) > this.EXPAND_THRESHOLD;
     }
 
+    get review(): Review {
+        return this._review;
+    }
+    private _review: Review;
     contentHtml = '';
-    createdAt: string | null = null;
-    displayName = 'Anonymous';
-    fallbackInitial = 'A';
-    avatarPath: string | null = null;
-    userRating: number | null = null;
+    contentPreviewHtml = '';
+    initial = 'A';
     expanded = false;
-    canExpand = false;
+    expandable = false;
 
     toggleExpanded(): void {
         this.expanded = !this.expanded;
     }
 
-    isReviewLong(content: string): boolean {
-        const plainText = content
-            .replace(/<[^>]+>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
+    private renderMarkdown(content: string): string {
+        const rendered = marked.parse(content, {
+            breaks: true,
+            gfm: true,
+        });
 
-        return plainText.length > 500;
+        return typeof rendered === 'string' ? rendered : content;
     }
 }

@@ -1,13 +1,4 @@
-import {
-    catchError,
-    combineLatest,
-    EMPTY,
-    forkJoin,
-    map,
-    Observable,
-    of,
-    tap,
-} from 'rxjs';
+import { catchError, combineLatest, EMPTY, forkJoin, map, Observable, of, tap } from 'rxjs';
 
 import { Injectable } from '@angular/core';
 
@@ -23,10 +14,13 @@ import {
     VideoList,
 } from '../../../api';
 import {
+    getISODate,
     MediaDetails,
     groupCrewMembers,
     LoadableItems,
     ViewerImage,
+    loadedValue,
+    GroupedCrew,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaSeasonsStoreService } from '../media-seasons-store.service';
@@ -43,26 +37,10 @@ const INITIAL_STATE: EpisodeDetailState = {
     videos: { type: 'idle' },
 };
 
-function loadedValue<T>(state: LoadableItems<T>): T | undefined {
-    return state.type === 'loaded' ? state.value[0] : undefined;
-}
-
-function canRateEpisode(episode: TvEpisode | null): boolean {
-    const airDate = episode?.air_date;
-
-    if (!airDate) {
-        return true;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    return airDate <= today;
-}
-
-type GroupedCrew = ReturnType<typeof groupCrewMembers>;
-
 export interface EpisodeDetailVm {
     media: MediaDetails | null;
     episode: TvEpisode | null;
+    isLoading: boolean;
     canRateEpisode: boolean;
     previousEpisode: TvEpisode | null;
     nextEpisode: TvEpisode | null;
@@ -71,7 +49,7 @@ export interface EpisodeDetailVm {
         writer: CrewMember | null;
         hasCrew: boolean;
     };
-    groupedCrew: GroupedCrew;
+    groupedCrew: GroupedCrew[];
     guestStars: CastMember[];
     videosState: LoadableItems<Video>;
     videoCount: number;
@@ -100,16 +78,11 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
 
         return {
             type: 'loaded',
-            value: (loadedValue(state.images)?.stills ?? []).slice(
-                0,
-                12,
-            ) as ViewerImage[],
+            value: (loadedValue(state.images)[0]?.stills ?? []).slice(0, 12) as ViewerImage[],
         };
     });
 
-    readonly allStills$ = this.select(
-        (state) => loadedValue(state.images)?.stills ?? [],
-    );
+    readonly allStills$ = this.select((state) => loadedValue(state.images)[0]?.stills ?? []);
 
     readonly videosState$ = this.select((state): LoadableItems<Video> => {
         if (state.videos.type === 'loading') {
@@ -134,71 +107,48 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
         this.videosState$,
         this.allStills$,
     ]).pipe(
-        map(
-            ([
-                mediaState,
-                episodeState,
-                seasonEpisodesState,
-                stillsState,
-                videosState,
-                allStills,
-            ]): EpisodeDetailVm => {
-                const media =
-                    mediaState.type === 'loaded' ? mediaState.value : null;
-                const episode = loadedValue(episodeState) ?? null;
-                const isLoading =
-                    episodeState.type === 'idle' || episodeState.type === 'loading';
-                const director =
-                    episode?.crew?.find(
-                        (crewMember) => crewMember.job === 'Director',
-                    ) ?? null;
-                const writer =
-                    episode?.crew?.find(
-                        (crewMember) =>
-                            crewMember.job === 'Writer' ||
-                            crewMember.job === 'Screenplay',
-                    ) ?? null;
-                const groupedCrew = groupCrewMembers(episode?.crew ?? []);
-                const guestStars = episode?.guest_stars ?? [];
-                const stillsTotalCount = allStills.length;
-                const youtubeVideoCount =
-                    videosState.type === 'loaded' ? videosState.value.length : 0;
-                const seasonEpisodes =
-                    seasonEpisodesState.type === 'loaded'
-                        ? seasonEpisodesState.value
-                        : [];
-                const episodeIndex = episode
-                    ? seasonEpisodes.findIndex(
-                          (seasonEpisode) => seasonEpisode.id === episode.id,
-                      )
-                    : -1;
-                const previousEpisode =
-                    episodeIndex > 0 ? seasonEpisodes[episodeIndex - 1] : null;
-                const nextEpisode =
-                    episodeIndex >= 0 && episodeIndex < seasonEpisodes.length - 1
-                        ? seasonEpisodes[episodeIndex + 1]
-                        : null;
+        map(([mediaState, episodeState, seasonEpisodesState, stillsState, videosState, allStills]): EpisodeDetailVm => {
+            const media = mediaState.type === 'loaded' ? mediaState.value : null;
+            const episode = loadedValue(episodeState)[0] ?? null;
+            const isLoading = episodeState.type === 'idle' || episodeState.type === 'loading';
+            const director = episode?.crew?.find((crewMember) => crewMember.job === 'Director') ?? null;
+            const writer =
+                episode?.crew?.find((crewMember) => crewMember.job === 'Writer' || crewMember.job === 'Screenplay') ??
+                null;
+            const groupedCrew = groupCrewMembers(episode?.crew ?? []);
+            const guestStars = episode?.guest_stars ?? [];
+            const stillsTotalCount = allStills.length;
+            const youtubeVideoCount = videosState.type === 'loaded' ? videosState.value.length : 0;
+            const seasonEpisodes = seasonEpisodesState.type === 'loaded' ? seasonEpisodesState.value : [];
+            const episodeIndex = episode
+                ? seasonEpisodes.findIndex((seasonEpisode) => seasonEpisode.id === episode.id)
+                : -1;
+            const previousEpisode = episodeIndex > 0 ? seasonEpisodes[episodeIndex - 1] : null;
+            const nextEpisode =
+                episodeIndex >= 0 && episodeIndex < seasonEpisodes.length - 1 ? seasonEpisodes[episodeIndex + 1] : null;
 
-                return {
-                    media,
-                    episode,
-                    canRateEpisode: canRateEpisode(episode),
-                    previousEpisode: isLoading ? null : previousEpisode,
-                    nextEpisode: isLoading ? null : nextEpisode,
-                    headerCrew: {
-                        director,
-                        writer,
-                        hasCrew: !!director || !!writer,
-                    },
-                    groupedCrew,
-                    guestStars,
-                    videosState,
-                    videoCount: youtubeVideoCount,
-                    stillsState,
-                    stillsTotalCount,
-                };
-            },
-        ),
+            const airDate = episode?.air_date;
+
+            return {
+                media,
+                episode,
+                isLoading,
+                canRateEpisode: airDate ? (airDate <= getISODate(0) ? true : false) : false,
+                previousEpisode: isLoading ? null : previousEpisode,
+                nextEpisode: isLoading ? null : nextEpisode,
+                headerCrew: {
+                    director,
+                    writer,
+                    hasCrew: !!director || !!writer,
+                },
+                groupedCrew,
+                guestStars,
+                videosState,
+                videoCount: youtubeVideoCount,
+                stillsState,
+                stillsTotalCount,
+            };
+        }),
     );
 
     getEpisodeDetails$(
@@ -212,16 +162,8 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
             videos: { type: 'loading' },
         });
         return forkJoin([
-            this.tvEpisodeRestControllerService.tvEpisodeDetails(
-                seriesId,
-                seasonNumber,
-                episodeNumber,
-            ),
-            this.tvEpisodeRestControllerService.tvEpisodeImages(
-                seriesId,
-                seasonNumber,
-                episodeNumber,
-            ),
+            this.tvEpisodeRestControllerService.tvEpisodeDetails(seriesId, seasonNumber, episodeNumber),
+            this.tvEpisodeRestControllerService.tvEpisodeImages(seriesId, seasonNumber, episodeNumber),
             this.tvEpisodeRestControllerService
                 .tvEpisodeVideos(seriesId, seasonNumber, episodeNumber)
                 .pipe(catchError(() => of({ results: [] }))),

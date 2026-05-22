@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { EMPTY, catchError, of, switchMap, take, tap } from 'rxjs';
 
 import {
+    IconButtonComponent,
     MediaUserListSummary,
     MediaType,
     TmdbListService,
@@ -26,14 +27,14 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-media-list-actions',
-    imports: [AsyncPipe, MatTooltipModule],
+    imports: [AsyncPipe, MatTooltipModule, IconButtonComponent],
     templateUrl: './media-list-actions.component.html',
     styleUrl: './media-list-actions.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaListActionsComponent {
     @Input({ required: true }) title = '';
-    @Input({ required: true }) mediaType!: Extract<MediaType, 'movie' | 'tv'>;
+    @Input({ required: true }) mediaType!: MediaType;
 
     readonly vm$ = this.mediaDetailActionsStore.listActionsVm$;
 
@@ -56,9 +57,7 @@ export class MediaListActionsComponent {
         action$
             .pipe(
                 take(1),
-                catchError((error) =>
-                    this.showError(error, 'Could not update your watchlist.'),
-                ),
+                catchError((error) => this.showError(error, 'Could not update your watchlist.')),
             )
             .subscribe();
     }
@@ -72,24 +71,17 @@ export class MediaListActionsComponent {
         action$
             .pipe(
                 take(1),
-                catchError((error) =>
-                    this.showError(error, 'Could not update your favorites.'),
-                ),
+                catchError((error) => this.showError(error, 'Could not update your favorites.')),
             )
             .subscribe();
     }
 
     openCustomListsDialog() {
-        if (
-            this.userSessionStore.mode() !== 'user' ||
-            !this.userSessionStore.v4AccessToken()
-        ) {
+        if (this.userSessionStore.mode() !== 'user' || !this.userSessionStore.v4AccessToken()) {
             this.openSigninDialog()
                 .pipe(
                     take(1),
-                    catchError((error) =>
-                        this.showError(error, 'Could not update your list.'),
-                    ),
+                    catchError((error) => this.showError(error, 'Could not update your list.')),
                 )
                 .subscribe();
             return;
@@ -102,20 +94,14 @@ export class MediaListActionsComponent {
                 catchError(() => of([] as MediaUserListSummary[])),
                 switchMap((lists) => this.openListsDialog(lists)),
                 tap(() => this.showSuccess('Media added to your list.')),
-                catchError((error) =>
-                    this.showError(error, 'Could not update your list.'),
-                ),
+                catchError((error) => this.showError(error, 'Could not update your list.')),
             )
             .subscribe();
     }
 
     private openListsDialog(customLists: MediaUserListSummary[]) {
         return this.dialog
-            .open<
-                MediaListDialogComponent,
-                MediaListDialogData,
-                MediaListDialogResult
-            >(MediaListDialogComponent, {
+            .open<MediaListDialogComponent, MediaListDialogData, MediaListDialogResult>(MediaListDialogComponent, {
                 data: { title: this.title, customLists },
                 autoFocus: false,
                 maxWidth: '32rem',
@@ -131,22 +117,17 @@ export class MediaListActionsComponent {
 
     private openSigninDialog() {
         return this.dialog
-            .open<MediaSigninDialogComponent, undefined, boolean>(
-                MediaSigninDialogComponent,
-                {
-                    autoFocus: false,
-                    maxWidth: '32rem',
-                    panelClass: 'media-list-dialog-panel',
-                    width: '100%',
-                },
-            )
+            .open<MediaSigninDialogComponent, undefined, boolean>(MediaSigninDialogComponent, {
+                autoFocus: false,
+                maxWidth: '32rem',
+                panelClass: 'media-list-dialog-panel',
+                width: '100%',
+            })
             .afterClosed()
             .pipe(
                 take(1),
                 switchMap((shouldLogin) =>
-                    shouldLogin
-                        ? this.tmdbUserAuthService.startLogin$(this.router.url)
-                        : EMPTY,
+                    shouldLogin ? this.tmdbUserAuthService.startLogin$(this.router.url) : EMPTY,
                 ),
             );
     }
@@ -157,21 +138,17 @@ export class MediaListActionsComponent {
         }
 
         if (result.kind === 'create-list') {
-            return this.mediaDetailActionsStore.createListAndAdd$(
-                result.name,
-                result.description,
-            );
+            return this.mediaDetailActionsStore.createListAndAdd$(result.name, result.description);
         }
 
         return this.mediaDetailActionsStore.addToList$(result.listId);
     }
 
     private showError(error: unknown, fallback: string) {
-        this.snackBar.open(
-            toUserFacingErrorMessage(error, fallback),
-            'Dismiss',
-            { duration: 5000, panelClass: 'snackbar-error' },
-        );
+        this.snackBar.open(toUserFacingErrorMessage(error, fallback), 'Dismiss', {
+            duration: 5000,
+            panelClass: 'snackbar-error',
+        });
         return EMPTY;
     }
 

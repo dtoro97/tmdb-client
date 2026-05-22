@@ -1,123 +1,150 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-.episodes-page__main {
+.episodes {
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
 }
 
-.episodes-page__featured {
+.highlights {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-4);
-}
 
-.episodes-page__featured-card,
-.episodes-page__featured-card-skeleton {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-xl);
-    background: var(--surface-panel);
-}
+    &__card,
+    &__card--skeleton {
+        display: block;
+        overflow: hidden;
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-xl);
+        background: var(--surface-panel);
+    }
 
-.episodes-page__featured-card {
-    color: inherit;
-    text-decoration: none;
-    @include media-hover();
-}
+    &__card {
+        color: inherit;
+        text-decoration: none;
 
-.episodes-page__featured-media {
-    position: relative;
-}
+        @include media-hover();
+    }
 
-.episodes-page__featured-image,
-.episodes-page__featured-image-skeleton {
-    width: 100%;
-    aspect-ratio: var(--backdrop-ratio);
-}
-.episodes-page__featured-image-skeleton {
-    --skeleton-height: auto;
-    --skeleton-radius: 0;
-}
+    &__media {
+        position: relative;
+    }
 
-.episodes-page__featured-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    padding: var(--space-4);
-    background: var(--gradient-overlay-bottom);
-}
+    &__image,
+    &__image-skeleton {
+        width: 100%;
+        aspect-ratio: var(--backdrop-ratio);
+    }
 
-.episodes-page__featured-badge {
-    position: absolute;
-    top: var(--space-3);
-    left: var(--space-3);
-    z-index: 1;
-}
+    &__image-skeleton {
+        --skeleton-height: auto;
+        --skeleton-radius: 0;
+    }
 
-.episodes-page__featured-title {
-    margin: 0;
-    @include line-clamp(1);
-}
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: var(--space-2);
+        padding: var(--space-4);
+        background: var(--gradient-overlay-bottom);
+    }
 
-.episodes-page__featured-meta {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-}
+    &__badge {
+        position: absolute;
+        top: var(--space-3);
+        left: var(--space-3);
+        z-index: 1;
+    }
 
-.episodes-page__featured-rail {
-    display: flex;
-    align-items: flex-start;
-    padding: var(--space-3) var(--space-4);
-}
-
-.episodes-page__featured-hook {
-    margin: 0;
-    @include line-clamp(2);
-}
-
-.episodes-page__featured-copy-skeleton {
-    width: 100%;
-    height: 2.75rem;
-}
-
-.episodes-page__season-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-3);
-
-    h2,
-    span {
+    &__title {
         margin: 0;
+        @include line-clamp(1);
+    }
+
+    &__meta {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    &__body {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    &__hook {
+        margin: 0;
+        @include line-clamp(2);
+    }
+
+    &__hook--ghost {
+        visibility: hidden;
+    }
+}
+
+.season {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: var(--space-3);
+
+        h2,
+        span {
+            margin: 0;
+        }
+    }
+
+    &__head-skeleton {
+        display: flex;
+    }
+
+    &__pills-skeleton {
+        display: flex;
+    }
+
+    &__line-skeleton {
+        --skeleton-radius: var(--radius-pill);
+
+        &--head {
+            width: 10.5rem;
+            height: 1.4rem;
+        }
+
+        &--pills {
+            width: 24rem;
+            max-width: 100%;
+            height: 2.25rem;
+        }
     }
 }
 
 @include mobile() {
-    .episodes-page__main {
+    .episodes {
         gap: var(--space-4);
     }
 
-    .episodes-page__featured {
+    .highlights {
         grid-template-columns: 1fr;
         gap: var(--space-3);
-    }
 
-    .episodes-page__featured-card,
-    .episodes-page__featured-card-skeleton {
-        border-radius: var(--radius-lg);
-    }
+        &__card,
+        &__card--skeleton {
+            border-radius: var(--radius-lg);
+        }
 
-    .episodes-page__featured-overlay,
-    .episodes-page__featured-rail {
-        padding: var(--space-3);
+        &__overlay,
+        &__body {
+            padding: var(--space-3);
+        }
     }
 }

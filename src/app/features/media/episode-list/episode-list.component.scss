@@ -1,4 +1,4 @@
-@use "breakpoints" as *;
+@use 'breakpoints' as *;
 
 .episode-list {
     display: flex;
@@ -7,8 +7,8 @@
     margin: 0;
     padding: 0;
     list-style: none;
-}
 
-.episode-list__entry {
-    min-width: 0;
+    &__item {
+        min-width: 0;
+    }
 }

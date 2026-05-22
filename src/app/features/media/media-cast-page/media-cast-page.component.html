@@ -1,0 +1,98 @@
+<div class="page-container">
+    @if (vm$ | async; as vm) {
+        <app-sub-page-header
+            [backdropPath]="vm.media?.backdropPath"
+            [parentTitle]="vm.media?.title"
+            [backLink]="['../']"
+            pageTitle="Cast"
+            [loading]="!vm.media"
+        />
+
+        @if (vm.media; as media) {
+            <section class="summary">
+                <app-image
+                    class="summary__poster aspect-poster"
+                    [src]="media.posterPath"
+                    [alt]="media.title"
+                    params="w185"
+                />
+
+                <div class="summary__body">
+                    <h2 class="text-headline summary__title">{{ media.title }}</h2>
+
+                    <div class="summary__meta text-meta">
+                        @if (media.year) {
+                            <span>{{ media.year }}</span>
+                        }
+                        @if (media.mediaType === "movie" && media.runtime) {
+                            <span>{{ media.runtime | m2h }}</span>
+                        }
+                        @if (media.mediaType === "tv" && media.numberOfSeasons) {
+                            <span>
+                                {{ media.numberOfSeasons }}
+                                {{ media.numberOfSeasons === 1 ? "Season" : "Seasons" }}
+                            </span>
+                        }
+                        @if (media.voteAverage) {
+                            <app-rating [value]="media.voteAverage" />
+                        }
+                    </div>
+
+                    <div class="summary__genres">
+                        @for (genre of media.genres; track genre.id) {
+                            <mat-chip class="chip--accent">{{ genre.name }}</mat-chip>
+                        }
+                    </div>
+                </div>
+            </section>
+        } @else {
+            <section class="summary" aria-hidden="true">
+                <app-skeleton class="summary__poster-skeleton aspect-poster" />
+                <div class="summary__body">
+                    <app-skeleton class="summary__title-skeleton" />
+                    <app-skeleton class="summary__meta-skeleton" />
+                    <div class="summary__genres">
+                        <app-skeleton class="summary__genre-skeleton" />
+                        <app-skeleton class="summary__genre-skeleton" />
+                        <app-skeleton class="summary__genre-skeleton" />
+                    </div>
+                </div>
+            </section>
+        }
+
+        <main class="page-main cast-page">
+            @if (vm.isEmpty) {
+                <app-empty-state
+                    class="empty"
+                    iconClass="fa-solid fa-sliders"
+                    iconStyle="plain"
+                    text="No cast or crew information is available for this title."
+                />
+            } @else {
+                <section class="panel surface-panel">
+                    @if (vm.isLoading) {
+                        <app-skeleton class="panel__toolbar-skeleton" />
+                    } @else {
+                        <app-browse-toolbar class="panel__toolbar">
+                            <app-pill-toggle
+                                start
+                                [options]="vm.filters"
+                                [selectedValue]="visibleSection"
+                                variant="subtle"
+                                (selected)="onVisibleSectionsChange($event)"
+                            />
+                        </app-browse-toolbar>
+                    }
+
+                    <app-cast-crew-grid
+                        [cast]="vm.cast"
+                        [groupedCrew]="vm.groupedCrew"
+                        [showCast]="visibleSection !== 'crew'"
+                        [showCrew]="visibleSection !== 'cast'"
+                        [loading]="vm.isLoading"
+                    />
+                </section>
+            }
+        </main>
+    }
+</div>

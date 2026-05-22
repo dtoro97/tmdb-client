@@ -26,12 +26,16 @@
                 <h1 class="sub-page-header__title text-headline">
                     {{ pageTitle }}
                 </h1>
+            } @else if (loading) {
+                <app-skeleton class="sub-page-header__title-skeleton" />
             }
 
             @if (subtitle) {
                 <p class="sub-page-header__subtitle text-body-sm">
                     {{ subtitle }}
                 </p>
+            } @else if (loading) {
+                <app-skeleton class="sub-page-header__subtitle-skeleton" />
             }
         </div>
     </header>

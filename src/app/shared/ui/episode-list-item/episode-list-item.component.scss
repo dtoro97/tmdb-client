@@ -1,5 +1,10 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
+
+:host {
+    display: block;
+    width: 100%;
+}
 
 .episode-list-item {
     display: flex;
@@ -19,6 +24,7 @@
 
 .episode-list-item--loading {
     cursor: default;
+    padding: 0;
 }
 
 .episode-list-item__still {
@@ -27,12 +33,6 @@
     aspect-ratio: var(--backdrop-ratio);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-}
-
-.episode-list-item__still-skeleton {
-    --skeleton-height: auto;
-    align-self: stretch;
-    aspect-ratio: var(--backdrop-ratio);
 }
 
 .episode-list-item__content {
@@ -88,34 +88,26 @@
     display: flex;
 }
 
-.episode-list-item__label-skeleton {
-    width: min(7rem, 50%);
-    height: 0.75rem;
-}
-
-.episode-list-item__title-skeleton {
-    width: min(18rem, 70%);
-    height: 1.1rem;
-}
-
-.episode-list-item__meta-skeleton {
-    width: min(12rem, 40%);
-    height: 0.9rem;
-}
-
-.episode-list-item__overview-skeleton {
+.episode-list-item__row-skeleton {
     width: 100%;
-    height: 2rem;
+    min-height: 9.5rem;
+    --skeleton-height: 9.5rem;
+    --skeleton-radius: calc(var(--radius-md) - 1px);
 }
 
 @include mobile() {
     .episode-list-item {
         display: grid;
         grid-template-columns: 112px minmax(0, 1fr) auto;
-        grid-template-areas: "still content trailing";
+        grid-template-areas: 'still content trailing';
         align-items: start;
         gap: var(--space-3);
         padding: var(--space-2);
+
+        &--loading {
+            display: flex;
+            padding: 0;
+        }
     }
 
     .episode-list-item__still {

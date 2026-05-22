@@ -21,6 +21,23 @@
     border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow: var(--shadow-xl);
+
+    &--skeleton {
+        --skeleton-height: auto;
+        --skeleton-radius: var(--radius-xl);
+    }
+}
+
+.hero {
+    &__eyebrow-skeleton {
+        width: min(10rem, 40%);
+        height: 0.875rem;
+    }
+
+    &__title-skeleton {
+        width: min(24rem, 100%);
+        height: 3.5rem;
+    }
 }
 
 .biography {
@@ -36,6 +53,19 @@
         @include text-link();
         cursor: pointer;
     }
+
+    &__line-skeleton {
+        width: min(54rem, 100%);
+        height: 1rem;
+
+        &--wide {
+            width: min(58rem, 100%);
+        }
+
+        &--short {
+            width: min(34rem, 72%);
+        }
+    }
 }
 
 .footer {
@@ -44,6 +74,17 @@
     flex-wrap: wrap;
     gap: var(--space-3);
     padding-top: var(--space-2);
+
+    &__label-skeleton {
+        width: 4rem;
+        height: 0.875rem;
+    }
+
+    &__icon-skeleton {
+        width: 2.25rem;
+        height: 2.25rem;
+        --skeleton-radius: var(--radius-full);
+    }
 }
 
 .browse-link {
@@ -71,6 +112,10 @@
         gap: var(--space-4);
         padding-top: var(--space-1);
         padding-bottom: var(--space-8);
+
+        &__title-skeleton {
+            height: 2.75rem;
+        }
     }
 
     .facts {
