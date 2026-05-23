@@ -13,93 +13,60 @@
     border: 1px solid var(--mat-sys-outline-variant);
     border-radius: var(--radius-md);
     background: var(--mat-sys-surface-container-lowest);
-    color: inherit;
     min-width: 0;
-}
 
-.episode-list-item--navigable {
-    cursor: pointer;
-    @include surface-hover();
-}
+    &--navigable {
+        cursor: pointer;
+        @include surface-hover();
+    }
 
-.episode-list-item--loading {
-    cursor: default;
-    padding: 0;
-}
+    &--loading {
+        cursor: default;
+        padding: 0;
+    }
 
-.episode-list-item__still {
-    flex-shrink: 0;
-    width: 200px;
-    aspect-ratio: var(--backdrop-ratio);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-}
+    &__still {
+        flex-shrink: 0;
+        width: 200px;
+        aspect-ratio: var(--backdrop-ratio);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+    }
 
-.episode-list-item__content {
-    min-width: 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        min-width: 0;
+    }
 
-.episode-list-item__label {
-    color: var(--color-brand);
-    font-weight: var(--weight-semibold);
-    text-transform: uppercase;
-}
+    &__meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+    }
 
-.episode-list-item__subtitle {
-    color: var(--text-muted);
-    text-transform: none;
-    letter-spacing: normal;
-    font-weight: var(--weight-regular);
-}
+    &__overview {
+        @include line-clamp(2);
+    }
 
-.episode-list-item__title {
-    margin: 0;
-    font-size: var(--text-md);
-    color: var(--text-primary);
-    font-weight: var(--weight-bold);
-    line-height: var(--lh-normal);
-}
+    &__end {
+        align-self: center;
+        flex-shrink: 0;
+    }
 
-.episode-list-item__meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-}
-
-.episode-list-item__overview {
-    margin: var(--space-1) 0 0;
-    font-size: var(--text-sm);
-    font-weight: var(--weight-regular);
-    line-height: var(--lh-relaxed);
-    color: var(--text-secondary);
-    @include line-clamp(2);
-}
-
-.episode-list-item__actions {
-    align-self: center;
-    flex-shrink: 0;
-    display: flex;
-}
-
-.episode-list-item__row-skeleton {
-    width: 100%;
-    min-height: 9.5rem;
-    --skeleton-height: 9.5rem;
-    --skeleton-radius: calc(var(--radius-md) - 1px);
+    &__row-skeleton {
+        width: 100%;
+        min-height: 9.5rem;
+        --skeleton-height: 9.5rem;
+        --skeleton-radius: calc(var(--radius-md) - 1px);
+    }
 }
 
 @include mobile() {
     .episode-list-item {
-        display: grid;
-        grid-template-columns: 112px minmax(0, 1fr) auto;
-        grid-template-areas: 'still content trailing';
+        flex-direction: column;
         align-items: start;
         gap: var(--space-3);
         padding: var(--space-2);
@@ -108,41 +75,17 @@
             display: flex;
             padding: 0;
         }
-    }
 
-    .episode-list-item__still {
-        grid-area: still;
-        width: 112px;
-    }
+        &__content {
+            gap: var(--space-1);
+        }
 
-    .episode-list-item__content {
-        grid-area: content;
-        gap: var(--space-1);
-    }
+        &__end {
+            align-self: flex-start;
+        }
 
-    .episode-list-item__actions {
-        grid-area: trailing;
-        justify-self: end;
-        align-self: start;
-    }
-
-    .episode-list-item__label {
-        font-size: var(--text-xs);
-        letter-spacing: 0.08em;
-    }
-
-    .episode-list-item__title {
-        font-size: var(--text-sm);
-        line-height: var(--lh-normal);
-    }
-
-    .episode-list-item__meta {
-        gap: var(--space-1) var(--space-2);
-        line-height: var(--lh-normal);
-    }
-
-    .episode-list-item__overview {
-        line-height: var(--lh-normal);
-        @include line-clamp(2);
+        &__meta {
+            gap: var(--space-1) var(--space-2);
+        }
     }
 }

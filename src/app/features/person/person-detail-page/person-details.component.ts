@@ -15,13 +15,12 @@ import {
     ImageComponent,
     PageSectionComponent,
     PhotoViewerComponent,
-    PhotosGridComponent,
+    PhotosPreviewComponent,
     ExternalLinksComponent,
     MediaCarouselPanelComponent,
     RecentlyViewedStoreService,
     SkeletonComponent,
 } from '../../../shared';
-import { MAX_VISIBLE_PHOTOS } from '../../../constants';
 import {
     PersonDetailStoreService,
     PersonCreditsMediaType,
@@ -40,7 +39,7 @@ import { PersonCreditsComponent } from '../person-credits/person-credits.compone
         MatDialogModule,
         HeroSurfaceComponent,
         ImageComponent,
-        PhotosGridComponent,
+        PhotosPreviewComponent,
         ExternalLinksComponent,
         AgePipe,
         PageSectionComponent,
@@ -53,7 +52,6 @@ import { PersonCreditsComponent } from '../person-credits/person-credits.compone
     styleUrl: './person-details.component.scss',
 })
 export class PersonDetailsComponent {
-    private readonly maxVisiblePhotos = MAX_VISIBLE_PHOTOS;
     readonly aliasPreviewCount = 3;
     readonly bioPreviewThreshold = 300;
     bioExpanded = false;
@@ -102,13 +100,6 @@ export class PersonDetailsComponent {
 
             const person = vm.person.value;
             const allPhotos = vm.photos.value;
-            const totalCount = allPhotos.length;
-            const visibleCount = Math.min(totalCount, this.maxVisiblePhotos);
-            const isShowMoreTile = index === visibleCount - 1 && totalCount > this.maxVisiblePhotos;
-            if (isShowMoreTile) {
-                this.router.navigate(['/name', person.id, 'photos']);
-                return;
-            }
 
             this.dialog.open(PhotoViewerComponent, {
                 data: {
@@ -123,6 +114,16 @@ export class PersonDetailsComponent {
                 height: '100vh',
                 autoFocus: false,
             });
+        });
+    }
+
+    openPhotosPage(): void {
+        this.personDetailStore.personDetailVm$.pipe(take(1)).subscribe((vm) => {
+            if (vm.person.type !== 'loaded' || !vm.person.value) {
+                return;
+            }
+
+            this.router.navigate(['/name', vm.person.value.id, 'photos']);
         });
     }
 

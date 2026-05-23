@@ -13,18 +13,18 @@
         />
     </div>
 
-    <div class="backdrop-card__content">
+    <div class="backdrop-card__content u-flex-column u-gap-1">
         <span class="backdrop-card__title text-subtitle">{{ item.title }}</span>
 
-        <div class="backdrop-card__meta text-caption">
+        <div class="backdrop-card__meta text-caption u-flex u-items-center u-gap-2">
             @if (showRating && item.rating) {
                 <app-rating [value]="item.rating"></app-rating>
             }
             @if ((showDate || dateFormat) && item.date) {
                 @if (showRating && item.rating) {
-                    <span class="backdrop-card__meta-muted">&middot;</span>
+                    <span class="backdrop-card__meta-separator" aria-hidden="true">&middot;</span>
                 }
-                <span class="backdrop-card__meta-muted">{{
+                <span class="backdrop-card__meta-date">{{
                     item.date
                         | date: (dateFormat === "dayMonth" ? "MMM d" : "yyyy")
                 }}</span>

@@ -26,11 +26,11 @@
                         }
                     </div>
                 </section>
-            } @else if (vm.videos.length) {
+            } @else if (vm.videoItems.length) {
                 <section class="videos">
                     <app-browse-toolbar class="videos__toolbar">
                         <span start class="text-caption">
-                            1 - {{ vm.videos.length }} of {{ vm.videos.length }}
+                            1 - {{ vm.videoItems.length }} of {{ vm.videoItems.length }}
                         </span>
                         <app-sort-button
                             end
@@ -43,16 +43,8 @@
                     </app-browse-toolbar>
 
                     <div class="videos__grid">
-                        @for (video of vm.videos; track video.id) {
-                            <app-youtube-video-card
-                                [video]="video"
-                                [mediaTitle]="vm.media?.title"
-                                [mediaYear]="vm.media?.year"
-                                [mediaId]="vm.media?.id"
-                                [mediaType]="vm.media?.mediaType"
-                                destination="detail"
-                                metaVariant="detailed"
-                            />
+                        @for (item of vm.videoItems; track item.id) {
+                            <app-video-card [item]="item" />
                         }
                     </div>
                 </section>

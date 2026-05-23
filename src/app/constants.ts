@@ -6,7 +6,7 @@ export const MEDIUM_LIST_COUNT = 10;
 
 export const PHOTOS_GRID_FIRST_ROW = 3;
 export const GRID_COUNT = 4;
-export const MAX_VISIBLE_PHOTOS = 7;
+export const MAX_VISIBLE_PHOTOS = 9;
 export const PHOTOS_BROWSER_BATCH = 18;
 
 export const VIDEOS_GRID_FEATURED_COUNT = 2;

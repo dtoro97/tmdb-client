@@ -1,15 +1,11 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    EventEmitter,
-    Input,
-    OnChanges,
-    Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 
-interface PillToggleOption {
+export interface PillToggleOption {
     label: string;
     value: unknown;
+}
+
+interface PillToggleViewOption extends PillToggleOption {
     selected: boolean;
 }
 
@@ -22,14 +18,14 @@ export type PillToggleVariant = 'default' | 'subtle';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PillToggleComponent implements OnChanges {
-    @Input() options: { label: string; value: unknown }[] = [];
+    @Input() options: PillToggleOption[] = [];
     @Input() selectedValue: unknown;
     @Input() selectedValues: unknown[] = [];
     @Input() multiple = false;
     @Input() variant: PillToggleVariant = 'default';
     @Output() selected = new EventEmitter<unknown | unknown[]>();
 
-    viewOptions: PillToggleOption[] = [];
+    viewOptions: PillToggleViewOption[] = [];
 
     ngOnChanges(): void {
         this.viewOptions = this.options.map((option) => ({

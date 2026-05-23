@@ -11,8 +11,11 @@ import {
     SkeletonComponent,
     SortButtonComponent,
     SubPageHeaderComponent,
-    YoutubeVideoCardComponent,
+    VideoCardComponent,
+    VideoCardItem,
+    MediaDetails,
     SortDirection,
+    buildYoutubeThumbnailUrl,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
@@ -31,7 +34,7 @@ type SortField = 'published_at' | 'type' | 'name';
         SkeletonComponent,
         SortButtonComponent,
         SubPageHeaderComponent,
-        YoutubeVideoCardComponent,
+        VideoCardComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './videos-page.component.html',
@@ -74,15 +77,26 @@ export class VideosPageComponent {
         sortField: this.sortField$,
         sortDirection: this.sortDirection$,
     }).pipe(
-        map(({ mediaState, videosState, videos, sortField, sortDirection }) => ({
-            media: mediaState.type === 'loaded' ? mediaState.value : null,
-            videosState,
-            videos,
-            sortField,
-            sortDirection,
-            isLoading:
-                videosState.type === 'loading' || videosState.type === 'idle',
-        })),
+        map(({ mediaState, videosState, videos, sortField, sortDirection }) => {
+            const media = mediaState.type === 'loaded' ? mediaState.value : null;
+            const videoItems = media
+                ? videos.flatMap((video) => {
+                      const item = this.toVideoCardItem(video, media);
+                      return item ? [item] : [];
+                  })
+                : [];
+
+            return {
+                media,
+                videosState,
+                videoItems,
+                sortField,
+                sortDirection,
+                isLoading:
+                    videosState.type === 'loading' ||
+                    videosState.type === 'idle',
+            };
+        }),
     );
 
     constructor(
@@ -106,5 +120,33 @@ export class VideosPageComponent {
         this.sortDirectionSubject.next(
             this.sortDirectionSubject.value === 'asc' ? 'desc' : 'asc',
         );
+    }
+
+    private toVideoCardItem(
+        video: Video,
+        media: MediaDetails,
+    ): VideoCardItem | null {
+        if (!video.id || !video.key) {
+            return null;
+        }
+
+        const title = video.name ?? media.title;
+
+        return {
+            id: video.id,
+            title,
+            thumbnailUrl: buildYoutubeThumbnailUrl(video.key),
+            alt: title,
+            openLabel: `Open video: ${title}`,
+            typeLabel: video.type,
+            publishedAt: video.published_at,
+            routerLink: [
+                '/title',
+                media.id,
+                media.mediaType,
+                'videos',
+                video.id,
+            ],
+        };
     }
 }

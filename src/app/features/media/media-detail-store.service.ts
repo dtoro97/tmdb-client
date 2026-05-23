@@ -358,7 +358,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                 });
 
                 return this.mediaApiService.getDetails$(id, mediaType).pipe(
-                    delay(2000),
+                    delay(1000),
                     tap((media) => {
                         const externalIds = (
                             media as (Movie | TvSeries) & {

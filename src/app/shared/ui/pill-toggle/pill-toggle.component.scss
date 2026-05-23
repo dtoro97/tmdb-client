@@ -1,5 +1,5 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'mixins' as *;
+
 .pill-toggle {
     display: flex;
     flex-wrap: wrap;
@@ -8,14 +8,14 @@
 
 .pill-toggle__button {
     min-height: var(--control-height-sm);
+    border: 1px solid var(--control-border);
+    border-radius: var(--control-radius);
     background: var(--control-surface);
     color: var(--control-text);
-    border: 1px solid var(--control-border);
     padding: var(--space-1) var(--space-4);
-    border-radius: var(--control-radius);
     cursor: pointer;
-    transition: var(--control-transition);
     box-shadow: none;
+    transition: var(--control-transition);
     @include surface-hover();
 }
 
@@ -23,7 +23,6 @@
     background: var(--control-accent-surface);
     color: var(--control-accent-text);
     border-color: var(--control-accent-border);
-    font-weight: var(--weight-semibold);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -53,12 +52,5 @@
         background: var(--control-subtle-surface-active);
         color: var(--control-subtle-text-active);
         border-color: var(--color-border-subtle);
-    }
-}
-
-@include mobile() {
-    .pill-toggle__button {
-        min-height: var(--control-height-lg);
-        font-size: var(--text-sm);
     }
 }

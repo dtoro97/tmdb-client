@@ -1,98 +1,74 @@
 <section
-    class="rating-distribution"
-    [class.rating-distribution--single-panel]="!hasSummary"
-    [attr.aria-label]="ariaLabel"
+    class="rating-distribution__panel"
+    [attr.aria-label]="summaryLabel"
 >
-    @if (hasSummary) {
-        <section
-            class="rating-distribution__section rating-distribution__section--summary"
-            [attr.aria-label]="summaryLabel || 'Rating summary'"
+    <div class="rating-distribution__header text-overline">
+        {{ summaryLabel }}
+    </div>
+
+    <div class="rating-distribution__summary">
+        <i
+            class="rating-distribution__score-icon fa-solid fa-star"
+            aria-hidden="true"
+        ></i>
+
+        <div class="rating-distribution__score-copy">
+            <span class="rating-distribution__value text-display">
+                @if (summaryValue !== null) {
+                    {{ summaryValue | number: "1.1-1" }}
+                    <span class="rating-distribution__scale text-caption">
+                        /10
+                    </span>
+                } @else {
+                    -
+                }
+            </span>
+
+            @if (summaryMeta; as meta) {
+                <span class="text-meta">
+                    {{ meta }}
+                </span>
+            }
+        </div>
+    </div>
+</section>
+
+<section
+    class="rating-distribution__panel rating-distribution__panel--bars"
+    [attr.aria-label]="distributionLabel"
+>
+    <div class="rating-distribution__header text-overline">
+        <span>{{ distributionLabel }}</span>
+        <span>{{ resolvedDistributionMeta }}</span>
+    </div>
+
+    @if (hasRatings) {
+        <div
+            class="rating-distribution__bars"
+            [attr.aria-label]="distributionAriaLabel"
         >
-            @if (summaryLabel) {
-                <div class="rating-distribution__section-header text-overline">
-                    {{ summaryLabel }}
+            @for (bucket of buckets; track bucket.label) {
+                <div class="rating-distribution__bar-group">
+                    <div
+                        class="rating-distribution__bar"
+                        [style.height.%]="bucket.height"
+                        [attr.aria-label]="
+                            bucket.label + ' rated: ' + bucket.count
+                        "
+                        [attr.title]="
+                            bucket.label + ' rated: ' + bucket.count
+                        "
+                    ></div>
+
+                    <span class="rating-distribution__bar-label text-overline">
+                        {{ bucket.label }}
+                    </span>
                 </div>
             }
-
-            <div class="rating-distribution__section-body">
-                <div class="rating-distribution__summary">
-                    <i
-                        class="rating-distribution__score-icon fa-solid fa-star"
-                        aria-hidden="true"
-                    ></i>
-
-                    <div class="rating-distribution__score-copy">
-                        <span class="rating-distribution__value text-display">
-                            @if (summaryValue !== null) {
-                                {{ summaryValue | number: "1.1-1" }}
-                                @if (summaryValueSuffix) {
-                                    <span
-                                        class="rating-distribution__value-suffix text-caption"
-                                    >
-                                        {{ summaryValueSuffix }}
-                                    </span>
-                                }
-                            } @else {
-                                -
-                            }
-                        </span>
-
-                        @if (summaryMeta; as meta) {
-                            <span class="text-meta">
-                                {{ meta }}
-                            </span>
-                        } @else if (summaryEmptyText; as emptyText) {
-                            <span class="rating-distribution__meta text-meta">
-                                {{ emptyText }}
-                            </span>
-                        }
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
+    } @else {
+        <p class="rating-distribution__empty text-caption">
+            {{ distributionEmptyText }}
+        </p>
     }
-
-    <section
-        class="rating-distribution__section rating-distribution__section--distribution"
-        [attr.aria-label]="distributionLabel"
-    >
-        <div class="rating-distribution__section-header text-overline">
-            <span>{{ distributionLabel }}</span>
-            <span>{{ resolvedDistributionMeta }}</span>
-        </div>
-
-        <div class="rating-distribution__section-body">
-            @if (hasRatings) {
-                <div
-                    class="rating-distribution__bars"
-                    [attr.aria-label]="distributionAriaLabel"
-                >
-                    @for (bucket of buckets; track bucket.label) {
-                        <div class="rating-distribution__bar-group">
-                            <div
-                                class="rating-distribution__bar"
-                                [style.height.%]="bucket.height"
-                                [attr.aria-label]="
-                                    bucket.label + ' rated: ' + bucket.count
-                                "
-                                [attr.title]="
-                                    bucket.label + ' rated: ' + bucket.count
-                                "
-                            ></div>
-
-                            <span
-                                class="rating-distribution__bar-label text-overline"
-                            >
-                                {{ bucket.label }}
-                            </span>
-                        </div>
-                    }
-                </div>
-            } @else {
-                <p class="rating-distribution__empty text-caption">
-                    {{ distributionEmptyText }}
-                </p>
-            }
-        </div>
-    </section>
 </section>

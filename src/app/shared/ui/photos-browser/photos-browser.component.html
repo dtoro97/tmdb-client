@@ -1,104 +1,69 @@
 <div class="photos-browser">
-    @if (hasImages$ | async) {
-        <app-browse-toolbar>
-            <div start class="photos-browser__toolbar-start">
-                <span class="photos-browser__count text-meta">{{
-                    visibleCountLabel$ | async
-                }}</span>
-                @if (typePillOptions$ | async; as typePillOptions) {
-                    @if (typePillOptions.length) {
-                        <div class="photos-browser__filters">
-                            <app-pill-toggle
-                                [options]="typePillOptions"
-                                [multiple]="true"
-                                [selectedValues]="
-                                    (selectedTypes$ | async) ?? []
-                                "
-                                (selected)="setSelectedTypes($event)"
-                            />
-                        </div>
+    @if (vm$ | async; as vm) {
+        @if (vm.hasImages) {
+            <app-browse-toolbar>
+                <div start class="photos-browser__toolbar-start">
+                    <span class="text-meta u-nowrap">{{ vm.visibleCountLabel }}</span>
+                    @if (vm.typePillOptions.length) {
+                        <app-pill-toggle
+                            class="photos-browser__filters"
+                            [options]="vm.typePillOptions"
+                            [multiple]="true"
+                            [selectedValues]="vm.selectedTypes"
+                            (selected)="setSelectedTypes($event)"
+                        />
                     }
-                }
-                @if (languageOptions$ | async; as languageOptions) {
-                    @if (languageOptions.length > 1) {
+                    @if (vm.languageOptions.length > 1) {
                         <mat-select
                             class="photos-browser__language-select text-caption"
                             aria-label="Filter by language"
                             placeholder="Languages"
                             multiple
-                            [value]="(selectedLanguages$ | async) ?? []"
+                            [value]="vm.selectedLanguages"
                             (selectionChange)="setSelectedLanguages($event.value)"
                         >
-                            @if (hasSelectedLanguages$ | async) {
+                            @if (vm.hasSelectedLanguages) {
                                 <mat-select-trigger>
                                     <span class="photos-browser__language-trigger">
-                                        {{ selectedLanguageLabel$ | async }}
+                                        {{ vm.selectedLanguageLabel }}
                                     </span>
                                 </mat-select-trigger>
                             }
-                            @for (option of languageOptions; track option.value) {
+                            @for (option of vm.languageOptions; track option.value) {
                                 <mat-option [value]="option.value">
                                     {{ option.label }}
                                 </mat-option>
                             }
                         </mat-select>
                     }
-                }
-            </div>
-            <app-sort-button
-                end
-                class="photos-browser__sort"
-                [options]="sortOptions"
-                [selectedValue]="sortField$ | async"
-                [direction]="(sortDirection$ | async) ?? 'desc'"
-                (sortChange)="setSortField($event)"
-                (directionToggle)="toggleSortDirection()"
-            />
-        </app-browse-toolbar>
-    }
+                </div>
+                <app-sort-button
+                    end
+                    [options]="sortOptions"
+                    [selectedValue]="vm.sortField"
+                    [direction]="vm.sortDirection"
+                    (sortChange)="setSortField($event)"
+                    (directionToggle)="toggleSortDirection()"
+                />
+            </app-browse-toolbar>
+        }
 
-    @if (visibleBrowserVm$ | async; as vm) {
         @if (vm.cards.length) {
             <div class="photos-browser__grid">
-                @for (
-                    card of vm.cards;
-                    track card.image.file_path;
-                    let i = $index
-                ) {
+                @for (card of vm.cards; track card.image.file_path; let i = $index) {
                     <button
                         type="button"
                         class="photos-browser__card"
-                        [style.--aspect-ratio]="card.image.aspect_ratio ?? 1.5"
+                        [style.--photo-aspect-ratio]="card.layoutAspectRatio"
                         (click)="onImageClick(i, vm.images)"
                     >
-                        <img
+                        <app-image
                             class="photos-browser__image"
-                            [src]="
-                                card.image.file_path ?? ''
-                                    | imgSrc: card.thumbnailSize
-                            "
+                            [src]="card.image.file_path"
+                            [params]="card.thumbnailSize"
+                            type="media"
                             alt=""
                         />
-                        <div class="photos-browser__overlay">
-                            @if (card.image.width && card.image.height) {
-                                <span
-                                    class="photos-browser__dimensions text-caption"
-                                >
-                                    {{ card.image.width }}&times;{{
-                                        card.image.height
-                                    }}
-                                </span>
-                            }
-                            @if (
-                                card.image.vote_average &&
-                                card.image.vote_average > 0
-                            ) {
-                                <app-rating
-                                    class="photos-browser__rating"
-                                    [value]="card.image.vote_average"
-                                />
-                            }
-                        </div>
                     </button>
                 }
                 <span class="photos-browser__spacer" aria-hidden="true"></span>
@@ -106,23 +71,14 @@
                 <span class="photos-browser__spacer" aria-hidden="true"></span>
             </div>
 
-            @if (hasMore$ | async) {
-                <div class="photos-browser__actions">
-                    <button
-                        mat-stroked-button
-                        type="button"
-                        (click)="showMore()"
-                    >
-                        Show more photos
-                    </button>
+            @if (vm.hasMore) {
+                <div class="u-flex u-justify-center">
+                    <button mat-stroked-button type="button" (click)="showMore()">Show more photos</button>
                 </div>
             }
         } @else {
             <div class="empty-panel">
-                <app-empty-state
-                    iconClass="fa-regular fa-images"
-                    text="No photos added yet."
-                />
+                <app-empty-state iconClass="fa-regular fa-images" text="No photos added yet." />
             </div>
         }
     }

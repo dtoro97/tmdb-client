@@ -14,12 +14,14 @@ import {
     ExternalLinks,
     LoadableItems,
     LoadableValue,
+    LocaleStoreService,
     MediaType,
     SortDirection,
     ViewerImage,
     buildExternalLinks,
+    shuffle,
 } from '../../shared';
-import { API_JSON_OPTIONS, CAROUSEL_COUNT } from '../../constants';
+import { API_JSON_OPTIONS, CAROUSEL_COUNT, MAX_VISIBLE_PHOTOS } from '../../constants';
 
 export type CreditItemKind = 'cast' | 'production' | 'mixed';
 
@@ -125,6 +127,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
 
     constructor(
         private personRestControllerService: PersonRestControllerService,
+        private localStore: LocaleStoreService,
         private router: Router,
     ) {
         super(INITIAL_STATE);
@@ -151,7 +154,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         return this.personRestControllerService
             .personDetails(id, 'external_ids,images,tagged_images', undefined, undefined, undefined, API_JSON_OPTIONS)
             .pipe(
-                delay(3000),
+                delay(1000),
                 map((person) => person as PersonWithExternalIds),
                 tap((person) => {
                     this.patchState({
@@ -191,33 +194,33 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
     private patchPhotosFromPerson(person: PersonWithExternalIds): void {
         const tagged = person.tagged_images?.results ?? [];
         const profiles = person.images?.profiles ?? [];
-
+        const images = [
+            ...profiles.map(
+                (img): ViewerImage => ({
+                    ...img,
+                    photoType: 'profile',
+                }),
+            ),
+            ...tagged.map(
+                (img): ViewerImage => ({
+                    file_path: img.file_path,
+                    aspect_ratio: img.aspect_ratio,
+                    height: img.height,
+                    width: img.width,
+                    vote_average: img.vote_average,
+                    vote_count: img.vote_count,
+                    iso_639_1: img.iso_639_1,
+                    caption:
+                        (img.media as { title?: string; name?: string })?.title ??
+                        (img.media as { name?: string })?.name,
+                    photoType: 'tagged',
+                }),
+            ),
+        ];
         this.patchState({
             photos: {
                 type: 'loaded',
-                value: [
-                    ...tagged.map(
-                        (img): ViewerImage => ({
-                            file_path: img.file_path,
-                            aspect_ratio: img.aspect_ratio,
-                            height: img.height,
-                            width: img.width,
-                            vote_average: img.vote_average,
-                            vote_count: img.vote_count,
-                            iso_639_1: img.iso_639_1,
-                            caption:
-                                (img.media as { title?: string; name?: string })?.title ??
-                                (img.media as { name?: string })?.name,
-                            photoType: 'tagged',
-                        }),
-                    ),
-                    ...profiles.map(
-                        (img): ViewerImage => ({
-                            ...img,
-                            photoType: 'profile',
-                        }),
-                    ),
-                ],
+                value: shuffle(images),
             },
         });
     }
@@ -391,7 +394,6 @@ const buildPersonExternalLinks = (person: LoadableValue<PersonWithExternalIds | 
 
     return buildExternalLinks(person.value.external_ids ?? null, person.value.homepage ?? null, 'name');
 };
-
 const mergeCreditsForAllSection = (items: CreditItem[]): CreditItem[] => {
     const byKey = new Map<string, CreditItem>();
 

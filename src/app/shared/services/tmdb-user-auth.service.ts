@@ -1,28 +1,15 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 
-import {
-    Observable,
-    catchError,
-    finalize,
-    map,
-    of,
-    switchMap,
-    tap,
-    throwError,
-} from 'rxjs';
+import { Observable, catchError, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
 
-import {
-    AuthenticationRestControllerService,
-    SessionResponse,
-} from '../../api';
+import { AccountAddFavoriteRequest, AuthenticationRestControllerService, SessionResponse } from '../../api';
 import {
     AuthenticationService as AuthenticationV4Service,
     V4AccessTokenResponse,
     V4RequestTokenResponse,
 } from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
-import { buildRawBody } from '../utils/api-body';
 import { BrowserStorageService } from './browser-storage.service';
 import { TmdbUserAccountService } from './tmdb-user-account.service';
 import { UserSessionStoreService } from './user-session-store.service';
@@ -47,40 +34,25 @@ export class TmdbUserAuthService {
             return of(undefined);
         }
 
-        return this.authenticationService
-            .authenticationCreateGuestSession('body', false, API_JSON_OPTIONS)
-            .pipe(
-                tap((response) => {
-                    const guestSessionId = response.guest_session_id?.trim();
+        return this.authenticationService.authenticationCreateGuestSession('body', false, API_JSON_OPTIONS).pipe(
+            tap((response) => {
+                const guestSessionId = response.guest_session_id?.trim();
 
-                    if (!guestSessionId) {
-                        throw new Error(
-                            'TMDb did not return a guest session id.',
-                        );
-                    }
+                if (!guestSessionId) {
+                    throw new Error('TMDb did not return a guest session id.');
+                }
 
-                    this.userSessionStore.setGuestSession(
-                        guestSessionId,
-                        response.expires_at ?? null,
-                    );
-                }),
-                map(() => undefined),
-            );
+                this.userSessionStore.setGuestSession(guestSessionId, response.expires_at ?? null);
+            }),
+            map(() => undefined),
+        );
     }
 
     startLogin$(returnUrl: string): Observable<void> {
-        const redirectTo = new URL(
-            `.${returnUrl}`,
-            this.document.baseURI,
-        ).toString();
+        const redirectTo = new URL(`.${returnUrl}`, this.document.baseURI).toString();
 
         return this.authenticationV4Service
-            .authenticationV4CreateRequestToken(
-                { redirect_to: redirectTo },
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            )
+            .authenticationV4CreateRequestToken({ redirect_to: redirectTo }, 'body', false, API_JSON_OPTIONS)
             .pipe(
                 tap((response) => {
                     const requestToken = this.ensureV4RequestToken(response);
@@ -91,32 +63,17 @@ export class TmdbUserAuthService {
             );
     }
 
-    completeLoginFromCallback$(
-        requestToken: string | null,
-        approved: boolean,
-    ): Observable<void> {
+    completeLoginFromCallback$(requestToken: string | null, approved: boolean): Observable<void> {
         if (!requestToken) {
-            return throwError(
-                () =>
-                    new Error(
-                        'The TMDb callback did not include a request token.',
-                    ),
-            );
+            return throwError(() => new Error('The TMDb callback did not include a request token.'));
         }
 
         if (!approved) {
-            return throwError(
-                () => new Error('TMDb login was cancelled or not approved.'),
-            );
+            return throwError(() => new Error('TMDb login was cancelled or not approved.'));
         }
 
         return this.authenticationV4Service
-            .authenticationV4CreateAccessToken(
-                { request_token: requestToken },
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            )
+            .authenticationV4CreateAccessToken({ request_token: requestToken }, 'body', false, API_JSON_OPTIONS)
             .pipe(
                 map((response) => ({
                     v4AccessToken: this.ensureV4AccessToken(response),
@@ -125,7 +82,7 @@ export class TmdbUserAuthService {
                 switchMap(({ v4AccessToken, v4AccountId }) =>
                     this.authenticationService
                         .authenticationCreateSessionFromV4Token(
-                            buildRawBody({ access_token: v4AccessToken }),
+                            { access_token: v4AccessToken } as unknown as AccountAddFavoriteRequest,
                             'body',
                             false,
                             API_JSON_OPTIONS,
@@ -140,11 +97,7 @@ export class TmdbUserAuthService {
                         ),
                 ),
                 switchMap(({ sessionId, v4AccessToken, v4AccountId }) =>
-                    this.tmdbUserAccountService.hydrateUserSession$(
-                        sessionId,
-                        v4AccessToken,
-                        v4AccountId,
-                    ),
+                    this.tmdbUserAccountService.hydrateUserSession$(sessionId, v4AccessToken, v4AccountId),
                 ),
                 catchError((error) => {
                     this.userSessionStore.clearUserSession();
@@ -164,7 +117,7 @@ export class TmdbUserAuthService {
 
         return this.authenticationService
             .authenticationDeleteSession(
-                buildRawBody({ session_id: sessionId }),
+                { session_id: sessionId } as unknown as AccountAddFavoriteRequest,
                 'body',
                 false,
                 API_JSON_OPTIONS,
@@ -186,13 +139,9 @@ export class TmdbUserAuthService {
         }
 
         const params = new URL(window.location.href).searchParams;
-        const requestToken =
-            params.get('request_token') ??
-            this.browserStorage.getItem(PENDING_V4_REQUEST_TOKEN_KEY);
+        const requestToken = params.get('request_token') ?? this.browserStorage.getItem(PENDING_V4_REQUEST_TOKEN_KEY);
         const approvedParam = params.get('approved');
-        const pendingRedirectUrl = this.browserStorage.getItem(
-            PENDING_V4_REDIRECT_URL_KEY,
-        );
+        const pendingRedirectUrl = this.browserStorage.getItem(PENDING_V4_REDIRECT_URL_KEY);
         const isStoredCallbackReturn =
             !!requestToken &&
             !!pendingRedirectUrl &&
@@ -216,18 +165,11 @@ export class TmdbUserAuthService {
                 if (approvedParam !== null) {
                     url.searchParams.delete('approved');
                 }
-                window.history.replaceState(
-                    null,
-                    '',
-                    url.pathname + url.search + url.hash,
-                );
+                window.history.replaceState(null, '', url.pathname + url.search + url.hash);
             }),
             catchError((error) => {
                 this.clearPendingLogin();
-                const message =
-                    error instanceof Error
-                        ? error.message
-                        : 'TMDb sign-in could not be completed.';
+                const message = error instanceof Error ? error.message : 'TMDb sign-in could not be completed.';
                 this.browserStorage.setItem(LAST_AUTH_ERROR_KEY, message);
                 return of(undefined);
             }),
@@ -243,10 +185,7 @@ export class TmdbUserAuthService {
     }
 
     private storePendingLogin(requestToken: string, redirectUrl: string): void {
-        this.browserStorage.writeItem(
-            PENDING_V4_REQUEST_TOKEN_KEY,
-            requestToken,
-        );
+        this.browserStorage.writeItem(PENDING_V4_REQUEST_TOKEN_KEY, requestToken);
         this.browserStorage.writeItem(PENDING_V4_REDIRECT_URL_KEY, redirectUrl);
     }
 
@@ -255,16 +194,11 @@ export class TmdbUserAuthService {
         this.browserStorage.removeItem(PENDING_V4_REDIRECT_URL_KEY);
     }
 
-    private ensureV4RequestToken(
-        tokenResponse: V4RequestTokenResponse,
-    ): string {
+    private ensureV4RequestToken(tokenResponse: V4RequestTokenResponse): string {
         const requestToken = tokenResponse.request_token?.trim();
 
         if (!requestToken) {
-            throw new Error(
-                tokenResponse.status_message ||
-                    'TMDb did not return a v4 request token.',
-            );
+            throw new Error(tokenResponse.status_message || 'TMDb did not return a v4 request token.');
         }
 
         return requestToken;
@@ -274,10 +208,7 @@ export class TmdbUserAuthService {
         const accessToken = tokenResponse.access_token?.trim();
 
         if (!accessToken) {
-            throw new Error(
-                tokenResponse.status_message ||
-                    'TMDb did not return a v4 access token.',
-            );
+            throw new Error(tokenResponse.status_message || 'TMDb did not return a v4 access token.');
         }
 
         return accessToken;
@@ -303,17 +234,12 @@ export class TmdbUserAuthService {
         return sessionId;
     }
 
-    private isSameCallbackTarget(
-        currentUrl: string,
-        pendingRedirectUrl: string,
-    ): boolean {
+    private isSameCallbackTarget(currentUrl: string, pendingRedirectUrl: string): boolean {
         const current = new URL(currentUrl);
         const pending = new URL(pendingRedirectUrl, this.document.baseURI);
 
         return (
-            current.origin === pending.origin &&
-            current.pathname === pending.pathname &&
-            current.hash === pending.hash
+            current.origin === pending.origin && current.pathname === pending.pathname && current.hash === pending.hash
         );
     }
 }

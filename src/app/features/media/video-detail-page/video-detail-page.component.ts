@@ -12,10 +12,14 @@ import {
     EmptyStateComponent,
     PageSectionComponent,
     SkeletonComponent,
-    YoutubeVideoCardComponent,
-    YoutubeVideoComponent,
+    VideoCardComponent,
+    VideoCardItem,
+    MediaDetails,
+    YoutubePlayerComponent,
     RepeatPipe,
+    buildYoutubeThumbnailUrl,
 } from '../../../shared';
+import { Video } from '../../../api';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
 
@@ -26,8 +30,8 @@ import { MediaVideoStoreService } from '../media-video-store.service';
         BadgeComponent,
         DatePipe,
         RouterLink,
-        YoutubeVideoCardComponent,
-        YoutubeVideoComponent,
+        VideoCardComponent,
+        YoutubePlayerComponent,
         CarouselComponent,
         EmptyStateComponent,
         PageSectionComponent,
@@ -45,14 +49,25 @@ export class VideoDetailPageComponent {
         videosState: this.mediaVideoStoreService.videosState$,
         relatedVideos: this.mediaVideoStoreService.relatedVideos$,
     }).pipe(
-        map(({ mediaState, selected, videosState, relatedVideos }) => ({
-            media: mediaState.type === 'loaded' ? mediaState.value : null,
-            selected,
-            videosState,
-            relatedVideos,
-            isLoading:
-                videosState.type === 'loading' || videosState.type === 'idle',
-        })),
+        map(({ mediaState, selected, videosState, relatedVideos }) => {
+            const media = mediaState.type === 'loaded' ? mediaState.value : null;
+            const relatedVideoItems = media
+                ? relatedVideos.flatMap((video) => {
+                      const item = this.toRelatedVideoCardItem(video, media);
+                      return item ? [item] : [];
+                  })
+                : [];
+
+            return {
+                media,
+                selected,
+                videosState,
+                relatedVideoItems,
+                isLoading:
+                    videosState.type === 'loading' ||
+                    videosState.type === 'idle',
+            };
+        }),
     );
 
     constructor(
@@ -85,6 +100,33 @@ export class VideoDetailPageComponent {
                 }),
             )
             .subscribe();
+    }
+
+    private toRelatedVideoCardItem(
+        video: Video,
+        media: MediaDetails,
+    ): VideoCardItem | null {
+        if (!video.id || !video.key) {
+            return null;
+        }
+
+        const title = video.name ?? media.title;
+
+        return {
+            id: video.id,
+            title,
+            thumbnailUrl: buildYoutubeThumbnailUrl(video.key),
+            alt: title,
+            openLabel: `Open video: ${title}`,
+            typeLabel: video.type,
+            routerLink: [
+                '/title',
+                media.id,
+                media.mediaType,
+                'videos',
+                video.id,
+            ],
+        };
     }
 }
 

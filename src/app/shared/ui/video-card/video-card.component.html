@@ -1,0 +1,65 @@
+<article class="video-card">
+    @if (item.routerLink) {
+        <a class="video-card__media" [routerLink]="item.routerLink" [attr.aria-label]="item.openLabel">
+            <ng-container *ngTemplateOutlet="thumbnail" />
+        </a>
+    } @else if (item.href) {
+        <a
+            class="video-card__media"
+            [href]="item.href"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="item.openLabel"
+        >
+            <ng-container *ngTemplateOutlet="thumbnail" />
+        </a>
+    } @else {
+        <div class="video-card__media" aria-hidden="true">
+            <ng-container *ngTemplateOutlet="thumbnail" />
+        </div>
+    }
+
+    <div class="video-card__body">
+        @if (item.titleLink) {
+            <a class="video-card__title text-subtitle" [routerLink]="item.titleLink">
+                {{ item.title }}
+            </a>
+        } @else {
+            <p class="video-card__title text-subtitle">
+                {{ item.title }}
+            </p>
+        }
+
+        @if (item.typeLabel || item.contextLabel || item.publishedAt) {
+            <p class="video-card__metadata text-caption">
+                @if (item.typeLabel) {
+                    <span class="video-card__metadata-item">{{ item.typeLabel }}</span>
+                }
+                @if (item.contextLabel) {
+                    @if (item.contextLink) {
+                        <a class="video-card__metadata-item" [routerLink]="item.contextLink">
+                            {{ item.contextLabel }}
+                        </a>
+                    } @else {
+                        <span class="video-card__metadata-item">{{ item.contextLabel }}</span>
+                    }
+                }
+                @if (item.publishedAt) {
+                    <span class="video-card__metadata-item">
+                        {{ item.publishedAt | date: 'mediumDate' }}
+                    </span>
+                }
+            </p>
+        }
+    </div>
+</article>
+
+<ng-template #thumbnail>
+    <div class="video-card__thumb aspect-landscape">
+        <img [src]="item.thumbnailUrl" [alt]="item.alt" />
+
+        <div class="video-card__play" aria-hidden="true">
+            <i class="fa-solid fa-play" aria-hidden="true"></i>
+        </div>
+    </div>
+</ng-template>

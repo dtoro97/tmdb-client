@@ -13,6 +13,11 @@
     flex-direction: column;
 }
 
+.u-flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
 .u-flex-1 {
     flex: 1;
 }
@@ -31,6 +36,10 @@
 
 .u-space-between {
     justify-content: space-between;
+}
+
+.u-gap-0 {
+    gap: 0;
 }
 
 .u-gap-1 {
@@ -75,6 +84,10 @@
     position: relative;
     overflow: hidden;
     background: var(--skeleton-base);
+}
+
+.ml-auto {
+    margin-left: auto;
 }
 
 .skeleton::after {

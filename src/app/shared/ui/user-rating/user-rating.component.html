@@ -1,42 +1,29 @@
-@if (rating$ | async; as rating) {
+@if (vm$ | async; as vm) {
     <button
         class="user-rating"
         type="button"
-        [class.user-rating--rated]="rating.currentRating !== null"
-        [class.user-rating--pending]="rating.pending"
-        [disabled]="
-            rating.pending ||
-            rating.value.type === 'loading' ||
-            rating.value.type === 'idle'
-        "
-        [attr.aria-busy]="
-            rating.pending ||
-            rating.value.type === 'loading' ||
-            rating.value.type === 'idle'
-                ? 'true'
-                : null
-        "
+        [class.user-rating--rated]="vm.currentRating !== null"
+        [class.user-rating--pending]="vm.pending"
+        [disabled]="vm.disabled"
+        [attr.aria-busy]="vm.disabled ? 'true' : null"
         (click)="open()"
     >
-        <span class="user-rating__label text-overline">Your rating</span>
+        <span class="text-overline">Your rating</span>
 
-        @if (rating.value.type === "loading" || rating.value.type === "idle") {
-            <span class="user-rating__skeleton" aria-hidden="true">
-                <app-skeleton class="user-rating__skeleton-bar" />
-            </span>
+        @if (vm.loading) {
+            <app-skeleton class="user-rating__skeleton" aria-hidden="true" />
         } @else {
             <span class="user-rating__summary">
-                <mat-icon class="user-rating__icon" aria-hidden="true">
-                    @if (rating.currentRating !== null) {
-                        star
-                    } @else {
-                        star_outline
-                    }
-                </mat-icon>
+                <i
+                    class="user-rating__icon fa-star"
+                    [class.fa-solid]="vm.currentRating !== null"
+                    [class.fa-regular]="vm.currentRating === null"
+                    aria-hidden="true"
+                ></i>
 
                 <span class="user-rating__value text-subtitle">
-                    @if (rating.currentRating !== null) {
-                        {{ rating.currentRating | number: "1.1-1" }}
+                    @if (vm.currentRating !== null) {
+                        {{ vm.currentRating | number: '1.1-1' }}
                         <span class="user-rating__scale text-caption">/10</span>
                     } @else {
                         Rate

@@ -1,53 +1,53 @@
-<div
-    class="media-list-item"
-    role="link"
-    tabindex="0"
-    [attr.aria-label]="'Open ' + item.title"
-    (click)="onRowClick($event)"
-    (keydown)="onRowKeydown($event)"
->
+<div class="media-list-item">
     @if (index) {
-        <span class="media-list-item__index">{{ index }}.</span>
+        <span class="media-list-item__index text-caption">{{ index }}.</span>
     }
 
-    <app-image
-        class="media-list-item__poster"
-        [src]="item.thumb"
-        [alt]="item.title"
-        type="media"
-    />
+    <a
+        class="media-list-item__poster-link"
+        [routerLink]="routerLink"
+        [attr.aria-label]="'Open ' + item.title"
+    >
+        <app-image
+            class="media-list-item__poster"
+            [src]="item.thumb"
+            [alt]="item.title"
+            type="media"
+        />
+    </a>
 
     <div class="media-list-item__content">
-        <span class="media-list-item__title">
-            {{ item.title }}
+        <span class="media-list-item__heading text-subtitle">
+            <a class="media-list-item__title" [routerLink]="routerLink">
+                {{ item.title }}
+            </a>
             @if (item.date) {
-                <span class="text-caption"
-                    >({{ item.date | date: "yyyy" }})</span
-                >
+                <span class="text-caption">({{ item.date | date: "yyyy" }})</span>
             }
         </span>
 
         @if (genreNames.length) {
             <div class="media-list-item__genres">
-                @for (genreName of genreNames; track $index) {
+                @for (genreName of genreNames; track genreName) {
                     <app-badge [label]="genreName"></app-badge>
                 }
             </div>
         }
 
-        <p class="media-list-item__overview">
+        <p class="media-list-item__overview text-body-sm">
             {{ item.overview }}
         </p>
 
         @if (item.castLinks; as castLinks) {
             @if (castLinks.length) {
-                <p class="media-list-item__cast">
+                <p class="media-list-item__cast text-meta">
                     @for (actor of castLinks; track actor.id; let i = $index) {
                         <a
                             class="media-list-item__actor-link"
                             [routerLink]="['/name', actor.id]"
-                            >{{ actor.name }}</a
                         >
+                            {{ actor.name }}
+                        </a>
                         @if (i < castLinks.length - 1) {
                             <span>, </span>
                         }

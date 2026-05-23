@@ -1,30 +1,25 @@
-@use "mixins" as *;
+@use 'mixins' as *;
 
-.locale-button-icon {
-    @include icon-size(1rem);
-}
+.header-locale-selector {
+    &__icon {
+        @include icon-size(1rem);
+    }
 
-.locale-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-5);
-    min-width: 240px;
-}
+    &__panel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        min-width: 240px;
+        padding: var(--space-4) var(--space-5);
+    }
 
-.locale-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
 
-.locale-label {
-    color: var(--text-muted);
-    font-weight: var(--weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.locale-select {
-    width: 100%;
+    &__select {
+        width: 100%;
+    }
 }

@@ -1,4 +1,3 @@
-import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 import {
@@ -18,7 +17,6 @@ interface DisplayRatedEpisodeItem {
 @Component({
     selector: 'app-episode-rating-list',
     imports: [
-        DecimalPipe,
         EpisodeListItemComponent,
         RatingComponent,
         RepeatPipe,

@@ -14,8 +14,6 @@
 }
 
 .portrait {
-    --image-placeholder-icon-size: 65%;
-
     flex-shrink: 0;
     width: var(--person-photo-size);
     border-radius: var(--radius-xl);

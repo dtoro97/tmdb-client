@@ -1,59 +1,39 @@
 @if (state.type === "loading") {
-    <div class="videos-grid__featured">
-        @for (index of featuredSkeletonItems; track index) {
-            <div class="videos-grid__skeleton-card">
-                <app-skeleton
-                    class="videos-grid__skeleton-art aspect-landscape"
-                />
-                <app-skeleton
-                    class="videos-grid__skeleton-line videos-grid__skeleton-line--title"
-                />
-                <app-skeleton
-                    class="videos-grid__skeleton-line videos-grid__skeleton-line--short"
-                />
-            </div>
+    <div class="videos-grid__section videos-grid__section--featured">
+        @for (index of featuredCount | repeat; track index) {
+            <ng-container *ngTemplateOutlet="skeletonCard" />
         }
     </div>
 
-    <div class="videos-grid__list">
-        @for (index of gridSkeletonItems; track index) {
-            <div class="videos-grid__skeleton-card">
-                <app-skeleton
-                    class="videos-grid__skeleton-art aspect-landscape"
-                />
-                <app-skeleton
-                    class="videos-grid__skeleton-line videos-grid__skeleton-line--title"
-                />
-                <app-skeleton
-                    class="videos-grid__skeleton-line videos-grid__skeleton-line--short"
-                />
-            </div>
+    <div class="videos-grid__section videos-grid__section--list">
+        @for (index of gridCount | repeat; track index) {
+            <ng-container *ngTemplateOutlet="skeletonCard" />
         }
     </div>
 } @else if (state.type === "loaded" || state.type === "loading-more") {
-    @if (featuredVideos.length || gridVideos.length) {
-        @if (featuredVideos.length) {
-            <div class="videos-grid__featured">
-                @for (video of featuredVideos; track video.id) {
-                    <app-youtube-video [video]="video" />
+    @if (featuredItems.length || gridItems.length) {
+        @if (featuredItems.length) {
+            <div class="videos-grid__section videos-grid__section--featured">
+                @for (item of featuredItems; track item.id) {
+                    <app-video-card [item]="item" />
                 }
             </div>
         }
 
-        @if (gridVideos.length) {
-            <div class="videos-grid__list">
-                @for (video of gridVideos; track video.id) {
-                    <app-youtube-video-card
-                        [video]="video"
-                        [mediaTitle]="mediaTitle"
-                        [mediaYear]="mediaYear"
-                        [mediaId]="mediaId"
-                        [mediaType]="mediaType"
-                        [destination]="cardDestination"
-                        [metaVariant]="cardMetaVariant"
-                    />
+        @if (gridItems.length) {
+            <div class="videos-grid__section videos-grid__section--list">
+                @for (item of gridItems; track item.id) {
+                    <app-video-card [item]="item" />
                 }
             </div>
         }
     }
 }
+
+<ng-template #skeletonCard>
+    <div class="videos-grid__skeleton-card">
+        <app-skeleton class="videos-grid__skeleton-art aspect-landscape" />
+        <app-skeleton class="videos-grid__skeleton-line" />
+        <app-skeleton class="videos-grid__skeleton-line videos-grid__skeleton-line--short" />
+    </div>
+</ng-template>

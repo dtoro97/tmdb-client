@@ -1,30 +1,26 @@
-<div class="sort-button">
-    <div class="sort-button__control">
-        <div class="sort-button__select-shell">
-            <mat-select
-                class="sort-button__select text-caption"
-                aria-label="Sort by"
-                [value]="selectedValue"
-                (selectionChange)="onSortChange($event.value)"
-            >
-                @for (option of options; track option.value) {
-                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                }
-            </mat-select>
-        </div>
-        <span class="sort-button__divider" aria-hidden="true"></span>
-        <button
-            class="sort-button__direction"
-            [class.sort-button__direction--asc]="direction === 'asc'"
-            type="button"
-            [attr.aria-label]="
-                direction === 'asc'
-                    ? 'Switch to descending sort'
-                    : 'Switch to ascending sort'
-            "
-            (click)="onToggleDirection()"
-        >
-            <mat-icon aria-hidden="true">south</mat-icon>
-        </button>
-    </div>
-</div>
+<mat-select
+    class="sort-button__select text-caption"
+    aria-label="Sort by"
+    [value]="selectedValue"
+    (selectionChange)="onSortChange($event.value)"
+>
+    @for (option of options; track option.value) {
+        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+    }
+</mat-select>
+
+<span class="sort-button__divider" aria-hidden="true"></span>
+
+<button
+    class="sort-button__direction"
+    [class.sort-button__direction--asc]="direction === 'asc'"
+    type="button"
+    [attr.aria-label]="
+        direction === 'asc'
+            ? 'Switch to descending sort'
+            : 'Switch to ascending sort'
+    "
+    (click)="onToggleDirection()"
+>
+    <mat-icon aria-hidden="true">south</mat-icon>
+</button>

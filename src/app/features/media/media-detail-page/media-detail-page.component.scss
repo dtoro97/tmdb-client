@@ -24,8 +24,6 @@
     }
 
     &-poster {
-        --image-placeholder-icon-size: 65%;
-
         width: 220px;
         max-height: 330px;
         margin-top: calc(-1 * var(--hero-poster-overlap));
@@ -65,12 +63,6 @@
     &-tagline-skeleton {
         width: min(24rem, 60vw);
         --skeleton-height: 1.25rem;
-    }
-
-    &-links {
-        --external-links-icon-size: var(--text-2xl);
-
-        color: var(--text-muted);
     }
 
     &-ratings {

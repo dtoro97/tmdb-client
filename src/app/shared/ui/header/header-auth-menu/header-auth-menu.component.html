@@ -9,34 +9,18 @@
             [attr.aria-label]="'Open account menu for ' + vm.displayName"
             [attr.aria-busy]="vm.logoutPending ? 'true' : null"
         >
-            <app-user-avatar
-                class="header-auth-menu__badge"
-                [name]="vm.displayName"
-                [avatarPath]="vm.avatarPath"
-                size="sm"
-            />
+            <app-user-avatar [name]="vm.displayName" [avatarPath]="vm.avatarPath" size="sm" />
         </button>
 
         <mat-menu #authMenu="matMenu">
             <div class="header-auth-menu__panel">
                 <div class="header-auth-menu__profile">
-                    <app-user-avatar
-                        class="header-auth-menu__badge"
-                        [name]="vm.displayName"
-                        [avatarPath]="vm.avatarPath"
-                        size="sm"
-                    />
-                    <div class="header-auth-menu__profile-copy">
-                        <span
-                            class="header-auth-menu__panel-name text-body-sm u-truncate"
-                        >
+                    <app-user-avatar [name]="vm.displayName" [avatarPath]="vm.avatarPath" size="sm" />
+                    <div class="header-auth-menu__copy u-flex-column u-gap-1">
+                        <span class="text-body-sm u-truncate">
                             {{ vm.displayName }}
                         </span>
-                        <span
-                            class="header-auth-menu__panel-subtitle text-caption"
-                        >
-                            TMDb account
-                        </span>
+                        <span class="text-caption">TMDb account</span>
                     </div>
                 </div>
 
@@ -53,12 +37,7 @@
                 <mat-divider class="header-auth-menu__divider"></mat-divider>
 
                 <div class="header-auth-menu__group">
-                    <button
-                        mat-menu-item
-                        type="button"
-                        [disabled]="vm.logoutPending"
-                        (click)="signOut()"
-                    >
+                    <button mat-menu-item type="button" [disabled]="vm.logoutPending" (click)="signOut()">
                         Sign out
                     </button>
                 </div>
@@ -66,14 +45,14 @@
         </mat-menu>
     } @else {
         <button
-            class="header-auth-menu__trigger header-auth-menu__trigger--anonymous text-body-sm"
+            class="header-auth-menu__trigger header-auth-menu__trigger--anonymous text-meta"
             type="button"
             [disabled]="vm.loginPending"
             [attr.aria-busy]="vm.loginPending ? 'true' : null"
             aria-label="Sign in with TMDb"
             (click)="startLogin()"
         >
-            <span class="header-auth-menu__label">Sign in</span>
+            Sign in
         </button>
     }
 }

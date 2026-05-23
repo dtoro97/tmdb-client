@@ -22,20 +22,6 @@
     }
 }
 
-@mixin indexed-list-index() {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    align-self: center;
-    min-width: 1.75rem;
-    flex-shrink: 0;
-    text-align: right;
-    color: var(--text-soft);
-    font-size: var(--text-xs);
-    font-weight: var(--weight-semibold);
-    font-variant-numeric: tabular-nums;
-}
-
 @mixin surface-panel($bg: var(--mat-sys-surface-dim)) {
     background: $bg;
     border-radius: var(--radius-xl);

@@ -4,23 +4,26 @@ import {
     Input,
     OnChanges,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { Video } from '../../../api';
 import { GRID_COUNT, VIDEOS_GRID_FEATURED_COUNT } from '../../../constants';
-import type { LoadableItems, MediaType } from '../../types';
-import { SkeletonComponent } from '../skeleton/skeleton.component';
+import { RepeatPipe } from '../../pipes';
+import type { VideoCardItem } from '../../models';
+import type { LoadableItems } from '../../types';
 import {
-    YoutubeVideoCardComponent,
-    YoutubeVideoCardDestination,
-    YoutubeVideoCardMetaVariant,
-} from '../youtube-video-card/youtube-video-card.component';
-import { YoutubeVideoComponent } from '../youtube-video/youtube-video.component';
+    buildYoutubeThumbnailUrl,
+    buildYoutubeWatchUrl,
+} from '../../utils/youtube';
+import { SkeletonComponent } from '../skeleton/skeleton.component';
+import { VideoCardComponent } from '../video-card/video-card.component';
 
 @Component({
     selector: 'app-videos-grid',
     imports: [
-        YoutubeVideoComponent,
-        YoutubeVideoCardComponent,
+        NgTemplateOutlet,
+        RepeatPipe,
+        VideoCardComponent,
         SkeletonComponent,
     ],
     templateUrl: './videos-grid.component.html',
@@ -31,39 +34,48 @@ export class VideosGridComponent implements OnChanges {
     @Input() state: LoadableItems<Video> = { type: 'idle' };
     @Input() featuredCount = VIDEOS_GRID_FEATURED_COUNT;
     @Input() gridCount = GRID_COUNT;
-    @Input() mediaTitle = '';
-    @Input() mediaYear = '';
-    @Input() mediaId?: number;
-    @Input() mediaType?: MediaType;
-    @Input() cardDestination: YoutubeVideoCardDestination = 'youtube';
-    @Input() cardMetaVariant: YoutubeVideoCardMetaVariant = 'compact';
-    featuredSkeletonItems: readonly number[] = [];
-    gridSkeletonItems: readonly number[] = [];
-    featuredVideos: readonly Video[] = [];
-    gridVideos: readonly Video[] = [];
+    featuredItems: readonly VideoCardItem[] = [];
+    gridItems: readonly VideoCardItem[] = [];
 
     ngOnChanges(): void {
-        this.featuredSkeletonItems = createIndexes(this.featuredCount);
-        this.gridSkeletonItems = createIndexes(this.gridCount);
-
         if (
             this.state.type === 'loaded' ||
             this.state.type === 'loading-more'
         ) {
-            this.featuredVideos = this.state.value.slice(0, this.featuredCount);
-            this.gridVideos = this.state.value.slice(
+            const items = this.state.value.flatMap((video) => {
+                const item = this.toVideoCardItem(video);
+                return item ? [item] : [];
+            });
+
+            this.featuredItems = items.slice(0, this.featuredCount);
+            this.gridItems = items.slice(
                 this.featuredCount,
                 this.featuredCount + this.gridCount,
             );
             return;
         }
 
-        this.featuredVideos = [];
-        this.gridVideos = [];
+        this.featuredItems = [];
+        this.gridItems = [];
     }
-}
 
-function createIndexes(count: number): number[] {
-    return Array.from({ length: count }, (_, index) => index);
+    private toVideoCardItem(video: Video): VideoCardItem | null {
+        if (!video.id || !video.key) {
+            return null;
+        }
+
+        const title = video.name ?? 'Video';
+
+        return {
+            id: video.id,
+            title,
+            thumbnailUrl: buildYoutubeThumbnailUrl(video.key),
+            alt: title,
+            openLabel: `Open video: ${title}`,
+            typeLabel: video.type,
+            publishedAt: video.published_at,
+            href: buildYoutubeWatchUrl(video.key),
+        };
+    }
 }
 

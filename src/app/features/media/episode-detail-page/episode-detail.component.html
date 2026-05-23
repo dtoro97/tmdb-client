@@ -152,9 +152,10 @@
                                 {{ vm.stillsTotalCount }}
                             </span>
                         }
-                        <app-photos-grid
+                        <app-photos-preview
                             [state]="vm.stillsState"
                             [totalCount]="vm.stillsTotalCount"
+                            [showMoreTile]="false"
                             (photoClick)="openPhotoViewer($event)"
                         />
                     </app-page-section>

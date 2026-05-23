@@ -1,26 +1,9 @@
-@use "mixins" as *;
+@use 'mixins' as *;
 
-.recently-viewed {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-}
-
-.recently-viewed__header {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-3);
-}
-
-.recently-viewed__title {
-    margin: 0;
-}
-
-.recently-viewed__clear {
+.clear {
     padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
-    white-space: nowrap;
     @include text-link();
 }

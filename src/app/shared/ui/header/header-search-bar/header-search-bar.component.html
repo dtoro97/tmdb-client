@@ -18,9 +18,7 @@
                     (selectionChange)="setFilter($event.value)"
                 >
                     @for (opt of filterOptions; track opt.value) {
-                        <mat-option [value]="opt.value">{{
-                            opt.label
-                        }}</mat-option>
+                        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
                     }
                 </mat-select>
             </mat-form-field>
@@ -37,11 +35,7 @@
                     (keydown.enter)="navigateToSearch(vm.searchFilter)"
                     placeholder="Search movies, TV shows, people..."
                 />
-                <mat-icon
-                    class="header-search__suffix header-search__search-icon"
-                    matSuffix
-                    >search</mat-icon
-                >
+                <mat-icon class="header-search__suffix header-search__search-icon" matSuffix>search</mat-icon>
                 <button
                     matSuffix
                     mat-icon-button

@@ -1,4 +1,3 @@
-export * from './api-body';
 export * from './error-message';
 export * from './is-defined';
 export * from './get-iso-date';

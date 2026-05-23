@@ -4,40 +4,32 @@
 }
 
 .user-avatar {
-    --user-avatar-size: var(--round-media-sm);
-    --user-avatar-font-size: var(--text-xs);
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--user-avatar-size);
-    height: var(--user-avatar-size);
-    border-radius: var(--radius-full);
+    width: var(--round-media-sm);
+    height: var(--round-media-sm);
     overflow: hidden;
+    border-radius: var(--radius-full);
     background: var(--control-accent-surface);
     color: var(--text-primary);
-}
 
-.user-avatar--lg {
-    --user-avatar-size: clamp(5.5rem, 10vw, 7rem);
-    --user-avatar-font-size: clamp(1.75rem, 3vw, 2.5rem);
-}
+    &--lg {
+        width: 7rem;
+        height: 7rem;
 
-.user-avatar__image {
-    width: 100%;
-    height: 100%;
-}
+        .user-avatar__fallback {
+            font-size: 2.5rem;
+        }
+    }
 
-.user-avatar__image ::ng-deep .image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    &__image {
+        width: 100%;
+        height: 100%;
+        --image-radius: var(--radius-full);
+    }
 
-.user-avatar__fallback {
-    font-size: var(--user-avatar-font-size);
-    font-weight: var(--weight-bold);
-    line-height: 1;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    &__fallback {
+        font-weight: var(--weight-bold);
+    }
 }

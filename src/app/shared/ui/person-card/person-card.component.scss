@@ -1,58 +1,68 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
 :host {
-    --person-photo-size: 190px;
+    --person-card-photo-size: 190px;
+    display: block;
 }
 
-.person-card {
+.card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
     gap: var(--space-2);
     width: 100%;
     height: 100%;
-    color: inherit;
+    text-align: center;
+}
+
+a.card {
     @include media-hover();
 }
 
-.person-card__photo-shell {
+.photo {
     width: 100%;
-    max-width: var(--person-photo-size);
-}
-
-.person-card__photo {
-    max-width: var(--person-photo-size);
-    width: 100%;
+    max-width: var(--person-card-photo-size);
     aspect-ratio: 1 / 1;
-    border-radius: var(--radius-full);
     overflow: hidden;
-    position: relative;
-    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-full);
     border: 1px solid var(--mat-sys-outline-variant);
-
-    app-image {
-        width: 100%;
-        height: 100%;
-    }
+    box-shadow: var(--shadow-sm);
+    --image-radius: var(--radius-full);
 }
 
-.person-card__rank-badge {
-    min-height: 1.5rem;
-    margin-top: auto;
+.photo-fill {
+    height: 100%;
+    --skeleton-height: 100%;
+    --skeleton-radius: var(--radius-full);
 }
 
-.person-card__name {
+.name {
     @include line-clamp(2);
+}
+
+.name-skeleton {
+    width: 70%;
+    --skeleton-height: 1lh;
+}
+
+.subtitle-skeleton {
+    width: 50%;
+    --skeleton-height: 1lh;
+}
+
+.rank-skeleton {
+    width: 35px;
+    --skeleton-height: 1.5rem;
+    --skeleton-radius: var(--radius-sm);
 }
 
 @include mobile() {
     :host {
-        --person-photo-size: 120px;
+        --person-card-photo-size: 120px;
     }
 
-    .person-card {
+    .card {
         gap: 0;
     }
 }

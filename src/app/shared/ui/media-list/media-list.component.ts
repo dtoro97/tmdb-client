@@ -20,6 +20,8 @@ interface DisplayMediaListItem {
     readonly item: MediaListItem;
     readonly genreNames: string[];
     readonly userRating: number | null;
+    readonly routerLink: (string | number)[];
+    readonly index: number | null;
 }
 
 @Component({
@@ -47,11 +49,23 @@ export class MediaListComponent implements OnChanges {
     displayItems: DisplayMediaListItem[] = [];
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['state'] || changes['genreMap'] || changes['userRatings']) {
+        if (
+            changes['state'] ||
+            changes['genreMap'] ||
+            changes['userRatings'] ||
+            changes['routeType'] ||
+            changes['showIndex'] ||
+            changes['indexStart'] ||
+            changes['descendingFrom']
+        ) {
             this.displayItems = this.toDisplayItems(
                 this.state,
                 this.genreMap,
                 this.userRatings,
+                this.routeType,
+                this.showIndex,
+                this.indexStart,
+                this.descendingFrom,
             );
         }
     }
@@ -60,18 +74,55 @@ export class MediaListComponent implements OnChanges {
         state: LoadableItems<MediaListItem>,
         genreMap: Map<number, string>,
         userRatings: ReadonlyMap<number, number>,
+        routeType: MediaListRouteType,
+        showIndex: boolean,
+        indexStart: number,
+        descendingFrom: number | null,
     ): DisplayMediaListItem[] {
         if (state.type !== 'loaded' && state.type !== 'loading-more') {
             return [];
         }
 
-        return state.value.map((item) => ({
+        return state.value.map((item, index) => ({
             item,
             genreNames: (item.genreIds ?? [])
                 .map((genreId) => genreMap.get(genreId))
                 .filter((genreName): genreName is string => !!genreName)
                 .slice(0, 3),
             userRating: userRatings.get(item.id) ?? null,
+            routerLink: this.toRouterLink(item, routeType),
+            index: this.toDisplayIndex(
+                index,
+                showIndex,
+                indexStart,
+                descendingFrom,
+            ),
         }));
+    }
+
+    private toRouterLink(
+        item: MediaListItem,
+        routeType: MediaListRouteType,
+    ): (string | number)[] {
+        return [
+            '/title',
+            item.id,
+            routeType === 'item' ? item.mediaType : routeType,
+        ];
+    }
+
+    private toDisplayIndex(
+        index: number,
+        showIndex: boolean,
+        indexStart: number,
+        descendingFrom: number | null,
+    ): number | null {
+        if (!showIndex) {
+            return null;
+        }
+
+        return descendingFrom !== null
+            ? descendingFrom - index
+            : indexStart + index;
     }
 }

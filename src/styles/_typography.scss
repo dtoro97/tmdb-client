@@ -90,6 +90,14 @@
     color: var(--text-secondary);
 }
 
+.text-rating {
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    color: var(--color-rating);
+    font-variant-numeric: tabular-nums;
+}
+
 .text-overline {
     font-size: var(--text-2xs);
     font-weight: var(--weight-semibold);

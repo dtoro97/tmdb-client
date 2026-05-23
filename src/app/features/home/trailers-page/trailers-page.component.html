@@ -32,22 +32,11 @@
                     <ul class="grid u-list-none" role="list">
                         @for (
                             trailer of vm.trailersState.value;
-                            track trailer.videoId + trailer.mediaType;
+                            track trailer.id + trailer.mediaType;
                             let idx = $index
                         ) {
                             <li>
-                                @if (trailer.video; as video) {
-                                    <app-youtube-video-card
-                                        [video]="video"
-                                        [mediaTitle]="trailer.mediaTitle"
-                                        [mediaYear]="trailer.mediaYear ?? ''"
-                                        [mediaId]="trailer.mediaId"
-                                        [mediaType]="trailer.mediaType"
-                                        [linkToMedia]="true"
-                                        destination="youtube"
-                                        metaVariant="detailed"
-                                    />
-                                }
+                                <app-video-card [item]="trailer" />
                             </li>
                         }
 

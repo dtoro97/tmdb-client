@@ -8,30 +8,6 @@
     "
 >
     <ng-template let-person let-rank="index">
-        @if (state.type === "loading") {
-            <div class="person-carousel-panel__skeleton">
-                <div class="person-carousel-panel__photo">
-                    <app-skeleton
-                        class="person-carousel-panel__photo-fill"
-                    />
-                </div>
-
-                <app-skeleton class="person-carousel-panel__name text-meta" />
-                <app-skeleton
-                    class="person-carousel-panel__subtitle text-caption"
-                />
-
-                @if (showRank) {
-                    <app-skeleton
-                        class="person-carousel-panel__rank text-label"
-                    />
-                }
-            </div>
-        } @else {
-            <app-person-card
-                [person]="person"
-                [rank]="showRank ? rank + 1 : null"
-            />
-        }
+        <app-person-card [person]="person" [rank]="showRank ? rank + 1 : null" [loading]="state.type === 'loading'" />
     </ng-template>
 </app-carousel>

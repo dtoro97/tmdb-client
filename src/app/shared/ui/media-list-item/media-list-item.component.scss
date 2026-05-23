@@ -1,8 +1,7 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
 .media-list-item {
-    position: relative;
     display: flex;
     align-items: flex-start;
     gap: var(--space-3);
@@ -11,19 +10,26 @@
     border-radius: var(--radius-md);
     background: var(--mat-sys-surface-container-lowest);
     min-width: 0;
-    cursor: pointer;
-    @include surface-hover-subtle();
 }
 
 .media-list-item__index {
-    @include indexed-list-index();
+    align-self: center;
+    inline-size: 1.75rem;
+    flex: 0 0 auto;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.media-list-item__poster-link {
+    display: block;
+    width: 80px;
+    aspect-ratio: var(--poster-ratio);
+    flex-shrink: 0;
 }
 
 .media-list-item__poster {
-    width: 80px;
-    aspect-ratio: 2 / 3;
-    flex-shrink: 0;
-    border-radius: var(--radius-sm);
+    width: 100%;
+    height: 100%;
     box-shadow: var(--shadow-sm);
 }
 
@@ -35,13 +41,13 @@
     min-width: 0;
 }
 
-.media-list-item__title {
+.media-list-item__heading {
     min-width: 0;
-    font-size: var(--text-md);
-    color: var(--mat-sys-on-surface);
-    font-weight: var(--weight-bold);
-    line-height: var(--lh-normal);
     @include line-clamp(1);
+}
+
+.media-list-item__title {
+    @include text-link();
 }
 
 .media-list-item__genres {
@@ -51,19 +57,12 @@
 }
 
 .media-list-item__overview {
-    margin: 0;
-    font-size: var(--text-sm);
-    font-weight: var(--weight-regular);
-    line-height: var(--lh-relaxed);
-    color: var(--text-secondary);
     @include line-clamp(2);
 }
 
 .media-list-item__cast {
-    margin: 0;
-    font-size: var(--text-sm);
-    line-height: var(--lh-normal);
-    color: var(--text-muted);
+    min-width: 0;
+    @include line-clamp(2);
 }
 
 .media-list-item__actor-link {
@@ -83,14 +82,14 @@
     .media-list-item {
         display: grid;
         grid-template-columns: 72px minmax(0, 1fr) auto;
-        grid-template-areas: "poster content date";
+        grid-template-areas: 'poster content date';
         align-items: start;
         column-gap: var(--space-3);
         row-gap: var(--space-1);
         padding: var(--space-3);
     }
 
-    .media-list-item__poster {
+    .media-list-item__poster-link {
         grid-area: poster;
         width: 72px;
     }
@@ -100,18 +99,15 @@
         gap: var(--space-1);
     }
 
-    .media-list-item__title {
-        font-size: var(--text-sm);
-        line-height: var(--lh-normal);
+    .media-list-item__heading {
+        @include line-clamp(2);
     }
 
     .media-list-item__overview {
-        line-height: var(--lh-normal);
         @include line-clamp(3);
     }
 
     .media-list-item__cast {
-        line-height: var(--lh-normal);
         @include line-clamp(3);
     }
 

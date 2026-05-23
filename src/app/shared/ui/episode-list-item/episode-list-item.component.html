@@ -13,20 +13,20 @@
         (keydown)="onRowKeydown($event)"
     >
         <app-image class="episode-list-item__still" [src]="currentItem.stillPath" [alt]="currentItem.name" />
-        <div class="episode-list-item__content">
+        <div class="episode-list-item__content u-flex-1">
             @if (currentItem.seasonNumber !== null && currentItem.episodeNumber !== null) {
-                <span class="episode-list-item__label text-caption">
-                    S{{ currentItem.seasonNumber }}E{{ currentItem.episodeNumber }}
+                <div class="episode-list-item__label-row u-flex u-items-center u-gap-2">
+                    <span class="text-overline"> S{{ currentItem.seasonNumber }}E{{ currentItem.episodeNumber }} </span>
                     @if (currentItem.subtitle) {
-                        <span class="episode-list-item__subtitle text-caption"> · {{ currentItem.subtitle }} </span>
+                        <span class="text-caption">{{ currentItem.subtitle }}</span>
                     }
-                </span>
+                </div>
             } @else if (currentItem.subtitle) {
-                <span class="episode-list-item__label text-caption">
+                <span class="text-caption">
                     {{ currentItem.subtitle }}
                 </span>
             }
-            <h3 class="episode-list-item__title">
+            <h3 class="text-title">
                 {{ currentItem.name }}
             </h3>
             <div class="episode-list-item__meta text-meta">
@@ -40,12 +40,12 @@
                     <app-rating [value]="currentItem.voteAverage" />
                 }
             </div>
-            <p class="episode-list-item__overview">
+            <p class="episode-list-item__overview text-body-sm">
                 {{ currentItem.overview || 'No overview available.' }}
             </p>
         </div>
-        <div class="episode-list-item__actions">
-            <ng-content select="[episode-list-item-actions]" />
+        <div class="episode-list-item__end u-flex">
+            <ng-content />
         </div>
     </div>
 }

@@ -41,48 +41,46 @@
                 />
             </app-page-section>
 
-            <section class="surface-panel">
-                <app-page-section title="Tonight's TV" subtitle="Series airing fresh episodes today.">
-                    <ng-container section-controls>
-                        <a
-                            class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
-                            routerLink="/discover"
-                            [queryParams]="{ type: 'tv' }"
-                        >
-                            <span>Browse TV</span>
-                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-                        </a>
-                    </ng-container>
-                    @if (homeVM.airingToday.type === 'loaded') {
-                        <div class="tonight-grid">
-                            @for (item of homeVM.airingTonightPreview; track item.id) {
-                                <a
-                                    class="tonight-row"
-                                    [routerLink]="['/title', item.id, item.mediaType]"
-                                    [attr.aria-label]="item.title"
-                                >
-                                    <app-image
-                                        class="tonight-poster"
-                                        [src]="item.imagePath"
-                                        [alt]="item.title"
-                                        type="media"
-                                    />
+            <app-page-section panel title="Tonight's TV" subtitle="Series airing fresh episodes today.">
+                <ng-container section-controls>
+                    <a
+                        class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
+                        routerLink="/discover"
+                        [queryParams]="{ type: 'tv' }"
+                    >
+                        <span>Browse TV</span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </ng-container>
+                @if (homeVM.airingToday.type === 'loaded') {
+                    <div class="tonight-grid">
+                        @for (item of homeVM.airingTonightPreview; track item.id) {
+                            <a
+                                class="tonight-row"
+                                [routerLink]="['/title', item.id, item.mediaType]"
+                                [attr.aria-label]="item.title"
+                            >
+                                <app-image
+                                    class="tonight-poster"
+                                    [src]="item.imagePath"
+                                    [alt]="item.title"
+                                    type="media"
+                                />
 
-                                    <div class="tonight-content u-flex-column u-gap-1">
-                                        <span class="text-title-caption u-truncate">
-                                            {{ item.title }}
-                                        </span>
+                                <div class="tonight-content u-flex-column u-gap-1">
+                                    <span class="text-title-caption u-truncate">
+                                        {{ item.title }}
+                                    </span>
 
-                                        <span class="tonight-meta text-caption u-flex u-items-center">
-                                            <app-rating [value]="item.rating" />
-                                        </span>
-                                    </div>
-                                </a>
-                            }
-                        </div>
-                    }
-                </app-page-section>
-            </section>
+                                    <span class="tonight-meta text-caption u-flex u-items-center">
+                                        <app-rating [value]="item.rating" />
+                                    </span>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </app-page-section>
 
             <app-page-section title="Trending People" subtitle="Actors and creators driving conversation right now.">
                 <a
@@ -98,35 +96,33 @@
             </app-page-section>
 
             @if (homeVM.streamingProviders.length) {
-                <section class="surface-panel">
-                    <app-page-section title="Now Streaming" subtitle="What's new on your favorite streaming services.">
-                        <app-pill-toggle
-                            section-controls
-                            [options]="homeVM.streamingProviders"
-                            [selectedValue]="homeVM.selectedStreamingProviderId"
-                            (selected)="onStreamingProviderSelected($event)"
-                        />
-                        <app-media-carousel-panel [state]="homeVM.streamingNow" />
-                        @if (homeVM.selectedStreamingProviderLabel) {
-                            <div class="streaming-footer">
-                                <a
-                                    class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
-                                    routerLink="/discover"
-                                    [queryParams]="{
-                                        type: 'tv',
-                                        providers: homeVM.selectedStreamingProviderId,
-                                    }"
-                                >
-                                    <span>
-                                        See more on
-                                        {{ homeVM.selectedStreamingProviderLabel }}
-                                    </span>
-                                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        }
-                    </app-page-section>
-                </section>
+                <app-page-section panel title="Now Streaming" subtitle="What's new on your favorite streaming services.">
+                    <app-pill-toggle
+                        section-controls
+                        [options]="homeVM.streamingProviders"
+                        [selectedValue]="homeVM.selectedStreamingProviderId"
+                        (selected)="onStreamingProviderSelected($event)"
+                    />
+                    <app-media-carousel-panel [state]="homeVM.streamingNow" />
+                    @if (homeVM.selectedStreamingProviderLabel) {
+                        <div class="streaming-footer">
+                            <a
+                                class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
+                                routerLink="/discover"
+                                [queryParams]="{
+                                    type: 'tv',
+                                    providers: homeVM.selectedStreamingProviderId,
+                                }"
+                            >
+                                <span>
+                                    See more on
+                                    {{ homeVM.selectedStreamingProviderLabel }}
+                                </span>
+                                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    }
+                </app-page-section>
             }
 
             <app-page-section

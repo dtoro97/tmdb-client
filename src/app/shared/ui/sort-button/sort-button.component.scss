@@ -1,79 +1,66 @@
-@use "mixins" as *;
-@use "breakpoints" as *;
+@use 'mixins' as *;
+@use 'breakpoints' as *;
 
-.sort-button {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-}
-
-.sort-button__control {
+:host {
     display: inline-flex;
     align-items: stretch;
     min-width: 0;
+    overflow: hidden;
     border: 1px solid var(--control-border);
     border-radius: var(--control-radius);
     background: var(--control-surface);
-    overflow: hidden;
     transition: var(--control-transition);
 }
 
-.sort-button__select-shell {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-    min-height: var(--control-height-sm);
-    padding-inline: var(--space-4) var(--space-3);
-    @include surface-hover-subtle();
-}
+.sort-button {
+    &__select {
+        display: inline-flex;
+        align-items: center;
+        width: auto;
+        max-width: 100%;
+        min-width: 0;
+        min-height: var(--control-height-sm);
+        padding-inline: var(--space-4) var(--space-3);
+        background: transparent;
+        --control-border: 0;
+        --control-radius: 0;
+        @include surface-hover-subtle();
+    }
 
-.sort-button__select {
-    width: auto;
-    max-width: 100%;
-    min-width: 0;
-    min-height: unset;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-}
+    &__divider {
+        width: 1px;
+        flex-shrink: 0;
+        background: var(--control-border);
+    }
 
-.sort-button__divider {
-    width: 1px;
-    align-self: stretch;
-    background: var(--control-border);
-    flex-shrink: 0;
-}
+    &__direction {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 1.875rem;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--control-text);
+        line-height: 0;
+        cursor: pointer;
+        @include surface-hover-subtle();
 
-.sort-button__direction {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--control-surface);
-    border: none;
-    color: var(--control-text);
-    cursor: pointer;
-    width: 1.875rem;
-    min-width: 1.875rem;
-    padding: 0;
-    line-height: 0;
-    transition: var(--control-transition);
-    @include surface-hover-subtle();
+        mat-icon {
+            @include icon-size(0.875rem);
+            transition: transform var(--motion-base);
+        }
 
-    mat-icon {
-        @include icon-size(0.875rem);
-        transition: transform var(--motion-base);
-        transform: rotate(0deg);
+        &--asc mat-icon {
+            transform: rotate(180deg);
+        }
     }
 }
 
-.sort-button__direction--asc mat-icon {
-    transform: rotate(180deg);
-}
-
 @include mobile() {
-    .sort-button__select-shell {
-        padding-inline-start: var(--space-3);
+    .sort-button {
+        &__select {
+            padding-inline-start: var(--space-3);
+        }
     }
 }

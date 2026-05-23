@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map, of, tap, throwError } from 'rxjs';
 
 import {
+    AccountAddFavoriteRequest,
     AccountStates,
     MovieRestControllerService,
     StatusResponse,
@@ -11,7 +12,6 @@ import {
 } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
 import { MediaType } from '../types';
-import { buildRawBody } from '../utils/api-body';
 import { normalizeRatingValue } from '../utils/rating';
 import { UserSessionStoreService } from './user-session-store.service';
 
@@ -45,10 +45,7 @@ export class MediaRatingService {
         private readonly userSessionStore: UserSessionStoreService,
     ) {}
 
-    getMediaRating$(
-        mediaId: number,
-        mediaType: Extract<MediaType, 'movie' | 'tv'>,
-    ): Observable<number | null> {
+    getMediaRating$(mediaId: number, mediaType: Extract<MediaType, 'movie' | 'tv'>): Observable<number | null> {
         const sessionId = this.userSessionStore.sessionId();
         const guestSessionId = this.userSessionStore.guestSessionId();
 
@@ -78,11 +75,7 @@ export class MediaRatingService {
         return request$.pipe(map((accountStates) => extractUserRating(accountStates)));
     }
 
-    getEpisodeRating$(
-        seriesId: number,
-        seasonNumber: number,
-        episodeNumber: number,
-    ): Observable<number | null> {
+    getEpisodeRating$(seriesId: number, seasonNumber: number, episodeNumber: number): Observable<number | null> {
         const sessionId = this.userSessionStore.sessionId();
         const guestSessionId = this.userSessionStore.guestSessionId();
 
@@ -104,18 +97,12 @@ export class MediaRatingService {
             .pipe(map((accountStates) => extractUserRating(accountStates)));
     }
 
-    rateMedia$(
-        mediaId: number,
-        mediaType: Extract<MediaType, 'movie' | 'tv'>,
-        value: number,
-    ): Observable<void> {
+    rateMedia$(mediaId: number, mediaType: Extract<MediaType, 'movie' | 'tv'>, value: number): Observable<void> {
         const sessionId = this.userSessionStore.sessionId();
         const guestSessionId = this.userSessionStore.guestSessionId();
 
         if (!sessionId && !guestSessionId) {
-            return throwError(
-                () => new Error('You need a TMDb user session or guest session to rate.'),
-            );
+            return throwError(() => new Error('You need a TMDb user session or guest session to rate.'));
         }
 
         const ratingValue = normalizeRatingValue(value);
@@ -126,7 +113,7 @@ export class MediaRatingService {
                       'application/json',
                       guestSessionId ?? undefined,
                       sessionId ?? undefined,
-                      buildRawBody({ value: ratingValue }),
+                      { value: ratingValue } as unknown as AccountAddFavoriteRequest,
                       'body',
                       false,
                       API_JSON_OPTIONS,
@@ -136,7 +123,7 @@ export class MediaRatingService {
                       'application/json',
                       guestSessionId ?? undefined,
                       sessionId ?? undefined,
-                      buildRawBody({ value: ratingValue }),
+                      { value: ratingValue } as unknown as AccountAddFavoriteRequest,
                       'body',
                       false,
                       API_JSON_OPTIONS,
@@ -152,19 +139,12 @@ export class MediaRatingService {
         );
     }
 
-    rateEpisode$(
-        seriesId: number,
-        seasonNumber: number,
-        episodeNumber: number,
-        value: number,
-    ): Observable<void> {
+    rateEpisode$(seriesId: number, seasonNumber: number, episodeNumber: number, value: number): Observable<void> {
         const sessionId = this.userSessionStore.sessionId();
         const guestSessionId = this.userSessionStore.guestSessionId();
 
         if (!sessionId && !guestSessionId) {
-            return throwError(
-                () => new Error('You need a TMDb user session or guest session to rate.'),
-            );
+            return throwError(() => new Error('You need a TMDb user session or guest session to rate.'));
         }
 
         const ratingValue = normalizeRatingValue(value);
@@ -177,7 +157,7 @@ export class MediaRatingService {
                 episodeNumber,
                 guestSessionId ?? undefined,
                 sessionId ?? undefined,
-                buildRawBody({ value: ratingValue }),
+                { value: ratingValue } as unknown as AccountAddFavoriteRequest,
                 'body',
                 false,
                 API_JSON_OPTIONS,
@@ -192,17 +172,12 @@ export class MediaRatingService {
             );
     }
 
-    deleteMediaRating$(
-        mediaId: number,
-        mediaType: Extract<MediaType, 'movie' | 'tv'>,
-    ): Observable<void> {
+    deleteMediaRating$(mediaId: number, mediaType: Extract<MediaType, 'movie' | 'tv'>): Observable<void> {
         const sessionId = this.userSessionStore.sessionId();
         const guestSessionId = this.userSessionStore.guestSessionId();
 
         if (!sessionId && !guestSessionId) {
-            return throwError(
-                () => new Error('You need a TMDb user session or guest session to remove a rating.'),
-            );
+            return throwError(() => new Error('You need a TMDb user session or guest session to remove a rating.'));
         }
 
         const request$ =
@@ -229,28 +204,19 @@ export class MediaRatingService {
         return request$.pipe(
             tap((response) => {
                 if ((response.status_code ?? 0) >= 400) {
-                    throw toStatusError(
-                        'Unable to remove your rating.',
-                        response,
-                    );
+                    throw toStatusError('Unable to remove your rating.', response);
                 }
             }),
             map(() => undefined),
         );
     }
 
-    deleteEpisodeRating$(
-        seriesId: number,
-        seasonNumber: number,
-        episodeNumber: number,
-    ): Observable<void> {
+    deleteEpisodeRating$(seriesId: number, seasonNumber: number, episodeNumber: number): Observable<void> {
         const sessionId = this.userSessionStore.sessionId();
         const guestSessionId = this.userSessionStore.guestSessionId();
 
         if (!sessionId && !guestSessionId) {
-            return throwError(
-                () => new Error('You need a TMDb user session or guest session to remove a rating.'),
-            );
+            return throwError(() => new Error('You need a TMDb user session or guest session to remove a rating.'));
         }
 
         return this.tvEpisodeService
@@ -268,10 +234,7 @@ export class MediaRatingService {
             .pipe(
                 tap((response) => {
                     if ((response.status_code ?? 0) >= 400) {
-                        throw toStatusError(
-                            'Unable to remove your rating.',
-                            response,
-                        );
+                        throw toStatusError('Unable to remove your rating.', response);
                     }
                 }),
                 map(() => undefined),

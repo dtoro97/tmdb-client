@@ -1,25 +1,15 @@
 @if (items$ | async; as items) {
     @if (items.length) {
-        <div class="recently-viewed">
-            <div class="recently-viewed__header">
+        <div class="u-flex u-flex-column u-gap-3">
+            <div class="u-flex u-space-between u-gap-3">
                 <h2 class="text-title">Recently viewed</h2>
 
-                <button
-                    class="recently-viewed__clear text-body-sm"
-                    type="button"
-                    (click)="clearAll()"
-                >
-                    Clear all
-                </button>
+                <button class="clear text-body-sm" type="button" (click)="clearAll()">Clear all</button>
             </div>
 
-            <app-carousel
-                ariaLabel="Recently viewed titles and people"
-                [columns]="6"
-                [items]="items"
-            >
+            <app-carousel ariaLabel="Recently viewed titles and people" [columns]="6" [items]="items">
                 <ng-template let-item>
-                    @if (item.kind === "person") {
+                    @if (item.kind === 'person') {
                         <app-person-card [person]="item" />
                     } @else {
                         <app-card [item]="item" [showRating]="false" />

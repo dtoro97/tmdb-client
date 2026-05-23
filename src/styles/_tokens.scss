@@ -1,4 +1,4 @@
-@use "./breakpoints" as *;
+@use './breakpoints' as *;
 
 :root {
     --text-2xs: 0.75rem;
@@ -43,8 +43,8 @@
     --control-height-lg: 2.5rem;
     --control-radius: var(--radius-pill);
     --control-transition:
-        background-color var(--motion-fast), color var(--motion-fast),
-        border-color var(--motion-fast), box-shadow var(--motion-fast);
+        background-color var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast),
+        box-shadow var(--motion-fast);
 
     --control-surface: #181818;
     --control-surface-hover: #212121;
@@ -90,11 +90,9 @@
 
     --motion-base: 0.1s ease-out;
 
-    --transition-bg-color:
-        background-color var(--motion-base), color var(--motion-fast);
+    --transition-bg-color: background-color var(--motion-base), color var(--motion-fast);
 
-    --transition-lift:
-        transform var(--motion-base), box-shadow var(--motion-base);
+    --transition-lift: transform var(--motion-base), box-shadow var(--motion-base);
 
     --color-brand-300: #ef5350;
     --color-brand-400: #e53935;
@@ -145,12 +143,19 @@
     --border-success-soft: rgba(47, 143, 82, 0.3);
     --ripple-success-soft: rgba(120, 215, 159, 0.22);
     --interactive-media-hover-opacity: 0.75;
+    --control-hover-opacity: 0.8;
+    --control-disabled-opacity: 0.6;
     --text-faint: rgba(245, 243, 239, 0.45);
 
     --text-soft: rgba(245, 243, 239, 0.68);
 
     --skeleton-base: rgba(255, 255, 255, 0.06);
     --skeleton-highlight: rgba(255, 255, 255, 0.12);
+
+    --media-placeholder-surface: var(--surface-panel-soft);
+    --media-placeholder-color: var(--text-muted);
+    --media-placeholder-opacity: 0.45;
+    --media-placeholder-icon-size: 45%;
 
     --poster-ratio: 2 / 3;
     --backdrop-ratio: 16 / 9;

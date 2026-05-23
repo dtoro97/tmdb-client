@@ -28,7 +28,7 @@
                 } @else if (vm.media; as media) {
                     @if (vm.selected.video; as selectedVideo) {
                         <div class="player__stage">
-                            <app-youtube-video [video]="selectedVideo" [showTypeBadge]="false" />
+                            <app-youtube-player [video]="selectedVideo" />
                         </div>
 
                         <div class="player__info">
@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        @if (vm.isLoading || (vm.media && vm.selected.video && vm.relatedVideos.length)) {
+        @if (vm.isLoading || (vm.media && vm.selected.video && vm.relatedVideoItems.length)) {
             <main class="more">
                 <section>
                     <app-page-section subtitle="More from this title">
@@ -117,26 +117,16 @@
                             </div>
                         } @else if (vm.media; as media) {
                             <div class="more__carousel">
-                                <app-carousel [items]="vm.relatedVideos" [columns]="5">
-                                    <ng-template let-video>
-                                        <app-youtube-video-card
-                                            [video]="video"
-                                            [mediaId]="media.id"
-                                            [mediaType]="media.mediaType"
-                                            destination="detail"
-                                        />
+                                <app-carousel [items]="vm.relatedVideoItems" [columns]="5">
+                                    <ng-template let-item>
+                                        <app-video-card [item]="item" />
                                     </ng-template>
                                 </app-carousel>
                             </div>
 
                             <div class="more__list">
-                                @for (video of vm.relatedVideos; track video.id) {
-                                    <app-youtube-video-card
-                                        [video]="video"
-                                        [mediaId]="media.id"
-                                        [mediaType]="media.mediaType"
-                                        destination="detail"
-                                    />
+                                @for (item of vm.relatedVideoItems; track item.id) {
+                                    <app-video-card [item]="item" />
                                 }
                             </div>
                         }

@@ -32,7 +32,7 @@
                             }
 
                             @if (person.biography && person.biography.length > bioPreviewThreshold) {
-                                <a class="biography__toggle text-caption-strong" (click)="toggleBio()">
+                                <a class="biography__toggle text-body-sm" (click)="toggleBio()">
                                     {{ bioExpanded ? 'Hide biography' : 'Read full biography' }}
                                 </a>
                             }
@@ -84,39 +84,44 @@
                 </app-page-section>
             }
 
-            @if (vm.creditsDisplay.type === 'loading' || vm.creditsDisplay.type === 'loaded') {
-                <section class="surface-panel">
-                    <app-page-section subtitle="Filmography">
-                        <app-person-credits
-                            [state]="vm.creditsDisplay"
-                            [section]="vm.creditsUi.section"
-                            [mediaType]="vm.creditsUi.mediaType"
-                            [sortBy]="vm.creditsUi.sortBy"
-                            [sortDirection]="vm.creditsUi.sortDirection"
-                            (sectionChange)="onCreditsSectionChange($event)"
-                            (mediaTypeChange)="onCreditsMediaTypeChange($event)"
-                            (sortByChange)="onCreditsSortByChange($event)"
-                            (resetFilters)="resetCreditsFilters()"
-                            (sortDirectionToggle)="toggleCreditsSortDirection()"
-                        />
-                    </app-page-section>
-                </section>
-            }
-
             @if (vm.photos.type === 'loading' || (vm.photos.type === 'loaded' && vm.photos.value.length > 0)) {
                 <app-page-section subtitle="Photos">
                     <ng-container section-controls>
-                        @if (vm.person.type === 'loaded' && vm.person.value && vm.photos.type === 'loaded' && vm.photos.value.length) {
+                        @if (
+                            vm.person.type === 'loaded' &&
+                            vm.person.value &&
+                            vm.photos.type === 'loaded' &&
+                            vm.photos.value.length
+                        ) {
                             <a class="browse-link text-body-sm" [routerLink]="['/name', vm.person.value.id, 'photos']">
                                 Browse all photos ({{ vm.photos.value.length }})
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         }
                     </ng-container>
-                    <app-photos-grid
+                    <app-photos-preview
                         [state]="vm.photos"
                         [totalCount]="vm.photos.type === 'loaded' ? vm.photos.value.length : 0"
+                        mode="person"
                         (photoClick)="openPhotoViewer($event)"
+                        (moreClick)="openPhotosPage()"
+                    />
+                </app-page-section>
+            }
+
+            @if (vm.creditsDisplay.type === 'loading' || vm.creditsDisplay.type === 'loaded') {
+                <app-page-section panel subtitle="Filmography">
+                    <app-person-credits
+                        [state]="vm.creditsDisplay"
+                        [section]="vm.creditsUi.section"
+                        [mediaType]="vm.creditsUi.mediaType"
+                        [sortBy]="vm.creditsUi.sortBy"
+                        [sortDirection]="vm.creditsUi.sortDirection"
+                        (sectionChange)="onCreditsSectionChange($event)"
+                        (mediaTypeChange)="onCreditsMediaTypeChange($event)"
+                        (sortByChange)="onCreditsSortByChange($event)"
+                        (resetFilters)="resetCreditsFilters()"
+                        (sortDirectionToggle)="toggleCreditsSortDirection()"
                     />
                 </app-page-section>
             }

@@ -38,7 +38,7 @@
                         </div>
 
                         <div class="highlights__body">
-                            <p class="highlights__hook text-body-sm">
+                            <p class="highlights__hook text-body">
                                 {{ top.overview || 'No overview available.' }}
                             </p>
                         </div>
@@ -59,6 +59,9 @@
                                     {{ latest.name }}
                                 </span>
                                 <span class="highlights__meta text-caption">
+                                    @if (latest.vote_average) {
+                                        <app-rating-badge [value]="latest.vote_average" />
+                                    }
                                     @if (latest.air_date) {
                                         <span>{{ latest.air_date | date: 'MMM d, y' }}</span>
                                     }
@@ -67,7 +70,7 @@
                         </div>
 
                         <div class="highlights__body">
-                            <p class="highlights__hook text-body-sm">
+                            <p class="highlights__hook text-body">
                                 {{ latest.overview || 'No overview available.' }}
                             </p>
                         </div>

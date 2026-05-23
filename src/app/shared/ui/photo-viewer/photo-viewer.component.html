@@ -1,11 +1,11 @@
 @if (activeImage(); as image) {
-    <div class="container">
-        <div class="topbar">
-            <span class="counter text-meta">{{ counter() }}</span>
-            <div class="topbar-actions">
+    <div class="viewer">
+        <div class="toolbar">
+            <span class="toolbar__counter text-meta">{{ counter() }}</span>
+            <div class="toolbar__actions">
                 @if (data.photosLink) {
                     <app-icon-button
-                        class="photo-viewer__topbar-button photo-viewer__topbar-button--grid"
+                        class="toolbar__photos-link"
                         (onClick)="openPhotosPage()"
                         ariaLabel="Open photos page"
                     >
@@ -13,7 +13,6 @@
                     </app-icon-button>
                 }
                 <app-icon-button
-                    class="photo-viewer__topbar-button photo-viewer__topbar-button--close"
                     (onClick)="close()"
                     ariaLabel="Close"
                 >
@@ -22,9 +21,9 @@
             </div>
         </div>
 
-        <div class="main">
+        <div class="stage">
             <app-icon-button
-                class="photo-viewer__nav photo-viewer__nav--prev"
+                class="nav nav--prev"
                 (onClick)="prev()"
                 [disabled]="!hasPrev()"
                 ariaLabel="Previous photo"
@@ -33,13 +32,13 @@
             </app-icon-button>
 
             <img
-                class="image"
+                class="photo"
                 [src]="image.file_path ?? '' | imgSrc: 'w1280'"
                 alt=""
             />
 
             <app-icon-button
-                class="photo-viewer__nav photo-viewer__nav--next"
+                class="nav nav--next"
                 (onClick)="next()"
                 [disabled]="!hasNext()"
                 ariaLabel="Next photo"
@@ -51,16 +50,16 @@
         <div class="meta text-caption">
             @if (image.caption) {
                 <span>{{ image.caption }}</span>
-                <span class="separator">&middot;</span>
+                <span class="meta__separator">&middot;</span>
             }
             @if (image.width && image.height) {
                 <span>{{ image.width }} &times; {{ image.height }}</span>
             }
             @if (image.vote_average && image.vote_average > 0) {
-                <span class="separator">&middot;</span>
+                <span class="meta__separator">&middot;</span>
                 <app-rating [value]="image.vote_average"></app-rating>
                 @if (image.vote_count && image.vote_count > 0) {
-                    <span class="votes">({{ image.vote_count }})</span>
+                    <span class="meta__votes">({{ image.vote_count }})</span>
                 }
             }
         </div>

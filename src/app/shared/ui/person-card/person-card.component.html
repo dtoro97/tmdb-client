@@ -1,21 +1,38 @@
-<a class="person-card" [routerLink]="['/name', person.id]">
-    <div class="person-card__photo-shell">
-        <div class="person-card__photo">
-            <app-image [src]="person.imagePath" type="person" [alt]="person.name" params="w185" />
+@if (loading) {
+    <div class="card" aria-hidden="true">
+        <div class="photo">
+            <app-skeleton class="photo-fill" />
         </div>
-    </div>
 
-    <p class="person-card__name text-subtitle">{{ person.name }}</p>
+        <app-skeleton class="name name-skeleton text-subtitle" />
+        <app-skeleton class="subtitle-skeleton text-caption" />
 
-    <p class="text-caption">
-        @if (person.subtitle) {
-            {{ person.subtitle }}
-        } @else {
-            unknown
+        @if (rank !== null) {
+            <app-skeleton class="rank-skeleton text-label" />
         }
-    </p>
+    </div>
+} @else if (person; as person) {
+    <a class="card" [routerLink]="['/name', person.id]">
+        <app-image
+            class="photo"
+            [src]="person.imagePath"
+            type="person"
+            [alt]="person.name"
+            params="w185"
+        />
 
-    @if (rank) {
-        <app-badge class="person-card__rank-badge" [label]="'#' + rank" variant="rank" />
-    }
-</a>
+        <span class="name text-subtitle">{{ person.name }}</span>
+
+        <span class="text-caption">
+            @if (person.subtitle) {
+                {{ person.subtitle }}
+            } @else {
+                unknown
+            }
+        </span>
+
+        @if (rank !== null) {
+            <app-badge [label]="'#' + rank" variant="rank" />
+        }
+    </a>
+}

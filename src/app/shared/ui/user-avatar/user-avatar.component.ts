@@ -16,10 +16,9 @@ export class UserAvatarComponent implements OnChanges {
     @Input() avatarPath: string | null = null;
     @Input() size: UserAvatarSize = 'sm';
 
-    fallbackLabel = 'T';
+    initial = 'T';
 
     ngOnChanges(): void {
-        const normalizedName = this.name.trim();
-        this.fallbackLabel = normalizedName.charAt(0).toUpperCase() || 'T';
+        this.initial = this.name.trim().charAt(0).toUpperCase() || 'T';
     }
 }

@@ -11,7 +11,7 @@ export const pickBestYoutubeTrailer = (videos: Video[]): Video | null => {
         (video) =>
             video.site === 'YouTube' &&
             !!video.key &&
-            (video.type === 'Trailer' || video.type === 'Teaser'),
+            video.type === 'Trailer',
     );
 
     if (!candidates.length) {

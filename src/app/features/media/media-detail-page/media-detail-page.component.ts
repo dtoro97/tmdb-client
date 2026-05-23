@@ -14,7 +14,7 @@ import {
     ImageComponent,
     PageSectionComponent,
     PhotoViewerComponent,
-    PhotosGridComponent,
+    PhotosPreviewComponent,
     RepeatPipe,
     SkeletonComponent,
     ExternalLinksComponent,
@@ -28,7 +28,6 @@ import {
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { Title } from '@angular/platform-browser';
-import { MAX_VISIBLE_PHOTOS } from '../../../constants';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MediaCreditsPanelComponent } from '../media-credits-panel/media-credits-panel.component';
 import { UserRatingComponent } from '../../../shared';
@@ -50,7 +49,7 @@ import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
         KeywordsListComponent,
         HeroSurfaceComponent,
         ImageComponent,
-        PhotosGridComponent,
+        PhotosPreviewComponent,
         RatingDistributionComponent,
         ReviewCardComponent,
         SkeletonComponent,
@@ -71,8 +70,6 @@ import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
     styleUrl: './media-detail-page.component.scss',
 })
 export class MediaDetailsComponent {
-    private readonly maxVisiblePhotos = MAX_VISIBLE_PHOTOS;
-
     readonly vm$ = this.mediaStoreService.mediaDetailVm$;
 
     constructor(
@@ -124,16 +121,6 @@ export class MediaDetailsComponent {
                     return;
                 }
 
-                const visibleCount = Math.min(vm.photos.value.totalCount, this.maxVisiblePhotos);
-                const isShowMoreTile = index === visibleCount - 1 && vm.photos.value.totalCount > this.maxVisiblePhotos;
-
-                if (isShowMoreTile) {
-                    this.router.navigate(['photos'], {
-                        relativeTo: this.route,
-                    });
-                    return;
-                }
-
                 this.dialog.open(PhotoViewerComponent, {
                     data: {
                         images: vm.photos.value.allPhotos,
@@ -148,6 +135,12 @@ export class MediaDetailsComponent {
                     autoFocus: false,
                 });
             });
+    }
+
+    openPhotosPage(): void {
+        this.router.navigate(['photos'], {
+            relativeTo: this.route,
+        });
     }
 
     openTrailer(key: string): void {

@@ -4,65 +4,67 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-}
 
-.person-list__skeleton-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: var(--radius-md);
-    background: var(--mat-sys-surface-container-lowest);
-}
+    &__skeleton-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--mat-sys-outline-variant);
+        border-radius: var(--radius-md);
+        background: var(--mat-sys-surface-container-lowest);
+    }
 
-.person-list__index-skeleton {
-    width: 1.75rem;
-    flex-shrink: 0;
-    --skeleton-height: 1lh;
-}
+    &__index-skeleton {
+        width: 1.75rem;
+        flex-shrink: 0;
+        --skeleton-height: 1lh;
+    }
 
-.person-list__avatar-skeleton {
-    width: var(--media-square-lg);
-    height: var(--media-square-lg);
-    flex-shrink: 0;
-    --skeleton-radius: var(--radius-full);
-}
+    &__avatar-skeleton {
+        width: var(--media-square-lg);
+        height: var(--media-square-lg);
+        flex-shrink: 0;
+        --skeleton-radius: var(--radius-full);
+    }
 
-.person-list__content-skeleton {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: var(--space-1);
-    min-width: 0;
-}
+    &__content-skeleton {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-1);
+        min-width: 0;
+    }
 
-.person-list__title-skeleton {
-    width: min(24%, 12rem);
-    --skeleton-height: 1lh;
-}
+    &__title-skeleton {
+        width: min(24%, 12rem);
+        --skeleton-height: 1lh;
+    }
 
-.person-list__known-for-skeleton {
-    width: min(36%, 22rem);
-    --skeleton-height: 1lh;
+    &__known-for-skeleton {
+        width: min(36%, 22rem);
+        --skeleton-height: 1lh;
+    }
 }
 
 @include mobile() {
-    .person-list__skeleton-row {
-        gap: var(--space-3);
-        padding: var(--space-3);
-    }
+    .person-list {
+        &__skeleton-row {
+            gap: var(--space-3);
+            padding: var(--space-3);
+        }
 
-    .person-list__avatar-skeleton {
-        width: var(--media-square-md);
-        height: var(--media-square-md);
-    }
+        &__avatar-skeleton {
+            width: var(--media-square-md);
+            height: var(--media-square-md);
+        }
 
-    .person-list__title-skeleton {
-        width: min(36%, 10rem);
-    }
+        &__title-skeleton {
+            width: min(36%, 10rem);
+        }
 
-    .person-list__known-for-skeleton {
-        width: min(56%, 14rem);
+        &__known-for-skeleton {
+            width: min(56%, 14rem);
+        }
     }
 }

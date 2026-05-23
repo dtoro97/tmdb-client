@@ -1,4 +1,8 @@
-@use "breakpoints" as *;
+@use 'breakpoints' as *;
+
+:host {
+    display: block;
+}
 
 .page-section {
     display: flex;
@@ -23,18 +27,11 @@
 }
 
 .page-section__title {
-    margin: 0;
     color: var(--color-brand);
 }
 
 .page-section__subtitle {
-    margin: 0;
     max-width: 48rem;
-    color: var(--text-secondary);
-}
-
-.page-section__subtitle--standalone {
-    color: var(--text-primary);
 }
 
 .page-section__controls {
@@ -52,10 +49,5 @@
 @include mobile() {
     .page-section__header {
         align-items: flex-start;
-        flex-direction: row;
-    }
-
-    .page-section__subtitle {
-        font-size: var(--text-md);
     }
 }

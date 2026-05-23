@@ -1,7 +1,7 @@
-<div class="youtube-video">
-    <div class="youtube-video__frame aspect-landscape">
+<div class="youtube-player">
+    <div class="youtube-player__frame aspect-landscape">
         <iframe
-            class="youtube-video__embed"
+            class="youtube-player__embed"
             [src]="video | yt"
             [title]="video.name"
             loading="lazy"
@@ -17,9 +17,5 @@
             "
             allowfullscreen
         ></iframe>
-
-        @if (showTypeBadge && video.type) {
-            <app-badge class="youtube-video__type-badge" [label]="video.type" />
-        }
     </div>
 </div>

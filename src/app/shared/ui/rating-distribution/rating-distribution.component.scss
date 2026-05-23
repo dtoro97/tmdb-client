@@ -1,116 +1,115 @@
 @use "breakpoints" as *;
 
-.rating-distribution {
+:host {
     display: grid;
     grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
     gap: var(--space-4);
 }
 
-.rating-distribution--single-panel {
-    grid-template-columns: 1fr;
-}
+.rating-distribution {
+    &__panel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        min-width: 0;
+        padding: var(--space-4);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-lg);
+        background: var(--surface-panel-soft);
 
-.rating-distribution__section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    min-width: 0;
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    background: var(--surface-panel-soft);
-    border: 1px solid var(--color-border-subtle);
-}
+        &--bars {
+            justify-content: space-between;
+        }
+    }
 
-.rating-distribution__section--summary {
-    min-height: 100%;
-}
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2);
+    }
 
-.rating-distribution__section--distribution {
-    justify-content: space-between;
-}
+    &__summary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+    }
 
-.rating-distribution__section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-}
+    &__score-copy {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        min-width: 0;
+    }
 
-.rating-distribution__section-body {
-    min-width: 0;
-}
+    &__score-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 1em;
+        height: 1em;
+        color: var(--color-rating);
+        font-size: var(--text-xs);
+        line-height: 1;
 
-.rating-distribution__summary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    min-width: 0;
-}
+        &::before {
+            display: block;
+            line-height: 1;
+        }
+    }
 
-.rating-distribution__score-copy {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    min-width: 0;
-}
+    &__value {
+        color: var(--color-rating);
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
 
-.rating-distribution__score-icon {
-    flex-shrink: 0;
-    color: var(--color-rating);
-    font-size: var(--text-xs);
-    line-height: 1;
-    transform: translateY(-0.3rem);
-}
+    &__scale {
+        margin-left: var(--space-1);
+    }
 
-.rating-distribution__value {
-    color: var(--color-rating);
-    line-height: 0.92;
-}
+    &__bars {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        align-items: end;
+        gap: var(--space-2);
+        height: 4.75rem;
+    }
 
-.rating-distribution__value-suffix {
-    margin-left: var(--space-1);
-}
+    &__bar-group {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        row-gap: var(--space-2);
+        height: 100%;
+    }
 
-.rating-distribution__bars {
-    display: grid;
-    grid-template-columns: repeat(10, minmax(0, 1fr));
-    gap: var(--space-2);
-    align-items: end;
-    height: 4.75rem;
-}
+    &__bar {
+        min-height: 0.2rem;
+        align-self: end;
+        border-radius: var(--radius-sm);
+        background: var(--color-brand);
+    }
 
-.rating-distribution__bar-group {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    row-gap: var(--space-2);
-    height: 100%;
-}
+    &__bar-label {
+        text-align: center;
+    }
 
-.rating-distribution__bar {
-    width: 100%;
-    min-height: 0.2rem;
-    align-self: end;
-    border-radius: var(--radius-sm);
-    background: var(--color-brand);
-}
-
-.rating-distribution__bar-label {
-    text-align: center;
-}
-
-.rating-distribution__empty {
-    margin: 0;
-    padding: var(--space-4) 0;
+    &__empty {
+        padding: var(--space-4) 0;
+    }
 }
 
 @include mobile() {
-    .rating-distribution {
+    :host {
         grid-template-columns: 1fr;
     }
 
-    .rating-distribution__bars {
-        gap: var(--space-1);
-        height: 4rem;
+    .rating-distribution {
+        &__bars {
+            gap: var(--space-1);
+            height: 4rem;
+        }
     }
 }

@@ -40,7 +40,7 @@
                     <div class="poster-column">
                         <app-image class="hero-poster" [src]="media.posterPath" type="media" [alt]="media.title" />
                         @if (vm.hero.externalLinks; as externalLinks) {
-                            <app-external-links class="hero-links" [externalLinks]="externalLinks" />
+                            <app-external-links [externalLinks]="externalLinks" />
                         }
                     </div>
 
@@ -336,7 +336,7 @@
 
             @if (vm.photos.type === 'loading' || vm.photos.type === 'idle') {
                 <app-page-section subtitle="Photos">
-                    <app-photos-grid [state]="{ type: 'loading' }" />
+                    <app-photos-preview [state]="{ type: 'loading' }" />
                 </app-page-section>
             } @else if (vm.photos.type === 'loaded') {
                 @if (vm.photos.value; as photos) {
@@ -347,17 +347,18 @@
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         }
-                        <app-photos-grid
+                        <app-photos-preview
                             [state]="photos.state"
                             [totalCount]="photos.totalCount"
                             (photoClick)="openPhotoViewer($event)"
+                            (moreClick)="openPhotosPage()"
                         />
                     </app-page-section>
                 }
             }
 
             @if (vm.reviews.type === 'loading' || vm.reviews.type === 'idle') {
-                <app-page-section class="surface-panel" subtitle="Reviews">
+                <app-page-section panel subtitle="Reviews">
                     <app-skeleton class="reviews-summary-skeleton" />
                     <div class="reviews-list u-flex-column u-gap-3">
                         @for (i of 3 | repeat; track i) {
@@ -368,7 +369,7 @@
             } @else if (vm.reviews.type === 'loaded') {
                 @if (vm.reviews.value; as reviews) {
                     @if (vm.media; as media) {
-                        <app-page-section class="surface-panel" subtitle="Reviews">
+                        <app-page-section panel subtitle="Reviews">
                             <a section-controls class="section-link text-body-sm" routerLink="reviews">
                                 Browse all reviews ({{ reviews.totalResults }})
                                 <i class="fa-solid fa-chevron-right"></i>
@@ -396,7 +397,7 @@
             }
 
             @if (vm.recommendations.type === 'loading' || vm.recommendations.type === 'idle') {
-                <app-page-section class="surface-panel" title="More Like This">
+                <app-page-section panel title="More Like This">
                     <app-media-carousel-panel
                         [state]="{ type: 'loading' }"
                         variant="backdrop"
@@ -406,7 +407,7 @@
                 </app-page-section>
             } @else if (vm.recommendations.type === 'loaded') {
                 @if (vm.recommendations.value; as recommendations) {
-                    <app-page-section class="surface-panel" title="More Like This">
+                    <app-page-section panel title="More Like This">
                         <app-media-carousel-panel
                             [state]="recommendations.state"
                             variant="backdrop"

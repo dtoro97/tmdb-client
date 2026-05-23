@@ -7,23 +7,34 @@ import {
     DiscoverRestControllerService,
     MovieListItem,
     MovieRestControllerService,
-    TrendingRestControllerService,
     TvSeriesListItem,
     TvSeriesRestControllerService,
     Video,
 } from '../../api';
 import type { MediaType } from '../../shared';
 import {
+    buildYoutubeThumbnailUrl,
     buildYoutubeWatchUrl,
     isDefined,
     LoadableValue,
     LocaleStoreService,
     pickBestYoutubeTrailer,
     shuffle,
+    getISODate,
     toVideoTrailerSeedItem,
     VideoCardItem,
     VideoTrailerSeedItem,
 } from '../../shared';
+
+export interface TrailerVideoCardItem extends VideoCardItem {
+    mediaId: number;
+    mediaType: MediaType;
+    mediaTitle: string;
+    mediaYear: string;
+    mediaOverview: string;
+    backdropPath: string | null;
+    videoUrl: string;
+}
 
 interface TrailerDataState {
     videoCache: Record<string, LoadableValue<Video[]>>;
@@ -35,7 +46,6 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
 
     constructor(
         private readonly discoverService: DiscoverRestControllerService,
-        private readonly trendingService: TrendingRestControllerService,
         private readonly movieService: MovieRestControllerService,
         private readonly tvService: TvSeriesRestControllerService,
         private readonly localeStore: LocaleStoreService,
@@ -43,19 +53,22 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         super({ videoCache: {} });
     }
 
-    getTrendingTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {
+    getTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {
+        const start = getISODate(-30);
+        const end = getISODate(30);
+
         return forkJoin({
-            trendingMovies: this.trendingService.trendingMovies('week', undefined, 'body', undefined, this.opts),
-            trendingTv: this.trendingService.trendingTv('week', undefined, 'body', undefined, this.opts),
+            movies: this.discoverReleaseWindowMovies$(start, end),
+            tv: this.discoverReleaseWindowTv$(start, end),
         }).pipe(
-            map(({ trendingMovies, trendingTv }) =>
-                this.getVideoTrailerSeeds(trendingMovies.results ?? [], trendingTv.results ?? []),
+            map(({ movies, tv }) =>
+                this.getVideoTrailerSeeds(movies.results ?? [], tv.results ?? []),
             ),
             catchError(() => of([] as readonly VideoTrailerSeedItem[])),
         );
     }
 
-    loadVideoCardsForSeeds$(seeds: readonly VideoTrailerSeedItem[]): Observable<VideoCardItem[]> {
+    loadVideoCardsForSeeds$(seeds: readonly VideoTrailerSeedItem[]): Observable<TrailerVideoCardItem[]> {
         if (!seeds.length) {
             return of([]);
         }
@@ -156,6 +169,93 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         );
     }
 
+    private discoverReleaseWindowMovies$(start: string, end: string) {
+        return this.discoverService.discoverMovie(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            false,
+            false,
+            undefined,
+            1,
+            undefined,
+            start,
+            end,
+            this.localeStore.region(),
+            undefined,
+            undefined,
+            'popularity.desc',
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            'body',
+            undefined,
+            this.opts,
+        );
+    }
+
+    private discoverReleaseWindowTv$(start: string, end: string) {
+        return this.discoverService.discoverTv(
+            undefined,
+            undefined,
+            undefined,
+            start,
+            end,
+            false,
+            false,
+            undefined,
+            1,
+            undefined,
+            'popularity.desc',
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            this.localeStore.region(),
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            'body',
+            undefined,
+            this.opts,
+        );
+    }
+
     private getVideoTrailerSeeds(
         movies: readonly MovieListItem[],
         tvSeries: readonly TvSeriesListItem[],
@@ -168,26 +268,30 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             .slice(0, TRAILERS_PAGE_SEED_COUNT);
     }
 
-    private toVideoCardItem(seed: VideoTrailerSeedItem, video: Video | null): VideoCardItem | null {
+    private toVideoCardItem(seed: VideoTrailerSeedItem, video: Video | null): TrailerVideoCardItem | null {
         if (!video?.id || !video.key) {
             return null;
         }
 
-        const videoName = video.name ?? seed.mediaTitle;
+        const title = seed.mediaTitle || video.name || 'Trailer';
+        const videoUrl = buildYoutubeWatchUrl(video.key);
 
         return {
-            ...seed,
-            video: {
-                ...video,
-                type: undefined,
-            },
-            videoId: video.id,
-            videoKey: video.key,
-            videoName,
-            videoPublishedAt: video.published_at,
-            mediaLink: ['/title', seed.mediaId, seed.mediaType],
-            openVideoLabel: `Open video: ${videoName}`,
-            videoUrl: buildYoutubeWatchUrl(video.key),
+            id: video.id,
+            title,
+            titleLink: ['/title', seed.mediaId, seed.mediaType],
+            thumbnailUrl: buildYoutubeThumbnailUrl(video.key),
+            alt: title,
+            openLabel: `Open video: ${title}`,
+            publishedAt: video.published_at,
+            href: videoUrl,
+            mediaId: seed.mediaId,
+            mediaType: seed.mediaType,
+            mediaTitle: seed.mediaTitle,
+            mediaYear: seed.mediaYear,
+            mediaOverview: seed.mediaOverview,
+            backdropPath: seed.backdropPath,
+            videoUrl,
         };
     }
 }

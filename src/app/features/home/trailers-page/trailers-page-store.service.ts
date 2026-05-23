@@ -3,11 +3,14 @@ import { ComponentStore } from '@ngrx/component-store';
 import { of, switchMap, tap } from 'rxjs';
 
 import { PAGE_SIZE } from '../../../constants';
-import { LoadableItems, VideoCardItem, VideoTrailerSeedItem } from '../../../shared';
-import { TrailerDataStoreService } from '../trailer-data-store.service';
+import { LoadableItems, VideoTrailerSeedItem } from '../../../shared';
+import {
+    TrailerDataStoreService,
+    TrailerVideoCardItem,
+} from '../trailer-data-store.service';
 
 interface TrailersPageState {
-    readonly trailers: LoadableItems<VideoCardItem>;
+    readonly trailers: LoadableItems<TrailerVideoCardItem>;
     readonly pendingSeeds: readonly VideoTrailerSeedItem[];
 }
 
@@ -61,9 +64,9 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
             pendingSeeds: [],
         });
 
-        return this.trailerDataStore.getTrendingTrailerSeeds$().pipe(
-            switchMap((trendingSeeds) => {
-                const initialSeeds = trendingSeeds.slice(0, PAGE_SIZE);
+        return this.trailerDataStore.getTrailerSeeds$().pipe(
+            switchMap((trailerSeeds) => {
+                const initialSeeds = trailerSeeds.slice(0, PAGE_SIZE);
 
                 return this.trailerDataStore.loadVideoCardsForSeeds$(initialSeeds).pipe(
                     tap((nextTrailers) => {
@@ -72,7 +75,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                                 type: 'loaded',
                                 value: nextTrailers,
                             },
-                            pendingSeeds: trendingSeeds.slice(initialSeeds.length),
+                            pendingSeeds: trailerSeeds.slice(initialSeeds.length),
                         });
                     }),
                 );
@@ -96,7 +99,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                 type: 'loading-more',
                 value: currentTrailers,
                 placeholderCount: nextSeeds.length,
-            } as LoadableItems<VideoCardItem>,
+            } as LoadableItems<TrailerVideoCardItem>,
         });
 
         return this.trailerDataStore.loadVideoCardsForSeeds$(nextSeeds).pipe(
@@ -105,7 +108,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                     trailers: {
                         type: 'loaded',
                         value: [...currentTrailers, ...items],
-                    } as LoadableItems<VideoCardItem>,
+                    } as LoadableItems<TrailerVideoCardItem>,
                     pendingSeeds: remainingSeeds,
                 }),
             ),

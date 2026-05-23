@@ -8,30 +8,19 @@
                 rel="noreferrer"
                 aria-label="Facebook"
             >
-                <i
-                    class="external-links__icon fa-brands fa-facebook"
-                    aria-hidden="true"
-                ></i>
+                <i class="external-links__icon fa-brands fa-facebook" aria-hidden="true"></i>
             </a>
         }
 
         @if (externalLinks.links?.imdb_id; as imdbId) {
             <a
                 class="external-links__link"
-                [href]="
-                    'https://imdb.com/' +
-                    externalLinks.imdbType +
-                    '/' +
-                    imdbId
-                "
+                [href]="'https://imdb.com/' + externalLinks.imdbType + '/' + imdbId"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="IMDb"
             >
-                <i
-                    class="external-links__icon fa-brands fa-imdb"
-                    aria-hidden="true"
-                ></i>
+                <i class="external-links__icon fa-brands fa-imdb" aria-hidden="true"></i>
             </a>
         }
 
@@ -43,10 +32,7 @@
                 rel="noreferrer"
                 aria-label="Instagram"
             >
-                <i
-                    class="external-links__icon fa-brands fa-instagram"
-                    aria-hidden="true"
-                ></i>
+                <i class="external-links__icon fa-brands fa-instagram" aria-hidden="true"></i>
             </a>
         }
 
@@ -58,10 +44,7 @@
                 rel="noreferrer"
                 aria-label="X"
             >
-                <i
-                    class="external-links__icon fa-brands fa-x-twitter"
-                    aria-hidden="true"
-                ></i>
+                <i class="external-links__icon fa-brands fa-x-twitter" aria-hidden="true"></i>
             </a>
         }
 
@@ -72,10 +55,7 @@
                 externalLinks.links?.instagram_id ||
                 externalLinks.links?.twitter_id
             ) {
-                <mat-divider
-                    class="external-links__divider"
-                    [vertical]="true"
-                ></mat-divider>
+                <mat-divider [vertical]="true"></mat-divider>
             }
 
             <a
@@ -85,10 +65,7 @@
                 rel="noreferrer"
                 aria-label="Official website"
             >
-                <i
-                    class="external-links__icon fa-solid fa-link"
-                    aria-hidden="true"
-                ></i>
+                <i class="external-links__icon fa-solid fa-link" aria-hidden="true"></i>
             </a>
         }
     </div>
