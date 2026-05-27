@@ -44,16 +44,3 @@ export interface MediaDetailProviderPreview {
     hiddenCount: number;
     link: string | null;
 }
-
-export interface MediaDetailPhotosSection {
-    state: LoadableItems<ViewerImage>;
-    allPhotos: ViewerImage[];
-    totalCount: number;
-}
-
-export interface MediaDetailReviewsSection {
-    state: LoadableItems<Review>;
-    previewReviews: Review[];
-    totalResults: number;
-    hasMore: boolean;
-}

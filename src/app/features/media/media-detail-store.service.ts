@@ -16,6 +16,7 @@ import {
     KeywordListItem,
     Movie,
     MovieListItem,
+    ReleaseDate,
     ReleaseDateList,
     Review,
     TvEpisode,
@@ -61,6 +62,8 @@ import { MediaReviewsStoreService } from './media-reviews-store.service';
 import { MediaVideoStoreService } from './media-video-store.service';
 
 const TOP_CAST_PREVIEW_COUNT = 20;
+const CINEMA_RELEASE_TYPES = new Set([2, 3]);
+const CINEMA_WINDOW_DAYS = 30;
 
 export interface MediaState {
     mediaId: number | null;
@@ -75,6 +78,7 @@ export interface MediaState {
     externalLinks: ExternalLinks | null;
     watchProviders: LoadableValue<MediaDetailProviderPreview | null>;
     certification: LoadableValue<string | null>;
+    inCinemas: boolean;
 }
 
 const INITIAL_STATE: MediaState = {
@@ -90,6 +94,7 @@ const INITIAL_STATE: MediaState = {
     externalLinks: null,
     watchProviders: { type: 'idle' },
     certification: { type: 'idle' },
+    inCinemas: false,
 };
 
 @Injectable()
@@ -106,6 +111,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
     private readonly collectionState$ = this.select((state) => state.collection);
     private readonly watchProvidersState$ = this.select((state) => state.watchProviders);
     private readonly certificationState$ = this.select((state) => state.certification);
+    private readonly inCinemas$ = this.select((state) => state.inCinemas);
     private readonly externalLinks$ = this.select((state) => state.externalLinks);
 
     private readonly topCastState$ = this.castState$.pipe(
@@ -177,6 +183,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
         directors: this.directors$,
         externalLinks: this.externalLinks$,
         certification: this.certificationState$,
+        inCinemas: this.inCinemas$,
         watchProviders: this.watchProvidersState$,
         collection: this.collectionState$,
         photosState: this.photosState$,
@@ -198,6 +205,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                 directors,
                 externalLinks,
                 certification,
+                inCinemas,
                 watchProviders,
                 collection,
                 photosState,
@@ -217,12 +225,6 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                     crewState.type === 'loaded' || crewState.type === 'loading-more' ? crewState.value : [];
                 const photoItems =
                     photosState.type === 'loaded' || photosState.type === 'loading-more' ? photosState.value : [];
-                const reviewRatings =
-                    reviewsState.type === 'loaded'
-                        ? reviewsState.value.flatMap((review) =>
-                              typeof review.author_details?.rating === 'number' ? [review.author_details.rating] : [],
-                          )
-                        : [];
                 const reviewsItems =
                     reviewsState.type === 'loaded' || reviewsState.type === 'loading-more' ? reviewsState.value : [];
                 const credits =
@@ -273,11 +275,10 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                             });
                 const reviews =
                     reviewsState.type === 'idle' || reviewsState.type === 'loading'
-                        ? ({ type: 'loading' } as LoadableValue<{
+                          ? ({ type: 'loading' } as LoadableValue<{
                               state: LoadableItems<Review>;
                               previewReviews: Review[];
                               totalResults: number;
-                              ratings: number[];
                           } | null>)
                         : !reviewsItems.length
                           ? loaded(null)
@@ -285,7 +286,6 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                                 state: reviewsState,
                                 previewReviews: reviewPreview,
                                 totalResults: reviewTotalResults,
-                                ratings: reviewRatings,
                             });
                 const recommendations =
                     recommendationsState.type === 'idle' || recommendationsState.type === 'loading'
@@ -300,6 +300,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                 return {
                     mediaState: mediaDetailsState,
                     media,
+                    inCinemas,
                     hero: {
                         canRateTitle: media ? !primaryReleaseDate || primaryReleaseDate <= getISODate(0) : false,
                         tvYearLabel: media
@@ -354,6 +355,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                     collection: { type: 'loading' },
                     watchProviders: { type: 'loading' },
                     certification: { type: 'loading' },
+                    inCinemas: false,
                     externalLinks: null,
                 });
 
@@ -479,16 +481,31 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
         return this.mediaApiService.getImages$(id, type).pipe(
             catchError(() => of({} as ImageList)),
             tap((images) => {
+                const language = this.localStoreService.language() || 'en';
                 this.patchState({
                     photos: loaded([
-                        ...(images.backdrops ?? []).map((image) => ({
-                            ...image,
-                            photoType: 'backdrop' as const,
-                        })),
-                        ...(images.posters ?? []).map((image) => ({
-                            ...image,
-                            photoType: 'poster' as const,
-                        })),
+                        ...(images.backdrops ?? [])
+                            .filter(
+                                (image) =>
+                                    image.iso_639_1 === null ||
+                                    image.iso_639_1 === language ||
+                                    image.iso_639_1 === 'en',
+                            )
+                            .map((image) => ({
+                                ...image,
+                                photoType: 'backdrop' as const,
+                            })),
+                        ...(images.posters ?? [])
+                            .filter(
+                                (image) =>
+                                    image.iso_639_1 === null ||
+                                    image.iso_639_1 === language ||
+                                    image.iso_639_1 === 'en',
+                            )
+                            .map((image) => ({
+                                ...image,
+                                photoType: 'poster' as const,
+                            })),
                     ]),
                 });
             }),
@@ -534,11 +551,19 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
                             .find((rating) => rating.iso_3166_1 === country)
                             ?.rating?.trim() || null;
                 } else {
+                    const regionReleaseDates =
+                        ((response as ReleaseDateList | null)?.results ?? []).find(
+                            (releaseDates) => releaseDates.iso_3166_1 === country,
+                        )?.release_dates ?? [];
+
                     value =
-                        ((response as ReleaseDateList | null)?.results ?? [])
-                            .find((releaseDates) => releaseDates.iso_3166_1 === country)
-                            ?.release_dates?.map((release) => release.certification?.trim())
+                        regionReleaseDates
+                            .map((release) => release.certification?.trim())
                             .find((certification): certification is string => !!certification) ?? null;
+
+                    this.patchState({
+                        inCinemas: isInCinemaWindow(regionReleaseDates),
+                    });
                 }
 
                 this.patchState({
@@ -613,3 +638,20 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
         };
     }
 }
+
+const isInCinemaWindow = (releaseDates: readonly ReleaseDate[]): boolean => {
+    const startDate = getISODate(-CINEMA_WINDOW_DAYS);
+    const today = getISODate(0);
+
+    return releaseDates.some((release) => {
+        const releaseDate = release.release_date?.slice(0, 10);
+
+        return (
+            !!releaseDate &&
+            !!release.type &&
+            CINEMA_RELEASE_TYPES.has(release.type) &&
+            releaseDate >= startDate &&
+            releaseDate <= today
+        );
+    });
+};

@@ -13,6 +13,5 @@ import { RepeatPipe } from '../../pipes/repeat.pipe';
 })
 export class PersonCarouselPanelComponent {
     @Input({ required: true }) state!: LoadableItems<PersonCardItem>;
-    @Input() showRank = true;
     @Input() skeletonCount = MEDIUM_LIST_COUNT;
 }

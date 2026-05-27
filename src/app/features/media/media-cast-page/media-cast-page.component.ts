@@ -2,47 +2,37 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
-import { MatChipsModule } from '@angular/material/chips';
 
-import { combineLatest, filter, map, tap } from 'rxjs';
+import { combineLatest, map, tap } from 'rxjs';
 
 import {
-    BrowseToolbarComponent,
     EmptyStateComponent,
     groupCrewMembers,
-    ImageComponent,
     PillToggleComponent,
-    RatingComponent,
     SkeletonComponent,
     SubPageHeaderComponent,
 } from '../../../shared';
-import { MinutesToHours } from '../../../shared/pipes/time.pipe';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { CastCrewGridComponent } from '../cast-crew-grid/cast-crew-grid.component';
 
-type VisibleSection = 'all' | 'cast' | 'crew';
+type VisibleSection = 'cast' | 'crew';
 
 @Component({
     selector: 'app-media-cast-crew',
     imports: [
         AsyncPipe,
-        BrowseToolbarComponent,
-        MatChipsModule,
-        ImageComponent,
         PillToggleComponent,
-        RatingComponent,
         SkeletonComponent,
         CastCrewGridComponent,
         EmptyStateComponent,
         SubPageHeaderComponent,
-        MinutesToHours,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './media-cast-page.component.html',
     styleUrl: './media-cast-page.component.scss',
 })
 export class MediaCastPageComponent {
-    visibleSection: VisibleSection = 'all';
+    visibleSection: VisibleSection = 'cast';
 
     private readonly groupedCrew$ = this.mediaStoreService.crew$.pipe(
         map((crew) => groupCrewMembers(crew)),
@@ -51,9 +41,12 @@ export class MediaCastPageComponent {
     private readonly filters$ = this.mediaStoreService.castCrew$.pipe(
         map((castCrew) => ({
             options: [
-                { label: 'All', value: 'all' as const },
-                ...(castCrew.cast.length ? [{ label: 'Cast', value: 'cast' as const }] : []),
-                ...(castCrew.crew.length ? [{ label: 'Crew', value: 'crew' as const }] : []),
+                ...(castCrew.cast.length
+                    ? [{ label: `Cast (${castCrew.cast.length})`, value: 'cast' as const }]
+                    : []),
+                ...(castCrew.crew.length
+                    ? [{ label: `Crew (${castCrew.crew.length})`, value: 'crew' as const }]
+                    : []),
             ],
         })),
     );
@@ -102,6 +95,6 @@ export class MediaCastPageComponent {
     }
 
     onVisibleSectionsChange(value: unknown): void {
-        this.visibleSection = (value as VisibleSection) ?? 'all';
+        this.visibleSection = (value as VisibleSection) ?? 'cast';
     }
 }

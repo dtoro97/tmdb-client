@@ -1,97 +1,38 @@
 @use 'breakpoints' as *;
 
-.summary {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-5);
-    padding: var(--space-6) var(--space-6) 0;
-    max-width: var(--layout-content-max-width);
-    margin: 0 auto;
-
-    &__poster {
-        width: 5rem;
-        flex-shrink: 0;
-        overflow: hidden;
-        border-radius: var(--radius-md);
-    }
-
-    &__poster-skeleton {
-        width: 5rem;
-        flex-shrink: 0;
-        overflow: hidden;
-        border-radius: var(--radius-md);
-        --skeleton-height: auto;
-        --skeleton-radius: var(--radius-md);
-    }
-
-    &__body {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-1);
-        min-width: 0;
-    }
-
-    &__title {
-        margin: 0;
-    }
-
-    &__title-skeleton {
-        width: min(21rem, 100%);
-        height: 2rem;
-    }
-
-    &__meta {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: var(--space-2) var(--space-3);
-    }
-
-    &__meta-skeleton {
-        width: min(14rem, 100%);
-        height: 1rem;
-    }
-
-    &__genres {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2);
-    }
-
-    &__genre-skeleton {
-        width: 5.25rem;
-        height: 22px;
-        --skeleton-radius: var(--radius-pill);
-
-        &:nth-child(2) {
-            width: 4.75rem;
-        }
-
-        &:nth-child(3) {
-            width: 7.75rem;
-        }
-    }
-}
-
 .cast-page {
     padding-bottom: var(--space-10);
 }
 
-.panel {
+.directory {
     display: flex;
+    min-width: 0;
     flex-direction: column;
-    gap: var(--space-4);
-    overflow: hidden;
-    padding: var(--space-5);
+    gap: var(--space-5);
+}
 
-    &__toolbar {
-        margin-bottom: var(--space-2);
-    }
+.directory__head {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
 
-    &__toolbar-skeleton {
-        width: min(12rem, 100%);
-        height: 2.25rem;
-    }
+.directory__counts {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.directory__toolbar-skeleton {
+    width: min(12rem, 100%);
+    height: var(--control-height-md);
 }
 
 .empty {
@@ -99,25 +40,15 @@
 }
 
 @include mobile() {
-    .summary {
-        gap: var(--space-4);
-        padding: var(--space-5) var(--space-4) 0;
-
-        &__poster {
-            width: 3.75rem;
-        }
-
-        &__poster-skeleton {
-            width: 3.75rem;
-        }
-    }
-
     .cast-page {
         padding-bottom: var(--space-8);
     }
 
-    .panel {
-        gap: var(--space-3);
-        padding: var(--space-4);
+    .directory {
+        gap: var(--space-4);
+    }
+
+    .directory__head {
+        align-items: flex-start;
     }
 }

@@ -1,20 +1,21 @@
 @if (personDetailStore.personDetailVm$ | async; as vm) {
     <div class="page-container">
         @if (vm.person.type === 'loaded' && vm.person.value; as person) {
-            <app-hero-surface [alt]="person.name" variant="detail">
-                <div class="hero">
+            <section class="profile-hero">
+                <div class="profile-hero__inner inner-container">
                     <app-image
                         class="portrait aspect-poster"
                         [src]="person.profile_path"
                         type="person"
                         [alt]="person.name"
                     />
-                    <div class="u-flex-column u-gap-4">
-                        <div class="u-flex-column u-gap-2">
-                            <span class="text-overline">
+
+                    <div class="profile-hero__main">
+                        <div class="profile-hero__heading">
+                            <span class="text-hero-meta">
                                 {{ person.known_for_department }}
                             </span>
-                            <h1 class="text-display">
+                            <h1 class="profile-hero__title text-hero-title">
                                 {{ person.name }}
                             </h1>
                         </div>
@@ -22,7 +23,7 @@
                         <div class="biography u-flex-column u-items-start u-gap-3">
                             @if (person.biography) {
                                 <p
-                                    class="biography__copy text-body-strong"
+                                    class="biography__copy text-hero-summary"
                                     [class.biography__copy--collapsed]="!bioExpanded"
                                 >
                                     {{ person.biography }}
@@ -32,30 +33,63 @@
                             }
 
                             @if (person.biography && person.biography.length > bioPreviewThreshold) {
-                                <a class="biography__toggle text-body-sm" (click)="toggleBio()">
-                                    {{ bioExpanded ? 'Hide biography' : 'Read full biography' }}
-                                </a>
+                                <button class="biography__toggle text-body-sm" type="button" (click)="toggleBio()">
+                                    {{ bioExpanded ? 'Show less' : 'Read more' }}
+                                </button>
                             }
                         </div>
+                    </div>
+
+                    <aside class="profile-facts" aria-label="Profile details">
+                        <dl class="profile-facts__list">
+                            @if (person.birthday) {
+                                <div class="profile-facts__item">
+                                    <dt class="profile-facts__label text-card-meta">Born</dt>
+                                    <dd class="profile-facts__value text-body-sm">
+                                        {{ person.birthday | date }}
+                                        @if (!person.deathday) {
+                                            <span class="text-caption">age {{ person | age }}</span>
+                                        }
+                                    </dd>
+                                </div>
+                            }
+
+                            @if (person.deathday) {
+                                <div class="profile-facts__item">
+                                    <dt class="profile-facts__label text-card-meta">Died</dt>
+                                    <dd class="profile-facts__value text-body-sm">
+                                        {{ person.deathday | date }}
+                                        <span class="text-caption">age {{ person | age }}</span>
+                                    </dd>
+                                </div>
+                            }
+
+                            @if (person.place_of_birth) {
+                                <div class="profile-facts__item">
+                                    <dt class="profile-facts__label text-card-meta">Birthplace</dt>
+                                    <dd class="profile-facts__value text-body-sm">{{ person.place_of_birth }}</dd>
+                                </div>
+                            }
+                        </dl>
 
                         @if (vm.externalLinks) {
-                            <div class="footer">
-                                <span class="text-overline">Profiles</span>
+                            <div class="profile-facts__profiles">
+                                <span class="text-card-meta">Profiles</span>
                                 <app-external-links [externalLinks]="vm.externalLinks" />
                             </div>
                         }
-                    </div>
+                    </aside>
                 </div>
-            </app-hero-surface>
+            </section>
         } @else if (vm.person.type === 'loading' || vm.person.type === 'idle') {
-            <app-hero-surface variant="detail">
-                <div class="hero" aria-hidden="true">
+            <section class="profile-hero">
+                <div class="profile-hero__inner inner-container" aria-hidden="true">
                     <app-skeleton class="portrait portrait--skeleton aspect-poster" />
 
-                    <div class="u-flex-column u-gap-4">
-                        <div class="u-flex-column u-gap-2">
-                            <app-skeleton class="hero__eyebrow-skeleton" />
-                            <app-skeleton class="hero__title-skeleton" />
+                    <div class="profile-hero__main">
+                        <div class="profile-hero__heading">
+                            <app-skeleton class="profile-hero__eyebrow-skeleton" />
+                            <app-skeleton class="profile-hero__title-skeleton" />
                         </div>
 
                         <div class="biography u-flex-column u-items-start u-gap-3">
@@ -63,18 +97,33 @@
                             <app-skeleton class="biography__line-skeleton" />
                             <app-skeleton class="biography__line-skeleton biography__line-skeleton--short" />
                         </div>
+                    </div>
 
-                        <div class="footer" aria-hidden="true">
-                            <app-skeleton class="footer__label-skeleton" />
+                    <aside class="profile-facts">
+                        <dl class="profile-facts__list">
+                            <div class="profile-facts__item">
+                                <app-skeleton class="profile-facts__label-skeleton" />
+                                <app-skeleton class="profile-facts__value-skeleton" />
+                            </div>
+                            <div class="profile-facts__item">
+                                <app-skeleton class="profile-facts__label-skeleton" />
+                                <app-skeleton
+                                    class="profile-facts__value-skeleton profile-facts__value-skeleton--wide"
+                                />
+                            </div>
+                        </dl>
+
+                        <div class="profile-facts__profiles" aria-hidden="true">
+                            <app-skeleton class="profile-facts__label-skeleton" />
                             <div class="u-flex u-items-center u-gap-2">
-                                <app-skeleton class="footer__icon-skeleton" />
-                                <app-skeleton class="footer__icon-skeleton" />
-                                <app-skeleton class="footer__icon-skeleton" />
+                                <app-skeleton class="profile-facts__icon-skeleton" />
+                                <app-skeleton class="profile-facts__icon-skeleton" />
+                                <app-skeleton class="profile-facts__icon-skeleton" />
                             </div>
                         </div>
-                    </div>
+                    </aside>
                 </div>
-            </app-hero-surface>
+            </section>
         }
 
         <div class="page-sections">
@@ -113,72 +162,48 @@
                 <app-page-section panel subtitle="Filmography">
                     <app-person-credits
                         [state]="vm.creditsDisplay"
-                        [section]="vm.creditsUi.section"
                         [mediaType]="vm.creditsUi.mediaType"
                         [sortBy]="vm.creditsUi.sortBy"
                         [sortDirection]="vm.creditsUi.sortDirection"
-                        (sectionChange)="onCreditsSectionChange($event)"
                         (mediaTypeChange)="onCreditsMediaTypeChange($event)"
                         (sortByChange)="onCreditsSortByChange($event)"
                         (resetFilters)="resetCreditsFilters()"
                         (sortDirectionToggle)="toggleCreditsSortDirection()"
+                        (actingCreditsToggle)="toggleActingCredits()"
+                        (productionCreditsToggle)="toggleProductionCredits()"
                     />
                 </app-page-section>
             }
 
             @if (vm.person.type === 'loaded' && vm.person.value; as person) {
-                @if (person.birthday || person.deathday || person.place_of_birth || person.also_known_as?.length) {
+                @if (person.also_known_as?.length) {
                     <app-page-section subtitle="Personal Details">
-                        <ul class="facts u-list-none" aria-label="Personal details">
-                            @if (person.birthday) {
-                                <li class="fact u-flex-column u-gap-2">
-                                    <span class="text-overline">Born</span>
-                                    <span class="text-body-strong">
-                                        {{ person.birthday | date }}
-                                        @if (!person.deathday) {
-                                            <span class="text-caption"> (age {{ person | age }}) </span>
-                                        }
-                                    </span>
-                                </li>
-                            }
-                            @if (person.deathday) {
-                                <li class="fact u-flex-column u-gap-2">
-                                    <span class="text-overline">Died</span>
-                                    <span class="text-body-strong">
-                                        {{ person.deathday | date }}
-                                        <span class="text-caption"> (age {{ person | age }}) </span>
-                                    </span>
-                                </li>
-                            }
-                            @if (person.place_of_birth) {
-                                <li class="fact u-flex-column u-gap-2">
-                                    <span class="text-overline">Birthplace</span>
-                                    <span class="text-body-strong">{{ person.place_of_birth }}</span>
-                                </li>
-                            }
+                        <dl class="info-grid" aria-label="Personal details">
                             @if (person.also_known_as; as aliases) {
                                 @if (aliases.length) {
-                                    <li class="fact u-flex-column u-gap-2">
-                                        <span class="text-overline">
+                                    <div class="info-grid__item">
+                                        <dt class="info-grid__label text-card-meta">
                                             {{ aliases.length === 1 ? 'Alternative name' : 'Alternative names' }}
-                                        </span>
-                                        <ul class="u-list-none u-flex-column u-gap-2">
-                                            @for (alias of aliases | slice: 0 : aliasPreviewCount; track alias) {
-                                                <li class="text-body-strong">
-                                                    {{ alias }}
-                                                </li>
-                                            }
-                                            @if (aliases.length > aliasPreviewCount) {
-                                                <li class="text-caption">
-                                                    +{{ aliases.length - aliasPreviewCount }}
-                                                    more
-                                                </li>
-                                            }
-                                        </ul>
-                                    </li>
+                                        </dt>
+                                        <dd class="info-grid__value">
+                                            <ul class="info-grid__value-list u-list-none">
+                                                @for (alias of aliases | slice: 0 : aliasPreviewCount; track alias) {
+                                                    <li class="text-body-strong">
+                                                        {{ alias }}
+                                                    </li>
+                                                }
+                                                @if (aliases.length > aliasPreviewCount) {
+                                                    <li class="text-caption">
+                                                        +{{ aliases.length - aliasPreviewCount }}
+                                                        more
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </dd>
+                                    </div>
                                 }
                             }
-                        </ul>
+                        </dl>
                     </app-page-section>
                 }
             }

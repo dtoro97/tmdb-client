@@ -7,7 +7,7 @@
               : []
     "
 >
-    <ng-template let-person let-rank="index">
-        <app-person-card [person]="person" [rank]="showRank ? rank + 1 : null" [loading]="state.type === 'loading'" />
+    <ng-template let-person>
+        <app-person-card [person]="person" [loading]="state.type === 'loading'" />
     </ng-template>
 </app-carousel>

@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CastGridMember, GroupedCrew, ImageComponent, RepeatPipe, SkeletonComponent } from '../../../shared';
 
+type CastCrewGridVariant = 'accordion' | 'directory';
+
 @Component({
     selector: 'app-cast-crew-grid',
     imports: [CdkAccordionModule, RouterLink, ImageComponent, RepeatPipe, SkeletonComponent],
@@ -18,4 +20,5 @@ export class CastCrewGridComponent {
     @Input() showCast = true;
     @Input() showCrew = true;
     @Input() loading = false;
+    @Input() variant: CastCrewGridVariant = 'accordion';
 }

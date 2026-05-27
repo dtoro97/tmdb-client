@@ -4,12 +4,8 @@
             <app-skeleton class="photo-fill" />
         </div>
 
-        <app-skeleton class="name name-skeleton text-subtitle" />
-        <app-skeleton class="subtitle-skeleton text-caption" />
-
-        @if (rank !== null) {
-            <app-skeleton class="rank-skeleton text-label" />
-        }
+        <app-skeleton class="name name-skeleton text-card-title" />
+        <app-skeleton class="subtitle-skeleton text-card-meta" />
     </div>
 } @else if (person; as person) {
     <a class="card" [routerLink]="['/name', person.id]">
@@ -21,18 +17,14 @@
             params="w185"
         />
 
-        <span class="name text-subtitle">{{ person.name }}</span>
+        <span class="name text-card-title">{{ person.name }}</span>
 
-        <span class="text-caption">
+        <span class="subtitle text-card-meta">
             @if (person.subtitle) {
                 {{ person.subtitle }}
             } @else {
                 unknown
             }
         </span>
-
-        @if (rank !== null) {
-            <app-badge [label]="'#' + rank" variant="rank" />
-        }
     </a>
 }

@@ -1,0 +1,55 @@
+<div class="page-container">
+    @if (reviewState$ | async; as reviewState) {
+        @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+            <app-sub-page-header
+                [backdropPath]="mediaState.type === 'loaded' ? mediaState.value?.backdropPath : undefined"
+                parentTitle="Reviews"
+                [backLink]="['../']"
+                pageTitle="Review"
+                [subtitle]="
+                    (reviewState.type === 'loaded' ? reviewState.value?.media_title : null) ??
+                    (mediaState.type === 'loaded' ? (mediaState.value?.title ?? null) : null)
+                "
+            />
+        }
+
+        <main class="page-main">
+            @if (reviewState.type === 'loading' || reviewState.type === 'idle') {
+                <section class="review-detail-layout" aria-hidden="true">
+                    <app-skeleton class="review-detail-poster review-detail-poster--skeleton" />
+                    <div class="review-detail">
+                        <app-skeleton class="review-detail__meta-skeleton" />
+                        <app-skeleton class="review-detail__content-skeleton" />
+                    </div>
+                </section>
+            } @else if (reviewState.type === 'loaded') {
+                @if (reviewState.value; as review) {
+                    <section class="review-detail-layout">
+                        @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+                            @if (mediaState.type === 'loaded' && mediaState.value; as media) {
+                                <app-image
+                                    class="review-detail-poster"
+                                    [src]="media.posterPath"
+                                    type="media"
+                                    [alt]="media.title"
+                                />
+                            } @else {
+                                <app-skeleton class="review-detail-poster review-detail-poster--skeleton" />
+                            }
+                        } @else {
+                            <app-skeleton class="review-detail-poster review-detail-poster--skeleton" />
+                        }
+
+                        <div class="review-detail">
+                            <app-review-card [review]="review" variant="detail" />
+                        </div>
+                    </section>
+                } @else {
+                    <section class="review-detail__empty">
+                        <app-empty-state iconClass="fa-regular fa-comment-dots" text="Review unavailable" />
+                    </section>
+                }
+            }
+        </main>
+    }
+</div>

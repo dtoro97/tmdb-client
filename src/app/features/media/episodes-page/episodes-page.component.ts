@@ -1,15 +1,20 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { combineLatest, filter, map, tap } from 'rxjs';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import {
-    BadgeComponent,
     ImageComponent,
+    PageSectionComponent,
+    PhotoViewerComponent,
+    PhotosPreviewComponent,
     PillToggleComponent,
     SkeletonComponent,
     SubPageHeaderComponent,
-    RatingBadgeComponent,
+    TmdbRatingComponent,
+    VideosGridComponent,
+    ViewerImage,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { Title } from '@angular/platform-browser';
@@ -22,15 +27,18 @@ import { EpisodeListComponent } from '../episode-list/episode-list.component';
     selector: 'app-episodes-page',
     imports: [
         AsyncPipe,
-        BadgeComponent,
         DatePipe,
         RouterLink,
+        MatDialogModule,
         ImageComponent,
+        PageSectionComponent,
+        PhotosPreviewComponent,
         PillToggleComponent,
         EpisodeListComponent,
         SubPageHeaderComponent,
         SkeletonComponent,
-        RatingBadgeComponent,
+        TmdbRatingComponent,
+        VideosGridComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './episodes-page.component.html',
@@ -43,30 +51,47 @@ export class EpisodesPageComponent {
 
     readonly vm$ = combineLatest({
         mediaState: this.mediaStoreService.mediaDetailsState$,
-        topState: this.mediaSeasonsStoreService.topRatedEpisode$,
         seasonInfo: this.mediaSeasonsStoreService.selectedSeasonInfo$,
         seasonOptions: this.mediaSeasonsStoreService.seasonPillOptions$,
         selectedSeason: this.mediaSeasonsStoreService.selectedSeason$,
         episodesState: this.mediaSeasonsStoreService.seasonEpisodesState$,
+        seasonImagesState: this.mediaSeasonsStoreService.seasonImagesState$,
+        seasonVideosState: this.mediaSeasonsStoreService.seasonVideosState$,
         routePrefix: this.episodeRoutePrefix$,
     }).pipe(
-        map(({ mediaState, topState, seasonInfo, seasonOptions, selectedSeason, episodesState, routePrefix }) => ({
-            media: mediaState.type === 'loaded' ? mediaState.value : null,
-            latest: mediaState.type === 'loaded' ? (mediaState.value?.lastEpisode ?? null) : null,
-            topState,
-            seasonInfo,
-            seasonOptions,
-            selectedSeason,
-            episodesState,
-            routePrefix,
-        })),
+        map(
+            ({
+                mediaState,
+                seasonInfo,
+                seasonOptions,
+                selectedSeason,
+                episodesState,
+                seasonImagesState,
+                seasonVideosState,
+                routePrefix,
+            }) => ({
+                media: mediaState.type === 'loaded' ? mediaState.value : null,
+                seasonInfo,
+                seasonOptions,
+                selectedSeason,
+                episodesState,
+                seasonImagesState,
+                seasonImages: seasonImagesState.type === 'loaded' ? seasonImagesState.value : [],
+                seasonImagesTotalCount: seasonImagesState.type === 'loaded' ? seasonImagesState.value.length : 0,
+                seasonVideosState,
+                seasonVideoCount: seasonVideosState.type === 'loaded' ? seasonVideosState.value.length : 0,
+                routePrefix,
+            }),
+        ),
     );
 
     constructor(
         public mediaStoreService: MediaDetailStoreService,
         public mediaSeasonsStoreService: MediaSeasonsStoreService,
         private route: ActivatedRoute,
+        private router: Router,
         private title: Title,
+        private dialog: MatDialog,
     ) {
         this.mediaStoreService.title$
             .pipe(
@@ -101,5 +126,31 @@ export class EpisodesPageComponent {
 
     changeSeason(value: unknown): void {
         this.mediaSeasonsStoreService.updateSelectedSeason(value as number);
+    }
+
+    openPhotoViewer(index: number, images: ViewerImage[]): void {
+        if (!images.length) {
+            return;
+        }
+
+        this.dialog.open(PhotoViewerComponent, {
+            data: { images, activeIndex: index },
+            panelClass: 'photo-viewer-panel',
+            maxWidth: '100vw',
+            maxHeight: '100vh',
+            width: '100vw',
+            height: '100vh',
+            autoFocus: false,
+        });
+    }
+
+    openSeasonPhotosPage(seasonNumber: number | undefined): void {
+        if (seasonNumber === undefined) {
+            return;
+        }
+
+        this.router.navigate([seasonNumber, 'photos'], {
+            relativeTo: this.route,
+        });
     }
 }

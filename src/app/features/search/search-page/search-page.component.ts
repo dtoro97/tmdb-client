@@ -13,6 +13,7 @@ import {
     MediaListComponent,
     PillToggleComponent,
     PersonListComponent,
+    type SelectOption,
 } from '../../../shared';
 import { GenreService } from '../../../shared/services';
 import { SearchStoreService, SearchType } from '../search-store.service';
@@ -33,12 +34,12 @@ import { SearchStoreService, SearchType } from '../search-store.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchPageComponent {
-    readonly typeOptions = [
+    readonly typeOptions: SelectOption<SearchType>[] = [
         { label: 'All', value: 'all' },
         { label: 'Movies', value: 'movie' },
         { label: 'TV Shows', value: 'tv' },
         { label: 'People', value: 'person' },
-    ] satisfies { label: string; value: SearchType }[];
+    ];
 
     readonly vm$ = combineLatest({
         query: this.store.query$,
@@ -79,9 +80,7 @@ export class SearchPageComponent {
         this.store.query$
             .pipe(
                 tap((query) => {
-                    this.titleService.setTitle(
-                        query ? `Results for "${query}"` : 'Search',
-                    );
+                    this.titleService.setTitle(query ? `Results for "${query}"` : 'Search');
                 }),
                 takeUntilDestroyed(),
             )

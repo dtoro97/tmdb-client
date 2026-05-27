@@ -1,46 +1,50 @@
-@if (review) {
-    <article class="card">
-        <header class="u-flex u-items-start u-gap-3">
-            @if (review.author_details?.avatar_path; as avatarPath) {
-                <img class="avatar" [src]="avatarPath | imgSrc: 'w185'" [alt]="review.author ?? ''" />
-            } @else {
-                <div class="avatar avatar--fallback">
-                    {{ initial }}
-                </div>
-            }
+@if (currentReview; as review) {
+    <article
+        class="review-card"
+        [class.review-card--preview]="variant === 'preview'"
+        [class.review-card--detail]="variant === 'detail'"
+    >
+        @if (review.author_details?.avatar_path; as avatarPath) {
+            <img
+                class="review-card__avatar"
+                [src]="avatarPath | imgSrc: 'w185'"
+                [alt]="review.author || review.author_details?.username || 'Anonymous'"
+            />
+        } @else {
+            <div class="review-card__avatar review-card__avatar--fallback">
+                {{ initial }}
+            </div>
+        }
 
-            <div class="u-flex-column u-gap-1 u-flex-1">
-                <div class="u-flex u-space-between">
-                    <h3 class="author text-body-sm">
-                        {{ review.author }}
+        <div class="review-card__main">
+            <header class="review-card__header">
+                <div class="review-card__byline">
+                    <h3 class="review-card__author text-body-strong">
+                        {{ review.author || review.author_details?.username || 'Anonymous' }}
                     </h3>
 
-                    @if (review.author_details?.rating !== null && review.author_details?.rating !== undefined) {
-                        <app-rating-badge [value]="review.author_details?.rating ?? 0" />
-                    } @else {
-                        <span class="text-caption"> No user rating </span>
+                    <span class="review-card__meta text-caption">
+                        @if (review.created_at) {
+                            {{ review.created_at | date: 'MMM d, y' }}
+                        }
+                    </span>
+
+                    @if (review.author_details?.rating) {
+                        <app-rating-badge class="review-card__rating" [value]="review.author_details?.rating ?? 0" />
                     }
                 </div>
+            </header>
 
-                @if (review.created_at) {
-                    <p class="text-caption">
-                        {{ review.created_at | date: 'MMM d, y' }}
-                    </p>
-                }
-            </div>
-        </header>
-
-        <div class="u-flex-column u-gap-3">
-            @if (expanded) {
-                <div class="content text-body" [innerHTML]="contentHtml"></div>
+            @if (variant === 'detail') {
+                <div class="review-card__content text-body" [innerHTML]="contentHtml"></div>
             } @else {
-                <div class="content content--collapsed text-body" [innerHTML]="contentPreviewHtml"></div>
+                <p class="review-card__content review-card__content--collapsed text-body">
+                    {{ contentPreviewHtml }}
+                </p>
             }
 
-            @if (expandable) {
-                <button class="toggle text-caption" type="button" (click)="toggleExpanded()">
-                    {{ expanded ? 'Show less' : 'Read more' }}
-                </button>
+            @if (reviewLink && variant !== 'detail') {
+                <a class="review-card__link text-caption" [routerLink]="reviewLink">Read full review</a>
             }
         </div>
     </article>

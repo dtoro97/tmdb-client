@@ -8,94 +8,7 @@
         />
 
         <main class="page-main episodes">
-            <section class="highlights">
-                @if (vm.topState.type === 'loading' || vm.topState.type === 'idle') {
-                    <article class="highlights__card highlights__card--skeleton">
-                        <div class="highlights__media">
-                            <app-skeleton class="highlights__image-skeleton" />
-                        </div>
-                    </article>
-                } @else if (vm.topState.type === 'loaded' && vm.topState.value; as top) {
-                    <a class="highlights__card" [routerLink]="[top.season_number, top.episode_number]">
-                        <div class="highlights__media">
-                            <app-badge class="highlights__badge" label="Top Rated" variant="accent" />
-                            <app-image class="highlights__image" [src]="top.still_path ?? null" params="original" />
-
-                            <div class="highlights__overlay">
-                                <span class="text-overline"> S{{ top.season_number }}E{{ top.episode_number }} </span>
-                                <span class="highlights__title text-title">
-                                    {{ top.name }}
-                                </span>
-                                <span class="highlights__meta text-caption">
-                                    @if (top.vote_average) {
-                                        <app-rating-badge [value]="top.vote_average" />
-                                    }
-                                    @if (top.air_date) {
-                                        <span>{{ top.air_date | date: 'MMM d, y' }}</span>
-                                    }
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="highlights__body">
-                            <p class="highlights__hook text-body">
-                                {{ top.overview || 'No overview available.' }}
-                            </p>
-                        </div>
-                    </a>
-                }
-
-                @if (vm.latest; as latest) {
-                    <a class="highlights__card" [routerLink]="[latest.season_number, latest.episode_number]">
-                        <div class="highlights__media">
-                            <app-badge class="highlights__badge" label="Most Recent" />
-                            <app-image class="highlights__image" [src]="latest.still_path ?? null" params="original" />
-
-                            <div class="highlights__overlay">
-                                <span class="text-overline">
-                                    S{{ latest.season_number }}E{{ latest.episode_number }}
-                                </span>
-                                <span class="highlights__title text-title">
-                                    {{ latest.name }}
-                                </span>
-                                <span class="highlights__meta text-caption">
-                                    @if (latest.vote_average) {
-                                        <app-rating-badge [value]="latest.vote_average" />
-                                    }
-                                    @if (latest.air_date) {
-                                        <span>{{ latest.air_date | date: 'MMM d, y' }}</span>
-                                    }
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="highlights__body">
-                            <p class="highlights__hook text-body">
-                                {{ latest.overview || 'No overview available.' }}
-                            </p>
-                        </div>
-                    </a>
-                } @else {
-                    <article class="highlights__card highlights__card--skeleton">
-                        <div class="highlights__media">
-                            <app-skeleton class="highlights__image-skeleton" />
-                        </div>
-                    </article>
-                }
-            </section>
-
-            <section class="season">
-                @if (vm.seasonInfo; as seasonInfo) {
-                    <header class="season__head">
-                        <h2 class="text-title">{{ seasonInfo.name }}</h2>
-                        <span class="text-caption">{{ seasonInfo.episodeCount }} episodes</span>
-                    </header>
-                } @else {
-                    <div class="season__head-skeleton" aria-hidden="true">
-                        <app-skeleton class="season__line-skeleton season__line-skeleton--head" />
-                    </div>
-                }
-
+            <section class="season-nav" aria-label="Seasons">
                 @if (vm.seasonOptions.length) {
                     <app-pill-toggle
                         [options]="vm.seasonOptions"
@@ -103,13 +16,84 @@
                         (selected)="changeSeason($event)"
                     />
                 } @else {
-                    <div class="season__pills-skeleton" aria-hidden="true">
-                        <app-skeleton class="season__line-skeleton season__line-skeleton--pills" />
+                    <div class="season-nav__skeleton" aria-hidden="true">
+                        <app-skeleton class="season-nav__skeleton-line" />
                     </div>
                 }
+            </section>
 
+            <section class="season-summary" aria-label="Selected season">
+                @if (vm.seasonInfo; as seasonInfo) {
+                    <app-image
+                        class="season-summary__poster"
+                        [src]="seasonInfo.posterPath"
+                        [alt]="seasonInfo.name"
+                        params="w342"
+                    />
+
+                    <div class="season-summary__content">
+                        <header class="season-summary__head">
+                            <div class="season-summary__title-row">
+                                <h2 class="text-headline">{{ seasonInfo.name }}</h2>
+                                <span class="text-card-meta">{{ seasonInfo.episodeCount }} episodes</span>
+                            </div>
+
+                            @if (seasonInfo.airDate) {
+                                <div class="season-summary__meta text-card-meta">
+                                    <span>{{ seasonInfo.airDate | date: 'MMM d, y' }}</span>
+                                </div>
+                            }
+
+                            @if (seasonInfo.voteAverage) {
+                                <app-tmdb-rating [value]="seasonInfo.voteAverage" />
+                            }
+                        </header>
+
+                        <p class="season-summary__overview text-hero-summary">
+                            {{ seasonInfo.overview || 'No overview available for this season.' }}
+                        </p>
+                    </div>
+                } @else {
+                    <app-skeleton class="season-summary__poster-skeleton" />
+                    <div class="season-summary__content" aria-hidden="true">
+                        <app-skeleton class="season-summary__line-skeleton season-summary__line-skeleton--title" />
+                        <app-skeleton class="season-summary__line-skeleton season-summary__line-skeleton--meta" />
+                        <app-skeleton class="season-summary__line-skeleton season-summary__line-skeleton--overview" />
+                    </div>
+                }
+            </section>
+
+            <section class="season-episodes" aria-label="Season episodes">
                 <app-episode-list [state]="vm.episodesState" [skeletonCount]="5" [routePrefix]="vm.routePrefix" />
             </section>
+
+            @if (vm.seasonImagesState.type !== 'loaded' || vm.seasonImagesTotalCount) {
+                <app-page-section subtitle="Season Images">
+                    @if (vm.seasonImagesTotalCount && vm.selectedSeason !== undefined) {
+                        <a
+                            section-controls
+                            class="section-link text-body-sm"
+                            [routerLink]="[vm.selectedSeason, 'photos']"
+                        >
+                            Browse all photos ({{ vm.seasonImagesTotalCount }})
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    }
+                    <app-photos-preview
+                        [state]="vm.seasonImagesState"
+                        [totalCount]="vm.seasonImagesTotalCount"
+                        variant="compact"
+                        (photoClick)="openPhotoViewer($event, vm.seasonImages)"
+                        (moreClick)="openSeasonPhotosPage(vm.selectedSeason)"
+                    />
+                </app-page-section>
+            }
+
+            @if (vm.seasonVideosState.type !== 'loaded' || vm.seasonVideoCount) {
+                <app-page-section subtitle="Season Videos">
+                    <app-videos-grid [state]="vm.seasonVideosState" />
+                </app-page-section>
+            }
         </main>
     }
 </div>

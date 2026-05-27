@@ -2,7 +2,7 @@
     <div class="actions">
         <app-icon-button
             class="action"
-            [class.action--active]="vm.isFavorite"
+            [selected]="vm.isFavorite"
             [disabled]="vm.pending"
             [ariaLabel]="
                 vm.isFavorite
@@ -24,7 +24,7 @@
 
         <app-icon-button
             class="action"
-            [class.action--active]="vm.isInWatchlist"
+            [selected]="vm.isInWatchlist"
             [disabled]="vm.pending"
             [ariaLabel]="
                 vm.isInWatchlist
@@ -48,7 +48,7 @@
 
         <app-icon-button
             class="action"
-            [disabled]="vm.pending"
+            [disabled]="vm.pending || listDialogPending()"
             [ariaLabel]="'Add ' + title + ' to a list'"
             [matTooltip]="'Add to list'"
             (onClick)="openCustomListsDialog()"

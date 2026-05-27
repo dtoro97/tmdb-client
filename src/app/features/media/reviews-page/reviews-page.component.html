@@ -61,7 +61,7 @@
                                     review of reviewsState.value;
                                     track review.id
                                 ) {
-                                    <app-review-card [review]="review" />
+                                    <app-review-card [review]="review" [reviewLink]="review.id ? [review.id] : null" />
                                 }
 
                                 @if (reviewsState.type === "loading-more") {

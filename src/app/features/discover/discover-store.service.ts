@@ -31,23 +31,16 @@ import {
     getISODate,
     LoadableItems,
     MediaListItem,
+    MediaType,
     MediaOrPersonType,
     PersonListItem,
+    type SelectOption,
     SortDirection,
     toMediaListItem,
     toPersonListItem,
 } from '../../shared';
-import {
-    ConfigStoreService,
-    GenreService,
-    LocaleStoreService,
-    WatchProviderStoreService,
-} from '../../shared/services';
-import {
-    parseListParams,
-    parseNumberListParam,
-    parseNumberParam,
-} from '../../shared/utils';
+import { ConfigStoreService, GenreService, LocaleStoreService, WatchProviderStoreService } from '../../shared/services';
+import { parseListParams, parseNumberListParam, parseNumberParam } from '../../shared/utils';
 import { KeywordChip } from './discover-filters/discover-filters.component';
 
 export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
@@ -154,15 +147,9 @@ export interface CategoryConfig {
     dateFn?: () => { gte?: string; lte?: string };
 }
 
-export interface SortOption {
-    label: string;
-    value: string;
-}
+export type SortOption = SelectOption<string>;
 
-interface CategoryOption {
-    label: string;
-    value: BrowseCategory;
-}
+type CategoryOption = SelectOption<BrowseCategory>;
 
 interface ResultPaginationState {
     page: number;
@@ -341,23 +328,12 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             const region = this.localeStore.region() || 'US';
             const request$ =
                 type === 'tv'
-                    ? this.certificationService.certificationsTvList(
-                          'body',
-                          false,
-                          API_JSON_OPTIONS,
-                      )
-                    : this.certificationService.certificationMovieList(
-                          'body',
-                          false,
-                          API_JSON_OPTIONS,
-                      );
+                    ? this.certificationService.certificationsTvList('body', false, API_JSON_OPTIONS)
+                    : this.certificationService.certificationMovieList('body', false, API_JSON_OPTIONS);
 
             return request$.pipe(
                 map((result) => {
-                    const certs =
-                        result.certifications?.[region] ??
-                        result.certifications?.['US'] ??
-                        [];
+                    const certs = result.certifications?.[region] ?? result.certifications?.['US'] ?? [];
                     return certs
                         .filter(
                             (
@@ -366,10 +342,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                                 certification: string;
                             } => !!certification.certification,
                         )
-                        .sort(
-                            (left, right) =>
-                                (left.order ?? 0) - (right.order ?? 0),
-                        )
+                        .sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
                         .map((certification) => certification.certification);
                 }),
                 catchError(() => of([] as string[])),
@@ -384,9 +357,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             }
 
             const providers$ =
-                type === 'tv'
-                    ? this.watchProviderStore.tvProviders$
-                    : this.watchProviderStore.movieProviders$;
+                type === 'tv' ? this.watchProviderStore.tvProviders$ : this.watchProviderStore.movieProviders$;
 
             return providers$.pipe(
                 map((providers) =>
@@ -407,84 +378,61 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         watchProviderOptions: this.watchProviderOptions$,
         certificationOptions: this.certificationOptions$,
     }).pipe(
-        map(
-            ({
-                state,
+        map(({ state, genreMap, languageOptions, watchProviderOptions, certificationOptions }) => {
+            const browsingPeople = state.type === 'person';
+            const config = this.getCategoryConfig(state.category, state.type);
+            const visibleCount = this.getVisibleCount(state.resultsState);
+            const startIndex = state.sortDirection === 'asc' ? state.totalResults : 1;
+
+            return {
+                ...state,
+                config,
+                browsingPeople,
+                categoryOptions: this.getCategoryOptions(state.type),
+                sortOptions: this.getSortOptions(state.type),
+                visibleCount,
+                startIndex,
+                hasMore:
+                    !(state.type === 'person' && state.category === 'trending') &&
+                    state.pagination.page < state.pagination.totalPages,
+                mediaState: browsingPeople
+                    ? ({
+                          type: 'loaded',
+                          value: [],
+                      } as LoadableItems<MediaListItem>)
+                    : (state.resultsState as LoadableItems<MediaListItem>),
+                personState: browsingPeople
+                    ? (state.resultsState as LoadableItems<PersonListItem>)
+                    : ({
+                          type: 'loaded',
+                          value: [],
+                      } as LoadableItems<PersonListItem>),
                 genreMap,
+                genreList: Array.from(genreMap.entries()).map(([id, name]) => ({ id, name })),
                 languageOptions,
                 watchProviderOptions,
                 certificationOptions,
-            }) => {
-                const browsingPeople = state.type === 'person';
-                const config = this.getCategoryConfig(
-                    state.category,
-                    state.type,
-                );
-                const visibleCount = this.getVisibleCount(state.resultsState);
-                const startIndex =
-                    state.sortDirection === 'asc' ? state.totalResults : 1;
+                activeFilterCount: this.getActiveFilterCount(state),
+                ratingPlaceholder: config?.voteAverageGte ?? null,
+                descendingFrom: state.sortDirection === 'asc' ? startIndex : null,
+                showEmptyState: state.resultsState.type === 'loaded' && visibleCount === 0,
+            };
+        }),
+    );
 
-                return {
-                    ...state,
-                    config,
-                    browsingPeople,
-                    categoryOptions: this.getCategoryOptions(state.type),
-                    sortOptions: this.getSortOptions(state.type),
-                    visibleCount,
-                    startIndex,
-                    hasMore:
-                        !(
-                            state.type === 'person' &&
-                            state.category === 'trending'
-                        ) &&
-                        state.pagination.page < state.pagination.totalPages,
-                    mediaState: browsingPeople
-                        ? ({
-                              type: 'loaded',
-                              value: [],
-                          } as LoadableItems<MediaListItem>)
-                        : (state.resultsState as LoadableItems<MediaListItem>),
-                    personState: browsingPeople
-                        ? (state.resultsState as LoadableItems<PersonListItem>)
-                        : ({
-                              type: 'loaded',
-                              value: [],
-                          } as LoadableItems<PersonListItem>),
-                    genreMap,
-                    genreList: Array.from(genreMap.entries()).map(
-                        ([id, name]) => ({ id, name }),
-                    ),
-                    languageOptions,
-                    watchProviderOptions,
-                    certificationOptions,
-                    activeFilterCount: this.getActiveFilterCount(state),
-                    ratingPlaceholder: config?.voteAverageGte ?? null,
-                    descendingFrom:
-                        state.sortDirection === 'asc' ? startIndex : null,
-                    showEmptyState:
-                        state.resultsState.type === 'loaded' &&
-                        visibleCount === 0,
-                };
-            },
+    private readonly requestEffect = this.effect<DiscoverRequestIntent>((intent$) =>
+        intent$.pipe(
+            switchMap((intent) => {
+                if (intent.kind === 'browse') {
+                    return this.handleBrowseRequest(intent.params);
+                }
+
+                return this.handleLoadMoreRequest();
+            }),
         ),
     );
 
-    private readonly requestEffect = this.effect<DiscoverRequestIntent>(
-        (intent$) =>
-            intent$.pipe(
-                switchMap((intent) => {
-                    if (intent.kind === 'browse') {
-                        return this.handleBrowseRequest(intent.params);
-                    }
-
-                    return this.handleLoadMoreRequest();
-                }),
-            ),
-    );
-
-    private readonly syncSelectedKeywordsEffect = this.effect<
-        readonly string[]
-    >((keywordIds$) =>
+    private readonly syncSelectedKeywordsEffect = this.effect<readonly string[]>((keywordIds$) =>
         keywordIds$.pipe(
             switchMap((keywordIds) => {
                 if (!keywordIds.length) {
@@ -498,12 +446,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                 return forkJoin(
                     keywordIds.map((keywordId) =>
                         this.keywordService
-                            .keywordDetails(
-                                Number(keywordId),
-                                'body',
-                                false,
-                                API_JSON_OPTIONS,
-                            )
+                            .keywordDetails(Number(keywordId), 'body', false, API_JSON_OPTIONS)
                             .pipe(catchError(() => of(null))),
                     ),
                 ).pipe(
@@ -516,9 +459,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                                     ): keyword is {
                                         id: number;
                                         name: string;
-                                    } =>
-                                        typeof keyword?.id === 'number' &&
-                                        typeof keyword?.name === 'string',
+                                    } => typeof keyword?.id === 'number' && typeof keyword?.name === 'string',
                                 )
                                 .map((keyword) => ({
                                     id: keyword.id,
@@ -546,40 +487,34 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                     return EMPTY;
                 }
 
-                return this.searchService
-                    .searchKeyword(query, 1, 'body', false, API_JSON_OPTIONS)
-                    .pipe(
-                        tap((result) => {
-                            const selectedKeywordIds = new Set(
-                                this.get().selectedKeywords.map(
-                                    (keyword) => keyword.id,
-                                ),
-                            );
+                return this.searchService.searchKeyword(query, 1, 'body', false, API_JSON_OPTIONS).pipe(
+                    tap((result) => {
+                        const selectedKeywordIds = new Set(this.get().selectedKeywords.map((keyword) => keyword.id));
 
-                            this.patchState({
-                                keywordSuggestions: (result.results ?? [])
-                                    .filter(
-                                        (
-                                            keyword,
-                                        ): keyword is {
-                                            id: number;
-                                            name: string;
-                                        } =>
-                                            typeof keyword.id === 'number' &&
-                                            typeof keyword.name === 'string' &&
-                                            !selectedKeywordIds.has(keyword.id),
-                                    )
-                                    .map((keyword) => ({
-                                        id: keyword.id,
-                                        name: keyword.name,
-                                    })),
-                            });
-                        }),
-                        catchError(() => {
-                            this.patchState({ keywordSuggestions: [] });
-                            return EMPTY;
-                        }),
-                    );
+                        this.patchState({
+                            keywordSuggestions: (result.results ?? [])
+                                .filter(
+                                    (
+                                        keyword,
+                                    ): keyword is {
+                                        id: number;
+                                        name: string;
+                                    } =>
+                                        typeof keyword.id === 'number' &&
+                                        typeof keyword.name === 'string' &&
+                                        !selectedKeywordIds.has(keyword.id),
+                                )
+                                .map((keyword) => ({
+                                    id: keyword.id,
+                                    name: keyword.name,
+                                })),
+                        });
+                    }),
+                    catchError(() => {
+                        this.patchState({ keywordSuggestions: [] });
+                        return EMPTY;
+                    }),
+                );
             }),
         ),
     );
@@ -631,10 +566,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             return;
         }
 
-        const config = this.getCategoryConfig(
-            nextParams.category,
-            nextParams.type,
-        );
+        const config = this.getCategoryConfig(nextParams.category, nextParams.type);
         if (config) {
             this.titleService.setTitle(config.title);
         }
@@ -710,9 +642,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
     removeKeyword(keywordId: number): void {
         const state = this.get();
         this.patchState({
-            selectedKeywords: state.selectedKeywords.filter(
-                (keyword) => keyword.id !== keywordId,
-            ),
+            selectedKeywords: state.selectedKeywords.filter((keyword) => keyword.id !== keywordId),
         });
         this.navigateWithQueryState({
             keywords: state.keywordIds.filter((id) => id !== `${keywordId}`),
@@ -791,8 +721,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             type: state.type,
             category: state.category,
             sortField: state.sortField ?? undefined,
-            sortDirection:
-                state.type === 'person' ? undefined : state.sortDirection,
+            sortDirection: state.type === 'person' ? undefined : state.sortDirection,
             keywords: state.keywordIds,
             genreIds: state.genreIds,
             yearFrom: state.yearFrom,
@@ -820,33 +749,18 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             type,
             category: this.normalizeCategory(params.get('category'), type),
             sortField: params.get('sortField') || undefined,
-            sortDirection: this.normalizeSortDirection(
-                params.get('sortDirection'),
-            ),
-            keywords:
-                type === 'person'
-                    ? []
-                    : parseListParams(params.get('keywords')),
-            genreIds:
-                type === 'person'
-                    ? []
-                    : parseNumberListParam(params.get('genres'), 'int'),
+            sortDirection: this.normalizeSortDirection(params.get('sortDirection')),
+            keywords: type === 'person' ? [] : parseListParams(params.get('keywords')),
+            genreIds: type === 'person' ? [] : parseNumberListParam(params.get('genres'), 'int'),
             yearFrom: parseNumberParam(params.get('yearFrom'), 'int'),
             yearTo: parseNumberParam(params.get('yearTo'), 'int'),
             minRating: parseNumberParam(params.get('rating'), 'float'),
             voteCountMin: parseNumberParam(params.get('voteCount'), 'float'),
             runtimeMin: parseNumberParam(params.get('runtimeMin'), 'float'),
             runtimeMax: parseNumberParam(params.get('runtimeMax'), 'float'),
-            certifications:
-                type === 'person'
-                    ? []
-                    : parseListParams(params.get('certification')),
-            originalLanguage:
-                type === 'person' ? null : params.get('language') || null,
-            watchProviderIds:
-                type === 'person'
-                    ? []
-                    : parseNumberListParam(params.get('providers'), 'int'),
+            certifications: type === 'person' ? [] : parseListParams(params.get('certification')),
+            originalLanguage: type === 'person' ? null : params.get('language') || null,
+            watchProviderIds: type === 'person' ? [] : parseNumberListParam(params.get('providers'), 'int'),
         };
     }
 
@@ -858,17 +772,11 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         const config = this.getCategoryConfig(params.category, params.type);
 
         if (params.type !== 'person') {
-            if (
-                params.sortField &&
-                params.sortField !== config?.defaultSortField
-            ) {
+            if (params.sortField && params.sortField !== config?.defaultSortField) {
                 queryParams['sortField'] = params.sortField;
             }
 
-            if (
-                params.sortDirection &&
-                params.sortDirection !== config?.defaultSortDirection
-            ) {
+            if (params.sortDirection && params.sortDirection !== config?.defaultSortDirection) {
                 queryParams['sortDirection'] = params.sortDirection;
             }
 
@@ -920,10 +828,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         return queryParams;
     }
 
-    private shouldReplaceParams(
-        params: ParamMap,
-        canonicalParams: Record<string, string>,
-    ): boolean {
+    private shouldReplaceParams(params: ParamMap, canonicalParams: Record<string, string>): boolean {
         const keys = [
             'type',
             'category',
@@ -942,13 +847,11 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             'providers',
         ];
 
-        return keys.some(
-            (key) => (params.get(key) ?? undefined) !== canonicalParams[key],
-        );
+        return keys.some((key) => (params.get(key) ?? undefined) !== canonicalParams[key]);
     }
 
     private fetchBrowseMedia$(
-        type: 'movie' | 'tv',
+        type: MediaType,
         sortBy: string,
         page: number,
         config: CategoryConfig,
@@ -965,35 +868,18 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         watchProviderIds: number[] = [],
     ): Observable<void> {
         const categoryDates = config.dateFn ? config.dateFn() : {};
-        const keywordFilter = keywordIds.length
-            ? keywordIds.join(',')
-            : undefined;
+        const keywordFilter = keywordIds.length ? keywordIds.join(',') : undefined;
         const genreFilter = genreIds.length ? genreIds.join(',') : undefined;
-        const dateGte =
-            categoryDates.gte ?? (yearFrom ? `${yearFrom}-01-01` : undefined);
-        const dateLte =
-            categoryDates.lte ?? (yearTo ? `${yearTo}-12-31` : undefined);
+        const dateGte = categoryDates.gte ?? (yearFrom ? `${yearFrom}-01-01` : undefined);
+        const dateLte = categoryDates.lte ?? (yearTo ? `${yearTo}-12-31` : undefined);
         const voteAverageGte = minRating ?? config.voteAverageGte;
         const voteCountGte =
-            minRating !== null && minRating > 0
-                ? Math.max(config.voteCountGte ?? 1, 50)
-                : (config.voteCountGte ?? 1);
-        const effectiveVoteCountGte =
-            voteCountMin !== null && voteCountMin > 0
-                ? voteCountMin
-                : voteCountGte;
-        const certificationFilter = certifications.length
-            ? certifications.join('|')
-            : undefined;
-        const certificationCountry = certifications.length
-            ? this.localeStore.region() || 'US'
-            : undefined;
-        const watchProviderFilter = watchProviderIds.length
-            ? watchProviderIds.join('|')
-            : undefined;
-        const watchRegion = watchProviderIds.length
-            ? this.localeStore.region() || 'US'
-            : undefined;
+            minRating !== null && minRating > 0 ? Math.max(config.voteCountGte ?? 1, 50) : (config.voteCountGte ?? 1);
+        const effectiveVoteCountGte = voteCountMin !== null && voteCountMin > 0 ? voteCountMin : voteCountGte;
+        const certificationFilter = certifications.length ? certifications.join('|') : undefined;
+        const certificationCountry = certifications.length ? this.localeStore.region() || 'US' : undefined;
+        const watchProviderFilter = watchProviderIds.length ? watchProviderIds.join('|') : undefined;
+        const watchRegion = watchProviderIds.length ? this.localeStore.region() || 'US' : undefined;
 
         if (type === 'movie') {
             return this.discoverService
@@ -1042,16 +928,8 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                 )
                 .pipe(
                     map((result) => {
-                        const mapped = (result.results ?? []).map((item) =>
-                            toMediaListItem(item, 'movie', 'year'),
-                        );
-                        this.patchLoadedResults(
-                            page,
-                            mapped,
-                            result.page,
-                            result.total_pages,
-                            result.total_results,
-                        );
+                        const mapped = (result.results ?? []).map((item) => toMediaListItem(item, 'movie', 'year'));
+                        this.patchLoadedResults(page, mapped, result.page, result.total_pages, result.total_results);
                         return undefined;
                     }),
                     catchError(() => this.handleResultsError()),
@@ -1099,73 +977,32 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             )
             .pipe(
                 map((result) => {
-                    const mapped = (result.results ?? []).map((item) =>
-                        toMediaListItem(item, 'tv', 'year'),
-                    );
-                    this.patchLoadedResults(
-                        page,
-                        mapped,
-                        result.page,
-                        result.total_pages,
-                        result.total_results,
-                    );
+                    const mapped = (result.results ?? []).map((item) => toMediaListItem(item, 'tv', 'year'));
+                    this.patchLoadedResults(page, mapped, result.page, result.total_pages, result.total_results);
                     return undefined;
                 }),
                 catchError(() => this.handleResultsError()),
             );
     }
 
-    private fetchBrowsePeople$(
-        category: BrowseCategory,
-        page: number,
-    ): Observable<void> {
+    private fetchBrowsePeople$(category: BrowseCategory, page: number): Observable<void> {
         if (category === 'trending') {
-            return this.trendingService
-                .trendingPeople(
-                    'day',
-                    undefined,
-                    'body',
-                    false,
-                    API_JSON_OPTIONS,
-                )
-                .pipe(
-                    map((result) => {
-                        const mapped = (result.results ?? []).map((item) =>
-                            toPersonListItem(item),
-                        );
-                        this.patchLoadedResults(
-                            1,
-                            mapped,
-                            1,
-                            1,
-                            result.total_results ?? mapped.length,
-                        );
-                        return undefined;
-                    }),
-                    catchError(() => this.handleResultsError()),
-                );
+            return this.trendingService.trendingPeople('day', undefined, 'body', false, API_JSON_OPTIONS).pipe(
+                map((result) => {
+                    const mapped = (result.results ?? []).map((item) => toPersonListItem(item));
+                    this.patchLoadedResults(1, mapped, 1, 1, result.total_results ?? mapped.length);
+                    return undefined;
+                }),
+                catchError(() => this.handleResultsError()),
+            );
         }
 
         return this.personListRestControllerService
-            .personPopularList(
-                undefined,
-                page,
-                undefined,
-                undefined,
-                API_JSON_OPTIONS,
-            )
+            .personPopularList(undefined, page, undefined, undefined, API_JSON_OPTIONS)
             .pipe(
                 map((result) => {
-                    const mapped = (result.results ?? []).map((item) =>
-                        toPersonListItem(item),
-                    );
-                    this.patchLoadedResults(
-                        page,
-                        mapped,
-                        result.page,
-                        result.total_pages,
-                        result.total_results,
-                    );
+                    const mapped = (result.results ?? []).map((item) => toPersonListItem(item));
+                    this.patchLoadedResults(page, mapped, result.page, result.total_pages, result.total_results);
                     return undefined;
                 }),
                 catchError(() => this.handleResultsError()),
@@ -1173,10 +1010,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
     }
 
     private handleBrowseRequest(params: BrowseParams): Observable<void> {
-        const normalizedCategory = this.normalizeCategory(
-            params.category,
-            params.type,
-        );
+        const normalizedCategory = this.normalizeCategory(params.category, params.type);
         const config = this.getCategoryConfig(normalizedCategory, params.type);
 
         if (!config) {
@@ -1187,12 +1021,8 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             return EMPTY;
         }
 
-        const nextSortField =
-            params.type === 'person'
-                ? null
-                : (params.sortField ?? config.defaultSortField);
-        const nextSortDirection =
-            params.sortDirection ?? config.defaultSortDirection;
+        const nextSortField = params.type === 'person' ? null : (params.sortField ?? config.defaultSortField);
+        const nextSortDirection = params.sortDirection ?? config.defaultSortDirection;
 
         this.patchState({
             type: params.type,
@@ -1257,10 +1087,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         });
 
         if (state.type === 'person') {
-            return this.fetchBrowsePeople$(
-                state.category,
-                state.pagination.page + 1,
-            );
+            return this.fetchBrowsePeople$(state.category, state.pagination.page + 1);
         }
 
         const config = this.getCategoryConfig(state.category, state.type);
@@ -1287,32 +1114,21 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         );
     }
 
-    private getCategoryConfig(
-        category: BrowseCategory,
-        type: BrowseMediaType,
-    ): CategoryConfig | null {
+    private getCategoryConfig(category: BrowseCategory, type: BrowseMediaType): CategoryConfig | null {
         return CATEGORY_CONFIG[`${category}_${type}`] ?? null;
     }
 
     private getResultItems<T extends MediaListItem | PersonListItem>(): T[] {
         const { resultsState } = this.get();
-        if (
-            resultsState.type === 'loaded' ||
-            resultsState.type === 'loading-more'
-        ) {
+        if (resultsState.type === 'loaded' || resultsState.type === 'loading-more') {
             return resultsState.value as T[];
         }
 
         return [];
     }
 
-    private getVisibleCount(
-        resultsState: LoadableItems<MediaListItem | PersonListItem>,
-    ): number {
-        if (
-            resultsState.type !== 'loaded' &&
-            resultsState.type !== 'loading-more'
-        ) {
+    private getVisibleCount(resultsState: LoadableItems<MediaListItem | PersonListItem>): number {
+        if (resultsState.type !== 'loaded' && resultsState.type !== 'loading-more') {
             return 0;
         }
 
@@ -1359,15 +1175,10 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         return 'all';
     }
 
-    private normalizeCategory(
-        value: string | null,
-        type: BrowseMediaType,
-    ): BrowseCategory {
+    private normalizeCategory(value: string | null, type: BrowseMediaType): BrowseCategory {
         const { categories, defaultCategory } = BROWSE_TYPE_CONFIG[type];
 
-        return categories.some((category) => category.value === value)
-            ? (value as BrowseCategory)
-            : defaultCategory;
+        return categories.some((category) => category.value === value) ? (value as BrowseCategory) : defaultCategory;
     }
 
     private patchLoadedResults<T extends MediaListItem | PersonListItem>(
@@ -1377,8 +1188,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         totalPages?: number | null,
         totalResults?: number | null,
     ): void {
-        const results =
-            page === 1 ? mapped : [...this.getResultItems<T>(), ...mapped];
+        const results = page === 1 ? mapped : [...this.getResultItems<T>(), ...mapped];
 
         this.patchState({
             pagination: {
@@ -1398,19 +1208,14 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         this.patchState({
             resultsState: {
                 type: 'loaded',
-                value:
-                    currentState.type === 'loading-more'
-                        ? currentState.value
-                        : [],
+                value: currentState.type === 'loading-more' ? currentState.value : [],
             },
         });
 
         return EMPTY;
     }
 
-    private normalizeSortDirection(
-        value: string | null,
-    ): SortDirection | undefined {
+    private normalizeSortDirection(value: string | null): SortDirection | undefined {
         return value === 'asc' || value === 'desc' ? value : undefined;
     }
 }

@@ -1,20 +1,22 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { EMPTY, catchError, of, switchMap, take, tap } from 'rxjs';
+import { EMPTY, catchError, finalize, of, switchMap, take, tap } from 'rxjs';
 
 import {
     IconButtonComponent,
     MediaUserListSummary,
     MediaType,
+    SnackbarComponent,
+    SnackbarService,
+    SnackbarType,
     TmdbListService,
-    TmdbUserAuthService,
+    TmdbSigninDialogService,
     UserSessionStoreService,
-    toUserFacingErrorMessage,
 } from '../../../shared';
 import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
 import {
@@ -22,8 +24,6 @@ import {
     MediaListDialogData,
     MediaListDialogResult,
 } from '../media-list-dialog/media-list-dialog.component';
-import { MediaSigninDialogComponent } from '../media-signin-dialog/media-signin-dialog.component';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-media-list-actions',
@@ -33,68 +33,75 @@ import { AsyncPipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaListActionsComponent {
+    @Input({ required: true }) mediaId!: number;
     @Input({ required: true }) title = '';
     @Input({ required: true }) mediaType!: MediaType;
 
     readonly vm$ = this.mediaDetailActionsStore.listActionsVm$;
+    readonly listDialogPending = signal(false);
 
     constructor(
         private readonly dialog: MatDialog,
         private readonly mediaDetailActionsStore: MediaDetailActionsStore,
         private readonly router: Router,
-        private readonly snackBar: MatSnackBar,
+        private readonly snackbar: SnackbarService,
         private readonly tmdbListService: TmdbListService,
-        private readonly tmdbUserAuthService: TmdbUserAuthService,
+        private readonly tmdbSigninDialog: TmdbSigninDialogService,
         private readonly userSessionStore: UserSessionStoreService,
     ) {}
 
     toggleWatchlist() {
-        const action$ =
-            this.userSessionStore.mode() === 'user'
-                ? this.mediaDetailActionsStore.toggleWatchlist$()
-                : this.openSigninDialog();
+        const action$ = this.userSessionStore.isAuthenticated()
+            ? this.mediaDetailActionsStore.toggleWatchlist$()
+            : this.openSigninDialog();
 
         action$
             .pipe(
                 take(1),
-                catchError((error) => this.showError(error, 'Could not update your watchlist.')),
+                catchError(() => this.showError('Could not update your watchlist.')),
             )
             .subscribe();
     }
 
     toggleFavorite() {
-        const action$ =
-            this.userSessionStore.mode() === 'user'
-                ? this.mediaDetailActionsStore.toggleFavorite$()
-                : this.openSigninDialog();
+        const action$ = this.userSessionStore.isAuthenticated()
+            ? this.mediaDetailActionsStore.toggleFavorite$()
+            : this.openSigninDialog();
 
         action$
             .pipe(
                 take(1),
-                catchError((error) => this.showError(error, 'Could not update your favorites.')),
+                catchError(() => this.showError('Could not update your favorites.')),
             )
             .subscribe();
     }
 
     openCustomListsDialog() {
-        if (this.userSessionStore.mode() !== 'user' || !this.userSessionStore.v4AccessToken()) {
+        if (this.listDialogPending()) {
+            return;
+        }
+
+        this.listDialogPending.set(true);
+
+        if (!this.userSessionStore.hasV4AccountAccess()) {
             this.openSigninDialog()
                 .pipe(
                     take(1),
-                    catchError((error) => this.showError(error, 'Could not update your list.')),
+                    catchError(() => this.showError('Could not update your list.')),
+                    finalize(() => this.listDialogPending.set(false)),
                 )
                 .subscribe();
             return;
         }
 
         this.tmdbListService
-            .getUserLists$()
+            .getUserLists$(this.mediaId, this.mediaType)
             .pipe(
                 take(1),
                 catchError(() => of([] as MediaUserListSummary[])),
                 switchMap((lists) => this.openListsDialog(lists)),
-                tap(() => this.showSuccess('Media added to your list.')),
-                catchError((error) => this.showError(error, 'Could not update your list.')),
+                catchError(() => this.showError('Could not update your list.')),
+                finalize(() => this.listDialogPending.set(false)),
             )
             .subscribe();
     }
@@ -116,20 +123,7 @@ export class MediaListActionsComponent {
     }
 
     private openSigninDialog() {
-        return this.dialog
-            .open<MediaSigninDialogComponent, undefined, boolean>(MediaSigninDialogComponent, {
-                autoFocus: false,
-                maxWidth: '32rem',
-                panelClass: 'media-list-dialog-panel',
-                width: '100%',
-            })
-            .afterClosed()
-            .pipe(
-                take(1),
-                switchMap((shouldLogin) =>
-                    shouldLogin ? this.tmdbUserAuthService.startLogin$(this.router.url) : EMPTY,
-                ),
-            );
+        return this.tmdbSigninDialog.open$();
     }
 
     private handleListsDialogResult(result: MediaListDialogResult | undefined) {
@@ -138,24 +132,43 @@ export class MediaListActionsComponent {
         }
 
         if (result.kind === 'create-list') {
-            return this.mediaDetailActionsStore.createListAndAdd$(result.name, result.description);
+            this.router.navigate(['/me/lists/new'], {
+                queryParams: {
+                    mediaId: this.mediaId,
+                    mediaType: this.mediaType,
+                    mediaTitle: result.mediaTitle,
+                    returnUrl: this.router.url,
+                },
+            });
+            return EMPTY;
         }
 
-        return this.mediaDetailActionsStore.addToList$(result.listId);
+        return this.mediaDetailActionsStore.addToList$(result.listId).pipe(
+            tap(() => {
+                this.showSuccess(`${this.title} has been added to your list.`, result.listId);
+            }),
+        );
     }
 
-    private showError(error: unknown, fallback: string) {
-        this.snackBar.open(toUserFacingErrorMessage(error, fallback), 'Dismiss', {
-            duration: 5000,
-            panelClass: 'snackbar-error',
+    private showError(message: string) {
+        this.snackbar.openSnackbar(SnackbarComponent, {
+            message,
+            type: SnackbarType.Error,
         });
         return EMPTY;
     }
 
-    private showSuccess(message: string) {
-        this.snackBar.open(message, 'Dismiss', {
-            duration: 4000,
-            panelClass: 'snackbar-success',
+    private showSuccess(message: string, listId?: number) {
+        this.snackbar.openSnackbar(SnackbarComponent, {
+            message,
+            type: SnackbarType.Success,
+            duration: listId ? 7000 : undefined,
+            link: listId
+                ? {
+                      label: 'Open list',
+                      routerLink: ['/lists', listId],
+                  }
+                : undefined,
         });
     }
 }

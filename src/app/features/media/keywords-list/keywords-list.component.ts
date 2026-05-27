@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
 
 import { KeywordListItem } from '../../../api';
+import type { MediaType } from '../../../shared';
 
 @Component({
     selector: 'app-keywords-list',
@@ -14,5 +15,5 @@ import { KeywordListItem } from '../../../api';
 })
 export class KeywordsListComponent {
     @Input() keywords: KeywordListItem[] = [];
-    @Input() mediaType: 'movie' | 'tv' = 'movie';
+    @Input() mediaType: MediaType = 'movie';
 }

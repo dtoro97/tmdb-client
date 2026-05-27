@@ -1,0 +1,23 @@
+<div class="page-container">
+    @if (vm$ | async; as vm) {
+        <app-sub-page-header
+            [backdropPath]="vm.media?.backdropPath"
+            parentTitle="Episodes"
+            [backLink]="backLink"
+            [pageTitle]="pageTitle"
+            [subtitle]="vm.subtitle"
+            [loading]="!vm.media"
+        />
+
+        <main class="page-main">
+            @if (vm.showSkeleton) {
+                <app-photos-browser-skeleton />
+            } @else if (vm.photosState.type === "loaded") {
+                <app-photos-browser
+                    [images]="vm.photosState.value"
+                    (photoSelect)="openPhotoViewer($event)"
+                />
+            }
+        </main>
+    }
+</div>

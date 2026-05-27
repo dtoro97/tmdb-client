@@ -10,6 +10,7 @@ import {
     RatingVm,
     MediaRatingService,
     TmdbUserAuthService,
+    UserSessionStoreService,
     normalizeRatingValue,
 } from '../../../shared';
 
@@ -29,6 +30,12 @@ const INITIAL_STATE: EpisodeActionsState = {
     ratingPending: false,
 };
 
+interface EpisodeRatingTarget {
+    readonly seriesId: number;
+    readonly seasonNumber: number;
+    readonly episodeNumber: number;
+}
+
 @Injectable()
 export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsState> implements RatingActions {
     readonly userRatingState$ = this.select((state) => state.userRating);
@@ -46,6 +53,7 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
     constructor(
         private readonly mediaRatingService: MediaRatingService,
         private readonly tmdbUserAuthService: TmdbUserAuthService,
+        private readonly userSessionStore: UserSessionStoreService,
     ) {
         super(INITIAL_STATE);
     }
@@ -69,7 +77,11 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
             ratingPending: false,
         });
 
-        this.fetchEpisodeRating$().subscribe();
+        this.fetchEpisodeRatingEffect({
+            seriesId,
+            seasonNumber,
+            episodeNumber,
+        });
     }
 
     ensureGuestSessionForRating$() {
@@ -129,8 +141,8 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
             );
     }
 
-    private fetchEpisodeRating$() {
-        const state = this.get();
+    private fetchEpisodeRating$(target?: EpisodeRatingTarget) {
+        const state = target ?? this.get();
 
         if (state.seriesId === null || state.seasonNumber === null || state.episodeNumber === null) {
             return throwError(() => new Error('No episode action context is available.'));
@@ -152,4 +164,8 @@ export class EpisodeDetailActionsStore extends ComponentStore<EpisodeActionsStat
             }),
         );
     }
+
+    private readonly fetchEpisodeRatingEffect = this.effect<EpisodeRatingTarget>((target$) =>
+        target$.pipe(switchMap((target) => this.fetchEpisodeRating$(target))),
+    );
 }

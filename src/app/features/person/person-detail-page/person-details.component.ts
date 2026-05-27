@@ -11,7 +11,6 @@ import { distinctUntilChanged, map, take, tap } from 'rxjs';
 
 import {
     AgePipe,
-    HeroSurfaceComponent,
     ImageComponent,
     PageSectionComponent,
     PhotoViewerComponent,
@@ -24,7 +23,6 @@ import {
 import {
     PersonDetailStoreService,
     PersonCreditsMediaType,
-    PersonCreditsSection,
     PersonCreditsSortBy,
 } from '../person-detail-store.service';
 import { PersonCreditsComponent } from '../person-credits/person-credits.component';
@@ -37,7 +35,6 @@ import { PersonCreditsComponent } from '../person-credits/person-credits.compone
         SlicePipe,
         RouterLink,
         MatDialogModule,
-        HeroSurfaceComponent,
         ImageComponent,
         PhotosPreviewComponent,
         ExternalLinksComponent,
@@ -131,10 +128,6 @@ export class PersonDetailsComponent {
         this.bioExpanded = !this.bioExpanded;
     }
 
-    onCreditsSectionChange(value: PersonCreditsSection): void {
-        this.personDetailStore.setCreditsSection(value);
-    }
-
     onCreditsMediaTypeChange(value: PersonCreditsMediaType): void {
         this.personDetailStore.setCreditsMediaType(value);
     }
@@ -149,5 +142,13 @@ export class PersonDetailsComponent {
 
     toggleCreditsSortDirection(): void {
         this.personDetailStore.toggleCreditsSortDirection();
+    }
+
+    toggleActingCredits(): void {
+        this.personDetailStore.toggleActingCredits();
+    }
+
+    toggleProductionCredits(): void {
+        this.personDetailStore.toggleProductionCredits();
     }
 }

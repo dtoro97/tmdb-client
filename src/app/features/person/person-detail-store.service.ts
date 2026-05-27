@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ComponentStore } from '@ngrx/component-store';
-import type { Person, PersonExternalIds, PersonImages, TaggedImagePage } from '../../api';
-import {
+import type {
+    Person,
     PersonCombinedCastCredit,
     PersonCombinedCredits,
     PersonCombinedCrewCredit,
-    PersonRestControllerService,
+    PersonExternalIds,
+    PersonImages,
+    TaggedImagePage,
 } from '../../api';
+import { PersonRestControllerService } from '../../api';
 import { EMPTY, catchError, delay, map, of, switchMap, tap } from 'rxjs';
 import {
     CardItem,
@@ -16,34 +19,27 @@ import {
     LoadableValue,
     LocaleStoreService,
     MediaType,
+    type SelectOption,
     SortDirection,
     ViewerImage,
     buildExternalLinks,
     shuffle,
 } from '../../shared';
-import { API_JSON_OPTIONS, CAROUSEL_COUNT, MAX_VISIBLE_PHOTOS } from '../../constants';
+import { API_JSON_OPTIONS, CAROUSEL_COUNT } from '../../constants';
 
-export type CreditItemKind = 'cast' | 'production' | 'mixed';
-
-export interface CreditItem {
+export interface PersonCreditRow {
     id: number;
     title: string;
     mediaType: MediaType;
-    kind: CreditItemKind;
     releaseDate: string | null;
+    year: string;
     rating: number | null;
     voteCount: number;
     posterPath: string | null;
     backdropPath: string | null;
-    character?: string;
-    job?: string;
-    episodeCount?: number;
-}
-
-export interface PersonCreditsDisplayItemVm extends CreditItem {
-    roleLabel: string | null;
-    mediaTypeLabel: string;
+    roleLabel: string;
     episodeLabel: string | null;
+    mediaTypeLabel: string;
 }
 
 export interface PersonWithExternalIds extends Person {
@@ -52,32 +48,20 @@ export interface PersonWithExternalIds extends Person {
     tagged_images?: TaggedImagePage;
 }
 
-export interface PersonCreditsVm {
-    cast: CreditItem[];
-    production: CreditItem[];
+export interface PersonCreditsState {
+    acting: PersonCreditRow[];
+    production: PersonCreditRow[];
 }
 
-export type PersonCreditsSection = 'all' | 'cast' | 'production';
 export type PersonCreditsMediaType = 'all' | MediaType;
-export type PersonCreditsSortBy = 'date' | 'rating' | 'title';
+export type PersonCreditsSortBy = 'year' | 'rating' | 'title';
 
 export interface PersonCreditsUiState {
-    section: PersonCreditsSection;
     mediaType: PersonCreditsMediaType;
     sortBy: PersonCreditsSortBy;
     sortDirection: SortDirection;
-}
-
-export interface PersonCreditsGroupVm {
-    year: string;
-    movieCount: number;
-    tvCount: number;
-    items: PersonCreditsDisplayItemVm[];
-}
-
-export interface PersonCreditsDisplayVm {
-    totalCount: number;
-    groups: PersonCreditsGroupVm[];
+    actingExpanded: boolean;
+    productionExpanded: boolean;
 }
 
 export interface PersonDetailVm {
@@ -85,23 +69,40 @@ export interface PersonDetailVm {
     externalLinks: ExternalLinks | null;
     knownFor: LoadableItems<CardItem>;
     photos: LoadableItems<ViewerImage>;
-    credits: LoadableValue<PersonCreditsVm>;
+    credits: LoadableValue<PersonCreditsState>;
     creditsUi: PersonCreditsUiState;
-    creditsDisplay: LoadableValue<PersonCreditsDisplayVm>;
+    creditsDisplay: LoadableValue<{
+        totalCount: number;
+        hasActiveFilters: boolean;
+        mediaOptions: SelectOption<PersonCreditsMediaType>[];
+        acting: {
+            totalCount: number;
+            hiddenCount: number;
+            expanded: boolean;
+            rows: PersonCreditRow[];
+        };
+        production: {
+            totalCount: number;
+            hiddenCount: number;
+            expanded: boolean;
+            rows: PersonCreditRow[];
+        };
+    }>;
 }
 
 interface PersonDetailState {
     person: LoadableValue<PersonWithExternalIds | null>;
     photos: LoadableItems<ViewerImage>;
-    credits: LoadableValue<PersonCreditsVm>;
+    credits: LoadableValue<PersonCreditsState>;
     creditsUi: PersonCreditsUiState;
 }
 
 const INITIAL_CREDITS_UI: PersonCreditsUiState = {
-    section: 'all',
     mediaType: 'all',
-    sortBy: 'date',
+    sortBy: 'year',
     sortDirection: 'desc',
+    actingExpanded: false,
+    productionExpanded: false,
 };
 
 const INITIAL_STATE: PersonDetailState = {
@@ -116,12 +117,12 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
     personDetailVm$ = this.select(
         (state): PersonDetailVm => ({
             person: state.person,
-            externalLinks: buildPersonExternalLinks(state.person),
-            knownFor: buildKnownFor(state.person, state.credits),
+            externalLinks: this.buildPersonExternalLinks(state.person),
+            knownFor: this.buildKnownFor(state.person, state.credits),
             photos: state.photos,
             credits: state.credits,
             creditsUi: state.creditsUi,
-            creditsDisplay: buildCreditsDisplay(state.credits, state.creditsUi),
+            creditsDisplay: this.buildCreditsDisplay(state.credits, state.creditsUi),
         }),
     );
 
@@ -180,10 +181,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                     this.patchState({
                         credits: {
                             type: 'loaded',
-                            value: {
-                                cast: buildCastCredits(raw.cast ?? []),
-                                production: buildProductionCredits(raw.crew ?? []),
-                            },
+                            value: this.buildCredits(raw),
                         },
                     });
                 }),
@@ -194,6 +192,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
     private patchPhotosFromPerson(person: PersonWithExternalIds): void {
         const tagged = person.tagged_images?.results ?? [];
         const profiles = person.images?.profiles ?? [];
+        const language = this.localStore.language() || 'en';
         const images = [
             ...profiles.map(
                 (img): ViewerImage => ({
@@ -201,21 +200,23 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                     photoType: 'profile',
                 }),
             ),
-            ...tagged.map(
-                (img): ViewerImage => ({
-                    file_path: img.file_path,
-                    aspect_ratio: img.aspect_ratio,
-                    height: img.height,
-                    width: img.width,
-                    vote_average: img.vote_average,
-                    vote_count: img.vote_count,
-                    iso_639_1: img.iso_639_1,
-                    caption:
-                        (img.media as { title?: string; name?: string })?.title ??
-                        (img.media as { name?: string })?.name,
-                    photoType: 'tagged',
-                }),
-            ),
+            ...tagged
+                .filter((img) => img.iso_639_1 === null || img.iso_639_1 === language || img.iso_639_1 === 'en')
+                .map(
+                    (img): ViewerImage => ({
+                        file_path: img.file_path,
+                        aspect_ratio: img.aspect_ratio,
+                        height: img.height,
+                        width: img.width,
+                        vote_average: img.vote_average,
+                        vote_count: img.vote_count,
+                        iso_639_1: img.iso_639_1,
+                        caption:
+                            (img.media as { title?: string; name?: string })?.title ??
+                            (img.media as { name?: string })?.name,
+                        photoType: 'tagged',
+                    }),
+                ),
         ];
         this.patchState({
             photos: {
@@ -225,22 +226,12 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         });
     }
 
-    setCreditsSection(section: PersonCreditsSection): void {
-        this.patchState((state) => ({
-            ...state,
-            creditsUi: {
-                ...state.creditsUi,
-                section,
-            },
-        }));
-    }
-
     setCreditsMediaType(mediaType: PersonCreditsMediaType): void {
         this.patchState((state) => ({
             ...state,
             creditsUi: {
                 ...state.creditsUi,
-                mediaType,
+                mediaType: this.hasCreditsForMediaType(state.credits, mediaType) ? mediaType : 'all',
             },
         }));
     }
@@ -273,243 +264,319 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
             },
         }));
     }
-}
 
-const toCastCreditItem = (credit: PersonCombinedCastCredit): CreditItem => ({
-    id: credit.id!,
-    title: credit.title || credit.name || '',
-    kind: 'cast',
-    character: credit.character,
-    mediaType: (credit.media_type as MediaType) ?? 'movie',
-    releaseDate: credit.release_date || credit.first_air_date || null,
-    rating: credit.vote_average ?? null,
-    voteCount: credit.vote_count ?? 0,
-    posterPath: credit.poster_path ?? null,
-    backdropPath: credit.backdrop_path ?? null,
-    episodeCount: credit.media_type === 'tv' ? credit.episode_count : undefined,
-});
-
-const toProductionCreditItem = (credit: PersonCombinedCrewCredit): CreditItem => ({
-    id: credit.id!,
-    title: credit.title || credit.name || '',
-    kind: 'production',
-    job: credit.job,
-    mediaType: (credit.media_type as MediaType) ?? 'movie',
-    releaseDate: credit.release_date || credit.first_air_date || null,
-    rating: credit.vote_average ?? null,
-    voteCount: credit.vote_count ?? 0,
-    posterPath: credit.poster_path ?? null,
-    backdropPath: credit.backdrop_path ?? null,
-    episodeCount: credit.media_type === 'tv' ? credit.episode_count : undefined,
-});
-
-const mergeText = (a?: string, b?: string): string | undefined => {
-    const parts = [a, b].filter((v): v is string => !!v?.trim());
-    return parts.length ? [...new Set(parts)].join(', ') : undefined;
-};
-
-const buildCreditRoleLabel = (item: Pick<CreditItem, 'character' | 'job'>) =>
-    mergeText(item.character, item.job) ?? null;
-
-const sortCredits = (a: CreditItem, b: CreditItem): number =>
-    (b.releaseDate ?? '').localeCompare(a.releaseDate ?? '') || a.title.localeCompare(b.title);
-
-const mergeById = <T extends { id?: number }>(items: T[], merge: (existing: T, incoming: T) => T): T[] => {
-    const byId = new Map<number, T>();
-
-    for (const item of items) {
-        const id = item.id;
-        if (!id) {
-            continue;
-        }
-
-        const existing = byId.get(id);
-        if (!existing) {
-            byId.set(id, item);
-            continue;
-        }
-
-        byId.set(id, merge(existing, item));
-    }
-
-    return [...byId.values()];
-};
-
-const buildCastCredits = (items: PersonCombinedCastCredit[]): CreditItem[] => {
-    const merged = mergeById(items, (existing, incoming) => ({
-        ...existing,
-        episode_count: Math.max(existing.episode_count ?? 0, incoming.episode_count ?? 0),
-        character: mergeText(existing.character, incoming.character),
-    }));
-
-    return merged.map(toCastCreditItem).sort(sortCredits);
-};
-
-const buildProductionCredits = (items: PersonCombinedCrewCredit[]): CreditItem[] => {
-    const merged = mergeById(items, (existing, incoming) => ({
-        ...existing,
-        episode_count: Math.max(existing.episode_count ?? 0, incoming.episode_count ?? 0),
-        job: mergeText(existing.job, incoming.job),
-    }));
-
-    return merged.map(toProductionCreditItem).sort(sortCredits);
-};
-
-const buildKnownFor = (
-    person: LoadableValue<PersonWithExternalIds | null>,
-    credits: LoadableValue<PersonCreditsVm>,
-): LoadableItems<CardItem> => {
-    if (person.type === 'loading' || credits.type === 'loading') {
-        return { type: 'loading' };
-    }
-
-    if (person.type !== 'loaded' || credits.type !== 'loaded' || !person.value) {
-        return { type: 'idle' };
-    }
-
-    const seed = person.value.known_for_department === 'Acting' ? credits.value.cast : credits.value.production;
-
-    const cards: CardItem[] = [...seed]
-        .sort((a, b) => b.voteCount - a.voteCount)
-        .slice(0, CAROUSEL_COUNT * 2)
-        .map((c) => ({
-            id: c.id,
-            mediaType: c.mediaType,
-            title: c.title,
-            imagePath: c.posterPath,
-            backdropPath: c.backdropPath,
-            rating: c.rating,
-            date: c.releaseDate ?? '',
-            overview: '',
-            role: buildCreditRoleLabel(c) ?? undefined,
+    toggleActingCredits(): void {
+        this.patchState((state) => ({
+            ...state,
+            creditsUi: {
+                ...state.creditsUi,
+                actingExpanded: !state.creditsUi.actingExpanded,
+            },
         }));
-
-    return { type: 'loaded', value: cards };
-};
-
-const buildPersonExternalLinks = (person: LoadableValue<PersonWithExternalIds | null>): ExternalLinks | null => {
-    if (person.type !== 'loaded' || !person.value) {
-        return null;
     }
 
-    return buildExternalLinks(person.value.external_ids ?? null, person.value.homepage ?? null, 'name');
-};
-const mergeCreditsForAllSection = (items: CreditItem[]): CreditItem[] => {
-    const byKey = new Map<string, CreditItem>();
+    toggleProductionCredits(): void {
+        this.patchState((state) => ({
+            ...state,
+            creditsUi: {
+                ...state.creditsUi,
+                productionExpanded: !state.creditsUi.productionExpanded,
+            },
+        }));
+    }
 
-    for (const item of items) {
-        const key = `${item.mediaType}-${item.id}`;
-        const existing = byKey.get(key);
+    private buildCredits(raw: PersonCombinedCredits): PersonCreditsState {
+        return {
+            acting: this.buildActingCredits(raw.cast ?? []),
+            production: this.buildProductionCredits(raw.crew ?? []),
+        };
+    }
 
-        if (!existing) {
-            byKey.set(key, item);
-            continue;
+    private buildActingCredits(items: PersonCombinedCastCredit[]): PersonCreditRow[] {
+        const byKey = new Map<string, PersonCreditRow>();
+
+        for (const credit of items) {
+            const seed = this.toCreditSeed(credit, credit.character);
+            if (!seed) {
+                continue;
+            }
+
+            const existing = byKey.get(seed.key);
+            byKey.set(seed.key, existing ? this.mergeCreditRows(existing, seed.row) : seed.row);
         }
 
-        const mergedCharacter = mergeText(existing.character, item.character);
-        const mergedJob = mergeText(existing.job, item.job);
+        return [...byKey.values()].sort((left, right) => this.compareRows(left, right, 'year', 'desc'));
+    }
 
-        byKey.set(key, {
+    private buildProductionCredits(items: PersonCombinedCrewCredit[]): PersonCreditRow[] {
+        const byKey = new Map<string, PersonCreditRow>();
+
+        for (const credit of items) {
+            const seed = this.toCreditSeed(credit, credit.job);
+            if (!seed) {
+                continue;
+            }
+
+            const existing = byKey.get(seed.key);
+            byKey.set(seed.key, existing ? this.mergeCreditRows(existing, seed.row) : seed.row);
+        }
+
+        return [...byKey.values()].sort((left, right) => this.compareRows(left, right, 'year', 'desc'));
+    }
+
+    private toCreditSeed(
+        credit: PersonCombinedCastCredit | PersonCombinedCrewCredit,
+        role: string | undefined,
+    ): { key: string; row: PersonCreditRow } | null {
+        const id = credit.id;
+        const title = credit.title || credit.name;
+        if (!id || !title) {
+            return null;
+        }
+
+        const mediaType = this.getCreditMediaType(credit);
+        const releaseDate = credit.release_date || credit.first_air_date || null;
+        const episodeCount = mediaType === 'tv' ? credit.episode_count : undefined;
+        const roleLabel = this.mergeRoleText('', role);
+
+        return {
+            key: `${mediaType}-${id}`,
+            row: {
+                id,
+                title,
+                mediaType,
+                releaseDate,
+                year: releaseDate?.slice(0, 4) || 'Unknown',
+                rating: credit.vote_average ?? null,
+                voteCount: credit.vote_count ?? 0,
+                posterPath: credit.poster_path ?? null,
+                backdropPath: credit.backdrop_path ?? null,
+                roleLabel,
+                episodeLabel: mediaType === 'tv' && episodeCount ? `${episodeCount} ep` : null,
+                mediaTypeLabel: mediaType === 'tv' ? 'TV' : 'Movie',
+            },
+        };
+    }
+
+    private mergeCreditRows(existing: PersonCreditRow, incoming: PersonCreditRow): PersonCreditRow {
+        return {
             ...existing,
-            kind: mergedCharacter && mergedJob ? 'mixed' : mergedCharacter ? 'cast' : 'production',
-            character: mergedCharacter,
-            job: mergedJob,
-            episodeCount: Math.max(existing.episodeCount ?? 0, item.episodeCount ?? 0),
-            rating: (existing.voteCount ?? 0) >= (item.voteCount ?? 0) ? existing.rating : item.rating,
-            voteCount: Math.max(existing.voteCount ?? 0, item.voteCount ?? 0),
-            posterPath: existing.posterPath ?? item.posterPath,
-            backdropPath: existing.backdropPath ?? item.backdropPath,
-        });
+            releaseDate: existing.releaseDate ?? incoming.releaseDate,
+            year: existing.releaseDate ? existing.year : incoming.year,
+            rating: existing.voteCount >= incoming.voteCount ? existing.rating : incoming.rating,
+            voteCount: Math.max(existing.voteCount, incoming.voteCount),
+            posterPath: existing.posterPath ?? incoming.posterPath,
+            backdropPath: existing.backdropPath ?? incoming.backdropPath,
+            roleLabel: this.mergeRoleText(existing.roleLabel, incoming.roleLabel),
+            episodeLabel: this.mergeEpisodeLabels(existing.episodeLabel, incoming.episodeLabel),
+        };
     }
 
-    return [...byKey.values()];
-};
+    private buildKnownFor(
+        person: LoadableValue<PersonWithExternalIds | null>,
+        credits: LoadableValue<PersonCreditsState>,
+    ): LoadableItems<CardItem> {
+        if (person.type === 'loading' || credits.type === 'loading') {
+            return { type: 'loading' };
+        }
 
-const getSortableDate = (value: string | null): string => {
-    if (!value?.trim()) {
-        return '';
+        if (person.type !== 'loaded' || credits.type !== 'loaded' || !person.value) {
+            return { type: 'idle' };
+        }
+
+        const seed = person.value.known_for_department === 'Acting' ? credits.value.acting : credits.value.production;
+
+        const cards: CardItem[] = [...seed]
+            .sort((a, b) => b.voteCount - a.voteCount)
+            .slice(0, CAROUSEL_COUNT * 2)
+            .map((credit) => ({
+                id: credit.id,
+                mediaType: credit.mediaType,
+                title: credit.title,
+                imagePath: credit.posterPath,
+                backdropPath: credit.backdropPath,
+                rating: credit.rating,
+                date: credit.releaseDate ?? '',
+                overview: '',
+                role: credit.roleLabel || undefined,
+            }));
+
+        return { type: 'loaded', value: cards };
     }
 
-    return value;
-};
+    private buildCreditsDisplay(credits: LoadableValue<PersonCreditsState>, ui: PersonCreditsUiState) {
+        if (credits.type === 'loading') {
+            return { type: 'loading' } as const;
+        }
 
-const compareCreditsBySort = (left: CreditItem, right: CreditItem, sortBy: PersonCreditsSortBy): number => {
-    if (sortBy === 'title') {
-        return left.title.localeCompare(right.title);
+        if (credits.type !== 'loaded') {
+            return { type: 'idle' } as const;
+        }
+
+        const acting = this.prepareCreditSection(credits.value.acting, ui, ui.actingExpanded);
+        const production = this.prepareCreditSection(credits.value.production, ui, ui.productionExpanded);
+
+        return {
+            type: 'loaded' as const,
+            value: {
+                totalCount: acting.totalCount + production.totalCount,
+                hasActiveFilters:
+                    ui.mediaType !== INITIAL_CREDITS_UI.mediaType ||
+                    ui.sortBy !== INITIAL_CREDITS_UI.sortBy ||
+                    ui.sortDirection !== INITIAL_CREDITS_UI.sortDirection,
+                mediaOptions: this.buildMediaOptions(credits.value),
+                acting,
+                production,
+            },
+        };
     }
 
-    if (sortBy === 'rating') {
+    private buildMediaOptions(credits: PersonCreditsState): SelectOption<PersonCreditsMediaType>[] {
+        const hasMovies = this.hasMediaType(credits, 'movie');
+        const hasTv = this.hasMediaType(credits, 'tv');
+        const options: SelectOption<PersonCreditsMediaType>[] = [{ label: 'All media', value: 'all' }];
+
+        if (hasMovies) {
+            options.push({ label: 'Movies', value: 'movie' });
+        }
+
+        if (hasTv) {
+            options.push({ label: 'TV Shows', value: 'tv' });
+        }
+
+        return options;
+    }
+
+    private hasCreditsForMediaType(
+        credits: LoadableValue<PersonCreditsState>,
+        mediaType: PersonCreditsMediaType,
+    ): boolean {
+        if (mediaType === 'all') {
+            return true;
+        }
+
+        return credits.type === 'loaded' && this.hasMediaType(credits.value, mediaType);
+    }
+
+    private hasMediaType(credits: PersonCreditsState, mediaType: MediaType): boolean {
         return (
-            (left.rating ?? -1) - (right.rating ?? -1) ||
-            left.voteCount - right.voteCount ||
-            left.title.localeCompare(right.title)
+            credits.acting.some((credit) => credit.mediaType === mediaType) ||
+            credits.production.some((credit) => credit.mediaType === mediaType)
         );
     }
 
-    return (
-        getSortableDate(left.releaseDate).localeCompare(getSortableDate(right.releaseDate)) ||
-        left.title.localeCompare(right.title)
-    );
-};
+    private prepareCreditSection(
+        rows: PersonCreditRow[],
+        ui: PersonCreditsUiState,
+        expanded: boolean,
+    ): {
+        totalCount: number;
+        hiddenCount: number;
+        expanded: boolean;
+        rows: PersonCreditRow[];
+    } {
+        const filtered = ui.mediaType === 'all' ? rows : rows.filter((row) => row.mediaType === ui.mediaType);
+        const sorted = [...filtered].sort((left, right) => this.compareRows(left, right, ui.sortBy, ui.sortDirection));
+        const visibleRows = expanded ? sorted : sorted.slice(0, 10);
 
-const buildCreditsDisplay = (
-    credits: LoadableValue<PersonCreditsVm>,
-    ui: PersonCreditsUiState,
-): LoadableValue<PersonCreditsDisplayVm> => {
-    if (credits.type === 'loading') {
-        return { type: 'loading' };
+        return {
+            totalCount: sorted.length,
+            hiddenCount: Math.max(sorted.length - visibleRows.length, 0),
+            expanded,
+            rows: visibleRows,
+        };
     }
 
-    if (credits.type !== 'loaded') {
-        return { type: 'idle' };
+    private compareRows(
+        left: PersonCreditRow,
+        right: PersonCreditRow,
+        sortBy: PersonCreditsSortBy,
+        direction: SortDirection,
+    ): number {
+        if (sortBy === 'title') {
+            const result = left.title.localeCompare(right.title);
+            return direction === 'desc' ? -result : result;
+        }
+
+        if (sortBy === 'rating') {
+            return this.compareRatings(left, right, direction);
+        }
+
+        return this.compareDates(left, right, direction);
     }
 
-    const source =
-        ui.section === 'all'
-            ? [...credits.value.cast, ...credits.value.production]
-            : ui.section === 'cast'
-              ? credits.value.cast
-              : credits.value.production;
+    private compareRatings(left: PersonCreditRow, right: PersonCreditRow, direction: SortDirection): number {
+        if (left.rating === null && right.rating === null) {
+            return left.title.localeCompare(right.title);
+        }
 
-    const seed = ui.section === 'all' ? mergeCreditsForAllSection(source) : source;
+        if (left.rating === null) {
+            return 1;
+        }
 
-    const mediaFiltered = ui.mediaType === 'all' ? seed : seed.filter((item) => item.mediaType === ui.mediaType);
+        if (right.rating === null) {
+            return -1;
+        }
 
-    const direction = ui.sortDirection === 'desc' ? -1 : 1;
-    const sorted = [...mediaFiltered].sort((left, right) => compareCreditsBySort(left, right, ui.sortBy) * direction);
-
-    const displayItems = sorted.map(
-        (item): PersonCreditsDisplayItemVm => ({
-            ...item,
-            roleLabel: buildCreditRoleLabel(item),
-            mediaTypeLabel: item.mediaType === 'tv' ? 'TV Shows' : 'Movie',
-            episodeLabel: item.mediaType === 'tv' && item.episodeCount ? `${item.episodeCount} ep` : null,
-        }),
-    );
-
-    const groups = new Map<string, PersonCreditsDisplayItemVm[]>();
-    for (const item of displayItems) {
-        const year = ui.sortBy === 'date' ? item.releaseDate?.slice(0, 4) || 'Unknown' : 'All Years';
-        const existing = groups.get(year) ?? [];
-        existing.push(item);
-        groups.set(year, existing);
+        const result =
+            left.rating - right.rating || left.voteCount - right.voteCount || left.title.localeCompare(right.title);
+        return direction === 'desc' ? -result : result;
     }
 
-    return {
-        type: 'loaded',
-        value: {
-            totalCount: displayItems.length,
-            groups: [...groups.entries()].map(([year, items]) => {
-                const movieCount = items.filter((item) => item.mediaType === 'movie').length;
-                const tvCount = items.filter((item) => item.mediaType === 'tv').length;
+    private compareDates(left: PersonCreditRow, right: PersonCreditRow, direction: SortDirection): number {
+        if (!left.releaseDate && !right.releaseDate) {
+            return left.title.localeCompare(right.title);
+        }
 
-                return {
-                    year,
-                    movieCount,
-                    tvCount,
-                    items,
-                };
-            }),
-        },
-    };
-};
+        if (!left.releaseDate) {
+            return 1;
+        }
+
+        if (!right.releaseDate) {
+            return -1;
+        }
+
+        const result = left.releaseDate.localeCompare(right.releaseDate) || left.title.localeCompare(right.title);
+        return direction === 'desc' ? -result : result;
+    }
+
+    private getCreditMediaType(credit: PersonCombinedCastCredit | PersonCombinedCrewCredit): MediaType {
+        if (credit.media_type === 'tv' || (!credit.media_type && credit.first_air_date)) {
+            return 'tv';
+        }
+
+        return 'movie';
+    }
+
+    private mergeRoleText(existing: string, incoming: string | undefined): string {
+        const parts = [...existing.split(','), ...(incoming ?? '').split(',')]
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        return [...new Set(parts)].join(', ');
+    }
+
+    private mergeEpisodeLabels(left: string | null, right: string | null): string | null {
+        const leftCount = this.getEpisodeCount(left);
+        const rightCount = this.getEpisodeCount(right);
+        const count = Math.max(leftCount, rightCount);
+
+        return count ? `${count} ep` : null;
+    }
+
+    private getEpisodeCount(label: string | null): number {
+        if (!label) {
+            return 0;
+        }
+
+        return Number.parseInt(label, 10) || 0;
+    }
+
+    private buildPersonExternalLinks(person: LoadableValue<PersonWithExternalIds | null>): ExternalLinks | null {
+        if (person.type !== 'loaded' || !person.value) {
+            return null;
+        }
+
+        return buildExternalLinks(person.value.external_ids ?? null, person.value.homepage ?? null, 'name');
+    }
+}

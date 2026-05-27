@@ -1,5 +1,5 @@
 @if (data.type === 'loading' || data.type === 'idle') {
-    <app-person-carousel-panel [state]="{ type: 'loading' }" [showRank]="false" />
+    <app-person-carousel-panel [state]="{ type: 'loading' }" />
 
     <div class="list">
         <div class="row row--skeleton">
@@ -14,7 +14,7 @@
     </div>
 } @else if (data.type === 'loaded') {
     @if (data.value; as credits) {
-        <app-person-carousel-panel [state]="credits.topCastState" [showRank]="false" />
+        <app-person-carousel-panel [state]="credits.topCastState" />
 
         @if (credits.directors.length || credits.creators.length) {
             <div class="list">

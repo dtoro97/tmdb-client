@@ -20,6 +20,13 @@
     margin: 0 0 var(--space-4);
 }
 
+.search-section-footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    background: transparent;
+}
+
 @include mobile() {
     .search-header {
         padding-block: var(--space-5);
@@ -27,5 +34,9 @@
 
     .results {
         gap: var(--space-6);
+    }
+
+    .search-section-footer {
+        padding-inline: var(--space-3);
     }
 }

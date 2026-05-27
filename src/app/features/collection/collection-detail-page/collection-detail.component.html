@@ -7,29 +7,10 @@
             [alt]="
                 collectionState.type === 'loaded' && collectionState.value ? collectionState.value.name : 'Collection'
             "
-            variant="detail"
+            variant="integrated"
         >
-            <div class="hero-cinematic u-flex-column u-gap-4">
-                @if (collectionState.type === 'loaded' ? collectionState.value : null; as collection) {
-                    <p class="text-overline">
-                        Collection
-                        @if (store.timelineLabel$ | async; as timelineLabel) {
-                            &#x2022; {{ timelineLabel }}
-                        }
-                    </p>
-                    <h1 class="hero-title text-hero-title">
-                        {{ collection.name }}
-                    </h1>
-                } @else {
-                    <app-skeleton class="hero-kicker-skeleton" />
-                    <app-skeleton class="hero-title-skeleton" />
-                }
-            </div>
-        </app-hero-surface>
-
-        <div class="info-shelf">
-            <div class="info-shelf-inner inner-container">
-                <div class="poster-column">
+            @if (collectionState.type === 'loaded' ? collectionState.value : null; as collection) {
+                <div class="collection-hero">
                     @if (store.posterPath$ | async; as posterPath) {
                         <app-image
                             class="poster aspect-poster"
@@ -44,117 +25,87 @@
                     } @else {
                         <app-skeleton class="poster poster--skeleton aspect-poster" />
                     }
-                </div>
 
-                <div class="info-content u-flex-column">
-                    @if (collectionState.type === 'loaded' ? collectionState.value : null; as collection) {
-                        <div class="summary-row">
-                            @if (store.averageRating$ | async; as rating) {
-                                @if (rating > 0) {
-                                    <app-rating class="summary-rating__value" [value]="rating" />
+                    <div class="collection-hero__main">
+                        <div class="collection-hero__heading">
+                            <p class="text-hero-meta">
+                                Collection
+                                @if (store.timelineLabel$ | async; as timelineLabel) {
+                                    &#x2022; {{ timelineLabel }}
                                 }
-                            }
-
-                            @if (store.partsCount$ | async; as count) {
-                                <span class="text-meta">
-                                    {{ count }}
-                                    {{ count === 1 ? 'movie' : 'movies' }}
-                                </span>
-                            }
-
-                            @if (store.timelineLabel$ | async; as timelineLabel) {
-                                <span class="text-meta">
-                                    {{ timelineLabel }}
-                                </span>
-                            }
+                            </p>
+                            <h1 class="hero-title text-hero-title">
+                                {{ collection.name }}
+                            </h1>
                         </div>
 
                         @if (collection.overview) {
-                            <p class="overview text-body">
+                            <p class="overview text-hero-summary">
                                 {{ collection.overview }}
                             </p>
                         } @else {
                             <p class="text-meta">We don't have an overview for this collection yet.</p>
                         }
-                    } @else {
-                        <div class="summary-skeleton-row">
-                            <app-skeleton class="summary-pill-skeleton" />
-                            <app-skeleton class="summary-pill-skeleton summary-pill-skeleton--wide" />
+                    </div>
+
+                    <aside class="collection-hero__side" aria-label="Collection facts">
+                        <div class="collection-facts">
+                            @if (store.averageRating$ | async; as rating) {
+                                @if (rating > 0) {
+                                    <div class="collection-facts__item">
+                                        <span class="text-card-meta">Average rating</span>
+                                        <app-rating class="summary-rating__value" [value]="rating" />
+                                    </div>
+                                }
+                            }
+
+                            @if (store.partsCount$ | async; as count) {
+                                <div class="collection-facts__item">
+                                    <span class="text-card-meta">Movies</span>
+                                    <span class="text-body-sm">
+                                        {{ count }}
+                                        {{ count === 1 ? 'movie' : 'movies' }}
+                                    </span>
+                                </div>
+                            }
+
+                            @if (store.timelineLabel$ | async; as timelineLabel) {
+                                <div class="collection-facts__item">
+                                    <span class="text-card-meta">Timeline</span>
+                                    <span class="text-body-sm">
+                                        {{ timelineLabel }}
+                                    </span>
+                                </div>
+                            }
                         </div>
+                    </aside>
+                </div>
+            } @else {
+                <div class="collection-hero collection-hero--loading" aria-hidden="true">
+                    <app-skeleton class="poster poster--skeleton aspect-poster" />
+
+                    <div class="collection-hero__main">
+                        <app-skeleton class="hero-kicker-skeleton" />
+                        <app-skeleton class="hero-title-skeleton" />
+
                         <div class="overview-skeleton">
                             <app-skeleton class="overview-line" />
                             <app-skeleton class="overview-line overview-line--wide" />
                             <app-skeleton class="overview-line overview-line--medium" />
                         </div>
-                    }
+                    </div>
+
+                    <aside class="collection-hero__side">
+                        <div class="summary-skeleton-row">
+                            <app-skeleton class="summary-pill-skeleton" />
+                            <app-skeleton class="summary-pill-skeleton summary-pill-skeleton--wide" />
+                        </div>
+                    </aside>
                 </div>
-            </div>
-        </div>
+            }
+        </app-hero-surface>
 
         <div class="page-sections">
-            @if (store.arcEntries$ | async; as arcEntries) {
-                @if (arcEntries.length) {
-                    <app-page-section
-                        title="Collection Highlights"
-                        [subtitle]="(store.collectionArcSummary$ | async) ?? undefined"
-                    >
-                        <div class="arc-grid">
-                            @for (entry of arcEntries; track entry.id) {
-                                <a class="arc-card" [routerLink]="['/title', entry.item.id, entry.item.mediaType]">
-                                    <app-image
-                                        class="arc-poster aspect-poster"
-                                        [src]="entry.item.thumb"
-                                        [alt]="entry.item.title"
-                                        type="media"
-                                    />
-
-                                    <div class="u-flex-column u-gap-1">
-                                        <div class="arc-header">
-                                            <div class="arc-title-row">
-                                                <h3 class="text-title">
-                                                    {{ entry.item.title }}
-                                                </h3>
-                                                <app-badge
-                                                    [label]="entry.label"
-                                                    [variant]="entry.label === 'Top rated' ? 'accent' : 'neutral'"
-                                                />
-                                            </div>
-                                            @if (entry.item.date || entry.item.rating) {
-                                                <p class="arc-meta text-meta">
-                                                    @if (entry.item.date) {
-                                                        <span>{{ entry.item.date }}</span>
-                                                    }
-                                                    @if (entry.item.rating) {
-                                                        @if (entry.item.date) {
-                                                            <span>&#x2022;</span>
-                                                        }
-                                                        <span class="u-flex u-items-center u-gap-2">
-                                                            <app-rating [value]="entry.item.rating" />
-                                                            @if (entry.item.voteCount) {
-                                                                <span class="text-caption">
-                                                                    ({{ entry.item.voteCount | voteCount }})
-                                                                </span>
-                                                            }
-                                                        </span>
-                                                    }
-                                                </p>
-                                            }
-                                        </div>
-                                        @if (entry.item.overview) {
-                                            <p class="arc-overview text-body-sm">
-                                                {{ entry.item.overview }}
-                                            </p>
-                                        } @else {
-                                            <p class="text-meta">We don't have an overview for this movie yet.</p>
-                                        }
-                                    </div>
-                                </a>
-                            }
-                        </div>
-                    </app-page-section>
-                }
-            }
-
             @if (store.mappedPartsState$ | async; as partsState) {
                 @if (partsState.type === 'loading' || (partsState.type === 'loaded' && partsState.value.length)) {
                     <app-page-section subtitle="Movies">

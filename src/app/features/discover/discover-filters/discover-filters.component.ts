@@ -19,6 +19,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
+import type { MediaType, SelectOption } from '../../../shared';
 import { StepperInputComponent } from '../../../shared/ui';
 
 export const US_CERTIFICATIONS = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
@@ -38,7 +39,7 @@ export interface KeywordChip {
     name: string;
 }
 
-type LanguageOption = { value: string; label: string };
+type LanguageOption = SelectOption<string>;
 
 @Component({
     selector: 'app-discover-filters',
@@ -67,7 +68,7 @@ export class DiscoverFiltersComponent implements OnChanges {
     @Input() yearFrom: number | null = null;
     @Input() yearTo: number | null = null;
     @Input() minRating: number | null = null;
-    @Input() mediaType: 'movie' | 'tv' = 'movie';
+    @Input() mediaType: MediaType = 'movie';
     @Input() activeFilterCount = 0;
     @Input() voteCountMin: number | null = null;
     @Input() ratingPlaceholder: number | null = null;
