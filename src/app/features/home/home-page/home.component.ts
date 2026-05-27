@@ -4,12 +4,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import {
+    EmptyStateComponent,
     ImageComponent,
     MediaCarouselPanelComponent,
     PageSectionComponent,
     PersonCarouselPanelComponent,
     PillToggleComponent,
     RatingComponent,
+    SkeletonComponent,
 } from '../../../shared';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -31,6 +33,8 @@ import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.compone
         HomeTopPicksComponent,
         ImageComponent,
         RatingComponent,
+        EmptyStateComponent,
+        SkeletonComponent,
     ],
     providers: [HomeStoreService],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,16 +42,23 @@ import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.compone
     styleUrl: './home.component.scss',
 })
 export class HomePageComponent {
+    readonly tonightSkeletonItems = Array.from(
+        { length: 6 },
+        (_, index) => index,
+    );
+    readonly streamingPreviewSkeletonItems = Array.from(
+        { length: 3 },
+        (_, index) => index,
+    );
     readonly homeVM$ = this.homeStoreService.homeVM$;
 
     constructor(private readonly homeStoreService: HomeStoreService) {
-        this.homeStoreService
-            .loadAllSections$()
-            .pipe(takeUntilDestroyed())
-            .subscribe();
+        this.homeStoreService.loadAllSections$().pipe(takeUntilDestroyed()).subscribe();
     }
 
-    onStreamingProviderSelected(providerId: number): void {
-        this.homeStoreService.setStreamingProvider(providerId);
+    onWhatToWatchMediaTypeSelected(value: unknown): void {
+        if (value === 'movie' || value === 'tv') {
+            this.homeStoreService.setWhatToWatchMediaType(value);
+        }
     }
 }

@@ -22,7 +22,7 @@
 
         <section class="hero">
             <div class="hero__content u-flex-column u-gap-4">
-                <span class="badge text-overline">{{ badge }}</span>
+                <app-badge class="badge" [label]="badge" variant="outline" />
 
                 <a [routerLink]="['/title', spotlight.id, spotlight.mediaType]">
                     <h1 class="title text-hero-title">
@@ -46,7 +46,7 @@
                 </div>
 
                 @if (spotlight.overview) {
-                    <p class="overview text-body">
+                    <p class="overview text-hero-summary">
                         {{ spotlight.overview }}
                     </p>
                 }

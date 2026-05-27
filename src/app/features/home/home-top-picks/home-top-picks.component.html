@@ -8,7 +8,6 @@
                     </div>
 
                     <div class="feature-body u-flex-column u-items-start">
-                        <app-skeleton class="rank-skeleton" />
                         <app-skeleton class="feature-title-skeleton" />
 
                         <div class="feature-meta u-flex u-items-center u-gap-2">
@@ -42,8 +41,6 @@
                         </div>
 
                         <div class="feature-body u-flex-column u-items-start">
-                            <app-badge class="rank rank--featured" [label]="'#' + entry.rank" variant="rank" />
-
                             <span class="feature-title text-title">
                                 {{ entry.item.title }}
                             </span>
@@ -75,9 +72,7 @@
             <div class="tiles-grid">
                 @for (entry of secondaryItems; track entry.item.id) {
                     <article class="tile">
-                        <app-badge class="rank rank--tile" [label]="'#' + entry.rank" variant="rank" />
-
-                        <app-card [item]="entry.item" [showRating]="false" />
+                        <app-card [item]="entry.item" [showRating]="true" />
                     </article>
                 }
             </div>

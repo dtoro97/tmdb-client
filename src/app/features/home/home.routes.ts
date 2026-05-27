@@ -11,6 +11,11 @@ export const homeRoutes: Routes = [
     },
     {
         path: 'trailers',
+        redirectTo: 'trailers/trending',
+        pathMatch: 'full',
+    },
+    {
+        path: 'trailers/:feedType',
         component: TrailersPageComponent,
         title: 'Watch Movie & TV Trailers',
     },

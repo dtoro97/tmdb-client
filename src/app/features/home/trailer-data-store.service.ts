@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, catchError, filter, forkJoin, map, of, take, tap } from 'rxjs';
+import { Observable, catchError, filter, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
 
 import { API_JSON_OPTIONS, TRAILERS_PAGE_SEED_COUNT } from '../../constants';
 import {
     DiscoverRestControllerService,
     MovieListItem,
     MovieRestControllerService,
+    MultiListItem,
+    TrendingRestControllerService,
+    TvSeasonCompact,
+    TvSeasonRestControllerService,
     TvSeriesListItem,
     TvSeriesRestControllerService,
     Video,
@@ -17,14 +21,17 @@ import {
     buildYoutubeWatchUrl,
     isDefined,
     LoadableValue,
-    LocaleStoreService,
     pickBestYoutubeTrailer,
-    shuffle,
     getISODate,
     toVideoTrailerSeedItem,
     VideoCardItem,
     VideoTrailerSeedItem,
 } from '../../shared';
+
+export type TrailerFeedType = 'trending' | 'new';
+
+const TRAILER_CONTENT_REGION = 'US';
+const TRAILER_VIDEO_LANGUAGE = 'en';
 
 export interface TrailerVideoCardItem extends VideoCardItem {
     mediaId: number;
@@ -47,13 +54,29 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
     constructor(
         private readonly discoverService: DiscoverRestControllerService,
         private readonly movieService: MovieRestControllerService,
+        private readonly trendingService: TrendingRestControllerService,
+        private readonly tvSeasonService: TvSeasonRestControllerService,
         private readonly tvService: TvSeriesRestControllerService,
-        private readonly localeStore: LocaleStoreService,
     ) {
         super({ videoCache: {} });
     }
 
-    getTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {
+    getTrailerSeeds$(feedType: TrailerFeedType): Observable<readonly VideoTrailerSeedItem[]> {
+        if (feedType === 'trending') {
+            return this.getTrendingTrailerSeeds$();
+        }
+
+        return this.getNewTrailerSeeds$();
+    }
+
+    private getTrendingTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {
+        return this.trendingService.trendingAll('day', undefined, 'body', undefined, this.opts).pipe(
+            map((response) => this.toTrendingTrailerSeeds(response.results ?? [])),
+            catchError(() => of([] as readonly VideoTrailerSeedItem[])),
+        );
+    }
+
+    private getNewTrailerSeeds$(): Observable<readonly VideoTrailerSeedItem[]> {
         const start = getISODate(-30);
         const end = getISODate(30);
 
@@ -62,7 +85,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             tv: this.discoverReleaseWindowTv$(start, end),
         }).pipe(
             map(({ movies, tv }) =>
-                this.getVideoTrailerSeeds(movies.results ?? [], tv.results ?? []),
+                this.toNewTrailerSeeds(movies.results ?? [], tv.results ?? []),
             ),
             catchError(() => of([] as readonly VideoTrailerSeedItem[])),
         );
@@ -76,51 +99,15 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         return forkJoin(
             seeds.map((seed) =>
                 this.getVideosForMedia$(seed.mediaId, seed.mediaType).pipe(
-                    map((videos) => this.toVideoCardItem(seed, pickBestYoutubeTrailer(videos))),
+                    map((videos) =>
+                        this.toVideoCardItem(
+                            seed,
+                            pickBestYoutubeTrailer(videos, TRAILER_VIDEO_LANGUAGE),
+                        ),
+                    ),
                 ),
             ),
-        ).pipe(map((items) => shuffle(items.filter(isDefined))));
-    }
-
-    discoverStreamingTvByProviderId$(providerId: number): Observable<{ results?: TvSeriesListItem[] }> {
-        return this.discoverService.discoverTv(
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            false,
-            undefined,
-            undefined,
-            1,
-            undefined,
-            'popularity.desc',
-            undefined,
-            undefined,
-            undefined,
-            200,
-            undefined,
-            this.localeStore.region(),
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            'flatrate',
-            `${providerId}`,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            'body',
-            undefined,
-            this.opts,
-        );
+        ).pipe(map((items) => items.filter(isDefined)));
     }
 
     private getVideosForMedia$(mediaId: number, mediaType: MediaType): Observable<Video[]> {
@@ -159,17 +146,64 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
     }
 
     private fetchVideosForMedia$(mediaId: number, mediaType: MediaType): Observable<Video[]> {
-        return (
-            mediaType === 'movie'
-                ? this.movieService.movieVideos(mediaId, undefined, 'body', undefined, this.opts)
-                : this.tvService.tvSeriesVideos(mediaId, undefined, undefined, 'body', undefined, this.opts)
-        ).pipe(
+        return mediaType === 'movie'
+            ? this.fetchMovieVideos$(mediaId)
+            : this.fetchTvVideos$(mediaId);
+    }
+
+    private fetchMovieVideos$(mediaId: number): Observable<Video[]> {
+        return this.movieService.movieVideos(mediaId, undefined, 'body', undefined, this.opts).pipe(
             map((response) => response.results ?? []),
             catchError(() => of([] as Video[])),
         );
     }
 
+    private fetchTvVideos$(seriesId: number): Observable<Video[]> {
+        return this.tvService.tvSeriesDetails(seriesId, undefined, undefined, 'body', undefined, this.opts).pipe(
+            map((series) => this.getLatestSeasonNumber(series.seasons ?? [])),
+            switchMap((seasonNumber) => {
+                if (!seasonNumber) {
+                    return this.fetchTvSeriesVideos$(seriesId);
+                }
+
+                return this.fetchTvSeasonVideos$(seriesId, seasonNumber).pipe(
+                    switchMap((seasonVideos) => {
+                        const seasonTrailer = pickBestYoutubeTrailer(
+                            seasonVideos,
+                            TRAILER_VIDEO_LANGUAGE,
+                            { requirePreferredLanguage: true },
+                        );
+
+                        return seasonTrailer
+                            ? of([seasonTrailer])
+                            : this.fetchTvSeriesVideos$(seriesId);
+                    }),
+                );
+            }),
+            catchError(() => this.fetchTvSeriesVideos$(seriesId)),
+        );
+    }
+
+    private fetchTvSeriesVideos$(seriesId: number): Observable<Video[]> {
+        return this.tvService.tvSeriesVideos(seriesId, undefined, undefined, 'body', undefined, this.opts).pipe(
+            map((response) => response.results ?? []),
+            catchError(() => of([] as Video[])),
+        );
+    }
+
+    private fetchTvSeasonVideos$(seriesId: number, seasonNumber: number): Observable<Video[]> {
+        return this.tvSeasonService
+            .tvSeasonVideos(seriesId, seasonNumber, undefined, undefined, 'body', undefined, this.opts)
+            .pipe(
+                map((response) => response.results ?? []),
+                catchError(() => of([] as Video[])),
+            );
+    }
+
     private discoverReleaseWindowMovies$(start: string, end: string) {
+        const region = TRAILER_CONTENT_REGION;
+        const watchRegion = TRAILER_CONTENT_REGION;
+
         return this.discoverService.discoverMovie(
             undefined,
             undefined,
@@ -182,7 +216,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             undefined,
             start,
             end,
-            this.localeStore.region(),
+            region,
             undefined,
             undefined,
             'popularity.desc',
@@ -190,7 +224,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             undefined,
             undefined,
             undefined,
-            undefined,
+            watchRegion,
             undefined,
             undefined,
             undefined,
@@ -216,6 +250,8 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
     }
 
     private discoverReleaseWindowTv$(start: string, end: string) {
+        const watchRegion = TRAILER_CONTENT_REGION;
+
         return this.discoverService.discoverTv(
             undefined,
             undefined,
@@ -233,7 +269,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             undefined,
             undefined,
             undefined,
-            this.localeStore.region(),
+            watchRegion,
             undefined,
             undefined,
             undefined,
@@ -256,16 +292,51 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         );
     }
 
-    private getVideoTrailerSeeds(
+    private toTrendingTrailerSeeds(
+        items: readonly MultiListItem[],
+    ): VideoTrailerSeedItem[] {
+        return items
+            .filter(
+                (item): item is MultiListItem & { media_type: 'movie' | 'tv' } =>
+                    item.media_type === 'movie' || item.media_type === 'tv',
+            )
+            .map((item) => toVideoTrailerSeedItem(item, item.media_type))
+            .filter((seed) => seed.mediaId > 0)
+            .slice(0, TRAILERS_PAGE_SEED_COUNT);
+    }
+
+    private toNewTrailerSeeds(
         movies: readonly MovieListItem[],
         tvSeries: readonly TvSeriesListItem[],
     ): VideoTrailerSeedItem[] {
-        return shuffle([
-            ...movies.map((movie) => toVideoTrailerSeedItem(movie, 'movie')),
-            ...tvSeries.map((tv) => toVideoTrailerSeedItem(tv, 'tv')),
-        ])
-            .filter((seed) => seed.mediaId > 0)
+        return [
+            ...movies.map((movie) => ({
+                seed: toVideoTrailerSeedItem(movie, 'movie'),
+                popularity: movie.popularity ?? 0,
+            })),
+            ...tvSeries.map((tv) => ({
+                seed: toVideoTrailerSeedItem(tv, 'tv'),
+                popularity: tv.popularity ?? 0,
+            })),
+        ]
+            .filter((item) => item.seed.mediaId > 0)
+            .sort((left, right) => right.popularity - left.popularity)
+            .map((item) => item.seed)
             .slice(0, TRAILERS_PAGE_SEED_COUNT);
+    }
+
+    private getLatestSeasonNumber(seasons: readonly TvSeasonCompact[]): number | null {
+        return seasons.reduce<number | null>((latestSeasonNumber, season) => {
+            const seasonNumber = season.season_number ?? 0;
+
+            if (seasonNumber <= 0) {
+                return latestSeasonNumber;
+            }
+
+            return latestSeasonNumber === null || seasonNumber > latestSeasonNumber
+                ? seasonNumber
+                : latestSeasonNumber;
+        }, null);
     }
 
     private toVideoCardItem(seed: VideoTrailerSeedItem, video: Video | null): TrailerVideoCardItem | null {
