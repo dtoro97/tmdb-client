@@ -1,319 +1,256 @@
 @if (vm$ | async; as vm) {
-    <div class="user-list-detail page-container">
-        @if (vm.headerState.type === "loaded") {
-            <app-hero-surface
-                variant="compact"
-                [backdropPath]="vm.headerState.value.backdropPath"
-                [alt]="vm.headerState.value.name"
-            >
-                <header class="user-list-detail__hero">
-                    <a
-                        class="user-list-detail__back-link text-caption"
-                        [routerLink]="backLink"
+    <div class="detail page-container">
+        @if (vm.header.type === "loaded") {
+            <app-sub-page-header
+                parentTitle="lists"
+                [backLink]="backLink"
+                [pageTitle]="vm.header.value.name"
+                [subtitle]="
+                    vm.header.value.itemCount +
+                    ' title' +
+                    (vm.header.value.itemCount === 1 ? '' : 's')
+                "
+                [titleIconClass]="vm.isPublic ? 'fa-regular fa-eye' : 'fa-solid fa-lock'"
+                [titleIconLabel]="(vm.isPublic ? 'Public' : 'Private') + ' list'"
+            />
+
+            <main class="page-main detail__main">
+                @if (
+                    vm.header.value.description ||
+                    vm.header.value.createdBy ||
+                    vm.ownedByCurrentUser
+                ) {
+                    <section
+                        class="detail__summary"
+                        aria-label="List details"
                     >
-                        <i
-                            class="user-list-detail__back-icon fa-solid fa-chevron-left"
-                            aria-hidden="true"
-                        ></i>
-                        Back to your lists
-                    </a>
-
-                    <div class="user-list-detail__title-row">
-                        <h1 class="user-list-detail__title text-headline">
-                            {{ vm.headerState.value.name }}
-                        </h1>
-                    </div>
-
-                    <p class="user-list-detail__hero-meta text-body-sm">
-                        @if (vm.headerState.value.createdBy) {
-                            <span>
-                                Created by
-                                <strong>{{ vm.headerState.value.createdBy }}</strong>
-                            </span>
-                        }
-                    </p>
-
-                    <p
-                        class="user-list-detail__subtitle text-body-sm"
-                        [class.user-list-detail__subtitle--placeholder]="
-                            !vm.headerState.value.description
-                        "
-                    >
-                        {{
-                            vm.headerState.value.description ||
-                                "This custom TMDb list does not have a description yet."
-                        }}
-                    </p>
-                </header>
-            </app-hero-surface>
-
-            <div class="page-main">
-                <section class="user-list-detail__summary-shell">
-                    @if (vm.isOwnedByCurrentUser) {
-                        <article
-                            class="surface-panel user-list-detail__summary-card"
-                        >
-                            <div class="user-list-detail__summary-copy">
-                                <div class="user-list-detail__actions-block">
-                                    <div class="user-list-detail__actions">
-                                        <button
-                                            mat-stroked-button
-                                            type="button"
-                                            (click)="onEditDetails(vm.headerState.value, vm.isPublic)"
-                                        >
-                                            Edit details
-                                        </button>
-                                        <button
-                                            mat-stroked-button
-                                            type="button"
-                                            (click)="onClearList()"
-                                        >
-                                            Clear list
-                                        </button>
-                                        <button
-                                            class="user-list-detail__delete-button"
-                                            matButton="filled"
-                                            type="button"
-                                            (click)="onDeleteList()"
-                                        >
-                                            Delete list
-                                        </button>
-                                    </div>
+                        @if (!vm.ownedByCurrentUser && vm.header.value.createdBy) {
+                            <div class="detail__owner-summary">
+                                <app-user-avatar
+                                    [name]="vm.header.value.createdBy"
+                                />
+                                <div class="detail__owner-copy">
+                                    <span class="text-caption">
+                                        {{ vm.header.value.createdBy }}
+                                    </span>
+                                    @if (vm.header.value.description) {
+                                        <p class="detail__description text-body-sm">
+                                            {{ vm.header.value.description }}
+                                        </p>
+                                    }
                                 </div>
                             </div>
-                        </article>
-                    }
-                </section>
-
-                <section class="user-list-detail__items-section">
-                    <div class="user-list-detail__items-header">
-                        <div class="user-list-detail__items-heading">
-                            <h2 class="text-title">In this list</h2>
-                        </div>
-                        <div class="user-list-detail__items-controls">
-                            <p
-                                class="user-list-detail__items-count text-caption"
-                            >
-                                {{
-                                    vm.headerState.value.itemCount +
-                                        " title" +
-                                        (vm.headerState.value.itemCount === 1
-                                            ? ""
-                                            : "s")
-                                }}
+                        } @else if (vm.header.value.description) {
+                            <p class="detail__description text-body-sm">
+                                {{ vm.header.value.description }}
                             </p>
-                            <app-sort-button
-                                [options]="sortOptions"
-                                [selectedValue]="vm.sortField"
-                                [direction]="vm.sortDirection"
-                                (sortChange)="onSortChange($event, vm.sortBy)"
-                                (directionToggle)="onToggleSortDirection()"
-                            />
-                        </div>
+                        }
+
+                        @if (vm.ownedByCurrentUser) {
+                            <div
+                                class="detail__actions"
+                                role="group"
+                                aria-label="List actions"
+                            >
+                                <button
+                                    matButton="filled"
+                                    type="button"
+                                    (click)="onAddTitles(vm.header.value.id, vm.existingItemKeys)"
+                                >
+                                    Add movies or shows
+                                </button>
+                                <button
+                                    mat-stroked-button
+                                    type="button"
+                                    (click)="onEditDetails(vm.header.value, vm.isPublic, vm.defaultSortBy)"
+                                >
+                                    Edit list
+                                </button>
+                                <button
+                                    mat-stroked-button
+                                    type="button"
+                                    (click)="onClearList()"
+                                >
+                                    Clear list
+                                </button>
+                                <button
+                                    class="detail__danger-button"
+                                    mat-stroked-button
+                                    type="button"
+                                    (click)="onDeleteList()"
+                                >
+                                    Delete list
+                                </button>
+                            </div>
+                        }
+                    </section>
+                }
+
+                <section class="detail__toolbar">
+                    <div>
+                        <h2 class="text-title">Movies and shows</h2>
                     </div>
 
-                    @if (
-                        vm.itemsState.type === "loading" ||
-                        vm.itemsState.type === "idle"
-                    ) {
-                        <div class="user-list-detail__grid">
-                            @for (
-                                placeholder of initialSkeletonCount | repeat;
-                                track placeholder
-                            ) {
-                                <article
-                                    class="user-list-detail__card-skeleton surface-panel"
-                                >
-                                    <app-skeleton
-                                        class="user-list-detail__card-skeleton-media"
-                                    />
-                                    <div
-                                        class="user-list-detail__card-skeleton-copy"
-                                    >
-                                        <app-skeleton
-                                            class="user-list-detail__card-skeleton-title"
-                                        />
-                                        <app-skeleton
-                                            class="user-list-detail__card-skeleton-meta"
-                                        />
-                                    </div>
-                                </article>
-                            }
-                        </div>
-                    } @else if (
-                        vm.itemsState.type === "loaded" ||
-                        vm.itemsState.type === "loading-more"
-                    ) {
-                        @if (vm.itemsState.value.length) {
-                            <div class="user-list-detail__grid">
-                                @for (
-                                    item of vm.itemsState.value;
-                                    track item.mediaType + item.id
-                                ) {
-                                    <article
-                                        class="user-list-detail__item-card"
-                                    >
-                                        <app-backdrop-card
-                                            [item]="item"
-                                        ></app-backdrop-card>
+                    <div class="detail__sort">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                            <mat-select
+                                [value]="vm.sortBy"
+                                aria-label="Sort list items"
+                                (selectionChange)="onSortChange($event.value)"
+                            >
+                                @for (option of sortOptions; track option.value) {
+                                    <mat-option [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </section>
 
-                                        @if (vm.isOwnedByCurrentUser) {
-                                            <button
-                                                class="user-list-detail__item-remove"
-                                                type="button"
-                                                matTooltip="Remove from list"
-                                                matTooltipPosition="above"
-                                                aria-label="Remove item from list"
-                                                (click)="onRemoveItem(item)"
+                @if (
+                    vm.items.type === "loading" ||
+                    vm.items.type === "idle"
+                ) {
+                    <app-media-list
+                        [state]="loadingListState"
+                        [skeletonCount]="initialSkeletonCount"
+                    />
+                } @else if (vm.items.type === "loaded") {
+                    @if (vm.items.value.length) {
+                        <div class="detail__items">
+                            @for (item of vm.items.value; track item.key) {
+                                <app-media-list-item
+                                    [item]="item.mediaItem"
+                                    [link]="item.link"
+                                >
+                                    @if (vm.ownedByCurrentUser) {
+                                        <div
+                                            media-list-item-action
+                                            class="detail__item-actions"
+                                        >
+                                            <app-icon-button
+                                                matTooltip="Edit comment"
+                                                ariaLabel="Edit comment"
+                                                (onClick)="onStartComment(item)"
                                             >
                                                 <i
-                                                    class="fa-solid fa-xmark"
+                                                    class="fa-regular fa-comment"
                                                     aria-hidden="true"
                                                 ></i>
-                                            </button>
-                                        }
-                                    </article>
-                                }
-
-                                @if (vm.itemsState.type === "loading-more") {
-                                    @for (
-                                        placeholder of loadingMoreSkeletonCount
-                                            | repeat;
-                                        track placeholder
-                                    ) {
-                                        <article
-                                            class="user-list-detail__card-skeleton surface-panel"
-                                        >
-                                            <app-skeleton
-                                                class="user-list-detail__card-skeleton-media"
-                                            />
-                                            <div
-                                                class="user-list-detail__card-skeleton-copy"
+                                            </app-icon-button>
+                                            <app-icon-button
+                                                tone="danger"
+                                                matTooltip="Remove from list"
+                                                ariaLabel="Remove from list"
+                                                (onClick)="onRemoveItem(item)"
                                             >
-                                                <app-skeleton
-                                                    class="user-list-detail__card-skeleton-title"
-                                                />
-                                                <app-skeleton
-                                                    class="user-list-detail__card-skeleton-meta"
-                                                />
-                                            </div>
-                                        </article>
+                                                <i
+                                                    class="fa-regular fa-trash-can"
+                                                    aria-hidden="true"
+                                                ></i>
+                                            </app-icon-button>
+                                        </div>
                                     }
-                                }
-                            </div>
 
-                            @if (vm.page < vm.totalPages) {
-                                <footer class="user-list-detail__footer">
-                                    <button
-                                        mat-stroked-button
-                                        type="button"
-                                        [disabled]="
-                                            vm.itemsState.type ===
-                                            'loading-more'
-                                        "
-                                        (click)="onShowMore()"
-                                    >
-                                        {{
-                                            vm.itemsState.type ===
-                                            "loading-more"
-                                                ? "Loading more"
-                                                : "Show more"
-                                        }}
-                                    </button>
-                                </footer>
+                                    @if (item.comment) {
+                                        <p
+                                            media-list-item-note
+                                            class="detail__comment text-body-sm"
+                                        >
+                                            <i
+                                                class="fa-regular fa-comment"
+                                                aria-hidden="true"
+                                            ></i>
+                                            {{ item.comment }}
+                                        </p>
+                                    }
+
+                                    @if (
+                                        vm.ownedByCurrentUser &&
+                                        editingCommentKey() === item.key
+                                    ) {
+                                        <div
+                                            media-list-item-note
+                                            class="detail__comment-editor"
+                                        >
+                                            <textarea
+                                                class="detail__comment-input text-body-sm"
+                                                rows="2"
+                                                [value]="commentDraft()"
+                                                [attr.aria-label]="'Comment for ' + item.title"
+                                                placeholder="Add a comment"
+                                                (input)="onCommentDraftInput($event)"
+                                            ></textarea>
+                                            <div class="detail__comment-actions">
+                                                <button
+                                                    matButton
+                                                    type="button"
+                                                    (click)="onCancelComment()"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    matButton="filled"
+                                                    type="button"
+                                                    (click)="onSaveComment(item)"
+                                                >
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </app-media-list-item>
                             }
-                        } @else {
-                            <div
-                                class="surface-panel empty-panel user-list-detail__empty-panel"
-                            >
-                                <app-empty-state
-                                    iconClass="fa-solid fa-list"
-                                    title="This list is empty"
-                                    text="Add more titles and they will appear here."
-                                />
-                            </div>
+                        </div>
+
+                        @if (vm.total > vm.pageSize) {
+                            <mat-paginator
+                                class="detail__paginator"
+                                [length]="vm.total"
+                                [pageIndex]="vm.page"
+                                [pageSize]="vm.pageSize"
+                                [hidePageSize]="true"
+                                (page)="onPageChange($event)"
+                            />
                         }
-                    }
-                </section>
-            </div>
-        } @else {
-            <app-hero-surface variant="compact">
-                <div
-                    class="user-list-detail__hero user-list-detail__hero--loading"
-                >
-                    <app-skeleton
-                        class="user-list-detail__back-link-skeleton"
-                    />
-                    <app-skeleton class="user-list-detail__eyebrow-skeleton" />
-                    <app-skeleton class="user-list-detail__title-skeleton" />
-                    <app-skeleton class="user-list-detail__subtitle-skeleton" />
-                </div>
-            </app-hero-surface>
-
-            <div class="page-main">
-                <section class="user-list-detail__summary-shell">
-                    <article
-                        class="surface-panel user-list-detail__summary-card"
-                    >
-                        <div class="user-list-detail__summary-copy">
-                            <div class="user-list-detail__actions-block">
-                                <div class="user-list-detail__actions">
-                                    <app-skeleton
-                                        class="user-list-detail__action-skeleton"
-                                    />
-                                    <app-skeleton
-                                        class="user-list-detail__action-skeleton"
-                                    />
-                                    <app-skeleton
-                                        class="user-list-detail__action-skeleton"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                </section>
-
-                <section class="user-list-detail__items-section">
-                    <div class="user-list-detail__items-header">
-                        <div class="user-list-detail__items-heading">
-                            <app-skeleton
-                                class="user-list-detail__items-eyebrow-skeleton"
+                    } @else {
+                        <section class="detail__empty">
+                            <app-empty-state
+                                iconClass="fa-solid fa-list"
+                                title="This list is empty"
+                                [text]="
+                                    vm.ownedByCurrentUser
+                                        ? 'Add a movie or TV show to start building it.'
+                                        : 'There are no titles to show here yet.'
+                                "
                             />
-                            <app-skeleton
-                                class="user-list-detail__items-title-skeleton"
-                            />
-                        </div>
-                        <app-skeleton
-                            class="user-list-detail__items-count-skeleton"
-                        />
-                    </div>
-
-                    <div class="user-list-detail__grid">
-                        @for (
-                            placeholder of initialSkeletonCount | repeat;
-                            track placeholder
-                        ) {
-                            <article
-                                class="user-list-detail__card-skeleton surface-panel"
-                            >
-                                <app-skeleton
-                                    class="user-list-detail__card-skeleton-media"
-                                />
-                                <div
-                                    class="user-list-detail__card-skeleton-copy"
+                            @if (vm.ownedByCurrentUser) {
+                                <button
+                                    matButton="filled"
+                                    type="button"
+                                    (click)="onAddTitles(vm.header.value.id, vm.existingItemKeys)"
                                 >
-                                    <app-skeleton
-                                        class="user-list-detail__card-skeleton-title"
-                                    />
-                                    <app-skeleton
-                                        class="user-list-detail__card-skeleton-meta"
-                                    />
-                                </div>
-                            </article>
-                        }
-                    </div>
-                </section>
-            </div>
+                                    Add movies or shows
+                                </button>
+                            }
+                        </section>
+                    }
+                }
+            </main>
+        } @else {
+            <app-sub-page-header
+                parentTitle="lists"
+                [backLink]="backLink"
+                [loading]="true"
+            />
+
+            <main class="page-main detail__main">
+                <app-media-list
+                    [state]="loadingListState"
+                    [skeletonCount]="initialSkeletonCount"
+                />
+            </main>
         }
     </div>
 }

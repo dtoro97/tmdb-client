@@ -1,98 +1,145 @@
 @use "breakpoints" as *;
 @use "mixins" as *;
 
-.user-list-card {
+.list-card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 9.5rem;
+    min-height: 8rem;
     padding: var(--space-4);
     color: inherit;
-    text-decoration: none;
     @include surface-panel(var(--surface-panel-soft));
     @include surface-hover();
+
+    &__link,
+    &__main {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__link {
+        flex: 1 1 auto;
+        gap: var(--space-4);
+        height: 100%;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    &__main {
+        gap: var(--space-2);
+    }
+
+    &__title-row,
+    &__meta-row,
+    &__footer,
+    &__actions,
+    &__meta,
+    &__status {
+        display: flex;
+        align-items: center;
+    }
+
+    &__title-row,
+    &__meta-row,
+    &__footer {
+        flex-wrap: wrap;
+    }
+
+    &__title-row {
+        align-items: flex-start;
+        gap: var(--space-2);
+        padding-inline-end: 6.75rem;
+    }
+
+    &__meta-row {
+        gap: var(--space-1) var(--space-3);
+    }
+
+    &__meta {
+        gap: var(--space-1);
+
+        i {
+            width: 0.875rem;
+            color: var(--text-muted);
+            font-size: var(--text-xs);
+        }
+    }
+
+    &__title {
+        min-width: 0;
+        transition: color var(--motion-base);
+        @include line-clamp(2);
+    }
+
+    &__description {
+        max-width: 52ch;
+        @include line-clamp(1);
+
+        &--placeholder {
+            color: var(--text-muted);
+        }
+    }
+
+    &__footer {
+        justify-content: space-between;
+        gap: var(--space-3);
+        margin-top: auto;
+    }
+
+    &__timestamp {
+        min-width: 0;
+    }
+
+    &__actions {
+        position: absolute;
+        top: var(--space-3);
+        right: var(--space-3);
+        gap: var(--space-1);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--motion-base);
+    }
+
+    &__status {
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: var(--text-sm);
+        line-height: 1;
+    }
 }
 
-.user-list-card__copy {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
+@include hover-capable {
+    .list-card {
+        &:hover &__actions,
+        &:focus-within &__actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        &:hover &__title,
+        &:focus-within &__title {
+            color: var(--text-accent);
+        }
+    }
 }
 
-.user-list-card__main {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.user-list-card__title-row {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-}
-
-.user-list-card__meta {
-    color: var(--text-muted);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-}
-
-.user-list-card__title {
-    flex: 1 1 12rem;
-    margin: 0;
-    min-width: 0;
-    @include line-clamp(2);
-}
-
-.user-list-card__description {
-    margin: 0;
-    color: var(--text-secondary);
-    max-width: 52ch;
-    @include line-clamp(2);
-}
-
-.user-list-card__description--placeholder {
-    color: var(--text-muted);
-}
-
-.user-list-card__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-    margin-top: auto;
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--color-border-subtle);
-}
-
-.user-list-card__timestamp {
-    margin: 0;
-}
-
-.user-list-card__action {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--text-secondary);
-    white-space: nowrap;
-}
-
-.user-list-card__action-icon {
-    font-size: 0.75rem;
+@media (hover: none) {
+    .list-card {
+        &__actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
 }
 
 @include mobile() {
-    .user-list-card {
+    .list-card {
         padding: var(--space-3);
-        min-height: 9rem;
-    }
-
-    .user-list-card__copy {
-        gap: var(--space-4);
-    }
-
-    .user-list-card__main {
-        gap: var(--space-2);
     }
 }

@@ -1,27 +1,29 @@
-import { Observable, of, map, tap } from 'rxjs';
-
-export interface PagedLoadConfig<T> {
-    readonly currentItems: T[];
-    readonly currentPage: number;
-    readonly totalPages: number;
-    readonly placeholderCount: number;
-    setLoadingMore(items: T[]): void;
-    fetchPage(nextPage: number): Observable<T[]>;
-    setLoaded(items: T[], page: number): void;
+export interface PageItemRangeInput {
+    readonly page: number;
+    readonly pageSize: number;
+    readonly itemCount: number;
+    readonly totalResults: number;
 }
 
-export function loadMorePaged$<T>(config: PagedLoadConfig<T>): Observable<void> {
-    if (config.currentPage >= config.totalPages) {
-        return of(undefined);
+export interface PageItemRange {
+    readonly start: number;
+    readonly end: number;
+}
+
+export const toPageItemRange = ({
+    page,
+    pageSize,
+    itemCount,
+    totalResults,
+}: PageItemRangeInput): PageItemRange => {
+    if (totalResults <= 0 || itemCount <= 0) {
+        return { start: 0, end: 0 };
     }
 
-    const nextPage = config.currentPage + 1;
-    config.setLoadingMore(config.currentItems);
+    const start = (page - 1) * pageSize + 1;
 
-    return config.fetchPage(nextPage).pipe(
-        tap((newItems) =>
-            config.setLoaded([...config.currentItems, ...newItems], nextPage),
-        ),
-        map(() => undefined),
-    );
-}
+    return {
+        start,
+        end: Math.min(totalResults, start + itemCount - 1),
+    };
+};

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { NotFoundComponent } from './shared';
+import { NotFoundComponent, v4AccountAccessGuard } from './shared';
 
 export const routes: Routes = [
     {
@@ -40,9 +40,17 @@ export const routes: Routes = [
     {
         path: 'me',
         loadChildren: () =>
-            import('./features/user/user-data.routes').then(
-                (m) => m.userDataRoutes,
+            import('./features/user/user.routes').then(
+                (m) => m.userRoutes,
             ),
+    },
+    {
+        path: 'lists/:listId',
+        canActivate: [v4AccountAccessGuard],
+        loadComponent: () =>
+            import(
+                './features/user/user-list-detail-page/user-list-detail-page.component'
+            ).then((m) => m.UserListDetailPageComponent),
     },
     {
         path: 'watch',

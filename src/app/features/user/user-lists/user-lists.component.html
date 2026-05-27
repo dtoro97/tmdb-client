@@ -1,0 +1,64 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Lists"
+        subtitle="Collections you have built."
+    />
+
+    <div class="page-main">
+        <div class="lists">
+            @if (
+                vm.state.type === "loading" ||
+                vm.state.type === "idle"
+            ) {
+                <app-skeleton class="lists__summary-skeleton" />
+
+                <div class="lists__grid">
+                    @for (placeholder of 5 | repeat; track placeholder) {
+                        <app-user-list-card-skeleton />
+                    }
+                </div>
+            } @else if (vm.state.type === "loaded") {
+                @if (vm.state.value.length) {
+                    <p class="lists__summary text-caption">
+                        {{ vm.start }} - {{ vm.end }} of
+                        {{ vm.total }}
+                    </p>
+
+                    <div class="lists__grid">
+                        @for (item of vm.state.value; track item.id) {
+                            <app-user-list-card
+                                [item]="item"
+                                [actionsEnabled]="true"
+                                (editList)="onEditList($event)"
+                                (deleteList)="onDeleteList($event)"
+                            />
+                        }
+                    </div>
+
+                    @if (vm.total > vm.pageSize) {
+                        <mat-paginator
+                            class="lists__paginator"
+                            [length]="vm.total"
+                            [pageIndex]="vm.page"
+                            [pageSize]="vm.pageSize"
+                            [hidePageSize]="true"
+                            (page)="onPageChange($event)"
+                        />
+                    }
+                } @else {
+                    <div class="empty-panel">
+                        <app-empty-state
+                            iconClass="fa-solid fa-list"
+                            title="No lists yet"
+                            text="Create a list to start collecting movies and shows."
+                        />
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
+
+

@@ -1,0 +1,88 @@
+@if (vm$ | async; as vm) {
+    <div class="dialog">
+        <header>
+            <h2 class="text-title">Add titles</h2>
+        </header>
+
+        <div class="dialog__search">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input
+                    matInput
+                    type="search"
+                    autocomplete="off"
+                    [formControl]="queryControl"
+                    placeholder="Search by title"
+                />
+            </mat-form-field>
+        </div>
+
+        <mat-dialog-content class="dialog__content">
+            @if (vm.errorMessage; as message) {
+                <p class="dialog__error text-body-sm">
+                    {{ message }}
+                </p>
+            }
+
+            @if (vm.state.type === 'loading') {
+                <div class="dialog__results">
+                    @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+                        <article class="dialog__result">
+                            <app-skeleton class="dialog__poster-skeleton" />
+                            <div class="dialog__result-copy">
+                                <app-skeleton class="dialog__title-skeleton" />
+                                <app-skeleton class="dialog__meta-skeleton" />
+                            </div>
+                        </article>
+                    }
+                </div>
+            } @else if (vm.state.type === 'loaded' && vm.state.value.length) {
+                <div class="dialog__results">
+                    @for (item of vm.state.value; track item.key) {
+                        <article class="dialog__result">
+                            <app-image
+                                class="dialog__poster"
+                                [src]="item.posterPath"
+                                [alt]="item.title"
+                                params="w154"
+                            />
+
+                            <div class="dialog__result-copy">
+                                <h3 class="text-body-sm">
+                                    {{ item.title }}
+                                </h3>
+                                <div class="dialog__meta text-card-meta">
+                                    <app-badge
+                                        [label]="item.mediaType === 'movie' ? 'Movie' : 'TV show'"
+                                    />
+                                    @if (item.year) {
+                                        <span>{{ item.year }}</span>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (item.isAdded) {
+                                <span class="dialog__added text-caption">
+                                    <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                    Added
+                                </span>
+                            } @else {
+                                <button mat-stroked-button type="button" (click)="addItem(item)">Add</button>
+                            }
+                        </article>
+                    }
+                </div>
+            } @else if (vm.state.type === 'loaded') {
+                <p class="text-meta">No titles found.</p>
+            } @else {
+                <p class="text-meta">
+                    Search for a movie or TV show to add it to this list.
+                </p>
+            }
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button matButton="filled" type="button" (click)="close()">Done</button>
+        </mat-dialog-actions>
+    </div>
+}
+

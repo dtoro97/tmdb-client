@@ -23,14 +23,12 @@ import {
     CardItem,
     LoadableItems,
     LocaleStoreService,
-    MediaListItem,
     MediaType,
     SortDirection,
     TmdbListService,
     TmdbUserAccountService,
     isDefined,
     toCardItem,
-    toMediaListItem,
 } from '../../shared';
 import { toLoadedItems } from '../../shared/utils';
 import {
@@ -41,10 +39,10 @@ import {
     UserAccountSortField,
 } from './user-list-sort-options';
 
-interface UserWatchlistState {
+interface UserFavouritesState {
     readonly items: LoadableItems<CardItem>;
     readonly totalResults: number;
-    readonly pageItems: LoadableItems<MediaListItem>;
+    readonly pageItems: LoadableItems<CardItem>;
     readonly mediaType: MediaType;
     readonly page: number;
     readonly pageTotalResults: number;
@@ -52,7 +50,7 @@ interface UserWatchlistState {
     readonly sortDirection: SortDirection;
 }
 
-interface UserWatchlistPageChanges {
+interface UserFavouritesPageChanges {
     readonly mediaType?: MediaType;
     readonly sortField?: UserAccountSortField;
     readonly sortDirection?: SortDirection;
@@ -60,7 +58,7 @@ interface UserWatchlistPageChanges {
 
 const INITIAL_PAGE = 1;
 
-const INITIAL_STATE: UserWatchlistState = {
+const INITIAL_STATE: UserFavouritesState = {
     items: { type: 'idle' },
     totalResults: 0,
     pageItems: { type: 'idle' },
@@ -72,13 +70,13 @@ const INITIAL_STATE: UserWatchlistState = {
 };
 
 @Injectable()
-export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
-    readonly watchlistViewModel$ = this.select((state) => ({
+export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
+    readonly favouritesViewModel$ = this.select((state) => ({
         state: state.items,
         total: state.totalResults,
     }));
 
-    readonly watchlistPageViewModel$ = this.select((state) => ({
+    readonly favouritesPageViewModel$ = this.select((state) => ({
         mediaType: state.mediaType,
         items: state.pageItems,
         page: state.page - 1,
@@ -105,7 +103,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
             items: { type: 'loading' },
         });
 
-        return this.fetchWatchlistTitles$().pipe(
+        return this.fetchFavouriteTitles$().pipe(
             tap((result) => {
                 this.patchState({
                     items: toLoadedItems(result.items),
@@ -119,7 +117,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         );
     }
 
-    loadPage$(pageIndex: number, changes: UserWatchlistPageChanges = {}) {
+    loadPage$(pageIndex: number, changes: UserFavouritesPageChanges = {}) {
         const previousState = this.get();
         const page = pageIndex + 1;
         const mediaType = changes.mediaType ?? previousState.mediaType;
@@ -135,7 +133,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
             sortDirection,
         });
 
-        return this.fetchWatchlistPage$(
+        return this.fetchFavouritePage$(
             mediaType,
             page,
             this.toSortBy(sortField, sortDirection),
@@ -180,7 +178,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         });
     }
 
-    removeFromWatchlist$(item: MediaListItem) {
+    removeFromFavourites$(item: CardItem) {
         const previousState = this.get();
         const optimisticTotal = this.toTotalAfterRemoval(previousState, item);
         const nextPage = this.toValidPage(previousState.page, optimisticTotal);
@@ -192,7 +190,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         });
 
         return this.tmdbListService
-            .updateWatchlist$(item.id, item.mediaType, false)
+            .updateFavorite$(item.id, item.mediaType, false)
             .pipe(
                 switchMap(() => this.loadPage$(nextPage - 1)),
                 catchError((error: unknown) => {
@@ -202,13 +200,13 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
             );
     }
 
-    private fetchWatchlistTitles$() {
+    private fetchFavouriteTitles$() {
         return this.tmdbUserAccountService.ensureAccount$().pipe(
             switchMap(({ accountId, sessionId }) => {
                 const language = this.localeStore.language();
 
                 return forkJoin({
-                    movies: this.accountService.accountWatchlistMovies(
+                    movies: this.accountService.accountGetFavorites(
                         accountId,
                         language,
                         1,
@@ -218,7 +216,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                         false,
                         API_JSON_OPTIONS,
                     ),
-                    tv: this.accountService.accountWatchlistTv(
+                    tv: this.accountService.accountFavoriteTv(
                         accountId,
                         language,
                         1,
@@ -248,7 +246,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         );
     }
 
-    private fetchWatchlistPage$(
+    private fetchFavouritePage$(
         mediaType: MediaType,
         page: number,
         sortBy: UserAccountSortBy,
@@ -258,7 +256,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                 const language = this.localeStore.language();
 
                 if (mediaType === 'movie') {
-                    return this.accountService.accountWatchlistMovies(
+                    return this.accountService.accountGetFavorites(
                         accountId,
                         language,
                         page,
@@ -270,7 +268,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                     );
                 }
 
-                return this.accountService.accountWatchlistTv(
+                return this.accountService.accountFavoriteTv(
                     accountId,
                     language,
                     page,
@@ -281,39 +279,39 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
                     API_JSON_OPTIONS,
                 );
             }),
-            map((result) => this.toWatchlistPage(result, mediaType, page)),
+            map((result) => this.toFavouritePage(result, mediaType, page)),
         );
     }
 
-    private toWatchlistPage(
+    private toFavouritePage(
         result: MoviePage | TvSeriesPage,
         mediaType: MediaType,
         requestedPage: number,
     ) {
         return {
             items: (result.results ?? [])
-                .map((item) => this.toWatchlistItem(item, mediaType))
+                .map((item) => this.toFavouriteItem(item, mediaType))
                 .filter(isDefined),
             page: result.page ?? requestedPage,
             totalResults: result.total_results ?? 0,
         };
     }
 
-    private toWatchlistItem(
+    private toFavouriteItem(
         item: MovieListItem | TvSeriesListItem,
         mediaType: MediaType,
-    ): MediaListItem | null {
-        const mediaItem = toMediaListItem(item, mediaType, 'year');
-        const title = mediaItem.title.trim();
+    ): CardItem | null {
+        const cardItem = toCardItem(item, mediaType);
+        const title = cardItem.title.trim();
 
-        if (!mediaItem.id || !title) {
+        if (!cardItem.id || !title) {
             return null;
         }
 
         return {
-            ...mediaItem,
+            ...cardItem,
             title,
-            overview: mediaItem.overview.trim(),
+            overview: cardItem.overview.trim(),
         };
     }
 
@@ -333,8 +331,8 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
     }
 
     private toTotalAfterRemoval(
-        state: UserWatchlistState,
-        item: MediaListItem,
+        state: UserFavouritesState,
+        item: CardItem,
     ): number {
         const itemWasLoaded =
             state.pageItems.type === 'loaded' &&

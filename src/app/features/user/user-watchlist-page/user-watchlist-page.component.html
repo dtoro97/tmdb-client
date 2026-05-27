@@ -1,0 +1,83 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Watchlist"
+        subtitle="Movies and TV series saved for later."
+    />
+
+    <main class="page-main page">
+        <app-browse-toolbar>
+            <div start class="page__total">
+                @if (vm.items.type === "loaded") {
+                    <span class="text-caption">{{ vm.totalLabel }}</span>
+                }
+            </div>
+
+            <div end class="page__toolbar-actions">
+                <app-pill-toggle
+                    [options]="mediaTypeOptions"
+                    [selectedValue]="vm.mediaType"
+                    variant="subtle"
+                    (selected)="onMediaTypeSelected($event)"
+                />
+
+                <app-sort-button
+                    [options]="sortOptions"
+                    [selectedValue]="vm.sortField"
+                    [direction]="vm.sortDirection"
+                    (sortChange)="onSortChange($event)"
+                    (directionToggle)="onSortDirectionToggle()"
+                />
+            </div>
+        </app-browse-toolbar>
+
+        @if (vm.items.type === "loading" || vm.items.type === "idle") {
+            <div class="page__list">
+                @for (placeholder of skeletonCount | repeat; track placeholder) {
+                    <app-account-media-item [loading]="true" />
+                }
+            </div>
+        } @else if (vm.items.type === "loaded") {
+            @if (vm.items.value.length) {
+                <div class="page__list">
+                    @for (item of vm.items.value; track item.id) {
+                        <app-account-media-item
+                            [item]="item"
+                            [link]="['/title', item.id, item.mediaType]"
+                        >
+                            <app-icon-button
+                                account-media-item-action
+                                tone="danger"
+                                title="Remove from watchlist"
+                                [ariaLabel]="'Remove ' + item.title + ' from watchlist'"
+                                (onClick)="onRemoveFromWatchlist(item)"
+                            >
+                                <i class="fa-solid fa-bookmark" aria-hidden="true"></i>
+                            </app-icon-button>
+                        </app-account-media-item>
+                    }
+                </div>
+
+                @if (vm.total > vm.pageSize) {
+                    <mat-paginator
+                        class="page__paginator"
+                        [length]="vm.total"
+                        [pageIndex]="vm.page"
+                        [pageSize]="vm.pageSize"
+                        [hidePageSize]="true"
+                        (page)="onPageChange($event)"
+                    />
+                }
+            } @else {
+                <section class="page__empty">
+                    <app-empty-state
+                        iconClass="fa-regular fa-bookmark"
+                        title="No watchlist titles"
+                        text="Movies and TV series you add to your watchlist will appear here."
+                    />
+                </section>
+            }
+        }
+    </main>
+}
