@@ -1,0 +1,215 @@
+@if (vm$ | async; as vm) {
+    <section class="profile page-main">
+        <aside class="profile__rail" aria-label="Profile summary">
+            <div class="profile__identity">
+                @if (vm.profileState.type === 'loading') {
+                    <app-skeleton class="profile__avatar-skeleton" />
+                } @else {
+                    <app-user-avatar
+                        [name]="vm.profileDisplayName"
+                        [avatarPath]="vm.profileState.type === 'loaded' ? vm.profileState.value.avatarPath : null"
+                        size="lg"
+                    />
+                }
+
+                <div class="profile__identity-copy">
+                    @if (vm.profileState.type === 'loading') {
+                        <app-skeleton class="profile__name-skeleton" />
+                        <app-skeleton class="profile__handle-skeleton" />
+                    } @else {
+                        <h1 class="text-headline">
+                            {{ vm.profileDisplayName }}
+                        </h1>
+
+                        @if (vm.profileState.type === 'loaded') {
+                            @if (vm.profileState.value.username; as username) {
+                                <p class="text-meta">@{{ username }}</p>
+                            }
+                        }
+
+                        @if (vm.profileMeta.length) {
+                            <p class="profile__meta text-caption">
+                                @for (item of vm.profileMeta; track item) {
+                                    <span>{{ item }}</span>
+                                }
+                            </p>
+                        }
+                    }
+                </div>
+            </div>
+
+            <nav class="profile__nav" aria-label="Profile navigation">
+                <a class="profile__nav-link text-body-sm" routerLink="/me/watchlists">
+                    <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
+                    <span>Watchlist</span>
+                    <strong class="text-caption-strong">{{ vm.watchlist.total }}</strong>
+                </a>
+
+                <a class="profile__nav-link text-body-sm" routerLink="/me/ratings">
+                    <i class="fa-regular fa-star" aria-hidden="true"></i>
+                    <span>Ratings</span>
+                    <strong class="text-caption-strong">{{ vm.ratings.total }}</strong>
+                </a>
+
+                <a class="profile__nav-link text-body-sm" routerLink="/me/favorites">
+                    <i class="fa-regular fa-heart" aria-hidden="true"></i>
+                    <span>Favourites</span>
+                    <strong class="text-caption-strong">{{ vm.favourites.total }}</strong>
+                </a>
+
+                <a class="profile__nav-link text-body-sm" routerLink="/me/lists">
+                    <i class="fa-solid fa-list" aria-hidden="true"></i>
+                    <span>Lists</span>
+                    <strong class="text-caption-strong">{{ vm.lists.total }}</strong>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="profile__main">
+            <section class="profile__section" aria-labelledby="profile-watchlist-title">
+                <header class="profile__section-header">
+                    <div class="profile__section-heading">
+                        <h2 id="profile-watchlist-title" class="text-title">Watchlist</h2>
+                        <p class="profile__section-count text-caption">
+                            {{ vm.watchlist.total }} title{{ vm.watchlist.total === 1 ? '' : 's' }}
+                        </p>
+                    </div>
+
+                    <a class="profile__section-link text-body-sm" routerLink="/me/watchlists">
+                        View all
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </header>
+
+                @if (vm.watchlist.state.type === 'loaded' && !vm.watchlist.state.value.length) {
+                    <div class="profile__empty">
+                        <app-empty-state
+                            iconClass="fa-regular fa-bookmark"
+                            iconStyle="plain"
+                            title="No watchlist titles"
+                            text="Movies and TV series you add to your watchlist will appear here."
+                        />
+                    </div>
+                } @else {
+                    <app-media-carousel-panel
+                        ariaLabel="Watchlist preview"
+                        [state]="vm.watchlist.state"
+                        [columns]="previewCarouselColumns"
+                        [imageParams]="previewPosterImageParams"
+                        [skeletonCount]="previewCarouselColumns"
+                    />
+                }
+            </section>
+
+            <section class="profile__section" aria-labelledby="profile-ratings-title">
+                <header class="profile__section-header">
+                    <div class="profile__section-heading">
+                        <h2 id="profile-ratings-title" class="text-title">Ratings</h2>
+                        <p class="profile__section-count text-caption">
+                            {{ vm.ratings.total }} title{{ vm.ratings.total === 1 ? '' : 's' }}
+                        </p>
+                    </div>
+
+                    <a class="profile__section-link text-body-sm" routerLink="/me/ratings">
+                        View all
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </header>
+
+                @if (vm.ratings.state.type === 'loaded' && !vm.ratings.state.value.length) {
+                    <div class="profile__empty">
+                        <app-empty-state
+                            iconClass="fa-regular fa-star"
+                            iconStyle="plain"
+                            title="No rated titles"
+                            text="Movies and TV series you rate will appear here."
+                        />
+                    </div>
+                } @else {
+                    <app-media-carousel-panel
+                        ariaLabel="Ratings preview"
+                        [state]="vm.ratings.state"
+                        [columns]="previewCarouselColumns"
+                        [imageParams]="previewPosterImageParams"
+                        [skeletonCount]="previewCarouselColumns"
+                    />
+                }
+            </section>
+
+            <section class="profile__section" aria-labelledby="profile-favourites-title">
+                <header class="profile__section-header">
+                    <div class="profile__section-heading">
+                        <h2 id="profile-favourites-title" class="text-title">Favourites</h2>
+                        <p class="profile__section-count text-caption">
+                            {{ vm.favourites.total }} title{{ vm.favourites.total === 1 ? '' : 's' }}
+                        </p>
+                    </div>
+
+                    <a class="profile__section-link text-body-sm" routerLink="/me/favorites">
+                        View all
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </header>
+
+                @if (vm.favourites.state.type === 'loaded' && !vm.favourites.state.value.length) {
+                    <div class="profile__empty">
+                        <app-empty-state
+                            iconClass="fa-regular fa-heart"
+                            iconStyle="plain"
+                            title="No favourite titles"
+                            text="Movies and TV series you mark as favourites will appear here."
+                        />
+                    </div>
+                } @else {
+                    <app-media-carousel-panel
+                        ariaLabel="Favourites preview"
+                        [state]="vm.favourites.state"
+                        [columns]="previewCarouselColumns"
+                        [imageParams]="previewPosterImageParams"
+                        [skeletonCount]="previewCarouselColumns"
+                    />
+                }
+            </section>
+
+            <section class="profile__section" aria-labelledby="profile-lists-title">
+                <header class="profile__section-header">
+                    <div class="profile__section-heading">
+                        <h2 id="profile-lists-title" class="text-title">Lists</h2>
+                        <p class="profile__section-count text-caption">
+                            {{ vm.lists.total }} list{{ vm.lists.total === 1 ? '' : 's' }}
+                        </p>
+                    </div>
+
+                    <a class="profile__section-link text-body-sm" routerLink="/me/lists">
+                        View all
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </header>
+
+                @if (vm.lists.state.type === 'loading' || vm.lists.state.type === 'idle') {
+                    <div class="profile__list-grid">
+                        @for (placeholder of 3 | repeat; track placeholder) {
+                            <app-user-list-card-skeleton />
+                        }
+                    </div>
+                } @else if (vm.lists.state.type === 'loaded' && vm.lists.state.value.length) {
+                    <div class="profile__list-grid">
+                        @for (item of vm.lists.state.value | slice: 0 : 3; track item.id) {
+                            <app-user-list-card [item]="item" />
+                        }
+                    </div>
+                } @else {
+                    <div class="profile__empty">
+                        <app-empty-state
+                            iconClass="fa-solid fa-list"
+                            iconStyle="plain"
+                            title="No custom lists"
+                            text="Custom lists will appear here."
+                        />
+                        <a class="profile__empty-link" routerLink="/me/lists/new">Create list</a>
+                    </div>
+                }
+            </section>
+        </main>
+    </section>
+}

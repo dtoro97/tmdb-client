@@ -1,0 +1,118 @@
+@use "breakpoints" as *;
+
+.dialog {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    height: 100%;
+    min-height: 0;
+
+    &__search {
+        mat-form-field {
+            width: 100%;
+        }
+    }
+
+    &__content {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: var(--space-4);
+        min-height: 0;
+        max-height: none;
+        padding-inline: 0;
+        overflow: hidden;
+    }
+
+    &__results,
+    &__result-copy {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__results {
+        gap: var(--space-2);
+        min-height: 0;
+        overflow: auto;
+        padding-right: var(--space-1);
+    }
+
+    &__result {
+        display: grid;
+        grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-2);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-md);
+        background: var(--surface-panel-soft);
+    }
+
+    &__poster {
+        display: block;
+        width: 3.25rem;
+        aspect-ratio: var(--poster-ratio);
+        overflow: hidden;
+        border-radius: var(--radius-sm);
+    }
+
+    &__result-copy {
+        gap: var(--space-1);
+        min-width: 0;
+
+        h3 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-1) var(--space-2);
+        min-height: 1.2rem;
+    }
+
+    &__error {
+        color: var(--color-danger-text);
+    }
+
+    &__added {
+        display: inline-flex;
+        justify-self: end;
+        align-items: center;
+        gap: var(--space-1);
+        color: var(--color-success-light);
+
+        i {
+            color: inherit;
+            font-size: var(--text-2xs);
+        }
+    }
+
+    &__poster-skeleton {
+        width: 3.25rem;
+        aspect-ratio: var(--poster-ratio);
+        --skeleton-height: 100%;
+        --skeleton-radius: var(--radius-sm);
+    }
+
+    &__title-skeleton {
+        width: min(18rem, 62vw);
+        height: 1rem;
+    }
+
+    &__meta-skeleton {
+        width: 4rem;
+        height: 0.85rem;
+    }
+}
+
+@include mobile() {
+    .dialog {
+        &__result {
+            grid-template-columns: 3rem minmax(0, 1fr) auto;
+        }
+    }
+}

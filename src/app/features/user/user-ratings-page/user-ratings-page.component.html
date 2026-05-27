@@ -1,0 +1,152 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Ratings"
+        subtitle="Movies, TV series, and episodes you rated."
+    />
+
+    <main class="page-main page">
+        <app-browse-toolbar>
+            <div start class="page__total">
+                @if (vm.itemsState === "loaded") {
+                    <span class="text-caption">{{ vm.totalLabel }}</span>
+                }
+            </div>
+
+            <div end class="page__toolbar-actions">
+                <app-pill-toggle
+                    [options]="contentTypeOptions"
+                    [selectedValue]="vm.contentType"
+                    variant="subtle"
+                    (selected)="onContentTypeSelected($event)"
+                />
+
+                <app-sort-button
+                    [options]="sortOptions"
+                    [selectedValue]="vm.sortField"
+                    [direction]="vm.sortDirection"
+                    (sortChange)="onSortChange($event)"
+                    (directionToggle)="onSortDirectionToggle()"
+                />
+            </div>
+        </app-browse-toolbar>
+
+        @if (vm.contentType === "episode") {
+            @if (vm.episodeItems.type === "loading" || vm.episodeItems.type === "idle") {
+                <ul class="page__episode-list" aria-hidden="true">
+                    @for (placeholder of episodeSkeletonCount | repeat; track placeholder) {
+                        <li>
+                            <app-account-episode-item [loading]="true" />
+                        </li>
+                    }
+                </ul>
+            } @else if (vm.episodeItems.type === "loaded") {
+                @if (vm.episodeItems.value.length) {
+                    <ul class="page__episode-list" aria-label="Rated episodes">
+                        @for (episode of vm.episodeItems.value; track episode.key) {
+                            <li>
+                                <app-account-episode-item [item]="episode.item">
+                                    <div class="page__actions">
+                                        <app-icon-button
+                                            title="Edit rating"
+                                            [ariaLabel]="'Edit rating for ' + episode.title"
+                                            (onClick)="onEditEpisodeRating(episode)"
+                                        >
+                                            <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                                        </app-icon-button>
+
+                                        <app-icon-button
+                                            tone="danger"
+                                            title="Remove rating"
+                                            [ariaLabel]="'Remove rating from ' + episode.title"
+                                            (onClick)="onRemoveEpisodeRating(episode)"
+                                        >
+                                            <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                        </app-icon-button>
+                                    </div>
+                                </app-account-episode-item>
+                            </li>
+                        }
+                    </ul>
+
+                    @if (vm.total > vm.pageSize) {
+                        <mat-paginator
+                            class="page__paginator"
+                            [length]="vm.total"
+                            [pageIndex]="vm.page"
+                            [pageSize]="vm.pageSize"
+                            [hidePageSize]="true"
+                            (page)="onPageChange($event)"
+                        />
+                    }
+                } @else {
+                    <section class="page__empty">
+                        <app-empty-state
+                            [iconClass]="vm.emptyState.iconClass"
+                            [title]="vm.emptyState.title"
+                            [text]="vm.emptyState.text"
+                        />
+                    </section>
+                }
+            }
+        } @else {
+            @if (vm.mediaItems.type === "loading" || vm.mediaItems.type === "idle") {
+                <div class="page__list" aria-hidden="true">
+                    @for (placeholder of skeletonCount | repeat; track placeholder) {
+                        <app-account-media-item [loading]="true" />
+                    }
+                </div>
+            } @else if (vm.mediaItems.type === "loaded") {
+                @if (vm.mediaItems.value.length) {
+                    <div class="page__list">
+                        @for (item of vm.mediaItems.value; track item.mediaType + "-" + item.id) {
+                            <app-account-media-item
+                                [item]="item"
+                                [link]="['/title', item.id, item.mediaType]"
+                            >
+                                <div account-media-item-action class="page__actions">
+                                    <app-icon-button
+                                        title="Edit rating"
+                                        [ariaLabel]="'Edit rating for ' + item.title"
+                                        (onClick)="onEditMediaRating(item)"
+                                    >
+                                        <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                                    </app-icon-button>
+
+                                    <app-icon-button
+                                        tone="danger"
+                                        title="Remove rating"
+                                        [ariaLabel]="'Remove rating from ' + item.title"
+                                        (onClick)="onRemoveMediaRating(item)"
+                                    >
+                                        <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                    </app-icon-button>
+                                </div>
+                            </app-account-media-item>
+                        }
+                    </div>
+
+                    @if (vm.total > vm.pageSize) {
+                        <mat-paginator
+                            class="page__paginator"
+                            [length]="vm.total"
+                            [pageIndex]="vm.page"
+                            [pageSize]="vm.pageSize"
+                            [hidePageSize]="true"
+                            (page)="onPageChange($event)"
+                        />
+                    }
+                } @else {
+                    <section class="page__empty">
+                        <app-empty-state
+                            [iconClass]="vm.emptyState.iconClass"
+                            [title]="vm.emptyState.title"
+                            [text]="vm.emptyState.text"
+                        />
+                    </section>
+                }
+            }
+        }
+    </main>
+}

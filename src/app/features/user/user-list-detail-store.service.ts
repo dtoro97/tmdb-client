@@ -1,36 +1,23 @@
 import { Injectable } from '@angular/core';
 
 import { ComponentStore } from '@ngrx/component-store';
-import {
-    Observable,
-    catchError,
-    forkJoin,
-    map,
-    of,
-    switchMap,
-    tap,
-    throwError,
-} from 'rxjs';
+import { EMPTY, catchError, of, switchMap, tap, throwError } from 'rxjs';
 
-import { V4ListDetails } from '../../api-v4';
+import { V4ListContentItem, V4ListDetails, V4ListSortBy } from '../../api-v4';
 import { PAGE_SIZE } from '../../constants';
 import {
-    CardItem,
     LoadableItems,
     LoadableValue,
+    MediaListItem,
+    MediaType,
     TmdbListService,
     UserSessionStoreService,
-    loaded,
+    toLoadedItems,
+    toLoadedValue,
+    toUpdatedAtLabel,
+    updateLoadedItems,
 } from '../../shared';
-import { loadMorePaged$, updateLoadableItems } from '../../shared/utils';
-
-export type UserListSortBy =
-    | 'original_order.asc'
-    | 'original_order.desc'
-    | 'title.asc'
-    | 'title.desc'
-    | 'primary_release_date.asc'
-    | 'primary_release_date.desc';
+import { DEFAULT_USER_LIST_SORT_BY } from './user-list-sort-options';
 
 export interface UserListDetailHeader {
     readonly id: number;
@@ -38,23 +25,31 @@ export interface UserListDetailHeader {
     readonly description: string | null;
     readonly createdBy: string | null;
     readonly itemCount: number;
-    readonly posterPath: string | null;
-    readonly backdropPath: string | null;
+    readonly updatedLabel: string | null;
+}
+
+export interface UserListDetailItem {
+    readonly key: string;
+    readonly id: number;
+    readonly mediaType: MediaType;
+    readonly mediaItem: MediaListItem;
+    readonly title: string;
+    readonly comment: string;
+    readonly link: (string | number)[];
 }
 
 interface UserListDetailState {
     readonly listId: number | null;
     readonly headerState: LoadableValue<UserListDetailHeader>;
-    readonly itemsState: LoadableItems<CardItem>;
+    readonly itemsState: LoadableItems<UserListDetailItem>;
     readonly page: number;
     readonly totalPages: number;
     readonly totalResults: number;
-    readonly sortBy: UserListSortBy;
+    readonly activeSortBy: V4ListSortBy;
+    readonly defaultSortBy: V4ListSortBy;
     readonly isOwnedByCurrentUser: boolean;
     readonly isPublic: boolean;
 }
-
-const LIST_DETAIL_PLACEHOLDER_COUNT = 6;
 
 const INITIAL_STATE: UserListDetailState = {
     listId: null,
@@ -63,7 +58,8 @@ const INITIAL_STATE: UserListDetailState = {
     page: 1,
     totalPages: 1,
     totalResults: 0,
-    sortBy: 'original_order.asc',
+    activeSortBy: DEFAULT_USER_LIST_SORT_BY,
+    defaultSortBy: DEFAULT_USER_LIST_SORT_BY,
     isOwnedByCurrentUser: false,
     isPublic: false,
 };
@@ -71,15 +67,16 @@ const INITIAL_STATE: UserListDetailState = {
 @Injectable()
 export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     readonly userListDetailVm$ = this.select((state) => ({
-        headerState: state.headerState,
-        itemsState: state.itemsState,
-        page: state.page,
-        totalPages: state.totalPages,
-        sortBy: state.sortBy,
-        sortField: this.getSortField(state.sortBy),
-        sortDirection: this.getSortDirection(state.sortBy),
-        isOwnedByCurrentUser: state.isOwnedByCurrentUser,
+        header: state.headerState,
+        items: state.itemsState,
+        page: state.page - 1,
+        pageSize: PAGE_SIZE,
+        total: state.totalResults,
+        sortBy: state.activeSortBy,
+        defaultSortBy: state.defaultSortBy,
+        ownedByCurrentUser: state.isOwnedByCurrentUser,
         isPublic: state.isPublic,
+        existingItemKeys: state.itemsState.type === 'loaded' ? state.itemsState.value.map((item) => item.key) : [],
     }));
 
     constructor(
@@ -89,9 +86,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
         super(INITIAL_STATE);
     }
 
-    loadList$(listId: number): Observable<void> {
-        const sortBy = this.get().sortBy;
-
+    loadList$(listId: number) {
         this.patchState({
             listId,
             headerState: { type: 'loading' },
@@ -99,123 +94,124 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             page: 1,
             totalPages: 1,
             totalResults: 0,
+            activeSortBy: DEFAULT_USER_LIST_SORT_BY,
+            defaultSortBy: DEFAULT_USER_LIST_SORT_BY,
             isOwnedByCurrentUser: false,
             isPublic: false,
         });
 
-        return this.getListDetailPage$(listId, 1, sortBy).pipe(
-            tap((result) => {
-                this.patchState(this.patchPageResult(result, sortBy));
-            }),
-            map(() => undefined),
-        );
+        return this.fetchAndPatchPage$(listId, 1, undefined, DEFAULT_USER_LIST_SORT_BY, INITIAL_STATE);
     }
 
-    loadMore$(): Observable<void> {
+    reload$() {
         const state = this.get();
 
-        if (state.itemsState.type !== 'loaded' || state.listId === null) {
-            return of(undefined);
+        if (state.listId === null) {
+            return EMPTY;
         }
 
-        return loadMorePaged$({
-            currentItems: state.itemsState.value,
-            currentPage: state.page,
-            totalPages: state.totalPages,
-            placeholderCount: LIST_DETAIL_PLACEHOLDER_COUNT,
-            setLoadingMore: (items) =>
-                this.patchState({
-                    itemsState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: LIST_DETAIL_PLACEHOLDER_COUNT,
-                    } as LoadableItems<CardItem>,
-                }),
-            fetchPage: (nextPage) =>
-                this.getListDetailPage$(state.listId!, nextPage, state.sortBy).pipe(
-                    tap((result) => {
-                        const nextState = this.patchPageResult(
-                            result,
-                            state.sortBy,
-                        );
-                        this.patchState({
-                            headerState: nextState.headerState!,
-                            totalPages: nextState.totalPages!,
-                            totalResults: nextState.totalResults!,
-                            sortBy: nextState.sortBy!,
-                            isOwnedByCurrentUser:
-                                nextState.isOwnedByCurrentUser!,
-                            isPublic: nextState.isPublic!,
-                        });
-                    }),
-                    map((result) => this.toItems(result)),
-                ),
-            setLoaded: (items, page) =>
-                this.patchState({
-                    itemsState: loaded(items),
-                    page,
-                }),
+        return this.loadPage$(state.page - 1);
+    }
+
+    loadPage$(pageIndex: number) {
+        const state = this.get();
+
+        if (state.listId === null) {
+            return EMPTY;
+        }
+
+        const page = pageIndex + 1;
+
+        this.patchState({
+            itemsState: { type: 'loading' },
+            page,
         });
+
+        return this.fetchAndPatchPage$(state.listId, page, state.activeSortBy, state.defaultSortBy, state);
+    }
+
+    setSortBy$(sortBy: V4ListSortBy) {
+        const state = this.get();
+
+        if (state.listId === null || sortBy === state.activeSortBy) {
+            return EMPTY;
+        }
+
+        this.patchState({
+            activeSortBy: sortBy,
+            itemsState: { type: 'loading' },
+            page: 1,
+            totalPages: 1,
+            totalResults: 0,
+        });
+
+        return this.fetchAndPatchPage$(state.listId, 1, sortBy, state.defaultSortBy, state);
     }
 
     updateList$(request: {
-        name: string;
-        description: string;
-        isPublic: boolean;
-    }): Observable<void> {
+        readonly name: string;
+        readonly description: string;
+        readonly isPublic: boolean;
+        readonly sortBy?: V4ListSortBy;
+    }) {
         const state = this.get();
 
         if (state.listId === null || state.headerState.type !== 'loaded') {
-            return throwError(
-                () => new Error('List detail is not loaded yet.'),
-            );
+            return throwError(() => new Error('List detail is not loaded yet.'));
         }
+
+        const nextDefaultSortBy = request.sortBy ?? state.defaultSortBy;
 
         return this.tmdbListService
             .updateList$(state.listId, {
                 name: request.name,
                 description: request.description,
                 public: request.isPublic,
+                sort_by: request.sortBy,
             })
             .pipe(
                 tap(() => {
-                    this.patchState((currentState) => ({
+                    this.patchState((state) => ({
                         headerState:
-                            currentState.headerState.type === 'loaded'
-                                ? loaded({
-                                      ...currentState.headerState.value,
+                            state.headerState.type === 'loaded'
+                                ? toLoadedValue({
+                                      ...state.headerState.value,
                                       name: request.name,
                                       description: request.description || null,
                                   })
-                                : currentState.headerState,
+                                : state.headerState,
+                        defaultSortBy: nextDefaultSortBy,
+                        activeSortBy:
+                            request.sortBy && state.activeSortBy === state.defaultSortBy
+                                ? request.sortBy
+                                : state.activeSortBy,
                         isPublic: request.isPublic,
                     }));
                 }),
+                switchMap(() =>
+                    request.sortBy && state.activeSortBy === state.defaultSortBy ? this.reload$() : of(undefined),
+                ),
             );
     }
 
-    clearList$(): Observable<void> {
+    clearList$() {
         const state = this.get();
 
         if (state.listId === null || state.headerState.type !== 'loaded') {
-            return throwError(
-                () => new Error('List detail is not loaded yet.'),
-            );
+            return throwError(() => new Error('List detail is not loaded yet.'));
         }
 
         return this.tmdbListService.clearList$(state.listId).pipe(
             tap(() => {
-                this.patchState((currentState) => ({
+                this.patchState((state) => ({
                     headerState:
-                        currentState.headerState.type === 'loaded'
-                            ? loaded({
-                                  ...currentState.headerState.value,
+                        state.headerState.type === 'loaded'
+                            ? toLoadedValue({
+                                  ...state.headerState.value,
                                   itemCount: 0,
-                                  backdropPath:
-                                      currentState.headerState.value.posterPath,
                               })
-                            : currentState.headerState,
-                    itemsState: loaded([]),
+                            : state.headerState,
+                    itemsState: toLoadedItems([]),
                     page: 1,
                     totalPages: 1,
                     totalResults: 0,
@@ -224,30 +220,32 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
         );
     }
 
-    deleteList$(): Observable<void> {
+    deleteList$() {
         const state = this.get();
 
         if (state.listId === null) {
-            return throwError(
-                () => new Error('List detail is not loaded yet.'),
-            );
+            return throwError(() => new Error('List detail is not loaded yet.'));
         }
 
         return this.tmdbListService.deleteList$(state.listId);
     }
 
-    removeItem$(item: CardItem): Observable<void> {
+    addItem$(mediaId: number, mediaType: MediaType) {
+        const state = this.get();
+
+        if (state.listId === null) {
+            return throwError(() => new Error('List detail is not loaded yet.'));
+        }
+
+        return this.tmdbListService.addToList$(state.listId, mediaId, mediaType).pipe(switchMap(() => this.reload$()));
+    }
+
+    removeItem$(item: UserListDetailItem) {
         const state = this.get();
 
         if (state.listId === null || state.headerState.type !== 'loaded') {
-            return throwError(
-                () => new Error('List detail is not loaded yet.'),
-            );
+            return throwError(() => new Error('List detail is not loaded yet.'));
         }
-
-        const shouldReloadLoadedPages =
-            state.itemsState.type === 'loaded' &&
-            state.itemsState.value.length < state.totalResults;
 
         return this.tmdbListService
             .removeItems$(state.listId, [
@@ -257,264 +255,163 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                 },
             ])
             .pipe(
-                switchMap(() =>
-                    shouldReloadLoadedPages
-                        ? this.loadLoadedPages$(
-                              state.listId!,
-                              state.page,
-                              state.sortBy,
-                          ).pipe(catchError(() => of(null)))
-                        : of(null),
-                ),
-                tap((refreshedResult) => {
-                    const nextTotalResults = Math.max(
-                        0,
-                        state.totalResults - 1,
-                    );
+                switchMap(() => {
+                    const state = this.get();
+                    const totalResults = Math.max(0, state.totalResults - 1);
+                    const totalPages = Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
+                    const page = Math.min(state.page, totalPages);
+                    const nextItems =
+                        state.itemsState.type === 'loaded'
+                            ? state.itemsState.value.filter((existingItem) => existingItem.key !== item.key)
+                            : null;
 
-                    this.patchState((currentState) => {
-                        if (refreshedResult) {
-                            return {
-                                ...this.patchPageResult(
-                                    refreshedResult,
-                                    state.sortBy,
-                                ),
-                            };
-                        }
-
-                        return {
-                            itemsState: updateLoadableItems(
-                                currentState.itemsState,
-                                (items) =>
-                                    items.filter(
-                                        (existingItem) =>
-                                            existingItem.id !== item.id ||
-                                            existingItem.mediaType !== item.mediaType,
-                                    ),
-                            ),
-                            page: Math.min(
-                                currentState.page,
-                                this.toPagedTotalPages(nextTotalResults),
-                            ),
-                            totalPages: this.toPagedTotalPages(nextTotalResults),
-                            totalResults: nextTotalResults,
-                            headerState:
-                                currentState.headerState.type === 'loaded'
-                                    ? loaded({
-                                          ...currentState.headerState.value,
-                                          itemCount: Math.max(
-                                              0,
-                                              currentState.headerState.value
-                                                  .itemCount - 1,
-                                          ),
-                                          backdropPath:
-                                              currentState.headerState.value
-                                                  .backdropPath ===
-                                              item.backdropPath
-                                                  ? currentState.headerState
-                                                        .value.posterPath
-                                                  : currentState.headerState
-                                                        .value.backdropPath,
-                                      })
-                                    : currentState.headerState,
-                        };
+                    this.patchState({
+                        itemsState: nextItems ? toLoadedItems(nextItems) : state.itemsState,
+                        page,
+                        totalPages,
+                        totalResults,
+                        headerState:
+                            state.headerState.type === 'loaded'
+                                ? toLoadedValue({
+                                      ...state.headerState.value,
+                                      itemCount: Math.max(0, state.headerState.value.itemCount - 1),
+                                  })
+                                : state.headerState,
                     });
+
+                    if (totalResults > 0 && nextItems && (page !== state.page || nextItems.length === 0)) {
+                        return this.loadPage$(page - 1);
+                    }
+
+                    return of(undefined);
                 }),
-                map(() => undefined),
             );
     }
 
-    setSortBy$(sortBy: UserListSortBy): Observable<void> {
-        const state = this.get();
-
-        if (state.listId === null || sortBy === state.sortBy) {
-            return of(undefined);
-        }
-
-        this.patchState({
-            sortBy,
-            itemsState: { type: 'loading' },
-            page: 1,
-            totalPages: 1,
-            totalResults: 0,
-        });
-
-        return this.getListDetailPage$(state.listId, 1, sortBy).pipe(
-            tap((result) => {
-                this.patchState(this.patchPageResult(result, sortBy));
-            }),
-            map(() => undefined),
-        );
-    }
-
-    toggleSortDirection(): Observable<void> {
+    updateItemComment$(item: UserListDetailItem, comment: string) {
         const state = this.get();
 
         if (state.listId === null) {
-            return of(undefined);
+            return throwError(() => new Error('List detail is not loaded yet.'));
         }
 
-        const direction = this.getSortDirection(state.sortBy);
-        const nextDirection = direction === 'asc' ? 'desc' : 'asc';
-        const base = state.sortBy.replace(/\.asc$|\.desc$/, '');
-        const nextSortBy = `${base}.${nextDirection}` as UserListSortBy;
-
-        return this.setSortBy$(nextSortBy);
+        return this.tmdbListService
+            .updateItems$(state.listId, [
+                {
+                    media_id: item.id,
+                    media_type: item.mediaType,
+                    comment,
+                },
+            ])
+            .pipe(
+                tap(() => {
+                    this.patchState((state) => ({
+                        itemsState: updateLoadedItems(state.itemsState, (items) =>
+                            items.map((existingItem) =>
+                                existingItem.key === item.key
+                                    ? {
+                                          ...existingItem,
+                                          comment,
+                                      }
+                                    : existingItem,
+                            ),
+                        ),
+                    }));
+                }),
+            );
     }
 
-    private getListDetailPage$(
+    private fetchAndPatchPage$(
         listId: number,
         page: number,
-        sortBy: UserListSortBy,
-    ): Observable<V4ListDetails> {
-        return this.tmdbListService.getListDetails$(listId, page, sortBy);
+        sortBy: V4ListSortBy | undefined,
+        fallbackDefaultSortBy: V4ListSortBy,
+        restoreState: UserListDetailState,
+    ) {
+        return this.tmdbListService.getListDetails$(listId, page, sortBy).pipe(
+            tap((result) => {
+                const defaultSortBy = result.sort_by ?? fallbackDefaultSortBy;
+                this.patchState(this.toLoadedPageState(result, sortBy ?? defaultSortBy, defaultSortBy));
+            }),
+            catchError((error: unknown) => {
+                this.setState(restoreState);
+                return throwError(() => error);
+            }),
+        );
     }
 
-    private toPagedTotalPages(totalResults: number): number {
-        return Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
-    }
-
-    private patchPageResult(
-        result: V4ListDetails,
-        sortBy: UserListSortBy,
-    ): Partial<UserListDetailState> {
+    private toLoadedPageState(result: V4ListDetails, activeSortBy: V4ListSortBy, fallbackDefaultSortBy: V4ListSortBy) {
         const items = this.toItems(result);
-        const createdBy = this.toCreatedBy(result.created_by);
+        const defaultSortBy = result.sort_by ?? fallbackDefaultSortBy;
+        const updatedLabel = toUpdatedAtLabel(result.updated_at);
 
         return {
-            headerState: loaded({
+            headerState: toLoadedValue({
                 id: result.id ?? 0,
                 name: result.name || 'Untitled List',
                 description: result.description ?? null,
-                createdBy,
+                createdBy: result.created_by?.username ?? null,
                 itemCount: result.item_count ?? items.length,
-                posterPath: result.poster_path ?? null,
-                backdropPath:
-                    items.find((item) => item.backdropPath)?.backdropPath ??
-                    result.poster_path ??
-                    null,
+                updatedLabel,
             }),
-            itemsState: loaded(items),
+            itemsState: toLoadedItems(items),
             page: result.page ?? 1,
             totalPages: result.total_pages ?? 1,
-            totalResults:
-                result.total_results ?? result.item_count ?? items.length,
-            sortBy,
-            isOwnedByCurrentUser: this.isOwnedByCurrentUser(createdBy),
+            totalResults: result.total_results ?? result.item_count ?? items.length,
+            activeSortBy,
+            defaultSortBy,
+            isOwnedByCurrentUser:
+                this.userSessionStore.username()?.toLocaleLowerCase() ===
+                result.created_by?.username?.toLocaleLowerCase(),
             isPublic: result.public === true,
         };
     }
 
-    private mergePageResults(results: readonly V4ListDetails[]): V4ListDetails {
-        const lastResult = results[results.length - 1];
+    private toItems(result: V4ListDetails): UserListDetailItem[] {
+        const commentsByKey = new Map(Object.entries(result.comments ?? {}));
 
-        return {
-            ...lastResult,
-            results: results.flatMap((result) => result.results ?? []),
-        };
-    }
-
-    private loadLoadedPages$(
-        listId: number,
-        pageCount: number,
-        sortBy: UserListSortBy,
-    ): Observable<V4ListDetails> {
-        return forkJoin(
-            Array.from({ length: pageCount }, (_, index) => index + 1).map(
-                (page) => this.getListDetailPage$(listId, page, sortBy),
-            ),
-        ).pipe(map((results) => this.mergePageResults(results)));
-    }
-
-    private toItems(result: V4ListDetails): CardItem[] {
         return (result.results ?? [])
-            .map((item) => {
-                if (!item.id || !item.media_type) {
-                    return null;
-                }
-
-                const mediaType =
-                    item.media_type === 'tv'
-                        ? 'tv'
-                        : item.media_type === 'movie'
-                          ? 'movie'
-                          : null;
-                const title =
-                    (mediaType === 'tv' ? item.name : item.title) ??
-                    item.title ??
-                    item.name;
-
-                if (!mediaType || !title) {
-                    return null;
-                }
-
-                return {
-                    id: item.id,
-                    mediaType,
-                    title,
-                    imagePath: item.poster_path ?? null,
-                    backdropPath: item.backdrop_path ?? null,
-                    rating: item.vote_average ?? null,
-                    date:
-                        mediaType === 'tv'
-                            ? item.first_air_date ?? ''
-                            : item.release_date ?? '',
-                    overview: item.overview ?? '',
-                };
-            })
-            .filter((item): item is CardItem => item !== null);
+            .map((item) => this.toItem(item, commentsByKey))
+            .filter((item): item is UserListDetailItem => item !== null);
     }
 
-    private isOwnedByCurrentUser(createdBy: string | null): boolean {
-        const username = this.userSessionStore.username();
-
-        return (
-            !!createdBy &&
-            !!username &&
-            createdBy.toLocaleLowerCase() === username.toLocaleLowerCase()
-        );
-    }
-
-    private toCreatedBy(value: unknown): string | null {
-        if (typeof value === 'string') {
-            return value;
-        }
-
-        if (!value || typeof value !== 'object') {
+    private toItem(item: V4ListContentItem, commentsByKey: ReadonlyMap<string, string>): UserListDetailItem | null {
+        if (!item.id || !item.media_type) {
             return null;
         }
 
-        const createdBy = value as {
-            readonly username?: unknown;
-            readonly name?: unknown;
+        const mediaType = item.media_type === 'tv' ? 'tv' : item.media_type === 'movie' ? 'movie' : null;
+        const title = (mediaType === 'tv' ? item.name : item.title) ?? item.title ?? item.name;
+
+        if (!mediaType || !title) {
+            return null;
+        }
+
+        const date = mediaType === 'tv' ? (item.first_air_date ?? '') : (item.release_date ?? '');
+
+        const key = `${mediaType}:${item.id}`;
+
+        return {
+            key,
+            id: item.id,
+            mediaType,
+            mediaItem: {
+                id: item.id,
+                thumb: item.poster_path ?? null,
+                title,
+                overview: item.overview ?? '',
+                rating: item.vote_average ?? null,
+                date,
+                mediaType,
+                badges: [
+                    {
+                        label: mediaType === 'tv' ? 'TV show' : 'Movie',
+                    },
+                ],
+            },
+            title,
+            comment: commentsByKey.get(key) ?? '',
+            link: ['/', 'title', item.id, mediaType],
         };
-
-        if (typeof createdBy.username === 'string') {
-            return createdBy.username;
-        }
-
-        if (typeof createdBy.name === 'string') {
-            return createdBy.name;
-        }
-
-        return null;
-    }
-
-    private getSortDirection(sortBy: UserListSortBy): 'asc' | 'desc' {
-        return sortBy.endsWith('.asc') ? 'asc' : 'desc';
-    }
-
-    private getSortField(
-        sortBy: UserListSortBy,
-    ): 'original_order' | 'title' | 'primary_release_date' {
-        if (sortBy.startsWith('title.')) {
-            return 'title';
-        }
-
-        if (sortBy.startsWith('primary_release_date.')) {
-            return 'primary_release_date';
-        }
-
-        return 'original_order';
     }
 }

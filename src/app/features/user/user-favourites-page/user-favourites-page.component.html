@@ -1,0 +1,88 @@
+@if (vm$ | async; as vm) {
+    <app-sub-page-header
+        parentTitle="Profile"
+        backLink="/me"
+        pageTitle="Favourites"
+        subtitle="Movies and TV series you marked as favourites."
+    />
+
+    <main class="page-main page">
+        <app-browse-toolbar>
+            <div start class="page__total">
+                @if (vm.items.type === "loaded") {
+                    <span class="text-caption">{{ vm.totalLabel }}</span>
+                }
+            </div>
+
+            <div end class="page__toolbar-actions">
+                <app-pill-toggle
+                    [options]="mediaTypeOptions"
+                    [selectedValue]="vm.mediaType"
+                    variant="subtle"
+                    (selected)="onMediaTypeSelected($event)"
+                />
+
+                <app-sort-button
+                    [options]="sortOptions"
+                    [selectedValue]="vm.sortField"
+                    [direction]="vm.sortDirection"
+                    (sortChange)="onSortChange($event)"
+                    (directionToggle)="onSortDirectionToggle()"
+                />
+            </div>
+        </app-browse-toolbar>
+
+        @if (vm.items.type === "loading" || vm.items.type === "idle") {
+            <div class="page__grid" aria-hidden="true">
+                @for (placeholder of skeletonCount | repeat; track placeholder) {
+                    <div class="page__card-skeleton">
+                        <app-skeleton class="page__poster-skeleton" />
+                        <app-skeleton class="page__line page__line--title" />
+                        <app-skeleton class="page__line page__line--meta" />
+                    </div>
+                }
+            </div>
+        } @else if (vm.items.type === "loaded") {
+            @if (vm.items.value.length) {
+                <div class="page__grid">
+                    @for (item of vm.items.value; track item.mediaType + "-" + item.id) {
+                        <article class="page__item">
+                            <app-card
+                                [item]="item"
+                                [imageParams]="posterImageParams"
+                            />
+
+                            <app-icon-button
+                                class="page__remove"
+                                tone="danger"
+                                [ariaLabel]="'Remove ' + item.title + ' from favourites'"
+                                (onClick)="onRemoveFromFavourites(item)"
+                            >
+                                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                            </app-icon-button>
+                        </article>
+                    }
+                </div>
+
+                @if (vm.total > vm.pageSize) {
+                    <mat-paginator
+                        class="page__paginator"
+                        [length]="vm.total"
+                        [pageIndex]="vm.page"
+                        [pageSize]="vm.pageSize"
+                        [hidePageSize]="true"
+                        (page)="onPageChange($event)"
+                    />
+                }
+            } @else {
+                <section class="page__empty">
+                    <app-empty-state
+                        iconClass="fa-regular fa-heart"
+                        title="No favourite titles"
+                        text="Movies and TV series you mark as favourites will appear here."
+                    />
+                </section>
+            }
+        }
+    </main>
+}

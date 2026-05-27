@@ -1,29 +1,50 @@
-.user-list-edit-dialog__header {
-    .user-list-edit-dialog__title {
-        margin-bottom: 0.5rem;
+.dialog {
+    &__header,
+    &__content,
+    &__field,
+    &__properties,
+    &__property {
+        display: flex;
+        flex-direction: column;
     }
-    margin-bottom: 1.5rem;
-}
-.user-list-edit-dialog__subtitle {
-    color: var(--text-secondary);
-}
 
-.user-list-edit-dialog__content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-}
+    &__header {
+        gap: var(--space-2);
+        margin-bottom: var(--space-6);
+    }
 
-.user-list-edit-dialog__field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
+    &__content {
+        gap: var(--space-6);
+    }
 
-.user-list-edit-dialog__description-field {
-    --mat-form-field-container-height: auto;
+    &__field {
+        gap: var(--space-3);
+    }
 
-    textarea.mat-mdc-input-element {
-        resize: vertical;
+    &__field-label {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-3);
+    }
+
+    &__description-field {
+        --mat-form-field-container-height: auto;
+
+        textarea.mat-mdc-input-element {
+            resize: vertical;
+        }
+    }
+
+    &__properties {
+        gap: var(--space-3);
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    &__property {
+        gap: var(--space-1);
     }
 }

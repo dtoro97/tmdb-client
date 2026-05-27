@@ -1,68 +1,60 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
-import {
-    EMPTY,
-    Observable,
-    catchError,
-    distinctUntilChanged,
-    map,
-    switchMap,
-    take,
-    tap,
-} from 'rxjs';
+import { EMPTY, Observable, catchError, distinctUntilChanged, map, switchMap, take, tap } from 'rxjs';
 
+import { V4ListSortBy } from '../../../api-v4';
 import {
-    CardItem,
+    ConfirmationDialogService,
     EmptyStateComponent,
-    HeroSurfaceComponent,
-    RepeatPipe,
-    SkeletonComponent,
-    SortButtonComponent,
-    toUserFacingErrorMessage,
-    BackdropCardComponent,
+    IconButtonComponent,
+    LoadableItems,
+    MediaListComponent,
+    MediaListItem,
+    MediaListItemComponent,
+    PageScrollService,
+    SnackbarComponent,
+    SnackbarService,
+    SnackbarType,
+    SubPageHeaderComponent,
+    UserAvatarComponent,
 } from '../../../shared';
 import {
-    UserListConfirmDialogComponent,
-    UserListConfirmDialogData,
-} from '../user-list-confirm-dialog/user-list-confirm-dialog.component';
+    UserListAddItemsDialogComponent,
+    UserListAddItemsDialogData,
+} from '../user-list-add-items-dialog/user-list-add-items-dialog.component';
 import {
     UserListEditDialogComponent,
     UserListEditDialogData,
 } from '../user-list-edit-dialog/user-list-edit-dialog.component';
-import {
-    UserListDetailHeader,
-    UserListDetailStore,
-    UserListSortBy,
-} from '../user-list-detail-store.service';
-
-const LIST_NAME_MAX_LENGTH = 100;
-const LIST_DESCRIPTION_MAX_LENGTH = 280;
-const SORT_OPTIONS = [
-    { label: 'Original Order', value: 'original_order' },
-    { label: 'Title', value: 'title' },
-    { label: 'Release Date', value: 'primary_release_date' },
-];
+import { UserListDetailHeader, UserListDetailItem, UserListDetailStore } from '../user-list-detail-store.service';
+import { USER_LIST_SORT_OPTIONS } from '../user-list-sort-options';
 
 @Component({
     selector: 'app-user-list-detail-page',
     imports: [
         AsyncPipe,
-        RouterLink,
-        MatButtonModule,
         EmptyStateComponent,
-        HeroSurfaceComponent,
-        RepeatPipe,
-        SkeletonComponent,
-        SortButtonComponent,
-        BackdropCardComponent,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatPaginatorModule,
+        MatSelectModule,
+        MatTooltipModule,
+        IconButtonComponent,
+        MediaListComponent,
+        MediaListItemComponent,
+        SubPageHeaderComponent,
+        UserAvatarComponent,
     ],
     templateUrl: './user-list-detail-page.component.html',
     styleUrl: './user-list-detail-page.component.scss',
@@ -71,17 +63,23 @@ const SORT_OPTIONS = [
 })
 export class UserListDetailPageComponent {
     readonly vm$ = this.store.userListDetailVm$;
-    backLink = ['/', 'me', 'lists'];
+    readonly backLink = ['/', 'me', 'lists'];
     readonly initialSkeletonCount = 6;
-    readonly loadingMoreSkeletonCount = 4;
-    readonly sortOptions = SORT_OPTIONS;
+    readonly loadingListState: LoadableItems<MediaListItem> = {
+        type: 'loading',
+    };
+    readonly sortOptions = USER_LIST_SORT_OPTIONS;
+    readonly editingCommentKey = signal<string | null>(null);
+    readonly commentDraft = signal('');
 
     constructor(
         private readonly destroyRef: DestroyRef,
+        private readonly confirmationDialog: ConfirmationDialogService,
         private readonly dialog: MatDialog,
+        private readonly pageScroll: PageScrollService,
         private readonly route: ActivatedRoute,
         private readonly router: Router,
-        private readonly snackBar: MatSnackBar,
+        private readonly snackbar: SnackbarService,
         private readonly store: UserListDetailStore,
         private readonly titleService: Title,
     ) {
@@ -101,51 +99,67 @@ export class UserListDetailPageComponent {
         this.vm$
             .pipe(
                 tap((vm) => {
-                    if (vm.headerState.type === 'loaded') {
-                        this.titleService.setTitle(
-                            `${vm.headerState.value.name} | Your TMDb List`,
-                        );
+                    if (vm.header.type === 'loaded') {
+                        this.titleService.setTitle(`${vm.header.value.name} | List`);
                         return;
                     }
 
-                    this.titleService.setTitle('Your TMDb List');
+                    this.titleService.setTitle('List');
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
-    onShowMore(): void {
+    onPageChange(event: PageEvent): void {
+        this.pageScroll.scrollToTop();
+
         this.store
-            .loadMore$()
+            .loadPage$(event.pageIndex)
             .pipe(
                 take(1),
-                catchError((error) =>
-                    this.showError(error, 'Could not load more list items.'),
-                ),
+                catchError(() => this.showError('Could not load list items.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
-    onEditDetails(header: UserListDetailHeader, isPublic: boolean): void {
+    onAddTitles(listId: number, existingKeys: readonly string[]): void {
         this.dialog
-            .open<UserListEditDialogComponent, UserListEditDialogData>(
-                UserListEditDialogComponent,
+            .open<UserListAddItemsDialogComponent, UserListAddItemsDialogData, true | undefined>(
+                UserListAddItemsDialogComponent,
                 {
                     autoFocus: false,
-                    data: {
-                        name: header.name,
-                        description: header.description,
-                        isPublic,
-                        maxNameLength: LIST_NAME_MAX_LENGTH,
-                        maxDescriptionLength: LIST_DESCRIPTION_MAX_LENGTH,
-                    },
-                    maxWidth: '34rem',
-                    panelClass: 'media-list-dialog-panel',
+                    data: { listId, existingKeys },
+                    maxWidth: '42rem',
+                    panelClass: ['media-list-dialog-panel', 'user-list-add-items-dialog-panel'],
                     width: '100%',
                 },
             )
+            .afterClosed()
+            .pipe(
+                take(1),
+                switchMap((changed) => (changed ? this.store.reload$() : EMPTY)),
+                catchError(() => this.showError('Could not refresh this list.')),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
+    }
+
+    onEditDetails(header: UserListDetailHeader, isPublic: boolean, defaultSortBy: V4ListSortBy): void {
+        this.dialog
+            .open<UserListEditDialogComponent, UserListEditDialogData>(UserListEditDialogComponent, {
+                autoFocus: false,
+                data: {
+                    name: header.name,
+                    description: header.description,
+                    isPublic,
+                    sortBy: defaultSortBy,
+                },
+                maxWidth: '34rem',
+                panelClass: 'media-list-dialog-panel',
+                width: '100%',
+            })
             .afterClosed()
             .pipe(
                 take(1),
@@ -157,7 +171,8 @@ export class UserListDetailPageComponent {
                     if (
                         result.name === header.name &&
                         result.description === (header.description ?? '') &&
-                        result.isPublic === isPublic
+                        result.isPublic === isPublic &&
+                        result.sortBy === defaultSortBy
                     ) {
                         return EMPTY;
                     }
@@ -168,151 +183,139 @@ export class UserListDetailPageComponent {
                         }),
                     );
                 }),
-                catchError((error) =>
-                    this.showError(error, 'Could not update this list.'),
-                ),
+                catchError(() => this.showError('Could not update this list.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
-    onSortChange(value: unknown, activeSortBy: UserListSortBy): void {
-        if (typeof value !== 'string') {
+    onSortChange(sortBy: V4ListSortBy): void {
+        if (!this.sortOptions.some((option) => option.value === sortBy)) {
             return;
         }
 
-        const direction = activeSortBy.endsWith('.asc') ? 'asc' : 'desc';
-        const nextSortBy = `${value}.${direction}` as UserListSortBy;
-
         this.store
-            .setSortBy$(nextSortBy)
+            .setSortBy$(sortBy)
             .pipe(
                 take(1),
-                catchError((error) =>
-                    this.showError(error, 'Could not update list sorting.'),
-                ),
-                takeUntilDestroyed(this.destroyRef),
-            )
-            .subscribe();
-    }
-
-    onToggleSortDirection(): void {
-        this.store
-            .toggleSortDirection()
-            .pipe(
-                take(1),
-                catchError((error) =>
-                    this.showError(error, 'Could not update list sorting.'),
-                ),
+                catchError(() => this.showError('Could not update list sorting.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
     onClearList(): void {
-        this.confirmAction$({
-            title: 'Clear this list?',
-            message:
-                'Every title will be removed, but the list itself will stay in place so you can reuse it.',
-            confirmLabel: 'Clear list',
-        })
+        this.confirmationDialog
+            .confirm$({
+                title: 'Clear this list?',
+                message:
+                    'Every title will be removed, but the list itself will stay in place so you can reuse it.',
+                confirmLabel: 'Clear list',
+                tone: 'danger',
+            })
             .pipe(
-                switchMap((confirmed) =>
-                    confirmed ? this.store.clearList$() : EMPTY,
-                ),
+                switchMap((confirmed) => (confirmed ? this.store.clearList$() : EMPTY)),
                 tap(() => {
                     this.showSuccess('List cleared.');
                 }),
-                catchError((error) =>
-                    this.showError(error, 'Could not clear this list.'),
-                ),
+                catchError(() => this.showError('Could not clear this list.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
     onDeleteList(): void {
-        this.confirmAction$({
-            title: 'Delete this list?',
-            message:
-                'This permanently removes the list and every item saved to it from your TMDb account.',
-            confirmLabel: 'Delete list',
-        })
+        this.confirmationDialog
+            .confirm$({
+                title: 'Delete this list?',
+                message:
+                    'This permanently removes the list and every item saved to it from your account.',
+                confirmLabel: 'Delete list',
+                tone: 'danger',
+            })
             .pipe(
-                switchMap((confirmed) =>
-                    confirmed ? this.store.deleteList$() : EMPTY,
-                ),
+                switchMap((confirmed) => (confirmed ? this.store.deleteList$() : EMPTY)),
                 tap(() => {
                     this.router.navigate(this.backLink);
                     this.showSuccess('List deleted.');
                 }),
-                catchError((error) =>
-                    this.showError(error, 'Could not delete this list.'),
-                ),
+                catchError(() => this.showError('Could not delete this list.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
-    onRemoveItem(item: CardItem): void {
-        this.confirmAction$({
-            title: `Remove ${item.title}?`,
-            message:
-                'The title will be removed from this list, but it will still be available everywhere else in the app.',
-            confirmLabel: 'Remove item',
-        })
+    onRemoveItem(item: UserListDetailItem): void {
+        this.confirmationDialog
+            .confirm$({
+                title: `Remove ${item.title}?`,
+                message: 'This removes the title from this list only.',
+                confirmLabel: 'Remove item',
+                tone: 'danger',
+            })
             .pipe(
-                switchMap((confirmed) =>
-                    confirmed ? this.store.removeItem$(item) : EMPTY,
-                ),
+                switchMap((confirmed) => (confirmed ? this.store.removeItem$(item) : EMPTY)),
                 tap(() => {
                     this.showSuccess('Item removed from the list.');
                 }),
-                catchError((error) =>
-                    this.showError(error, 'Could not remove this item.'),
-                ),
+                catchError(() => this.showError('Could not remove this item.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
 
-    private confirmAction$(
-        data: UserListConfirmDialogData,
-    ): Observable<boolean> {
-        return this.dialog
-            .open<
-                UserListConfirmDialogComponent,
-                UserListConfirmDialogData,
-                true | undefined
-            >(UserListConfirmDialogComponent, {
-                autoFocus: false,
-                data,
-                maxWidth: '30rem',
-                width: '100%',
-            })
-            .afterClosed()
+    onStartComment(item: UserListDetailItem): void {
+        this.editingCommentKey.set(item.key);
+        this.commentDraft.set(item.comment);
+    }
+
+    onCancelComment(): void {
+        this.editingCommentKey.set(null);
+        this.commentDraft.set('');
+    }
+
+    onCommentDraftInput(event: Event): void {
+        const target = event.target;
+
+        if (target instanceof HTMLTextAreaElement) {
+            this.commentDraft.set(target.value);
+        }
+    }
+
+    onSaveComment(item: UserListDetailItem): void {
+        const comment = this.commentDraft().trim();
+
+        if (comment === item.comment) {
+            this.onCancelComment();
+            return;
+        }
+
+        this.store
+            .updateItemComment$(item, comment)
             .pipe(
                 take(1),
-                map((result) => result === true),
-            );
+                tap(() => {
+                    this.onCancelComment();
+                    this.showSuccess('Comment updated.');
+                }),
+                catchError(() => this.showError('Could not update this comment.')),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
     }
 
     private showSuccess(message: string): void {
-        this.snackBar.open(message, 'Dismiss', {
-            duration: 4000,
-            panelClass: 'snackbar-success',
+        this.snackbar.openSnackbar(SnackbarComponent, {
+            message,
+            type: SnackbarType.Success,
         });
     }
 
-    private showError(error: unknown, fallback: string) {
-        this.snackBar.open(
-            toUserFacingErrorMessage(error, fallback),
-            'Dismiss',
-            {
-                duration: 5000,
-                panelClass: 'snackbar-error',
-            },
-        );
+    private showError(message: string): Observable<never> {
+        this.snackbar.openSnackbar(SnackbarComponent, {
+            message,
+            type: SnackbarType.Error,
+        });
 
         return EMPTY;
     }

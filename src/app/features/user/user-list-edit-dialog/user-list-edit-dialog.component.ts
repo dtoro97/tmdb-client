@@ -1,9 +1,12 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import {
+    AbstractControl,
     FormControl,
     NonNullableFormBuilder,
     FormGroup,
     ReactiveFormsModule,
+    ValidationErrors,
+    ValidatorFn,
     Validators,
 } from '@angular/forms';
 
@@ -15,21 +18,36 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
+import { V4ListSortBy } from '../../../api-v4';
+import { DEFAULT_USER_LIST_SORT_BY, USER_LIST_SORT_OPTIONS } from '../user-list-sort-options';
 
 export interface UserListEditDialogData {
     readonly name: string;
     readonly description: string | null;
     readonly isPublic: boolean;
-    readonly maxNameLength?: number;
-    readonly maxDescriptionLength?: number;
+    readonly sortBy?: V4ListSortBy;
 }
 
 export interface UserListEditDialogResult {
     readonly name: string;
     readonly description: string;
     readonly isPublic: boolean;
+    readonly sortBy?: V4ListSortBy;
 }
+
+const trimmedRequiredValidator: ValidatorFn = (
+    control: AbstractControl,
+): ValidationErrors | null => {
+    const value = typeof control.value === 'string' ? control.value.trim() : '';
+
+    return value ? null : { required: true };
+};
+
+const LIST_NAME_MAX_LENGTH = 100;
+const LIST_DESCRIPTION_MAX_LENGTH = 280;
 
 @Component({
     selector: 'app-user-list-edit-dialog',
@@ -38,7 +56,8 @@ export interface UserListEditDialogResult {
         MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
-        MatCheckboxModule,
+        MatSelectModule,
+        MatSlideToggleModule,
         ReactiveFormsModule,
     ],
     templateUrl: './user-list-edit-dialog.component.html',
@@ -46,10 +65,15 @@ export interface UserListEditDialogResult {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserListEditDialogComponent {
+    readonly nameMaxLength: number;
+    readonly descriptionMaxLength: number;
+    readonly sortOptions = USER_LIST_SORT_OPTIONS;
+    readonly showSortSelector: boolean;
     readonly form: FormGroup<{
         name: FormControl<string>;
         description: FormControl<string>;
         isPublic: FormControl<boolean>;
+        sortBy: FormControl<V4ListSortBy>;
     }>;
 
     constructor(
@@ -61,19 +85,23 @@ export class UserListEditDialogComponent {
         >,
         private readonly formBuilder: NonNullableFormBuilder,
     ) {
+        this.nameMaxLength = LIST_NAME_MAX_LENGTH;
+        this.descriptionMaxLength = LIST_DESCRIPTION_MAX_LENGTH;
+        this.showSortSelector = this.data.sortBy !== undefined;
         this.form = this.formBuilder.group({
             name: [
                 this.data.name,
                 [
-                    Validators.required,
-                    Validators.maxLength(this.data.maxNameLength ?? 100),
+                    trimmedRequiredValidator,
+                    Validators.maxLength(this.nameMaxLength),
                 ],
             ],
             description: [
                 this.data.description ?? '',
-                [Validators.maxLength(this.data.maxDescriptionLength ?? 280)],
+                [Validators.maxLength(this.descriptionMaxLength)],
             ],
             isPublic: [this.data.isPublic],
+            sortBy: [this.data.sortBy ?? DEFAULT_USER_LIST_SORT_BY],
         });
     }
 
@@ -83,12 +111,13 @@ export class UserListEditDialogComponent {
             return;
         }
 
-        const { name, description, isPublic } = this.form.getRawValue();
+        const { name, description, isPublic, sortBy } = this.form.getRawValue();
 
         this.dialogRef.close({
             name: name.trim(),
             description: description.trim(),
             isPublic,
+            sortBy: this.showSortSelector ? sortBy : undefined,
         });
     }
 }

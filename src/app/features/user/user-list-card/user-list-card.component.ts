@@ -1,15 +1,27 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { UserDataListItem } from '../user-lists-store.service';
+import { IconButtonComponent } from '../../../shared';
+import { UserListSummaryItem } from '../user-lists-store.service';
 
 @Component({
     selector: 'app-user-list-card',
-    imports: [RouterLink],
+    imports: [DatePipe, DecimalPipe, IconButtonComponent, RouterLink],
     templateUrl: './user-list-card.component.html',
     styleUrl: './user-list-card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserListCardComponent {
-    @Input({ required: true }) item!: UserDataListItem;
+    @Input({ required: true }) item!: UserListSummaryItem;
+    @Input() actionsEnabled = false;
+
+    @Output() readonly editList = new EventEmitter<UserListSummaryItem>();
+    @Output() readonly deleteList = new EventEmitter<UserListSummaryItem>();
 }

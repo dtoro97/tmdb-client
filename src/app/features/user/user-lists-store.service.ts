@@ -1,269 +1,192 @@
 import { Injectable } from '@angular/core';
 
 import { ComponentStore } from '@ngrx/component-store';
-import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
+import { catchError, map, of, switchMap, tap, throwError } from 'rxjs';
 
-import { AccountRestControllerService } from '../../api';
-import {
-    AccountService as AccountV4Service,
-    V4AccountListSummary,
-} from '../../api-v4';
-import { API_JSON_OPTIONS } from '../../constants';
-import {
-    LoadableItems,
-    MediaListItem,
-    UserSessionStoreService,
-    loaded,
-    mediaListItemToCardItem,
-    toMediaListItem,
-    toUpdatedAtLabel,
-} from '../../shared';
-import {
-    combineLoadablePreviewItems,
-    loadMorePaged$,
-    mapLoadableItems,
-} from '../../shared/utils';
+import { AccountService as AccountV4Service, V4AccountListSummary } from '../../api-v4';
+import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
+import { LoadableItems, TmdbListService, UserSessionStoreService, isDefined } from '../../shared';
+import { toLoadedItems, toPageItemRange, updateLoadedItems } from '../../shared/utils';
 
-export interface UserDataListItem {
+export interface UserListSummaryItem {
     readonly id: number;
     readonly name: string;
     readonly description: string | null;
-    readonly itemCount: number;
-    readonly metadata: string;
-    readonly updatedLabel: string | null;
-    readonly posterPath: string | null;
+    readonly isPublic: boolean;
+    readonly createdAt: string | null;
+    readonly updatedAt: string | null;
+    readonly numberOfItems: number | null;
+    readonly averageRating: number | null;
 }
 
 interface UserListsState {
-    favoriteMoviesState: LoadableItems<MediaListItem>;
-    favoriteTvState: LoadableItems<MediaListItem>;
-    listsState: LoadableItems<UserDataListItem>;
-    favoriteMoviesTotal: number;
-    favoriteTvTotal: number;
-    listsPage: number;
-    listsTotalPages: number;
-    listsTotal: number;
+    readonly items: LoadableItems<UserListSummaryItem>;
+    readonly page: number;
+    readonly totalPages: number;
+    readonly totalResults: number;
 }
 
-const LISTS_PLACEHOLDER_COUNT = 4;
+const INITIAL_PAGE = 1;
 
 const INITIAL_STATE: UserListsState = {
-    favoriteMoviesState: { type: 'idle' },
-    favoriteTvState: { type: 'idle' },
-    listsState: { type: 'idle' },
-    favoriteMoviesTotal: 0,
-    favoriteTvTotal: 0,
-    listsPage: 1,
-    listsTotalPages: 1,
-    listsTotal: 0,
+    items: { type: 'idle' },
+    page: INITIAL_PAGE,
+    totalPages: INITIAL_PAGE,
+    totalResults: 0,
 };
 
 @Injectable()
 export class UserListsStore extends ComponentStore<UserListsState> {
-    readonly vm$ = this.select((state) => ({
-        favoriteMoviesState: state.favoriteMoviesState,
-        favoriteTvState: state.favoriteTvState,
-        listsState: state.listsState,
-        hasFavoriteMovies:
-            state.favoriteMoviesState.type === 'loaded' &&
-            state.favoriteMoviesState.value.length > 0,
-        hasFavoriteTv:
-            state.favoriteTvState.type === 'loaded' &&
-            state.favoriteTvState.value.length > 0,
-        hasLists:
-            (state.listsState.type === 'loaded' ||
-                state.listsState.type === 'loading-more') &&
-            state.listsState.value.length > 0,
-        listsHasMore: state.listsPage < state.listsTotalPages,
-        favoritePreviewCards: combineLoadablePreviewItems(
-            [
-                mapLoadableItems(
-                    state.favoriteMoviesState,
-                    mediaListItemToCardItem,
-                ),
-                mapLoadableItems(
-                    state.favoriteTvState,
-                    mediaListItemToCardItem,
-                ),
-            ],
-            10,
-        ),
-        listPreviewState: combineLoadablePreviewItems([state.listsState], 3),
-        favoritesTotal: state.favoriteMoviesTotal + state.favoriteTvTotal,
-        favoriteMoviesTotal: state.favoriteMoviesTotal,
-        favoriteTvTotal: state.favoriteTvTotal,
-        listsTotal: state.listsTotal,
-    }));
+    readonly listsViewModel$ = this.select((state) => {
+        const range = toPageItemRange({
+            page: state.page,
+            pageSize: PAGE_SIZE,
+            itemCount: state.items.type === 'loaded' ? state.items.value.length : 0,
+            totalResults: state.totalResults,
+        });
+
+        return {
+            state: state.items,
+            page: state.page - 1,
+            pageSize: PAGE_SIZE,
+            start: range.start,
+            end: range.end,
+            total: state.totalResults,
+        };
+    });
 
     constructor(
-        private readonly accountService: AccountRestControllerService,
         private readonly accountV4Service: AccountV4Service,
+        private readonly tmdbListService: TmdbListService,
         private readonly userSessionStore: UserSessionStoreService,
     ) {
         super(INITIAL_STATE);
     }
 
-    load$(
-        sessionId: string,
-        accountId: number,
-        language: string,
-        includeCustomLists = true,
-    ): Observable<void> {
+    load$() {
+        return this.loadPage$(0);
+    }
+
+    loadPage$(pageIndex: number) {
+        const previousState = this.get();
+        const page = pageIndex + 1;
+
         this.patchState({
-            favoriteMoviesState: { type: 'loading' },
-            favoriteTvState: { type: 'loading' },
-            listsState: { type: 'loading' },
-            listsPage: 1,
-            listsTotalPages: 1,
-            listsTotal: 0,
+            items: { type: 'loading' },
+            page,
         });
 
-        return forkJoin({
-            favoriteMovies: this.accountService.accountGetFavorites(
-                accountId,
-                language,
-                1,
-                sessionId,
-                'created_at.desc',
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            ),
-            favoriteTv: this.accountService.accountFavoriteTv(
-                accountId,
-                language,
-                1,
-                sessionId,
-                'created_at.desc',
-                'body',
-                false,
-                API_JSON_OPTIONS,
-            ),
-            lists: this.fetchListsPage$(1, includeCustomLists),
-        }).pipe(
+        return this.fetchListsPage$(page).pipe(
             tap((result) => {
                 this.patchState({
-                    favoriteMoviesState: loaded(
-                        (result.favoriteMovies.results ?? []).map((item) =>
-                            toMediaListItem(item, 'movie'),
-                        ),
-                    ),
-                    favoriteTvState: loaded(
-                        (result.favoriteTv.results ?? []).map((item) =>
-                            toMediaListItem(item, 'tv'),
-                        ),
-                    ),
-                    listsState: loaded([...result.lists.items]),
-                    favoriteMoviesTotal:
-                        result.favoriteMovies.total_results ?? 0,
-                    favoriteTvTotal: result.favoriteTv.total_results ?? 0,
-                    listsPage: result.lists.page,
-                    listsTotalPages: result.lists.totalPages,
-                    listsTotal: result.lists.totalResults,
+                    items: toLoadedItems(result.items),
+                    page: result.page,
+                    totalPages: result.totalPages,
+                    totalResults: result.totalResults,
                 });
             }),
-            map(() => undefined),
-            tap({
-                error: () => {
-                    this.patchState({
-                        favoriteMoviesState: loaded([]),
-                        favoriteTvState: loaded([]),
-                        listsState: loaded([]),
-                    });
-                },
+            catchError((error: unknown) => {
+                this.setState(previousState);
+                return throwError(() => error);
             }),
         );
     }
 
-    loadMoreLists$(): Observable<void> {
-        const state = this.get();
-
-        if (state.listsState.type !== 'loaded') {
-            return of(undefined);
-        }
-
-        return loadMorePaged$({
-            currentItems: state.listsState.value,
-            currentPage: state.listsPage,
-            totalPages: state.listsTotalPages,
-            placeholderCount: LISTS_PLACEHOLDER_COUNT,
-            setLoadingMore: (items) =>
-                this.patchState({
-                    listsState: {
-                        type: 'loading-more',
-                        value: items,
-                        placeholderCount: LISTS_PLACEHOLDER_COUNT,
-                    } as LoadableItems<UserDataListItem>,
+    updateList$(
+        listId: number,
+        request: {
+            readonly name: string;
+            readonly description: string;
+            readonly isPublic: boolean;
+        },
+    ) {
+        return this.tmdbListService
+            .updateList$(listId, {
+                name: request.name,
+                description: request.description,
+                public: request.isPublic,
+            })
+            .pipe(
+                tap(() => {
+                    this.patchState((state) => ({
+                        items: updateLoadedItems(state.items, (items) =>
+                            items.map((item) =>
+                                item.id === listId
+                                    ? {
+                                          ...item,
+                                          name: request.name,
+                                          description: request.description || null,
+                                          isPublic: request.isPublic,
+                                      }
+                                    : item,
+                            ),
+                        ),
+                    }));
                 }),
-            fetchPage: (nextPage) =>
-                this.fetchListsPage$(
-                    nextPage,
-                    !!this.userSessionStore.v4AccessToken(),
-                ).pipe(
-                    tap((result) => {
-                        this.patchState({
-                            listsTotalPages: result.totalPages,
-                            listsTotal: result.totalResults,
-                        });
-                    }),
-                    map((result) => [...result.items]),
-                ),
-            setLoaded: (items, page) =>
-                this.patchState({
-                    listsState: loaded(items),
-                    listsPage: page,
-                }),
-        });
+            );
     }
 
-    private fetchListsPage$(page: number, includeCustomLists: boolean) {
-        const v4AccountId = this.userSessionStore.v4AccountId();
+    deleteList$(listId: number) {
+        return this.tmdbListService.deleteList$(listId).pipe(
+            switchMap(() => {
+                const state = this.get();
+                const totalResults = Math.max(0, state.totalResults - 1);
+                const totalPages = Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
+                const page = Math.min(state.page, totalPages);
+                const nextItems =
+                    state.items.type === 'loaded'
+                        ? state.items.value.filter((item) => item.id !== listId)
+                        : null;
 
-        if (!includeCustomLists || !v4AccountId) {
-            return of({
-                items: [],
-                page: 1,
-                totalPages: 1,
-                totalResults: 0,
-            });
-        }
+                this.patchState({
+                    items: nextItems ? toLoadedItems(nextItems) : state.items,
+                    page,
+                    totalPages,
+                    totalResults,
+                });
+
+                if (totalResults > 0 && nextItems && (page !== state.page || nextItems.length === 0)) {
+                    return this.loadPage$(page - 1);
+                }
+
+                return of(undefined);
+            }),
+        );
+    }
+
+    private fetchListsPage$(page: number) {
+        const { v4AccountId } = this.userSessionStore.requireV4AccountAccess();
 
         return this.accountV4Service
             .accountV4Lists(v4AccountId, page, 'body', false, API_JSON_OPTIONS)
             .pipe(
                 map((result) => ({
                     items: (result.results ?? [])
-                        .filter(
-                            (item): item is V4AccountListSummary =>
-                                !!item.id && !!item.name?.trim(),
-                        )
-                        .map((item) => {
-                            const itemCount = item.number_of_items ?? 0;
-
-                            return {
-                                id: item.id ?? 0,
-                                name: item.name?.trim() || 'Untitled List',
-                                description: item.description?.trim() || null,
-                                itemCount,
-                                metadata: `${itemCount} item${itemCount === 1 ? '' : 's'}`,
-                                updatedLabel: toUpdatedAtLabel(
-                                    item.updated_at ?? item.created_at,
-                                ),
-                                posterPath: item.poster_path ?? null,
-                            };
-                        }),
-                    page: result.page ?? 1,
-                    totalPages: result.total_pages ?? 1,
+                        .map((item) => this.toUserListSummaryItem(item))
+                        .filter(isDefined),
+                    page: result.page ?? INITIAL_PAGE,
+                    totalPages: result.total_pages ?? INITIAL_PAGE,
                     totalResults: result.total_results ?? 0,
                 })),
-                catchError(() =>
-                    of({
-                        items: [],
-                        page: 1,
-                        totalPages: 1,
-                        totalResults: 0,
-                    }),
-                ),
             );
+    }
+
+    private toUserListSummaryItem(item: V4AccountListSummary): UserListSummaryItem | null {
+        const name = item.name?.trim();
+
+        if (!item.id || !name) {
+            return null;
+        }
+
+        return {
+            id: item.id,
+            name,
+            description: item.description?.trim() || null,
+            isPublic: item.public === V4AccountListSummary.PublicEnum.NUMBER_1,
+            createdAt: item.created_at ?? null,
+            updatedAt: item.updated_at ?? null,
+            numberOfItems: item.number_of_items ?? null,
+            averageRating: item.average_rating ?? null,
+        };
     }
 }
