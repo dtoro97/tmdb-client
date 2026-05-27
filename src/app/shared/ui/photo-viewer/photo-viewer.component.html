@@ -4,47 +4,36 @@
             <span class="toolbar__counter text-meta">{{ counter() }}</span>
             <div class="toolbar__actions">
                 @if (data.photosLink) {
-                    <app-icon-button
-                        class="toolbar__photos-link"
-                        (onClick)="openPhotosPage()"
-                        ariaLabel="Open photos page"
-                    >
+                    <app-overlay-icon-button (onClick)="openPhotosPage()" ariaLabel="Open photos page">
                         <mat-icon>grid_on</mat-icon>
-                    </app-icon-button>
+                    </app-overlay-icon-button>
                 }
-                <app-icon-button
-                    (onClick)="close()"
-                    ariaLabel="Close"
-                >
+                <app-overlay-icon-button (onClick)="close()" ariaLabel="Close">
                     <mat-icon>close</mat-icon>
-                </app-icon-button>
+                </app-overlay-icon-button>
             </div>
         </div>
 
         <div class="stage">
-            <app-icon-button
+            <app-overlay-icon-button
                 class="nav nav--prev"
                 (onClick)="prev()"
                 [disabled]="!hasPrev()"
                 ariaLabel="Previous photo"
             >
                 <mat-icon>chevron_left</mat-icon>
-            </app-icon-button>
+            </app-overlay-icon-button>
 
-            <img
-                class="photo"
-                [src]="image.file_path ?? '' | imgSrc: 'w1280'"
-                alt=""
-            />
+            <img class="photo" [src]="image.file_path ?? '' | imgSrc: 'w1280'" alt="" />
 
-            <app-icon-button
+            <app-overlay-icon-button
                 class="nav nav--next"
                 (onClick)="next()"
                 [disabled]="!hasNext()"
                 ariaLabel="Next photo"
             >
                 <mat-icon>chevron_right</mat-icon>
-            </app-icon-button>
+            </app-overlay-icon-button>
         </div>
 
         <div class="meta text-caption">

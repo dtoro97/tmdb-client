@@ -17,17 +17,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
-import { SearchResultItem } from '../../..';
+import type { SearchResultItem, SelectOption } from '../../..';
 import { HeaderSearchResultsComponent } from './header-search-results.component';
 import {
     HeaderSearchBarStoreService,
     SearchFilterValue,
 } from './header-search-bar.store.service';
 
-interface SearchFilterOption {
-    readonly label: string;
-    readonly value: SearchFilterValue;
-}
+type SearchFilterOption = SelectOption<SearchFilterValue>;
 
 const FILTER_OPTIONS: ReadonlyArray<SearchFilterOption> = [
     { label: 'All', value: 'all' },

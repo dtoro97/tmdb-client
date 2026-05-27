@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import type { PhotoViewerData } from '../../models';
 import { ImagePipe } from '../../pipes/image.pipe';
-import { IconButtonComponent } from '../icon-button/icon-button.component';
+import { OverlayIconButtonComponent } from '../overlay-icon-button/overlay-icon-button.component';
 import { RatingComponent } from '../rating/rating.component';
 
 function clampIndex(index: number, length: number): number {
@@ -27,7 +27,7 @@ function clampIndex(index: number, length: number): number {
 
 @Component({
     selector: 'app-photo-viewer',
-    imports: [MatIconModule, ImagePipe, IconButtonComponent, RatingComponent],
+    imports: [MatIconModule, ImagePipe, OverlayIconButtonComponent, RatingComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './photo-viewer.component.html',
     styleUrl: './photo-viewer.component.scss',

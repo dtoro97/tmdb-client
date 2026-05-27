@@ -21,11 +21,11 @@
         background: var(--control-surface);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-md);
-        transition: border-color var(--motion-base);
+        transition: background-color var(--motion-base);
 
-        @media (hover: hover) and (pointer: fine) {
+        @include hover-capable {
             &:hover {
-                border-color: var(--control-focus-border);
+                background: var(--control-surface-hover);
             }
         }
     }
@@ -50,22 +50,37 @@
     }
 
     &__suffix {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         color: var(--text-muted);
         flex-shrink: 0;
     }
 
     &__search-icon {
-        margin-inline-end: var(--space-1);
-        @include icon-size(var(--text-lg));
+        width: 2rem;
+        height: 2rem;
+        margin-inline-end: 0;
+        font-size: 1rem;
+        line-height: 2rem;
     }
 
     &__close-button {
+        --mat-icon-button-state-layer-size: 2rem;
+        --mdc-icon-button-state-layer-size: 2rem;
+        --mat-icon-button-icon-size: 1rem;
+
         display: none;
         width: 2rem;
         height: 2rem;
         min-width: 2rem;
         padding: 0;
         margin-inline-end: var(--space-1);
+    }
+
+    &__close-button mat-icon {
+        @include icon-size(1rem);
+        line-height: 1;
     }
 
     &__dropdown {
@@ -82,7 +97,6 @@
         background: var(--surface-panel);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
     }
 
     &__toggle-button {

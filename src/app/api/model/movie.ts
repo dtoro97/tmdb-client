@@ -23,6 +23,7 @@ export interface Movie {
     homepage?: string;
     id?: number;
     imdb_id?: string;
+    origin_country?: Array<string>;
     original_language?: string;
     original_title?: string;
     overview?: string;

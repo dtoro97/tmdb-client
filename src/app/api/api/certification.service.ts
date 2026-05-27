@@ -23,13 +23,16 @@ import { CertificationList } from '../model/certificationList';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    CertificationRestControllerServiceInterface
+} from './certification.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class CertificationRestControllerService extends BaseService {
+export class CertificationRestControllerService extends BaseService implements CertificationRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

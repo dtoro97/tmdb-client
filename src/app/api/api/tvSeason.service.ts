@@ -41,13 +41,16 @@ import { WatchProviderList } from '../model/watchProviderList';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    TvSeasonRestControllerServiceInterface
+} from './tvSeason.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class TvSeasonRestControllerService extends BaseService {
+export class TvSeasonRestControllerService extends BaseService implements TvSeasonRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

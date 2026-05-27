@@ -8,36 +8,16 @@
     gap: var(--space-6);
     padding: var(--space-6);
     background: var(--surface-panel-soft);
-    border-color: var(--color-border-subtle);
 }
 
 .empty-panel {
     border-radius: var(--radius-lg);
     background: var(--surface-panel-soft);
-}
-
-.catalog-panel {
-    @include surface-panel();
-    overflow: hidden;
-}
-
-.catalog-panel-footer {
-    display: flex;
-    justify-content: center;
-    padding: var(--space-4) var(--space-4) var(--space-5);
-    background: transparent;
+    border: 1px solid var(--color-border-subtle);
 }
 
 @include mobile() {
     .surface-panel {
         padding: var(--space-3);
-    }
-
-    .catalog-panel {
-        border-radius: var(--radius-lg);
-    }
-
-    .catalog-panel-footer {
-        padding-inline: var(--space-3);
     }
 }

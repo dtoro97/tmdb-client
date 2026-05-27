@@ -12,13 +12,26 @@ export type UserAvatarSize = 'sm' | 'lg';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserAvatarComponent implements OnChanges {
-    @Input({ required: true }) name = 'TMDb Member';
+    @Input({ required: true }) name = 'Member';
     @Input() avatarPath: string | null = null;
     @Input() size: UserAvatarSize = 'sm';
 
-    initial = 'T';
+    initials = 'ME';
 
     ngOnChanges(): void {
-        this.initial = this.name.trim().charAt(0).toUpperCase() || 'T';
+        this.initials = getInitials(this.name);
     }
+}
+
+function getInitials(name: string): string {
+    const parts = name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (parts.length > 1) {
+        return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
+    }
+
+    return (parts[0] ?? 'ME').slice(0, 2).toUpperCase();
 }

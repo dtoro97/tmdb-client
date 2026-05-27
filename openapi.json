@@ -1500,7 +1500,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Configuration"
+                  "$ref": "#/components/schemas/TmdbConfiguration"
                 }
               }
             }
@@ -5631,7 +5631,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AlternativeTitleList"
+                  "$ref": "#/components/schemas/TvAlternativeTitleList"
                 }
               }
             }
@@ -7985,6 +7985,20 @@
           }
         }
       },
+      "TvAlternativeTitleList": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlternativeTitle"
+            }
+          }
+        }
+      },
       "AuthorDetails": {
         "type": "object",
         "properties": {
@@ -8410,7 +8424,7 @@
           }
         }
       },
-      "Configuration": {
+      "TmdbConfiguration": {
         "type": "object",
         "properties": {
           "images": {
@@ -9174,6 +9188,12 @@
           },
           "imdb_id": {
             "type": "string"
+          },
+          "origin_country": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "original_language": {
             "type": "string"
@@ -10699,6 +10719,9 @@
           },
           "status_message": {
             "type": "string"
+          },
+          "success": {
+            "type": "boolean"
           }
         }
       },
@@ -11016,6 +11039,10 @@
           "tvrage_id": {
             "type": "integer",
             "nullable": true
+          },
+          "wikidata_id": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -11108,6 +11135,12 @@
           },
           "name": {
             "type": "string"
+          },
+          "networks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Network"
+            }
           },
           "overview": {
             "type": "string"

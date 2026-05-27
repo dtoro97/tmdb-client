@@ -14,10 +14,22 @@ export interface V4AccountListSummary {
     id?: number;
     name?: string;
     description?: string;
-    'public'?: boolean;
+    /**
+     * TMDB v4 list visibility flag. 0 means private; 1 means public.
+     */
+    'public'?: V4AccountListSummary.PublicEnum;
     created_at?: string;
     updated_at?: string;
     number_of_items?: number;
+    average_rating?: number | null;
     poster_path?: string | null;
 }
+export namespace V4AccountListSummary {
+    export const PublicEnum = {
+        NUMBER_0: 0,
+        NUMBER_1: 1
+    } as const;
+    export type PublicEnum = typeof PublicEnum[keyof typeof PublicEnum];
+}
+
 

@@ -32,7 +32,6 @@
         }
 
         .video-card__play {
-            border-color: var(--color-brand-light);
             color: var(--color-brand-light);
         }
     }
@@ -50,9 +49,7 @@
     border: 2px solid currentColor;
     border-radius: var(--radius-full);
     color: var(--text-primary);
-    transition:
-        border-color var(--motion-base),
-        color var(--motion-base);
+    transition: color var(--motion-base);
 
     i {
         transform: translateX(0.0625rem);

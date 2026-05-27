@@ -1,21 +1,21 @@
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, Inject, Input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EMPTY, Observable, catchError, map, switchMap, take } from 'rxjs';
 
 import { RATING_ACTIONS, RatingActions } from '../../types';
-import { TmdbUserAuthService } from '../../services/tmdb-user-auth.service';
+import { SnackbarService, SnackbarType } from '../../services/snackbar.service';
 import { UserSessionStoreService } from '../../services/user-session-store.service';
 import {
     MediaRatingDialogComponent,
     MediaRatingDialogResult,
 } from '../media-rating-dialog/media-rating-dialog.component';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
+import { SnackbarComponent } from '../snackbar/snackbar.component';
+import { TmdbSigninDialogService } from '../tmdb-signin-dialog/tmdb-signin-dialog.service';
 
 interface UserRatingViewModel {
     readonly currentRating: number | null;
@@ -51,9 +51,8 @@ export class UserRatingComponent {
         private readonly destroyRef: DestroyRef,
         private readonly dialog: MatDialog,
         @Inject(RATING_ACTIONS) private readonly ratingActions: RatingActions,
-        private readonly router: Router,
-        private readonly snackBar: MatSnackBar,
-        private readonly tmdbUserAuthService: TmdbUserAuthService,
+        private readonly snackbar: SnackbarService,
+        private readonly tmdbSigninDialog: TmdbSigninDialogService,
         private readonly userSessionStore: UserSessionStoreService,
     ) {}
 
@@ -99,9 +98,7 @@ export class UserRatingComponent {
         }
 
         if (result === 'login') {
-            return this.tmdbUserAuthService
-                .startLogin$(this.router.url)
-                .pipe(catchError((error) => this.showError('Could not start sign-in.')));
+            return this.tmdbSigninDialog.open$().pipe(catchError(() => this.showError('Could not start sign-in.')));
         }
 
         if (typeof result === 'object' && 'guestValue' in result) {
@@ -121,9 +118,9 @@ export class UserRatingComponent {
     }
 
     private showError(message: string): Observable<never> {
-        this.snackBar.open(message, 'Dismiss', {
-            duration: 5000,
-            panelClass: 'snackbar-error',
+        this.snackbar.openSnackbar(SnackbarComponent, {
+            message,
+            type: SnackbarType.Error,
         });
         return EMPTY;
     }

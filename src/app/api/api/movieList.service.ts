@@ -27,13 +27,16 @@ import { MoviePageWithDates } from '../model/moviePageWithDates';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    MovieListRestControllerServiceInterface
+} from './movieList.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class MovieListRestControllerService extends BaseService {
+export class MovieListRestControllerService extends BaseService implements MovieListRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

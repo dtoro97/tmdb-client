@@ -165,7 +165,7 @@ export const toCastPersonCardItem = (person: CastLike): PersonCardItem => ({
 
 export const mediaToSearchResultItem = (
     item: MediaItemLike,
-    mediaType: Extract<MediaType, 'movie' | 'tv'>,
+    mediaType: MediaType,
 ): SearchResultItem => ({
     ...toMediaListItem(item, mediaType, 'year'),
     year: toDateValue(extractMediaFields(item, mediaType).date, 'year'),
@@ -226,7 +226,7 @@ export const toCardItem = (
 
 export const mediaListItemToCardItem = (item: MediaListItem): CardItem => ({
     id: item.id,
-    mediaType: item.mediaType as Extract<MediaType, 'movie' | 'tv'>,
+    mediaType: item.mediaType,
     title: item.title,
     imagePath: item.thumb,
     backdropPath: null,

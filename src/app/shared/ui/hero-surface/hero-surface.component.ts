@@ -6,7 +6,7 @@ import {
 
 import { ImageComponent } from '../image/image.component';
 
-export type HeroSurfaceVariant = 'detail' | 'compact';
+export type HeroSurfaceVariant = 'detail' | 'integrated' | 'compact';
 
 @Component({
     selector: 'app-hero-surface',

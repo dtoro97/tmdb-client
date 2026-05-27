@@ -39,13 +39,16 @@ import { TvSeriesPage } from '../model/tvSeriesPage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    AccountRestControllerServiceInterface
+} from './account.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class AccountRestControllerService extends BaseService {
+export class AccountRestControllerService extends BaseService implements AccountRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

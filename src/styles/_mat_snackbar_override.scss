@@ -6,73 +6,101 @@
     --mat-snack-bar-supporting-text-color: var(--text-primary);
     --mat-snack-bar-supporting-text-font: inherit;
     --mat-snack-bar-supporting-text-size: var(--text-sm);
-    --mat-snack-bar-supporting-text-weight: var(--weight-medium);
+    --mat-snack-bar-supporting-text-weight: var(--weight-semibold);
     --mat-snack-bar-supporting-text-line-height: var(--lh-normal);
     --mat-snack-bar-button-color: var(--color-brand-light);
+    --mat-button-text-label-text-color: var(--color-brand-light);
+    --mat-button-text-state-layer-color: transparent;
+    --mat-button-text-hover-state-layer-opacity: 0;
+    --mat-button-text-focus-state-layer-opacity: 0;
+    --mat-button-text-pressed-state-layer-opacity: 0;
+    --mat-button-text-ripple-color: rgba(255, 154, 122, 0.14);
+    --snackbar-action-color: var(--color-brand-light);
 
     margin: var(--space-4);
 
     .mdc-snackbar__surface {
         border: 1px solid var(--color-border-subtle);
-        box-shadow: var(--shadow-lg);
+        box-shadow: none;
+        min-width: min(22rem, calc(100vw - var(--space-8)));
+        max-width: min(38rem, calc(100vw - var(--space-8)));
         padding-right: var(--space-2);
     }
 
     .mdc-snackbar__label {
         padding: var(--space-3) var(--space-4);
+        letter-spacing: 0;
     }
 
     .mat-mdc-button.mat-mdc-snack-bar-action {
+        height: var(--control-height-sm);
+        border-radius: var(--radius-md);
+        color: var(--snackbar-action-color);
         font-weight: var(--weight-semibold);
-        font-size: var(--text-sm);
-        letter-spacing: 0.02em;
+        font-size: var(--text-xs);
+        line-height: 1;
+        letter-spacing: 0;
         min-width: auto;
-        padding-inline: var(--space-3);
+        padding-inline: var(--space-2);
+        text-decoration-color: transparent;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.16em;
+        transition:
+            color var(--motion-fast),
+            text-decoration-color var(--motion-fast);
+
+        .mat-mdc-button-persistent-ripple::before,
+        .mat-mdc-button-ripple,
+        .mat-ripple-element {
+            background: transparent;
+            opacity: 0;
+        }
+
+        &:is(:hover, :focus-visible, :active) {
+            background: transparent;
+            color: var(--snackbar-action-color);
+            text-decoration-line: underline;
+            text-decoration-color: currentColor;
+        }
+
+        .mdc-button__label {
+            color: inherit;
+        }
     }
 }
 
 .snackbar-error {
-    --mat-snack-bar-container-color: var(--surface-brand-strong);
+    --mat-snack-bar-container-color: var(--surface-danger-soft);
+    --mat-snack-bar-button-color: var(--color-danger-light);
+    --mat-button-text-label-text-color: var(--color-danger-light);
+    --mat-button-text-ripple-color: var(--ripple-danger-soft);
+    --snackbar-action-color: var(--color-danger-light);
 
     .mdc-snackbar__surface {
-        border-color: var(--border-brand-soft);
+        border-color: var(--border-danger-soft);
     }
 }
 
 .mat-mdc-snack-bar-container.snackbar-success,
 .snackbar-success .mat-mdc-snack-bar-container {
     --mat-snack-bar-container-color: var(--surface-success-soft);
-    --mat-snack-bar-button-color: var(--text-primary);
+    --mat-snack-bar-button-color: var(--color-success-light);
+    --mat-button-text-label-text-color: var(--color-success-light);
+    --mat-button-text-ripple-color: var(--ripple-success-soft);
+    --snackbar-action-color: var(--color-success-light);
 
     .mdc-snackbar__surface {
         border-color: var(--border-success-soft);
     }
 }
 
-.mat-mdc-snack-bar-container.snackbar-success
-    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled),
-.snackbar-success
-    .mat-mdc-snack-bar-container
-    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
-    --mat-button-text-label-text-color: var(--text-primary);
-    --mat-button-text-state-layer-color: var(--color-success-light);
-    --mat-button-text-ripple-color: var(--ripple-success-soft);
-
-    color: var(--text-primary);
-}
-
-.mat-mdc-snack-bar-container.snackbar-success
-    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled)
-    .mdc-button__label,
-.snackbar-success
-    .mat-mdc-snack-bar-container
-    .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled)
-    .mdc-button__label {
-    color: inherit;
-}
-
 @include mobile() {
     .mat-mdc-snack-bar-container {
         margin: var(--space-3);
+
+        .mdc-snackbar__surface {
+            min-width: calc(100vw - var(--space-6));
+            max-width: calc(100vw - var(--space-6));
+        }
     }
 }

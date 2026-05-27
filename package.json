@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "deploy": "ng build --base-href \"https://dtoro97.github.io/tmdb-client/\" && npx angular-cli-ghpages --dir=dist/tmdb-client/",
-    "generate-api": "npx -y @openapitools/openapi-generator-cli generate -i openapi.json -g typescript-angular -o src/app/api --additional-properties=providedIn=root,withInterfaces=true",
+    "generate-api": "npx -y @openapitools/openapi-generator-cli generate -i openapi.json -g typescript-angular -o src/app/api --additional-properties=providedIn=root,withInterfaces=true,serviceSuffix=RestControllerService",
     "generate-api:v4": "npx -y @openapitools/openapi-generator-cli generate -i openapi-v4-lists.json -g typescript-angular -o src/app/api-v4 --additional-properties=providedIn=root,withInterfaces=true",
     "serve:ssr:tmdb-client": "node dist/tmdb-client/server/server.mjs"
   },

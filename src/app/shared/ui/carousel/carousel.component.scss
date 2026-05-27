@@ -10,6 +10,7 @@
 :host([data-columns="5"]) { --carousel-columns: 5; }
 :host([data-columns="7"]) { --carousel-columns: 7; }
 :host([data-columns="8"]) { --carousel-columns: 8; }
+:host([data-columns="10"]) { --carousel-columns: 10; }
 
 @include carousel-md() {
     :host,

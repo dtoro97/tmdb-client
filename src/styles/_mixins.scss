@@ -6,26 +6,28 @@
     overflow: hidden;
 }
 
+@mixin hover-capable {
+    @media (hover: hover) and (pointer: fine) {
+        @content;
+    }
+}
+
 @mixin text-link($color: var(--mat-sys-on-surface)) {
     color: $color;
     text-decoration: none;
-    text-underline-offset: 0.2rem;
-    transition:
-        color var(--motion-base),
-        text-decoration-color var(--motion-base);
+    transition: color var(--motion-base);
 
-    @media (hover: hover) and (pointer: fine) {
+    @include hover-capable {
         &:hover {
             color: var(--text-accent);
-            text-decoration: underline;
         }
     }
 }
 
 @mixin surface-panel($bg: var(--mat-sys-surface-dim)) {
     background: $bg;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
 }
 
 @mixin absolute-fill {
@@ -41,32 +43,12 @@
     font-size: $size;
 }
 
-@mixin icon-button-shell(
-    $size: 2.5rem,
-    $surface: var(--control-subtle-surface),
-    $color: var(--control-subtle-text),
-    $radius: var(--radius-full)
-) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: $size;
-    block-size: $size;
-    padding: 0;
-    border: none;
-    border-radius: $radius;
-    background: $surface;
-    color: $color;
-    cursor: pointer;
-}
-
 @mixin surface-hover() {
     transition:
         background-color var(--motion-base),
-        border-color var(--motion-base),
         color var(--motion-base);
 
-    @media (hover: hover) and (pointer: fine) {
+    @include hover-capable {
         &:hover {
             cursor: pointer;
             background: var(--mat-sys-surface-container-low);
@@ -77,14 +59,13 @@
 @mixin surface-hover-subtle() {
     transition:
         background-color var(--motion-base),
-        border-color var(--motion-base),
         color var(--motion-base);
 
-    @media (hover: hover) and (pointer: fine) {
+    @include hover-capable {
         &:hover {
             cursor: pointer;
             background: var(--control-subtle-surface-hover);
-            border-color: var(--control-subtle-border-hover);
+            color: var(--control-subtle-text-hover);
         }
     }
 }
@@ -92,10 +73,43 @@
 @mixin media-hover() {
     transition: opacity var(--motion-base);
 
-    @media (hover: hover) and (pointer: fine) {
+    @include hover-capable {
         &:hover {
             cursor: pointer;
             opacity: var(--interactive-media-hover-opacity);
+        }
+    }
+}
+
+@mixin media-card-hover(
+    $media-selector: null,
+    $title-selector: null,
+    $border-color: null,
+    $background: null
+) {
+    @include hover-capable {
+        &:hover {
+            cursor: pointer;
+
+            @if $border-color != null {
+                border-color: $border-color;
+            }
+
+            @if $background != null {
+                background: $background;
+            }
+
+            @if $media-selector != null {
+                #{$media-selector} {
+                    opacity: var(--interactive-media-hover-opacity);
+                }
+            }
+
+            @if $title-selector != null {
+                #{$title-selector} {
+                    color: var(--text-accent);
+                }
+            }
         }
     }
 }

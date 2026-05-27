@@ -7,13 +7,14 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 
 import { Video } from '../../../api';
-import { GRID_COUNT, VIDEOS_GRID_FEATURED_COUNT } from '../../../constants';
+import { GRID_COUNT } from '../../../constants';
 import { RepeatPipe } from '../../pipes';
 import type { VideoCardItem } from '../../models';
 import type { LoadableItems } from '../../types';
 import {
     buildYoutubeThumbnailUrl,
     buildYoutubeWatchUrl,
+    toYoutubeTrailerFirstVideoState,
 } from '../../utils/youtube';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
 import { VideoCardComponent } from '../video-card/video-card.component';
@@ -32,31 +33,30 @@ import { VideoCardComponent } from '../video-card/video-card.component';
 })
 export class VideosGridComponent implements OnChanges {
     @Input() state: LoadableItems<Video> = { type: 'idle' };
-    @Input() featuredCount = VIDEOS_GRID_FEATURED_COUNT;
     @Input() gridCount = GRID_COUNT;
-    featuredItems: readonly VideoCardItem[] = [];
-    gridItems: readonly VideoCardItem[] = [];
+    items: readonly VideoCardItem[] = [];
 
     ngOnChanges(): void {
         if (
             this.state.type === 'loaded' ||
             this.state.type === 'loading-more'
         ) {
-            const items = this.state.value.flatMap((video) => {
+            const state = toYoutubeTrailerFirstVideoState(this.state);
+            const videos =
+                state.type === 'loaded' || state.type === 'loading-more'
+                    ? state.value
+                    : [];
+            const items = videos.flatMap((video) => {
                 const item = this.toVideoCardItem(video);
                 return item ? [item] : [];
             });
+            const limit = Math.max(this.gridCount, 0);
 
-            this.featuredItems = items.slice(0, this.featuredCount);
-            this.gridItems = items.slice(
-                this.featuredCount,
-                this.featuredCount + this.gridCount,
-            );
+            this.items = items.slice(0, limit);
             return;
         }
 
-        this.featuredItems = [];
-        this.gridItems = [];
+        this.items = [];
     }
 
     private toVideoCardItem(video: Video): VideoCardItem | null {

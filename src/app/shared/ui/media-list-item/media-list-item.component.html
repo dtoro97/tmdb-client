@@ -3,28 +3,29 @@
         <span class="media-list-item__index text-caption">{{ index }}.</span>
     }
 
-    <a
-        class="media-list-item__poster-link"
-        [routerLink]="routerLink"
-        [attr.aria-label]="'Open ' + item.title"
-    >
-        <app-image
-            class="media-list-item__poster"
-            [src]="item.thumb"
-            [alt]="item.title"
-            type="media"
-        />
+    <a class="media-list-item__poster-link" [routerLink]="link" [attr.aria-label]="'Open ' + item.title">
+        <app-image class="media-list-item__poster" [src]="item.thumb" [alt]="item.title" type="media" />
     </a>
 
     <div class="media-list-item__content">
         <span class="media-list-item__heading text-subtitle">
-            <a class="media-list-item__title" [routerLink]="routerLink">
+            <a class="media-list-item__title" [routerLink]="link">
                 {{ item.title }}
             </a>
             @if (item.date) {
-                <span class="text-caption">({{ item.date | date: "yyyy" }})</span>
+                <span class="text-caption">({{ item.date | date: 'yyyy' }})</span>
             }
         </span>
+
+        @if (item.badges; as badges) {
+            @if (badges.length) {
+                <div class="media-list-item__badges">
+                    @for (badge of badges; track badge.label) {
+                        <app-badge [label]="badge.label" [variant]="badge.variant ?? 'neutral'" />
+                    }
+                </div>
+            }
+        }
 
         @if (genreNames.length) {
             <div class="media-list-item__genres">
@@ -42,10 +43,7 @@
             @if (castLinks.length) {
                 <p class="media-list-item__cast text-meta">
                     @for (actor of castLinks; track actor.id; let i = $index) {
-                        <a
-                            class="media-list-item__actor-link"
-                            [routerLink]="['/name', actor.id]"
-                        >
+                        <a class="media-list-item__actor-link" [routerLink]="['/name', actor.id]">
                             {{ actor.name }}
                         </a>
                         @if (i < castLinks.length - 1) {
@@ -58,14 +56,16 @@
     </div>
 
     @if (userRating !== null) {
-        <app-rating
-            class="media-list-item__score-badge"
-            [value]="userRating | number: '1.1-1'"
-        />
+        <app-rating class="media-list-item__score-badge" [value]="userRating" />
     } @else if (item.rating) {
-        <app-rating
-            class="media-list-item__score-badge"
-            [value]="item.rating | number: '1.1-1'"
-        />
+        <app-rating class="media-list-item__score-badge" [value]="item.rating" />
     }
+
+    <div class="media-list-item__extra">
+        <ng-content select="[media-list-item-action]" />
+    </div>
+
+    <div class="media-list-item__note">
+        <ng-content select="[media-list-item-note]" />
+    </div>
 </div>

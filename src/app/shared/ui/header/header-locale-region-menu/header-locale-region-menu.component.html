@@ -1,0 +1,103 @@
+@if (vm$ | async; as vm) {
+    <button
+        class="locale-region-menu__trigger text-caption"
+        type="button"
+        [matMenuTriggerFor]="localeRegionMenu"
+        [matMenuTriggerRestoreFocus]="false"
+        [attr.aria-label]="vm.ariaLabel"
+    >
+        <mat-icon class="locale-region-menu__trigger-icon" aria-hidden="true">language</mat-icon>
+        <span class="locale-region-menu__trigger-value" aria-hidden="true">
+            <span>{{ vm.languageCode }}</span>
+            @if (vm.regionCode) {
+                <span class="locale-region-menu__trigger-region">{{ vm.regionCode }}</span>
+            }
+        </span>
+    </button>
+
+    <mat-menu #localeRegionMenu="matMenu" xPosition="before">
+        <div class="locale-region-menu__panel" (click)="$event.stopPropagation()">
+            <div class="locale-region-menu__field">
+                <span class="locale-region-menu__label text-label">Language</span>
+                <mat-form-field
+                    class="locale-region-menu__select-field"
+                    appearance="outline"
+                    subscriptSizing="dynamic"
+                >
+                    <mat-select
+                        aria-label="Language"
+                        [value]="vm.language"
+                        (selectionChange)="setLanguage($event.value)"
+                    >
+                        <mat-option>
+                            <ngx-mat-select-search
+                                placeholderLabel="Search languages"
+                                noEntriesFoundLabel="No matching languages"
+                                [ngModel]="vm.languageFilter"
+                                (ngModelChange)="updateLanguageFilter($event)"
+                            />
+                        </mat-option>
+                        @if (vm.featuredLanguageOptions.length) {
+                            <mat-optgroup label="Popular">
+                                @for (option of vm.featuredLanguageOptions; track option.value) {
+                                    <mat-option [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+                                }
+                            </mat-optgroup>
+                        }
+                        @if (!vm.featuredLanguageOptions.length && !vm.languageOptions.length) {
+                            <mat-option disabled>{{ vm.languageEmptyLabel }}</mat-option>
+                        }
+                        @for (option of vm.languageOptions; track option.value) {
+                            <mat-option [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="locale-region-menu__field">
+                <span class="locale-region-menu__label text-label">Region</span>
+                <mat-form-field
+                    class="locale-region-menu__select-field"
+                    appearance="outline"
+                    subscriptSizing="dynamic"
+                >
+                    <mat-select
+                        aria-label="Region"
+                        [value]="vm.region"
+                        (selectionChange)="setRegion($event.value)"
+                    >
+                        <mat-option>
+                            <ngx-mat-select-search
+                                placeholderLabel="Search regions"
+                                noEntriesFoundLabel="No matching regions"
+                                [ngModel]="vm.regionFilter"
+                                (ngModelChange)="updateRegionFilter($event)"
+                            />
+                        </mat-option>
+                        @if (vm.featuredRegionOptions.length) {
+                            <mat-optgroup label="Popular">
+                                @for (option of vm.featuredRegionOptions; track option.value) {
+                                    <mat-option [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+                                }
+                            </mat-optgroup>
+                        }
+                        @if (!vm.featuredRegionOptions.length && !vm.regionOptions.length) {
+                            <mat-option disabled>{{ vm.regionEmptyLabel }}</mat-option>
+                        }
+                        @for (option of vm.regionOptions; track option.value) {
+                            <mat-option [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+    </mat-menu>
+}

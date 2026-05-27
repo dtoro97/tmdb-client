@@ -1,10 +1,16 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import { catchError, map, of, take } from 'rxjs';
+import { ComponentStore } from '@ngrx/component-store';
 
-import { AuthenticationRestControllerService } from '../../api';
-import { API_JSON_OPTIONS } from '../../constants';
-import { UserSessionMode, UserSessionState } from '../models';
+import {
+    AccountSnapshot,
+    GuestSessionSnapshot,
+    UserSessionMode,
+    UserSessionSnapshot,
+    UserSessionState,
+    V4AccessSnapshot,
+    V4AccountAccessSnapshot,
+} from '../models';
 import { BrowserStorageService } from './browser-storage.service';
 
 const STORAGE_KEY_GUEST_SESSION_ID = 'tmdb_guest_session_id';
@@ -15,86 +21,126 @@ const STORAGE_KEY_V4_ACCOUNT_ID = 'tmdb_v4_account_id';
 const STORAGE_KEY_ACCOUNT_ID = 'tmdb_user_account_id';
 const STORAGE_KEY_USERNAME = 'tmdb_username';
 const STORAGE_KEY_AVATAR_PATH = 'tmdb_avatar_path';
-const STORAGE_KEY_ACCOUNT_DETAILS_HYDRATED = 'tmdb_account_details_hydrated';
 
 const INITIAL_SESSION_STATE: UserSessionState = {
-    guestSessionId: null,
-    guestSessionExpiresAt: null,
-    sessionId: null,
-    v4AccessToken: null,
-    v4AccountId: null,
-    accountId: null,
-    username: null,
-    avatarPath: null,
-    accountDetailsHydrated: false,
+    guestSession: null,
+    userSession: null,
+    account: null,
+    v4Access: null,
 };
 
 @Injectable({ providedIn: 'root' })
-export class UserSessionStoreService {
-    readonly state;
-    readonly mode = computed<UserSessionMode>(() => {
-        const currentState = this.state();
+export class UserSessionStoreService extends ComponentStore<UserSessionState> {
+    readonly mode$ = this.select((state) => this.toMode(state));
+    readonly isAuthenticated$ = this.select(
+        (state) => state.userSession !== null,
+    );
+    readonly hasAccount$ = this.select((state) => state.account !== null);
+    readonly hasV4AccountAccess$ = this.select(
+        (state) => state.account !== null && state.v4Access !== null,
+    );
+    readonly authViewModel$ = this.select((state) => {
+        const username = state.account?.username?.trim() || null;
 
-        if (currentState.sessionId) {
-            return 'user';
-        }
-
-        if (currentState.guestSessionId) {
-            return 'guest';
-        }
-
-        return 'anonymous';
+        return {
+            isAuthenticated: state.userSession !== null,
+            username,
+            displayName: username ?? 'Member',
+            avatarPath: state.account?.avatarPath ?? null,
+        };
     });
-    readonly canRate = computed(() => this.mode() !== 'anonymous');
 
-    constructor(
-        private readonly browserStorage: BrowserStorageService,
-        private readonly authenticationService: AuthenticationRestControllerService,
-    ) {
-        this.state = signal<UserSessionState>(this.readInitialState());
-        this.validatePersistedSession();
+    constructor(private readonly browserStorage: BrowserStorageService) {
+        super(INITIAL_SESSION_STATE);
+        this.setState(this.readInitialState());
+    }
+
+    mode(): UserSessionMode {
+        return this.toMode(this.get());
+    }
+
+    isAuthenticated(): boolean {
+        return this.get().userSession !== null;
+    }
+
+    hasAccount(): boolean {
+        return this.get().account !== null;
+    }
+
+    hasV4AccountAccess(): boolean {
+        const state = this.get();
+
+        return state.account !== null && state.v4Access !== null;
+    }
+
+    requireUserSession(): UserSessionSnapshot {
+        const userSession = this.get().userSession;
+
+        if (!userSession) {
+            throw new Error('A TMDb user session is required.');
+        }
+
+        return userSession;
+    }
+
+    requireAccount(): AccountSnapshot {
+        const account = this.get().account;
+
+        if (!account) {
+            throw new Error('A TMDb account is required.');
+        }
+
+        return account;
+    }
+
+    requireV4AccountAccess(): V4AccountAccessSnapshot {
+        const state = this.get();
+
+        if (!state.account || !state.v4Access) {
+            throw new Error('TMDb v4 account access is required.');
+        }
+
+        return {
+            ...state.account,
+            ...state.v4Access,
+        };
     }
 
     guestSessionId(): string | null {
-        return this.state().guestSessionId;
+        return this.get().guestSession?.guestSessionId ?? null;
     }
 
     sessionId(): string | null {
-        return this.state().sessionId;
+        return this.get().userSession?.sessionId ?? null;
     }
 
     v4AccessToken(): string | null {
-        return this.state().v4AccessToken;
+        return this.get().v4Access?.v4AccessToken ?? null;
     }
 
     v4AccountId(): string | null {
-        return this.state().v4AccountId;
+        return this.get().v4Access?.v4AccountId ?? null;
     }
 
     accountId(): number | null {
-        return this.state().accountId;
+        return this.get().account?.accountId ?? null;
     }
 
     username(): string | null {
-        return this.state().username;
+        return this.get().account?.username ?? null;
     }
 
     avatarPath(): string | null {
-        return this.state().avatarPath;
-    }
-
-    accountDetailsHydrated(): boolean {
-        return this.state().accountDetailsHydrated;
+        return this.get().account?.avatarPath ?? null;
     }
 
     setGuestSession(guestSessionId: string, expiresAt: string | null): void {
-        this.patchState(
-            this.sanitizeState({
-                ...this.state(),
+        this.patchAndPersist({
+            guestSession: this.toValidGuestSession({
                 guestSessionId,
-                guestSessionExpiresAt: expiresAt,
+                expiresAt,
             }),
-        );
+        });
     }
 
     setUserSession(
@@ -102,124 +148,149 @@ export class UserSessionStoreService {
         accountId: number | null = null,
         username: string | null = null,
         avatarPath: string | null = null,
-        accountDetailsHydrated = false,
-        v4AccessToken: string | null = this.state().v4AccessToken,
-        v4AccountId: string | null = this.state().v4AccountId,
+        v4AccessToken: string | null = this.v4AccessToken(),
+        v4AccountId: string | null = this.v4AccountId(),
     ): void {
-        this.patchState({
-            guestSessionId: null,
-            guestSessionExpiresAt: null,
-            sessionId,
-            v4AccessToken,
-            v4AccountId,
-            accountId,
-            username,
-            avatarPath,
-            accountDetailsHydrated,
+        const userSession: UserSessionSnapshot = { sessionId };
+        const account =
+            accountId === null
+                ? null
+                : {
+                      sessionId,
+                      accountId,
+                      username,
+                      avatarPath,
+                  };
+        const v4Access =
+            v4AccessToken && v4AccountId
+                ? {
+                      v4AccessToken,
+                      v4AccountId,
+                  }
+                : null;
+
+        this.patchAndPersist({
+            guestSession: null,
+            userSession,
+            account,
+            v4Access,
         });
     }
 
+    setAccount(account: AccountSnapshot): void {
+        this.patchAndPersist({
+            userSession: { sessionId: account.sessionId },
+            account,
+        });
+    }
+
+    setV4AccountAccess(v4Access: V4AccessSnapshot): void {
+        this.patchAndPersist({ v4Access });
+    }
+
     clearUserSession(): void {
-        this.patchState({
-            sessionId: null,
-            v4AccessToken: null,
-            v4AccountId: null,
-            accountId: null,
-            username: null,
-            avatarPath: null,
-            accountDetailsHydrated: false,
+        this.patchAndPersist({
+            userSession: null,
+            account: null,
+            v4Access: null,
         });
     }
 
     clearAllSessions(): void {
-        this.patchState(INITIAL_SESSION_STATE);
+        this.setState(INITIAL_SESSION_STATE);
+        this.syncToStorage(INITIAL_SESSION_STATE);
     }
 
-    private validatePersistedSession(): void {
-        const sessionId = this.state().sessionId;
-
-        if (!sessionId) {
-            return;
-        }
-
-        this.authenticationService
-            .authenticationValidateKey('body', false, API_JSON_OPTIONS)
-            .pipe(
-                take(1),
-                catchError(() => {
-                    this.clearUserSession();
-                    return of(undefined);
-                }),
-                map(() => undefined),
-            )
-            .subscribe();
-    }
-
-    private patchState(patch: Partial<UserSessionState>): void {
+    private patchAndPersist(patch: Partial<UserSessionState>): void {
         const nextState = this.sanitizeState({
-            ...this.state(),
+            ...this.get(),
             ...patch,
         });
 
-        this.state.set(nextState);
+        this.setState(nextState);
         this.syncToStorage(nextState);
     }
 
     private syncToStorage(state: UserSessionState): void {
         this.browserStorage.writeItem(
             STORAGE_KEY_GUEST_SESSION_ID,
-            state.guestSessionId,
+            state.guestSession?.guestSessionId ?? null,
         );
         this.browserStorage.writeItem(
             STORAGE_KEY_GUEST_SESSION_EXPIRES_AT,
-            state.guestSessionExpiresAt,
+            state.guestSession?.expiresAt ?? null,
         );
-        this.browserStorage.writeItem(STORAGE_KEY_SESSION_ID, state.sessionId);
+        this.browserStorage.writeItem(
+            STORAGE_KEY_SESSION_ID,
+            state.userSession?.sessionId ?? null,
+        );
         this.browserStorage.writeItem(
             STORAGE_KEY_V4_ACCESS_TOKEN,
-            state.v4AccessToken,
+            state.v4Access?.v4AccessToken ?? null,
         );
         this.browserStorage.writeItem(
             STORAGE_KEY_V4_ACCOUNT_ID,
-            state.v4AccountId,
+            state.v4Access?.v4AccountId ?? null,
         );
         this.browserStorage.writeItem(
             STORAGE_KEY_ACCOUNT_ID,
-            state.accountId !== null ? `${state.accountId}` : null,
+            state.account ? `${state.account.accountId}` : null,
         );
-        this.browserStorage.writeItem(STORAGE_KEY_USERNAME, state.username);
-        this.browserStorage.writeItem(STORAGE_KEY_AVATAR_PATH, state.avatarPath);
         this.browserStorage.writeItem(
-            STORAGE_KEY_ACCOUNT_DETAILS_HYDRATED,
-            state.accountDetailsHydrated ? 'true' : null,
+            STORAGE_KEY_USERNAME,
+            state.account?.username ?? null,
+        );
+        this.browserStorage.writeItem(
+            STORAGE_KEY_AVATAR_PATH,
+            state.account?.avatarPath ?? null,
         );
     }
 
     private readInitialState(): UserSessionState {
-        const guestSessionId = this.browserStorage.getItem(
-            STORAGE_KEY_GUEST_SESSION_ID,
+        const sessionId = this.browserStorage.getItem(STORAGE_KEY_SESSION_ID);
+        const accountId = this.parseAccountId(
+            this.browserStorage.getItem(STORAGE_KEY_ACCOUNT_ID),
         );
-        const guestSessionExpiresAt = this.browserStorage.getItem(
-            STORAGE_KEY_GUEST_SESSION_EXPIRES_AT,
+        const v4AccessToken = this.browserStorage.getItem(
+            STORAGE_KEY_V4_ACCESS_TOKEN,
         );
+        const v4AccountId = this.browserStorage.getItem(
+            STORAGE_KEY_V4_ACCOUNT_ID,
+        );
+        const guestSession = this.toValidGuestSession({
+            guestSessionId: this.browserStorage.getItem(
+                STORAGE_KEY_GUEST_SESSION_ID,
+            ),
+            expiresAt: this.browserStorage.getItem(
+                STORAGE_KEY_GUEST_SESSION_EXPIRES_AT,
+            ),
+        });
 
         return this.sanitizeState({
-            guestSessionId,
-            guestSessionExpiresAt,
-            sessionId: this.browserStorage.getItem(STORAGE_KEY_SESSION_ID),
-            v4AccessToken: this.browserStorage.getItem(
-                STORAGE_KEY_V4_ACCESS_TOKEN,
-            ),
-            v4AccountId: this.browserStorage.getItem(STORAGE_KEY_V4_ACCOUNT_ID),
-            accountId: this.parseAccountId(
-                this.browserStorage.getItem(STORAGE_KEY_ACCOUNT_ID),
-            ),
-            username: this.browserStorage.getItem(STORAGE_KEY_USERNAME),
-            avatarPath: this.browserStorage.getItem(STORAGE_KEY_AVATAR_PATH),
-            accountDetailsHydrated:
-                this.browserStorage.getItem(
-                    STORAGE_KEY_ACCOUNT_DETAILS_HYDRATED,
-                ) === 'true',
+            guestSession,
+            userSession: sessionId ? { sessionId } : null,
+            account:
+                sessionId && accountId !== null
+                    ? {
+                          sessionId,
+                          accountId,
+                          username:
+                              this.browserStorage.getItem(
+                                  STORAGE_KEY_USERNAME,
+                              ) || null,
+                          avatarPath:
+                              this.browserStorage.getItem(
+                                  STORAGE_KEY_AVATAR_PATH,
+                              ) || null,
+                      }
+                    : null,
+            v4Access:
+                v4AccessToken && v4AccountId
+                    ? {
+                          v4AccessToken,
+                          v4AccountId,
+                      }
+                    : null,
         });
     }
 
@@ -233,16 +304,42 @@ export class UserSessionStoreService {
     }
 
     private sanitizeState(state: UserSessionState): UserSessionState {
-        const validGuestSession = this.isGuestSessionValid(
-            state.guestSessionExpiresAt,
-        );
+        const guestSession = state.guestSession
+            ? this.toValidGuestSession(state.guestSession)
+            : null;
+        const account =
+            state.account && state.userSession
+                ? {
+                      ...state.account,
+                      sessionId: state.userSession.sessionId,
+                  }
+                : null;
 
         return {
-            ...state,
-            guestSessionId: validGuestSession ? state.guestSessionId : null,
-            guestSessionExpiresAt: validGuestSession
-                ? state.guestSessionExpiresAt
-                : null,
+            guestSession,
+            userSession: state.userSession,
+            account,
+            v4Access: state.v4Access,
+        };
+    }
+
+    private toValidGuestSession(
+        guestSession: GuestSessionSnapshot | {
+            readonly guestSessionId: string | null;
+            readonly expiresAt: string | null;
+        },
+    ): GuestSessionSnapshot | null {
+        if (!guestSession.guestSessionId) {
+            return null;
+        }
+
+        if (!this.isGuestSessionValid(guestSession.expiresAt)) {
+            return null;
+        }
+
+        return {
+            guestSessionId: guestSession.guestSessionId,
+            expiresAt: guestSession.expiresAt,
         };
     }
 
@@ -253,5 +350,17 @@ export class UserSessionStoreService {
 
         const expirationTime = Date.parse(expiresAt);
         return Number.isFinite(expirationTime) && expirationTime > Date.now();
+    }
+
+    private toMode(state: UserSessionState): UserSessionMode {
+        if (state.userSession) {
+            return 'user';
+        }
+
+        if (state.guestSession) {
+            return 'guest';
+        }
+
+        return 'anonymous';
     }
 }

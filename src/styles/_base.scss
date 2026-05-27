@@ -18,7 +18,7 @@ body {
 
 body {
     margin: 0;
-    font-family: "Geist", "Inter", "Segoe UI", sans-serif;
+    font-family: var(--font-body);
     font-optical-sizing: auto;
     font-style: normal;
     line-height: var(--lh-normal);
@@ -40,6 +40,12 @@ input,
 textarea,
 select {
     font: inherit;
+}
+
+input,
+textarea,
+select {
+    font-size: var(--text-sm);
 }
 
 a {
@@ -64,7 +70,7 @@ h4,
 h5,
 h6 {
     line-height: var(--lh-tight);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 
 h1 {

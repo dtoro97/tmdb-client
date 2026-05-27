@@ -10,7 +10,7 @@ export class YoutubeLinkPipe implements PipeTransform {
   transform(video: Video, params?: string): SafeResourceUrl {
     const query = params ? `?${params}` : '';
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://www.youtube.com/embed/${video.key}${query}`,
+      `https://www.youtube-nocookie.com/embed/${video.key}${query}`,
     );
   }
 }

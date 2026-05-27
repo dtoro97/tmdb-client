@@ -2,9 +2,17 @@
     --mat-button-filled-container-shape: var(--control-radius);
     --mat-button-filled-container-color: var(--control-accent-surface);
     --mat-button-filled-label-text-color: var(--control-accent-text);
+    --mat-button-filled-disabled-container-color: color-mix(
+        in srgb,
+        var(--control-accent-surface) 56%,
+        var(--surface-panel)
+    );
+    --mat-button-filled-disabled-label-text-color: var(--control-accent-text);
     --mat-button-filled-label-text-weight: var(--weight-semibold);
-    --mat-button-filled-hover-state-layer-opacity: 0.2;
+    --mat-button-filled-state-layer-color: var(--control-accent-ripple);
+    --mat-button-filled-hover-state-layer-opacity: 0;
     --mat-button-filled-focus-state-layer-opacity: 0;
+    --mat-button-filled-pressed-state-layer-opacity: 0.1;
 
     --mat-button-outlined-container-shape: var(--control-radius);
     --mat-button-outlined-outline-color: var(--control-accent-border);
@@ -33,6 +41,21 @@
 
 .mat-mdc-button.text-button:not(:disabled) .mdc-button__label {
     color: inherit;
+}
+
+.mat-mdc-unelevated-button:not(:disabled),
+.mat-mdc-filled-button:not(:disabled) {
+    transition: background-color var(--motion-base);
+}
+
+.mat-mdc-unelevated-button:not(:disabled):hover,
+.mat-mdc-filled-button:not(:disabled):hover {
+    --mat-button-filled-container-color: var(--control-accent-surface-hover);
+}
+
+.mat-mdc-unelevated-button:not(:disabled):active,
+.mat-mdc-filled-button:not(:disabled):active {
+    --mat-button-filled-container-color: var(--color-brand-active);
 }
 
 .mat-mdc-button-persistent-ripple::before {

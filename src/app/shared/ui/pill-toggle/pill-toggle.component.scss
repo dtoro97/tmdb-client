@@ -25,11 +25,10 @@
     border-color: var(--control-accent-border);
 }
 
-@media (hover: hover) and (pointer: fine) {
+@include hover-capable {
     .pill-toggle__button--active:hover {
         background: var(--control-accent-surface);
         color: var(--control-accent-text);
-        border-color: var(--control-accent-border);
     }
 }
 
@@ -47,10 +46,9 @@
     box-shadow: var(--control-subtle-shadow-active);
 }
 
-@media (hover: hover) and (pointer: fine) {
+@include hover-capable {
     .pill-toggle--subtle .pill-toggle__button--active:hover {
         background: var(--control-subtle-surface-active);
         color: var(--control-subtle-text-active);
-        border-color: var(--color-border-subtle);
     }
 }

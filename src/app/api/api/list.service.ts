@@ -33,13 +33,16 @@ import { StatusResponse } from '../model/statusResponse';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    ListRestControllerServiceInterface
+} from './list.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class ListRestControllerService extends BaseService {
+export class ListRestControllerService extends BaseService implements ListRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

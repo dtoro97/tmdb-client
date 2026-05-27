@@ -25,13 +25,16 @@ import { TvSeriesPage } from '../model/tvSeriesPage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    DiscoverRestControllerServiceInterface
+} from './discover.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class DiscoverRestControllerService extends BaseService {
+export class DiscoverRestControllerService extends BaseService implements DiscoverRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

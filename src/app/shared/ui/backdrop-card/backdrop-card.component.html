@@ -13,14 +13,14 @@
         />
     </div>
 
-    <div class="backdrop-card__content u-flex-column u-gap-1">
+    <div class="backdrop-card__content">
         <span class="backdrop-card__title text-subtitle">{{ item.title }}</span>
 
-        <div class="backdrop-card__meta text-caption u-flex u-items-center u-gap-2">
+        <div class="backdrop-card__meta text-caption">
             @if (showRating && item.rating) {
                 <app-rating [value]="item.rating"></app-rating>
             }
-            @if ((showDate || dateFormat) && item.date) {
+            @if (showDate && item.date) {
                 @if (showRating && item.rating) {
                     <span class="backdrop-card__meta-separator" aria-hidden="true">&middot;</span>
                 }

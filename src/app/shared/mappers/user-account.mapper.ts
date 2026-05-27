@@ -5,7 +5,7 @@ export function ensureAccountId(account: AccountDetails): number {
     const accountId = account.id;
 
     if (typeof accountId !== 'number' || !Number.isInteger(accountId)) {
-        throw new Error('TMDb did not return a valid account id.');
+        throw new Error('The account service did not return a valid account id.');
     }
 
     return accountId;

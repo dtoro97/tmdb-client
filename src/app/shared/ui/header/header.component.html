@@ -1,78 +1,24 @@
-<header class="header" #headerEl>
+<header class="header">
     <nav aria-label="Primary">
         <div class="header__inner inner-container">
-            <a class="header__brand" routerLink="/">
+            <a class="header__brand" routerLink="/" aria-label="Cinegraph home">
                 <img class="header__brand-icon" src="assets/brand-mark.svg" alt="" aria-hidden="true" />
-                <span class="header__brand-text">TMDB</span>
+                <span class="header__brand-text" aria-hidden="true">
+                    <span>CINE</span>
+                    <span class="header__brand-text-accent">GRAPH</span>
+                </span>
             </a>
 
-            <ul class="header__nav u-list-none">
-                @for (link of navLinks; track link.label) {
-                    <li>
-                        <a
-                            class="header__nav-link text-body-sm"
-                            [routerLink]="link.routerLink"
-                            [queryParams]="link.queryParams"
-                            routerLinkActive="header__nav-link--active"
-                            [routerLinkActiveOptions]="link.activeOptions"
-                            [attr.aria-current]="rla.isActive ? 'page' : null"
-                            #rla="routerLinkActive"
-                        >
-                            {{ link.label }}
-                        </a>
-                    </li>
-                }
-            </ul>
+            <app-header-browse-menu />
 
             <div class="header__search">
                 <app-header-search-bar />
             </div>
 
             <div class="header__actions">
-                <app-header-auth-menu />
-                <app-header-locale-selector />
-
-                <button
-                    class="header__menu-button"
-                    type="button"
-                    aria-haspopup="true"
-                    [attr.aria-expanded]="menuOpen"
-                    (click)="toggleMenu()"
-                >
-                    <mat-icon class="header__menu-button-icon">menu</mat-icon>
-                </button>
+                <app-header-account-menu />
+                <app-header-locale-region-menu />
             </div>
         </div>
     </nav>
-
-    @if (menuOpen) {
-        <div class="header__mobile-menu" role="group" aria-label="Navigation">
-            <div class="header__mobile-menu-inner inner-container">
-                <ul class="header__mobile-menu-list u-list-none">
-                    <li>
-                        <a class="header__mobile-menu-link text-body-sm" routerLink="/" (click)="onNavLinkClick()">
-                            <mat-icon>home</mat-icon>
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    @for (link of navLinks; track link.label) {
-                        <li>
-                            <a
-                                class="header__mobile-menu-link text-body-sm"
-                                [routerLink]="link.routerLink"
-                                [queryParams]="link.queryParams"
-                                routerLinkActive="header__mobile-menu-link--active"
-                                [routerLinkActiveOptions]="link.activeOptions"
-                                [attr.aria-current]="mobileRla.isActive ? 'page' : null"
-                                #mobileRla="routerLinkActive"
-                                (click)="onNavLinkClick()"
-                            >
-                                {{ link.label }}
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </div>
-    }
 </header>

@@ -420,14 +420,15 @@ export class ListService extends BaseService implements ListServiceInterface {
      * @param listId 
      * @param mediaId 
      * @param mediaType 
+     * @param language 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4ListItemStatus>;
-    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4ListItemStatus>>;
-    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4ListItemStatus>>;
-    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, language?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<V4ListItemStatus>;
+    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, language?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<V4ListItemStatus>>;
+    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, language?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<V4ListItemStatus>>;
+    public listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, language?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (listId === null || listId === undefined) {
             throw new Error('Required parameter listId was null or undefined when calling listV4ItemStatus.');
         }
@@ -439,6 +440,15 @@ export class ListService extends BaseService implements ListServiceInterface {
         }
 
         let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'language',
+            <any>language,
+            QueryParamStyle.Form,
+            true,
+        );
+
 
         localVarQueryParameters = this.addToHttpParams(
             localVarQueryParameters,

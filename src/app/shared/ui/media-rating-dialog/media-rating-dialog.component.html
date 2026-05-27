@@ -29,7 +29,7 @@
             </div>
 
             <button class="media-rating-dialog__login-link" type="button" (click)="loginToSave()">
-                Sign in to save it to your TMDb account
+                Sign in to save it to your account
             </button>
         </div>
     } @else {
@@ -41,7 +41,7 @@
             }
 
             <div class="media-rating-dialog__primary-actions">
-                <button matButton class="text-button" type="button" mat-dialog-close>Cancel</button>
+                <button matButton class="text-button" type="button" mat-dialog-close (click)="cancel()">Cancel</button>
                 <button matButton="filled" type="button" (click)="save()">
                     @if (data.currentRating !== null) {
                         Update

@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { V4ListSortBy } from './v4ListSortBy';
 
 
 export interface V4CreateListRequest { 
@@ -21,5 +22,9 @@ export interface V4CreateListRequest {
      * Country code used by TMDB when creating a v4 list.
      */
     iso_3166_1?: string;
+    sort_by?: V4ListSortBy;
 }
+export namespace V4CreateListRequest {
+}
+
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { Observable, map, of, switchMap, tap, throwError } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 import {
     AccountAddFavoriteRequest,
@@ -15,6 +15,7 @@ import {
     V4CreateListRequest,
     V4ListDetails,
     V4ListItemInput,
+    V4ListItemStatus,
     V4ListSortBy,
     V4StatusResponse,
     V4UpdateListRequest,
@@ -30,6 +31,7 @@ export interface MediaUserListSummary {
     name: string;
     description: string | null;
     itemCount: number;
+    itemPresent: boolean;
     favoriteCount: number | null;
     posterPath: string | null;
 }
@@ -42,6 +44,10 @@ function ensureSuccessfulV4Status(response: V4StatusResponse, prefix: string): v
     if (!response.success || (response.status_code ?? 0) >= 400) {
         throw toStatusError(prefix, response);
     }
+}
+
+function v4ItemStatusIndicatesPresent(response: V4ListItemStatus): boolean {
+    return response.success === true;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -58,25 +64,17 @@ export class TmdbListService {
     ) {}
 
     private ensureV4ListAccess(): void {
-        if (!this.userSessionStore.v4AccessToken()) {
-            throw new Error('Please sign in to TMDb again to grant custom list access.');
-        }
+        this.userSessionStore.requireV4AccountAccess();
     }
 
     private requireV4AccountId(): string {
-        const v4AccountId = this.userSessionStore.v4AccountId();
-
-        if (!v4AccountId) {
-            throw new Error('Please sign in to TMDb again to load your custom lists.');
-        }
-
-        return v4AccountId;
+        return this.userSessionStore.requireV4AccountAccess().v4AccountId;
     }
 
-    getWatchlistState$(mediaId: number, mediaType: Extract<MediaType, 'movie' | 'tv'>): Observable<boolean> {
+    getWatchlistState$(mediaId: number, mediaType: MediaType): Observable<boolean> {
         const sessionId = this.userSessionStore.sessionId();
 
-        if (!sessionId || this.userSessionStore.mode() !== 'user') {
+        if (!sessionId || !this.userSessionStore.isAuthenticated()) {
             return of(false);
         }
 
@@ -97,17 +95,11 @@ export class TmdbListService {
 
     updateWatchlist$(
         mediaId: number,
-        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+        mediaType: MediaType,
         watchlist: boolean,
     ): Observable<boolean> {
-        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(({ accountId }) => {
-                const sessionId = this.userSessionStore.sessionId();
-
-                if (!sessionId) {
-                    return throwError(() => new Error('You need a TMDb user session to update your watchlist.'));
-                }
-
+        return this.tmdbUserAccountService.ensureAccount$().pipe(
+            switchMap(({ accountId, sessionId }) => {
                 return this.accountService
                     .accountAddToWatchlist(
                         accountId,
@@ -133,10 +125,10 @@ export class TmdbListService {
         );
     }
 
-    getFavoriteState$(mediaId: number, mediaType: Extract<MediaType, 'movie' | 'tv'>): Observable<boolean> {
+    getFavoriteState$(mediaId: number, mediaType: MediaType): Observable<boolean> {
         const sessionId = this.userSessionStore.sessionId();
 
-        if (!sessionId || this.userSessionStore.mode() !== 'user') {
+        if (!sessionId || !this.userSessionStore.isAuthenticated()) {
             return of(false);
         }
 
@@ -157,17 +149,11 @@ export class TmdbListService {
 
     updateFavorite$(
         mediaId: number,
-        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+        mediaType: MediaType,
         favorite: boolean,
     ): Observable<boolean> {
-        return this.tmdbUserAccountService.ensureAccountIdentity$().pipe(
-            switchMap(({ accountId }) => {
-                const sessionId = this.userSessionStore.sessionId();
-
-                if (!sessionId) {
-                    return throwError(() => new Error('You need a TMDb user session to update your favorites.'));
-                }
-
+        return this.tmdbUserAccountService.ensureAccount$().pipe(
+            switchMap(({ accountId, sessionId }) => {
                 return this.accountService
                     .accountAddFavorite(
                         accountId,
@@ -193,7 +179,10 @@ export class TmdbListService {
         );
     }
 
-    getUserLists$(): Observable<MediaUserListSummary[]> {
+    getUserLists$(
+        mediaId?: number,
+        mediaType?: MediaType,
+    ): Observable<MediaUserListSummary[]> {
         this.ensureV4ListAccess();
         const v4AccountId = this.requireV4AccountId();
 
@@ -210,6 +199,7 @@ export class TmdbListService {
                             name: list.name.trim(),
                             description: list.description?.trim() || null,
                             itemCount: list.number_of_items ?? 0,
+                            itemPresent: false,
                             favoriteCount: null,
                             posterPath: list.poster_path ?? null,
                         };
@@ -218,7 +208,42 @@ export class TmdbListService {
                     })
                     .filter((list) => list !== null),
             ),
+            switchMap((lists) => this.addItemStatusToLists$(lists, mediaId, mediaType)),
         );
+    }
+
+    private addItemStatusToLists$(
+        lists: readonly MediaUserListSummary[],
+        mediaId?: number,
+        mediaType?: MediaType,
+    ): Observable<MediaUserListSummary[]> {
+        if (!mediaId || !mediaType || lists.length === 0) {
+            return of([...lists]);
+        }
+
+        return forkJoin(lists.map((list) => this.addItemStatusFromV4List$(list, mediaId, mediaType)));
+    }
+
+    private addItemStatusFromV4List$(
+        list: MediaUserListSummary,
+        mediaId: number,
+        mediaType: MediaType,
+    ): Observable<MediaUserListSummary> {
+        if (list.itemCount === 0) {
+            return of(list);
+        }
+
+        return this.listV4Service
+            .listV4ItemStatus(list.id, mediaId, mediaType, this.localeStore.language(), 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                map((status) => {
+                    return {
+                        ...list,
+                        itemPresent: v4ItemStatusIndicatesPresent(status),
+                    };
+                }),
+                catchError(() => of(list)),
+            );
     }
 
     getListDetails$(listId: number, page = 1, sortBy?: V4ListSortBy): Observable<V4ListDetails> {
@@ -235,14 +260,21 @@ export class TmdbListService {
         );
     }
 
-    createList$(name: string, description = ''): Observable<number> {
+    createList$(
+        name: string,
+        description = '',
+        isPublic = false,
+        sortBy: V4ListSortBy = V4ListSortBy.OriginalOrderAsc,
+    ): Observable<number> {
         this.ensureV4ListAccess();
 
-        const createListRequest = {
+        const createListRequest: V4CreateListRequest = {
             name: name.trim(),
             description: description.trim(),
+            public: isPublic,
             iso_639_1: this.localeStore.language(),
-        } as V4CreateListRequest & { iso_639_1: string };
+            sort_by: sortBy,
+        };
 
         return this.listV4Service.listV4Create(createListRequest, 'body', false, API_JSON_OPTIONS).pipe(
             map((response) => {
@@ -255,7 +287,7 @@ export class TmdbListService {
         );
     }
 
-    addToList$(listId: number, mediaId: number, mediaType: Extract<MediaType, 'movie' | 'tv'>): Observable<void> {
+    addToList$(listId: number, mediaId: number, mediaType: MediaType): Observable<void> {
         this.ensureV4ListAccess();
 
         return this.listV4Service
@@ -275,6 +307,23 @@ export class TmdbListService {
                     }
                 }),
                 map(() => undefined),
+            );
+    }
+
+    getListItemStatus$(
+        listId: number,
+        mediaId: number,
+        mediaType: MediaType,
+    ): Observable<boolean> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service
+            .listV4ItemStatus(listId, mediaId, mediaType, this.localeStore.language(), 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                map((status) => {
+                    return v4ItemStatusIndicatesPresent(status);
+                }),
+                catchError(() => of(false)),
             );
     }
 
@@ -316,13 +365,32 @@ export class TmdbListService {
             );
     }
 
+    updateItems$(
+        listId: number,
+        items: readonly {
+            media_type: MediaType;
+            media_id: number;
+            comment: string;
+        }[],
+    ): Observable<void> {
+        this.ensureV4ListAccess();
+
+        return this.listV4Service
+            .listV4UpdateItems(listId, { items: [...items] }, 'body', false, API_JSON_OPTIONS)
+            .pipe(
+                tap((response) => ensureSuccessfulV4Status(response, 'Unable to update your list item.')),
+                map(() => undefined),
+            );
+    }
+
     createListAndAdd$(
         name: string,
         description: string,
         mediaId: number,
-        mediaType: Extract<MediaType, 'movie' | 'tv'>,
+        mediaType: MediaType,
+        sortBy: V4ListSortBy = V4ListSortBy.OriginalOrderAsc,
     ): Observable<void> {
-        return this.createList$(name, description).pipe(
+        return this.createList$(name, description, false, sortBy).pipe(
             switchMap((listId) => this.addToList$(listId, mediaId, mediaType)),
         );
     }

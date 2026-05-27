@@ -39,13 +39,16 @@ import { TaggedImagePage } from '../model/taggedImagePage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    PersonRestControllerServiceInterface
+} from './person.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class PersonRestControllerService extends BaseService {
+export class PersonRestControllerService extends BaseService implements PersonRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

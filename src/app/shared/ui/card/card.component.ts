@@ -4,19 +4,20 @@ import { RouterLink } from '@angular/router';
 
 import { CardItem } from '../../models';
 import { ImageComponent } from '../image/image.component';
-import { RatingBadgeComponent } from '../rating-badge/rating-badge.component';
+import { RatingComponent } from '../rating/rating.component';
 
 export type CardDateFormat = 'year' | 'dayMonth';
 
 @Component({
     selector: 'app-card',
     templateUrl: './card.component.html',
-    imports: [DatePipe, RouterLink, ImageComponent, RatingBadgeComponent],
+    imports: [DatePipe, RouterLink, ImageComponent, RatingComponent],
     styleUrl: './card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
     @Input() item?: CardItem;
     @Input() dateFormat: CardDateFormat = 'year';
+    @Input() imageParams?: string;
     @Input() showRating = true;
 }

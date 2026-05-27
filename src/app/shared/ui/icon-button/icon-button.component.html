@@ -3,6 +3,8 @@
     class="icon-button"
     type="button"
     [attr.aria-label]="ariaLabel"
+    [matTooltip]="title"
+    [matTooltipDisabled]="!title"
     [disabled]="disabled"
     (click)="click()"
 >

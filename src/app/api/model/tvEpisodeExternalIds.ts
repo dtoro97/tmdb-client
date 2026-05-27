@@ -16,5 +16,6 @@ export interface TvEpisodeExternalIds {
     freebase_id?: string | null;
     tvdb_id?: number | null;
     tvrage_id?: number | null;
+    wikidata_id?: string | null;
 }
 

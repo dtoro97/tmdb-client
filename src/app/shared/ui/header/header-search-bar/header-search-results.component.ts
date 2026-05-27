@@ -4,11 +4,12 @@ import { LoadableItems, SearchResultItem } from '../../..';
 import { BadgeComponent } from '../../badge/badge.component';
 import { ImageComponent } from '../../image/image.component';
 import { RatingComponent } from '../../rating/rating.component';
+import { SkeletonComponent } from '../../skeleton/skeleton.component';
 
 @Component({
     selector: 'app-header-search-results',
     standalone: true,
-    imports: [BadgeComponent, RatingComponent, ImageComponent],
+    imports: [BadgeComponent, RatingComponent, ImageComponent, SkeletonComponent],
     templateUrl: './header-search-results.component.html',
     styleUrl: './header-search-results.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

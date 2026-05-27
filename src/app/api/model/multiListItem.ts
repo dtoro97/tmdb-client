@@ -16,7 +16,7 @@ export interface MultiListItem {
     adult?: boolean;
     backdrop_path?: string | null;
     id?: number;
-    media_type?: MultiListItemMediaTypeEnum;
+    media_type?: MultiListItem.MediaTypeEnum;
     title?: string;
     original_title?: string;
     release_date?: string;
@@ -37,11 +37,13 @@ export interface MultiListItem {
     vote_average?: number;
     vote_count?: number;
 }
-export enum MultiListItemMediaTypeEnum {
-    movie = 'movie',
-    tv = 'tv',
-    person = 'person'
-};
-
+export namespace MultiListItem {
+    export const MediaTypeEnum = {
+        Movie: 'movie',
+        Tv: 'tv',
+        Person: 'person'
+    } as const;
+    export type MediaTypeEnum = typeof MediaTypeEnum[keyof typeof MediaTypeEnum];
+}
 
 

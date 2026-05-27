@@ -3,7 +3,7 @@
   "info": {
     "title": "TMDB API v4 Lists",
     "version": "4",
-    "description": "Focused OpenAPI spec for TMDB v4 list endpoints. This is intentionally separate from the repo's v3 openapi.json so the generated client can target the /4 server cleanly."
+    "description": "Focused OpenAPI spec for TMDB v4 account, authentication, and list endpoints. This is intentionally separate from the repo's v3 openapi.json so the generated client can target the /4 server cleanly."
   },
   "servers": [
     {
@@ -156,6 +156,462 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/V4AccountListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/movie/favorites": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Favorite Movies",
+        "description": "Get a user's list of favorite movies.",
+        "operationId": "account-v4-favorite-movies",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4AccountSortBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountMoviePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/tv/favorites": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Favorite TV Shows",
+        "description": "Get a user's list of favorite TV shows.",
+        "operationId": "account-v4-favorite-tv",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4AccountSortBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountTvPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/movie/rated": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Rated Movies",
+        "description": "Get a user's rated movies.",
+        "operationId": "account-v4-rated-movies",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4AccountSortBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountMoviePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/tv/rated": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Rated TV Shows",
+        "description": "Get a user's rated TV shows.",
+        "operationId": "account-v4-rated-tv",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4AccountSortBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountTvPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/movie/recommendations": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Recommended Movies",
+        "description": "Get a user's list of recommended movies.",
+        "operationId": "account-v4-movie-recommendations",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountMoviePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/tv/recommendations": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Recommended TV Shows",
+        "description": "Get a user's list of recommended TV shows.",
+        "operationId": "account-v4-tv-recommendations",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountTvPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/movie/watchlist": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Watchlist Movies",
+        "description": "Get a user's movie watchlist.",
+        "operationId": "account-v4-movie-watchlist",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4AccountSortBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountMoviePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_object_id}/tv/watchlist": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Watchlist TV Shows",
+        "description": "Get a user's TV watchlist.",
+        "operationId": "account-v4-tv-watchlist",
+        "parameters": [
+          {
+            "name": "account_object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/V4AccountSortBy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4AccountTvPage"
                 }
               }
             }
@@ -490,6 +946,14 @@
             }
           },
           {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "media_id",
             "in": "query",
             "required": true,
@@ -650,6 +1114,13 @@
           "title.desc"
         ]
       },
+      "V4AccountSortBy": {
+        "type": "string",
+        "enum": [
+          "created_at.asc",
+          "created_at.desc"
+        ]
+      },
       "V4StatusResponse": {
         "type": "object",
         "properties": {
@@ -689,6 +1160,9 @@
             "type": "string",
             "description": "Country code used by TMDB when creating a v4 list.",
             "example": "US"
+          },
+          "sort_by": {
+            "$ref": "#/components/schemas/V4ListSortBy"
           }
         }
       },
@@ -827,7 +1301,13 @@
             "type": "string"
           },
           "public": {
-            "type": "boolean"
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "TMDB v4 list visibility flag. 0 means private; 1 means public."
           },
           "created_at": {
             "type": "string"
@@ -838,6 +1318,11 @@
           "number_of_items": {
             "type": "integer",
             "format": "int32"
+          },
+          "average_rating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           },
           "poster_path": {
             "type": "string",
@@ -868,9 +1353,200 @@
           }
         }
       },
+      "V4AccountRating": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "V4AccountMovieItem": {
+        "type": "object",
+        "properties": {
+          "adult": {
+            "type": "boolean"
+          },
+          "backdrop_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "original_language": {
+            "type": "string"
+          },
+          "original_title": {
+            "type": "string"
+          },
+          "overview": {
+            "type": "string"
+          },
+          "poster_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "genre_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "popularity": {
+            "type": "number",
+            "format": "double"
+          },
+          "release_date": {
+            "type": "string"
+          },
+          "video": {
+            "type": "boolean"
+          },
+          "vote_average": {
+            "type": "number",
+            "format": "double"
+          },
+          "vote_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "account_rating": {
+            "$ref": "#/components/schemas/V4AccountRating"
+          }
+        }
+      },
+      "V4AccountMoviePage": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_results": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/V4AccountMovieItem"
+            }
+          }
+        }
+      },
+      "V4AccountTvItem": {
+        "type": "object",
+        "properties": {
+          "adult": {
+            "type": "boolean"
+          },
+          "backdrop_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "genre_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "origin_country": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "original_language": {
+            "type": "string"
+          },
+          "original_name": {
+            "type": "string"
+          },
+          "overview": {
+            "type": "string"
+          },
+          "popularity": {
+            "type": "number",
+            "format": "double"
+          },
+          "poster_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "first_air_date": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "vote_average": {
+            "type": "number",
+            "format": "double"
+          },
+          "vote_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "account_rating": {
+            "$ref": "#/components/schemas/V4AccountRating"
+          }
+        }
+      },
+      "V4AccountTvPage": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_results": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/V4AccountTvItem"
+            }
+          }
+        }
+      },
       "V4ListContentItem": {
         "type": "object",
         "properties": {
+          "adult": {
+            "type": "boolean"
+          },
+          "backdrop_path": {
+            "type": "string",
+            "nullable": true
+          },
           "id": {
             "type": "integer",
             "format": "int32"
@@ -881,7 +1557,16 @@
           "title": {
             "type": "string"
           },
+          "original_language": {
+            "type": "string"
+          },
+          "original_title": {
+            "type": "string"
+          },
           "name": {
+            "type": "string"
+          },
+          "original_name": {
             "type": "string"
           },
           "overview": {
@@ -891,9 +1576,22 @@
             "type": "string",
             "nullable": true
           },
-          "backdrop_path": {
-            "type": "string",
-            "nullable": true
+          "genre_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "origin_country": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "popularity": {
+            "type": "number",
+            "format": "double"
           },
           "comment": {
             "type": "string"
@@ -910,12 +1608,27 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          },
+          "video": {
+            "type": "boolean"
+          },
+          "vote_count": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
       "V4ListDetails": {
         "type": "object",
         "properties": {
+          "average_rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "backdrop_path": {
+            "type": "string",
+            "nullable": true
+          },
           "id": {
             "type": "integer",
             "format": "int32"
@@ -927,7 +1640,25 @@
             "type": "string"
           },
           "created_by": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "avatar_path": {
+                "type": "string",
+                "nullable": true
+              },
+              "gravatar_hash": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              }
+            }
           },
           "created_at": {
             "type": "string"
@@ -941,6 +1672,12 @@
           "public": {
             "type": "boolean"
           },
+          "iso_3166_1": {
+            "type": "string"
+          },
+          "iso_639_1": {
+            "type": "string"
+          },
           "favorite_count": {
             "type": "integer",
             "format": "int32"
@@ -952,6 +1689,24 @@
           "poster_path": {
             "type": "string",
             "nullable": true
+          },
+          "comments": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "object_ids": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "revenue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "runtime": {
+            "type": "integer",
+            "format": "int32"
           },
           "page": {
             "type": "integer",

@@ -19,7 +19,6 @@ import { API_JSON_OPTIONS } from '../../../../constants';
 import {
     LoadableItems,
     MediaOrPersonFilterType,
-    MediaOrPersonType,
     mediaToSearchResultItem,
     multiToSearchResultItem,
     personToSearchResultItem,
@@ -72,8 +71,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
 
         if (
             state.searchResultsState.type === 'loading' ||
-            (state.searchResultsState.type === 'loaded' &&
-                state.searchResultsState.value.length > 0)
+            (state.searchResultsState.type === 'loaded' && state.searchResultsState.value.length > 0)
         ) {
             this.patchState({ showSearchDropdown: true });
         }
@@ -109,9 +107,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
             }),
             debounceTime(500),
             distinctUntilChanged(
-                (previous, current) =>
-                    previous.query === current.query &&
-                    previous.filter === current.filter,
+                (previous, current) => previous.query === current.query && previous.filter === current.filter,
             ),
             tap(({ query }) => {
                 if (!query) {
@@ -125,9 +121,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
                     return of([] as SearchResultItem[]);
                 }
 
-                return this.getSearchObservable({ filter, query }).pipe(
-                    catchError(() => of([] as SearchResultItem[])),
-                );
+                return this.getSearchObservable({ filter, query }).pipe(catchError(() => of([] as SearchResultItem[])));
             }),
             tap((searchResults) => {
                 this.applySearchResults(searchResults);
@@ -149,9 +143,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
         });
     }
 
-    private applySearchResults(
-        searchResults: ReadonlyArray<SearchResultItem>,
-    ): void {
+    private applySearchResults(searchResults: ReadonlyArray<SearchResultItem>): void {
         const showSearchDropdown = this.get().showSearchDropdown;
 
         this.patchState({
@@ -163,10 +155,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
         });
     }
 
-    private getSearchObservable({
-        filter,
-        query,
-    }: SearchRequest): Observable<SearchResultItem[]> {
+    private getSearchObservable({ filter, query }: SearchRequest): Observable<SearchResultItem[]> {
         const opts = API_JSON_OPTIONS;
 
         switch (filter) {
@@ -186,67 +175,23 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
                     )
                     .pipe(
                         map((response) =>
-                            (response.results ?? []).map((item) =>
-                                mediaToSearchResultItem(item, 'movie'),
-                            ),
+                            (response.results ?? []).map((item) => mediaToSearchResultItem(item, 'movie')),
                         ),
                     );
             case 'tv':
                 return this.searchService
-                    .searchTv(
-                        query,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        opts,
-                    )
+                    .searchTv(query, undefined, undefined, undefined, undefined, undefined, undefined, undefined, opts)
                     .pipe(
-                        map((response) =>
-                            (response.results ?? []).map((item) =>
-                                mediaToSearchResultItem(item, 'tv'),
-                            ),
-                        ),
+                        map((response) => (response.results ?? []).map((item) => mediaToSearchResultItem(item, 'tv'))),
                     );
             case 'person':
                 return this.searchService
-                    .searchPerson(
-                        query,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        opts,
-                    )
-                    .pipe(
-                        map((response) =>
-                            (response.results ?? []).map(
-                                personToSearchResultItem,
-                            ),
-                        ),
-                    );
+                    .searchPerson(query, undefined, undefined, undefined, undefined, undefined, opts)
+                    .pipe(map((response) => (response.results ?? []).map(personToSearchResultItem)));
             default:
                 return this.searchService
-                    .searchMulti(
-                        query,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        opts,
-                    )
-                    .pipe(
-                        map((response) =>
-                            (response.results ?? []).map(
-                                multiToSearchResultItem,
-                            ),
-                        ),
-                    );
+                    .searchMulti(query, undefined, undefined, undefined, undefined, undefined, opts)
+                    .pipe(map((response) => (response.results ?? []).map(multiToSearchResultItem)));
         }
     }
 }

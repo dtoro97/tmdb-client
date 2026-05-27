@@ -23,13 +23,16 @@ import { CreditDetails } from '../model/creditDetails';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    CreditRestControllerServiceInterface
+} from './credit.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class CreditRestControllerService extends BaseService {
+export class CreditRestControllerService extends BaseService implements CreditRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

@@ -2,14 +2,14 @@
     --mdc-outlined-text-field-label-text-size: 0.8rem;
 
     --mat-select-trigger-text-size: var(--text-xs);
-    --mat-select-trigger-text-line-height: 1;
+    --mat-select-trigger-text-line-height: var(--lh-normal);
     --mat-select-enabled-trigger-text-color: var(--control-text-hover);
     --mat-select-enabled-arrow-color: var(--control-text);
     --mat-select-focused-arrow-color: var(--control-text);
     --mat-select-placeholder-text-color: var(--control-text);
 
     --mat-select-panel-background-color: var(--mat-sys-surface-container);
-    --mat-select-container-elevation-shadow: var(--shadow-lg);
+    --mat-select-container-elevation-shadow: none;
 
     --mat-option-label-text-size: 0.875rem;
     --mat-option-label-text-color: var(--mat-sys-on-surface);
@@ -28,7 +28,7 @@
     --mat-form-field-container-vertical-padding: calc(var(--space-2) - 1px);
     --mdc-outlined-text-field-input-text-color: var(--text-primary);
     --mdc-outlined-text-field-input-text-placeholder-color: var(--text-muted);
-    --mdc-outlined-text-field-input-text-size: var(--text-sm);
+    --mdc-outlined-text-field-input-text-size: var(--text-xs);
     margin: 0;
     height: 100%;
 
@@ -43,10 +43,14 @@
         padding: 0;
         border: 1px solid var(--color-border-subtle);
         border-radius: var(--radius-md);
-        transition: border-color var(--motion-base);
+        transition: background-color var(--motion-base);
     }
 
     &:hover .mat-mdc-text-field-wrapper {
+        background: var(--control-surface-hover);
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
         border-color: var(--control-focus-border);
     }
 
@@ -115,7 +119,7 @@
 
     &:hover {
         background: var(--control-surface-hover);
-        border-color: var(--control-border-hover);
+        color: var(--control-text-hover);
     }
 
     .mat-mdc-select-arrow-wrapper {
@@ -139,8 +143,25 @@
         width: auto;
     }
 
+    .mat-mdc-select {
+        min-height: unset;
+        padding-inline: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .mat-mdc-select:hover {
+        background: transparent;
+    }
+
     .mat-mdc-select-value {
+        line-height: var(--mat-select-trigger-text-line-height);
         white-space: nowrap;
+    }
+
+    .mat-mdc-select-value-text {
+        line-height: var(--mat-select-trigger-text-line-height);
     }
 }
 
@@ -156,7 +177,7 @@
     border: 1px solid var(--mat-sys-outline-variant) !important;
     border-radius: var(--radius-lg) !important;
     background: var(--surface-panel) !important;
-    box-shadow: var(--shadow-lg) !important;
+    box-shadow: none !important;
 }
 
 .mat-mdc-option {

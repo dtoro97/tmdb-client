@@ -1,18 +1,18 @@
 :root {
-    --chip-radius: var(--radius-pill);
-    --chip-height: 22px;
-    --chip-primary-bg: var(--color-brand);
-    --chip-primary-text: #ffffff;
-    --chip-primary-border: var(--border-brand-soft);
-    --chip-muted-bg: var(--mat-sys-surface-container-high);
-    --chip-muted-text: var(--text-primary);
-    --chip-muted-border: var(--color-border-subtle);
+    --chip-radius: var(--badge-radius);
+    --chip-height: var(--badge-height);
+    --chip-primary-bg: var(--badge-accent-surface);
+    --chip-primary-text: var(--badge-accent-text);
+    --chip-primary-border: var(--badge-accent-border);
+    --chip-muted-bg: var(--badge-surface);
+    --chip-muted-text: var(--badge-text);
+    --chip-muted-border: var(--badge-border);
 
     --mat-chip-elevated-container-color: var(--chip-primary-bg);
     --mat-chip-container-shape-radius: var(--chip-radius);
-    --mat-chip-label-text-size: var(--text-xs);
-    --mat-chip-label-text-weight: var(--weight-semibold);
-    --mat-chip-label-text-tracking: 0.04em;
+    --mat-chip-label-text-size: var(--badge-font-size);
+    --mat-chip-label-text-weight: var(--badge-font-weight);
+    --mat-chip-label-text-tracking: 0;
     --mat-chip-container-height: var(--chip-height);
     --mat-chip-outline-width: 1px;
     --mat-chip-label-text-color: var(--chip-primary-text);
@@ -44,7 +44,6 @@
 
 .mat-mdc-standard-chip .mdc-evolution-chip__text-label {
     color: inherit;
-    text-transform: uppercase;
 }
 
 .mat-mdc-standard-chip .mat-mdc-chip-action {

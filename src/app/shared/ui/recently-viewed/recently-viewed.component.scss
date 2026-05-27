@@ -1,9 +1,17 @@
 @use 'mixins' as *;
 
-.clear {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    @include text-link();
+.recently-viewed {
+    text-align: left;
+
+    &__title {
+        margin: 0;
+    }
+
+    &__clear {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        @include text-link();
+    }
 }
