@@ -1,0 +1,105 @@
+<div class="streaming-hub page-container">
+    @if (vm$ | async; as vm) {
+        <header class="streaming-hub__hero">
+            <div class="inner-container streaming-hub__hero-inner">
+                <h1 class="text-display">{{ vm.title }}</h1>
+                <p class="streaming-hub__subtitle text-body-sm">{{ vm.subtitle }}</p>
+            </div>
+        </header>
+
+        <main class="inner-container streaming-hub__content">
+            @if (vm.providerCards.length) {
+                <section class="provider-section" aria-label="Popular streaming services">
+                    <div class="provider-rail">
+                        @for (card of vm.providerCards; track card.slug) {
+                            <a class="provider-card" [routerLink]="card.routerLink">
+                                @if (card.providerLogoPath) {
+                                    <span class="provider-card__logo">
+                                        <img
+                                            [src]="card.providerLogoPath | imgSrc: 'w92'"
+                                            [alt]="card.providerName"
+                                        />
+                                    </span>
+                                }
+
+                                <span class="provider-card__copy">
+                                    <span class="provider-card__label text-card-title">{{ card.providerName }}</span>
+                                    <span class="provider-card__meta text-card-meta">Airing series</span>
+                                </span>
+
+                                <span class="provider-card__media">
+                                    @if (card.preview?.backdropPath; as backdropPath) {
+                                        <img
+                                            class="provider-card__image"
+                                            [src]="backdropPath | imgSrc: 'w780'"
+                                            [alt]="card.preview?.title ?? card.providerName"
+                                        />
+                                    } @else {
+                                        <app-skeleton class="provider-card__skeleton" />
+                                    }
+                                </span>
+                            </a>
+                        }
+                    </div>
+                </section>
+            }
+
+            <section class="route-section" aria-labelledby="route-section-title">
+                <div class="route-section__header">
+                    <h2 id="route-section-title" class="text-title">Browse by mood and timing</h2>
+                    <p class="text-body-sm">Focused lists for the common streaming decisions.</p>
+                </div>
+
+                <div class="route-grid">
+                    @if (vm.featuredSection; as section) {
+                        <a class="route-card route-card--featured" [routerLink]="section.routerLink">
+                            <span class="route-card__preview" aria-hidden="true">
+                                @for (preview of section.previews; track preview.key) {
+                                    <img
+                                        class="route-card__image"
+                                        [src]="preview.imagePath | imgSrc: 'w342'"
+                                        [alt]="preview.title"
+                                    />
+                                } @empty {
+                                    @for (slot of previewSlots | repeat; track slot) {
+                                        <app-skeleton class="route-card__poster" />
+                                    }
+                                }
+                            </span>
+
+                            <span class="route-card__copy">
+                                <span class="route-card__title text-title">{{ section.title }}</span>
+                                <span class="route-card__description text-body-sm">{{ section.description }}</span>
+                                <span class="route-card__cta text-card-meta">{{ section.ctaLabel }}</span>
+                            </span>
+                        </a>
+                    }
+
+                    @for (section of vm.sections; track section.slug) {
+                        <a class="route-card" [routerLink]="section.routerLink">
+                            <span class="route-card__preview" aria-hidden="true">
+                                @for (preview of section.previews; track preview.key) {
+                                    <img
+                                        class="route-card__image"
+                                        [src]="preview.imagePath | imgSrc: 'w342'"
+                                        [alt]="preview.title"
+                                    />
+                                } @empty {
+                                    @for (slot of previewSlots | repeat; track slot) {
+                                        <app-skeleton class="route-card__poster" />
+                                    }
+                                }
+                            </span>
+
+                            <span class="route-card__copy">
+                                <span class="route-card__title text-title">{{ section.title }}</span>
+                                <span class="route-card__description text-body-sm">{{ section.description }}</span>
+                                <span class="route-card__cta text-card-meta">{{ section.ctaLabel }}</span>
+                            </span>
+                        </a>
+                    }
+                </div>
+            </section>
+        </main>
+    }
+</div>

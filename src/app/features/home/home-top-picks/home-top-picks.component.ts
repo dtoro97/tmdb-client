@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import {
-    BadgeComponent,
     CardComponent,
     CardItem,
     ImageComponent,
@@ -12,9 +11,8 @@ import {
     RatingComponent,
 } from '../../../shared';
 
-interface RankedTopPickItem {
+interface TopPickItem {
     readonly item: CardItem;
-    readonly rank: number;
 }
 
 @Component({
@@ -22,7 +20,6 @@ interface RankedTopPickItem {
     imports: [
         RouterLink,
         DatePipe,
-        BadgeComponent,
         CardComponent,
         ImageComponent,
         SkeletonComponent,
@@ -35,8 +32,8 @@ interface RankedTopPickItem {
 })
 export class HomeTopPicksComponent {
     @Input({ required: true }) loading!: boolean;
-    @Input({ required: true }) featuredItems!: readonly RankedTopPickItem[];
-    @Input({ required: true }) secondaryItems!: readonly RankedTopPickItem[];
+    @Input({ required: true }) featuredItems!: readonly TopPickItem[];
+    @Input({ required: true }) secondaryItems!: readonly TopPickItem[];
 
     readonly featuredSkeletonCount = 3;
     readonly secondarySkeletonCount = 7;

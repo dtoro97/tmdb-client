@@ -1,34 +1,53 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { of, switchMap, tap } from 'rxjs';
+import { forkJoin, of, switchMap, tap } from 'rxjs';
 
 import { PAGE_SIZE } from '../../../constants';
-import { LoadableItems, VideoTrailerSeedItem } from '../../../shared';
+import { LoadableItems, LoadableValue, VideoTrailerSeedItem } from '../../../shared';
 import {
     TrailerDataStoreService,
+    TrailerFeedType,
     TrailerVideoCardItem,
 } from '../trailer-data-store.service';
 
-interface TrailersPageState {
+interface TrailersFeedState {
     readonly trailers: LoadableItems<TrailerVideoCardItem>;
     readonly pendingSeeds: readonly VideoTrailerSeedItem[];
 }
 
+interface TrailersPageState {
+    readonly selectedFeed: TrailerFeedType;
+    readonly featuredTrailer: LoadableValue<TrailerVideoCardItem | null>;
+    readonly feeds: Record<TrailerFeedType, TrailersFeedState>;
+}
+
 const INITIAL_STATE: TrailersPageState = {
-    trailers: { type: 'idle' },
-    pendingSeeds: [],
+    selectedFeed: 'trending',
+    featuredTrailer: { type: 'idle' },
+    feeds: {
+        trending: {
+            trailers: { type: 'idle' },
+            pendingSeeds: [],
+        },
+        new: {
+            trailers: { type: 'idle' },
+            pendingSeeds: [],
+        },
+    },
 };
 
 @Injectable()
 export class TrailersPageStoreService extends ComponentStore<TrailersPageState> {
     readonly vm$ = this.select((state) => {
+        const feed = state.feeds[state.selectedFeed];
         const items =
-            state.trailers.type === 'loaded' || state.trailers.type === 'loading-more' ? state.trailers.value : [];
+            feed.trailers.type === 'loaded' || feed.trailers.type === 'loading-more' ? feed.trailers.value : [];
 
-        const featured = items[0] ?? null;
+        const featured = state.featuredTrailer.type === 'loaded' ? state.featuredTrailer.value : null;
 
         return {
-            trailersState: state.trailers,
+            selectedFeed: state.selectedFeed,
+            trailersState: feed.trailers,
             featuredSpotlight: featured
                 ? {
                       spotlight: {
@@ -44,7 +63,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                       videoUrl: featured.videoUrl,
                   }
                 : null,
-            showMore: state.pendingSeeds.length > 0,
+            showMore: feed.pendingSeeds.length > 0,
         };
     });
 
@@ -52,25 +71,60 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         super(INITIAL_STATE);
     }
 
-    load$() {
-        const { trailers } = this.get();
+    load$(feedType: TrailerFeedType = 'trending') {
+        this.patchState({ selectedFeed: feedType });
 
-        if (this.hasLoadedOrLoading(trailers)) {
+        return forkJoin([
+            this.loadFeaturedTrailer$(),
+            this.loadFeed$(feedType),
+        ]);
+    }
+
+    private loadFeaturedTrailer$() {
+        const { featuredTrailer } = this.get();
+
+        if (this.hasLoadedOrLoadingValue(featuredTrailer)) {
             return of([]);
         }
 
         this.patchState({
+            featuredTrailer: { type: 'loading' },
+        });
+
+        return this.trailerDataStore.getTrailerSeeds$('trending').pipe(
+            switchMap((trailerSeeds) =>
+                this.trailerDataStore.loadVideoCardsForSeeds$(trailerSeeds.slice(0, 1)),
+            ),
+            tap((trailers) => {
+                this.patchState({
+                    featuredTrailer: {
+                        type: 'loaded',
+                        value: trailers[0] ?? null,
+                    },
+                });
+            }),
+        );
+    }
+
+    private loadFeed$(feedType: TrailerFeedType) {
+        const feed = this.get().feeds[feedType];
+
+        if (this.hasLoadedOrLoading(feed.trailers)) {
+            return of([]);
+        }
+
+        this.patchFeedState(feedType, {
             trailers: { type: 'loading' },
             pendingSeeds: [],
         });
 
-        return this.trailerDataStore.getTrailerSeeds$().pipe(
+        return this.trailerDataStore.getTrailerSeeds$(feedType).pipe(
             switchMap((trailerSeeds) => {
                 const initialSeeds = trailerSeeds.slice(0, PAGE_SIZE);
 
                 return this.trailerDataStore.loadVideoCardsForSeeds$(initialSeeds).pipe(
                     tap((nextTrailers) => {
-                        this.patchState({
+                        this.patchFeedState(feedType, {
                             trailers: {
                                 type: 'loaded',
                                 value: nextTrailers,
@@ -85,16 +139,18 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
 
     showMoreSelected$() {
         const state = this.get();
+        const feedType = state.selectedFeed;
+        const feed = state.feeds[feedType];
 
-        if (state.trailers.type !== 'loaded' || !state.pendingSeeds.length) {
+        if (feed.trailers.type !== 'loaded' || !feed.pendingSeeds.length) {
             return of([]);
         }
 
-        const nextSeeds = state.pendingSeeds.slice(0, PAGE_SIZE);
-        const remainingSeeds = state.pendingSeeds.slice(nextSeeds.length);
-        const currentTrailers = state.trailers.value;
+        const nextSeeds = feed.pendingSeeds.slice(0, PAGE_SIZE);
+        const remainingSeeds = feed.pendingSeeds.slice(nextSeeds.length);
+        const currentTrailers = feed.trailers.value;
 
-        this.patchState({
+        this.patchFeedState(feedType, {
             trailers: {
                 type: 'loading-more',
                 value: currentTrailers,
@@ -104,7 +160,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
 
         return this.trailerDataStore.loadVideoCardsForSeeds$(nextSeeds).pipe(
             tap((items) =>
-                this.patchState({
+                this.patchFeedState(feedType, {
                     trailers: {
                         type: 'loaded',
                         value: [...currentTrailers, ...items],
@@ -115,7 +171,23 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         );
     }
 
+    private patchFeedState(feedType: TrailerFeedType, patch: Partial<TrailersFeedState>): void {
+        this.patchState((state) => ({
+            feeds: {
+                ...state.feeds,
+                [feedType]: {
+                    ...state.feeds[feedType],
+                    ...patch,
+                },
+            },
+        }));
+    }
+
     private hasLoadedOrLoading<T>(state: LoadableItems<T>): boolean {
         return state.type === 'loading' || state.type === 'loading-more' || state.type === 'loaded';
+    }
+
+    private hasLoadedOrLoadingValue<T>(state: LoadableValue<T>): boolean {
+        return state.type === 'loading' || state.type === 'loaded';
     }
 }

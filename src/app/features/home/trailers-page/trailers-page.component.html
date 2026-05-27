@@ -12,7 +12,16 @@
         }
 
         <div class="page-main">
-            <section class="u-gap-4 u-flex-column">
+            <section class="trailers">
+                <header class="trailers__toolbar">
+                    <app-pill-toggle
+                        [options]="feedOptions"
+                        [selectedValue]="vm.selectedFeed"
+                        variant="subtle"
+                        (selected)="feedSelected($event)"
+                    />
+                </header>
+
                 @if (vm.trailersState.type === 'idle' || vm.trailersState.type === 'loading') {
                     <ul class="grid u-list-none" aria-hidden="true">
                         @for (i of skeletonCount | repeat; track i) {

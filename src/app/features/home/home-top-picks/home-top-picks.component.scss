@@ -28,7 +28,6 @@
         overflow: hidden;
         border-radius: var(--radius-lg);
         background: var(--mat-sys-surface-container-high);
-        box-shadow: var(--shadow-md);
 
         app-image {
             @include absolute-fill;
@@ -84,20 +83,6 @@
     }
 }
 
-.rank {
-    min-height: 1.6rem;
-}
-
-.rank {
-    &--featured {
-        margin-bottom: var(--space-1);
-    }
-
-    &--tile {
-        min-width: 2.75rem;
-    }
-}
-
 .tiles-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -107,13 +92,6 @@
 .tile {
     position: relative;
     min-width: 0;
-
-    .rank {
-        position: absolute;
-        top: var(--space-2);
-        left: var(--space-2);
-        z-index: 3;
-    }
 
     &-card-skeleton {
         position: relative;

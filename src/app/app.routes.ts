@@ -45,6 +45,11 @@ export const routes: Routes = [
             ),
     },
     {
+        path: 'watch',
+        loadChildren: () =>
+            import('./features/watch/watch.routes').then((m) => m.watchRoutes),
+    },
+    {
         path: '',
         loadChildren: () =>
             import('./features/home/home.routes').then((m) => m.homeRoutes),

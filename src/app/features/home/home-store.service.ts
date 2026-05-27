@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
 
-import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
+import { API_JSON_OPTIONS, MEDIUM_LIST_COUNT, PAGE_SIZE } from '../../constants';
 import {
     DiscoverRestControllerService,
+    MovieListRestControllerService,
     MultiListItem,
     PersonListRestControllerService,
     TrendingRestControllerService,
@@ -12,49 +13,63 @@ import {
     TvSeriesListRestControllerService,
 } from '../../api';
 import {
+    getCurrentMonthDateWindow,
+    getCurrentMonthName,
     getISODate,
     LoadableItems,
     LoadableValue,
     LocaleStoreService,
     CardItem,
+    MediaType,
     PersonCardItem,
+    PillToggleOption,
     shuffle,
     toCardItem,
     toPersonCardItem,
 } from '../../shared';
 import { SpotlightItem } from './spotlight-item';
-import { TrailerDataStoreService } from './trailer-data-store.service';
 import { WatchProviderStoreService } from '../../shared/services';
 
-export interface StreamingProviderConfig {
-    id: number;
-    label: string;
+type AiringTodayItem = CardItem<{
+    year: string;
+}>;
+
+interface StreamingArrivalsFeature {
+    readonly title: string;
+    readonly description: string;
+    readonly ctaLabel: string;
+    readonly items: LoadableItems<CardItem>;
 }
 
-const TOP_PICKS_MAX_ITEMS = 10;
+const TOP_PICKS_MAX_ITEMS = MEDIUM_LIST_COUNT;
 const TOP_PICKS_FEATURED_COUNT = 3;
+
+const WHAT_TO_WATCH_OPTIONS: PillToggleOption[] = [
+    { label: 'Movies', value: 'movie' },
+    { label: 'TV Shows', value: 'tv' },
+];
 
 interface HomeState {
     spotlight: LoadableValue<SpotlightItem | null>;
-    whatToWatch: LoadableItems<CardItem>;
+    whatToWatchMovies: LoadableItems<CardItem>;
+    whatToWatchTv: LoadableItems<CardItem>;
+    selectedWhatToWatchMediaType: MediaType;
     popularPeople: LoadableItems<PersonCardItem>;
     trendingToday: LoadableItems<CardItem>;
-    airingToday: LoadableItems<CardItem>;
-    selectedStreamingProviderId: number | null;
-    streamingProviders: StreamingProviderConfig[];
-    streamingByProviderId: Record<number, LoadableItems<CardItem>>;
+    airingToday: LoadableItems<AiringTodayItem>;
+    streamingArrivals: LoadableItems<CardItem>;
     inTheatres: LoadableItems<CardItem>;
 }
 
 const INITIAL_STATE: HomeState = {
     spotlight: { type: 'loading' },
-    whatToWatch: { type: 'loading' },
+    whatToWatchMovies: { type: 'loading' },
+    whatToWatchTv: { type: 'loading' },
+    selectedWhatToWatchMediaType: 'movie',
     popularPeople: { type: 'loading' },
     trendingToday: { type: 'loading' },
     airingToday: { type: 'loading' },
-    selectedStreamingProviderId: null,
-    streamingProviders: [],
-    streamingByProviderId: {},
+    streamingArrivals: { type: 'loading' },
     inTheatres: { type: 'loading' },
 };
 
@@ -62,25 +77,28 @@ const INITIAL_STATE: HomeState = {
 export class HomeStoreService extends ComponentStore<HomeState> {
     readonly homeVM$ = this.select((state) => ({
         spotlight: state.spotlight,
-        whatToWatch: state.whatToWatch,
-        whatToWatchLoading: state.whatToWatch.type === 'loading',
-        whatToWatchTopPicks: this.toTopPickGroups(state.whatToWatch),
+        whatToWatch:
+            state.selectedWhatToWatchMediaType === 'movie'
+                ? state.whatToWatchMovies
+                : state.whatToWatchTv,
+        whatToWatchLoading:
+            (state.selectedWhatToWatchMediaType === 'movie'
+                ? state.whatToWatchMovies
+                : state.whatToWatchTv
+            ).type === 'loading',
+        whatToWatchTopPicks: this.toTopPickGroups(
+            state.selectedWhatToWatchMediaType === 'movie'
+                ? state.whatToWatchMovies
+                : state.whatToWatchTv,
+        ),
+        whatToWatchOptions: WHAT_TO_WATCH_OPTIONS,
+        selectedWhatToWatchMediaType: state.selectedWhatToWatchMediaType,
         popularPeople: state.popularPeople,
         trendingToday: state.trendingToday,
         airingToday: state.airingToday,
-        airingTonightPreview: state.airingToday.type === 'loaded' ? state.airingToday.value.slice(0, 12) : [],
-        selectedStreamingProviderId: state.selectedStreamingProviderId,
-        selectedStreamingProviderLabel:
-            state.streamingProviders.find((provider) => provider.id === state.selectedStreamingProviderId)?.label ??
-            null,
-        streamingProviders: state.streamingProviders.map((p) => ({
-            label: p.label,
-            value: p.id,
-        })),
-        streamingNow:
-            state.selectedStreamingProviderId !== null
-                ? (state.streamingByProviderId[state.selectedStreamingProviderId] ?? { type: 'idle' as const })
-                : { type: 'idle' as const },
+        airingTonightPreview:
+            state.airingToday.type === 'loaded' ? state.airingToday.value.slice(0, 12) : [],
+        streamingArrivals: this.toStreamingArrivalsFeature(state.streamingArrivals),
         inTheatres: state.inTheatres,
     }));
 
@@ -88,10 +106,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
 
     constructor(
         private readonly tvListService: TvSeriesListRestControllerService,
+        private readonly movieListService: MovieListRestControllerService,
         private readonly discoverService: DiscoverRestControllerService,
         private readonly personListService: PersonListRestControllerService,
         private readonly trendingService: TrendingRestControllerService,
-        private readonly trailerDataStore: TrailerDataStoreService,
         private readonly localeStore: LocaleStoreService,
         private readonly watchProviderStore: WatchProviderStoreService,
     ) {
@@ -104,172 +122,54 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             this.loadPopularPeople$(),
             this.loadTrendingToday$(),
             this.loadAiringToday$(),
-            this.loadStreamingProviders$(),
+            this.loadStreamingArrivals$(),
             this.loadInTheatres$(),
         ]);
     }
 
-    setStreamingProvider(providerId: number): void {
-        this.patchState({ selectedStreamingProviderId: providerId });
-    }
-
-    private loadStreamingProviders$() {
-        return this.watchProviderStore.topTvProviders$.pipe(
-            switchMap((topProviders) => {
-                if (!topProviders.length) {
-                    return of([]);
-                }
-
-                const providers: StreamingProviderConfig[] = topProviders.map((p) => ({
-                    id: p.id,
-                    label: p.name,
-                }));
-
-                const loadingState = providers.reduce(
-                    (acc, p) => ({
-                        ...acc,
-                        [p.id]: { type: 'loading' as const },
-                    }),
-                    {} as Record<number, LoadableItems<CardItem>>,
-                );
-
-                this.patchState({
-                    streamingProviders: providers,
-                    selectedStreamingProviderId: providers[0].id,
-                    streamingByProviderId: loadingState,
-                });
-
-                return forkJoin(
-                    providers.map((provider) =>
-                        this.trailerDataStore.discoverStreamingTvByProviderId$(provider.id).pipe(
-                            map((response) => response.results ?? []),
-                            catchError(() => of([] as TvSeriesListItem[])),
-                        ),
-                    ),
-                ).pipe(
-                    tap((streamingGroups) =>
-                        this.patchState({
-                            streamingByProviderId: providers.reduce(
-                                (acc, provider, index) => {
-                                    const results = streamingGroups[index] ?? [];
-                                    return {
-                                        ...acc,
-                                        [provider.id]: {
-                                            type: 'loaded' as const,
-                                            value: results.map((item) => toCardItem(item, 'tv')).slice(0, PAGE_SIZE),
-                                        },
-                                    };
-                                },
-                                {} as Record<number, LoadableItems<CardItem>>,
-                            ),
-                        }),
-                    ),
-                );
-            }),
-        );
+    setWhatToWatchMediaType(mediaType: MediaType): void {
+        this.patchState({ selectedWhatToWatchMediaType: mediaType });
     }
 
     private loadWhatToWatch$() {
-        this.patchState({ whatToWatch: { type: 'loading' } });
-
-        const movieMinScore = 6.8;
-        const movieMinVotes = 500;
-        const tvMinScore = 7;
-        const tvMinVotes = 200;
+        this.patchState({
+            whatToWatchMovies: { type: 'loading' },
+            whatToWatchTv: { type: 'loading' },
+        });
 
         return forkJoin({
-            movie: this.discoverService.discoverMovie(
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                false,
-                undefined,
-                undefined,
-                1,
-                undefined,
-                undefined,
-                undefined,
-                this.localeStore.region(),
-                undefined,
-                undefined,
-                'popularity.desc',
-                movieMinScore,
-                undefined,
-                movieMinVotes,
-                undefined,
-                this.localeStore.region(),
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
-            tv: this.discoverService.discoverTv(
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                false,
-                undefined,
-                undefined,
-                1,
-                undefined,
-                'popularity.desc',
-                undefined,
-                tvMinScore,
-                undefined,
-                tvMinVotes,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                'body',
-                undefined,
-                this.opts,
-            ),
+            movies: this.movieListService
+                .moviePopularList(
+                    undefined,
+                    1,
+                    this.localeStore.region(),
+                    'body',
+                    undefined,
+                    this.opts,
+                )
+                .pipe(
+                    map((response) =>
+                        (response.results ?? [])
+                            .map((item) => toCardItem(item, 'movie'))
+                            .slice(0, TOP_PICKS_MAX_ITEMS),
+                    ),
+                    catchError(() => of([] as CardItem[])),
+                ),
+            tv: this.tvListService
+                .tvSeriesPopularList(undefined, 1, 'body', undefined, this.opts)
+                .pipe(
+                    map((response) =>
+                        (response.results ?? [])
+                            .map((item) => toCardItem(item, 'tv'))
+                            .slice(0, TOP_PICKS_MAX_ITEMS),
+                    ),
+                    catchError(() => of([] as CardItem[])),
+                ),
         }).pipe(
-            map(({ movie, tv }) =>
-                shuffle([
-                    ...(movie.results ?? []).map((item) => toCardItem(item, 'movie')),
-                    ...(tv.results ?? []).map((item) => toCardItem(item, 'tv')),
-                ]).slice(0, PAGE_SIZE),
-            ),
-            catchError(() => of([] as CardItem[])),
             tap((whatToWatch) =>
                 this.patchState({
-                    whatToWatch: { type: 'loaded', value: whatToWatch },
+                    whatToWatchMovies: { type: 'loaded', value: whatToWatch.movies },
+                    whatToWatchTv: { type: 'loaded', value: whatToWatch.tv },
                 }),
             ),
         );
@@ -336,14 +236,100 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     private loadAiringToday$() {
         this.patchState({ airingToday: { type: 'loading' } });
 
-        return this.tvListService.tvSeriesAiringTodayList(undefined, 1, undefined, 'body', undefined, this.opts).pipe(
-            map((response) => (response.results ?? []).map((item) => toCardItem(item, 'tv')).slice(0, PAGE_SIZE)),
-            catchError(() => of([] as CardItem[])),
-            tap((airingToday) =>
+        return this.tvListService
+            .tvSeriesAiringTodayList(
+                undefined,
+                1,
+                this.getTimeZone(),
+                'body',
+                undefined,
+                this.opts,
+            )
+            .pipe(
+                map((response) =>
+                    (response.results ?? [])
+                        .map((item) => this.toAiringTodayItem(item))
+                        .slice(0, PAGE_SIZE),
+                ),
+                catchError(() => of([] as AiringTodayItem[])),
+                tap((airingToday) =>
+                    this.patchState({
+                        airingToday: {
+                            type: 'loaded',
+                            value: airingToday,
+                        },
+                    }),
+                ),
+            );
+    }
+
+    private loadStreamingArrivals$() {
+        this.patchState({ streamingArrivals: { type: 'loading' } });
+
+        const dateWindow = getCurrentMonthDateWindow();
+        const region = this.localeStore.region() || 'US';
+
+        return this.watchProviderStore.loaded$.pipe(
+            filter(Boolean),
+            take(1),
+            switchMap(() => this.watchProviderStore.topTvProviders$.pipe(take(1))),
+            switchMap((providers) => {
+                const providerFilter = providers.map((provider) => provider.id).join('|') || undefined;
+
+                return this.discoverService
+                    .discoverTv(
+                        dateWindow.from,
+                        dateWindow.to,
+                        undefined,
+                        undefined,
+                        undefined,
+                        false,
+                        undefined,
+                        undefined,
+                        1,
+                        undefined,
+                        'popularity.desc',
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        region,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        'flatrate',
+                        providerFilter,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        'body',
+                        undefined,
+                        this.opts,
+                    )
+                    .pipe(
+                        map((response) =>
+                            (response.results ?? [])
+                                .map((item) => toCardItem(item, 'tv'))
+                                .filter((item) => !!item.imagePath)
+                                .slice(0, 3),
+                        ),
+                        catchError(() => of([] as CardItem[])),
+                    );
+            }),
+            tap((streamingArrivals) =>
                 this.patchState({
-                    airingToday: {
+                    streamingArrivals: {
                         type: 'loaded',
-                        value: airingToday,
+                        value: streamingArrivals,
                     },
                 }),
             ),
@@ -435,17 +421,43 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     }
 
     private toTopPickGroups(state: LoadableItems<CardItem>) {
-        const rankedItems =
+        const topPickItems =
             state.type === 'loaded' || state.type === 'loading-more'
-                ? state.value.slice(0, TOP_PICKS_MAX_ITEMS).map((item, index) => ({
+                ? state.value.slice(0, TOP_PICKS_MAX_ITEMS).map((item) => ({
                       item,
-                      rank: index + 1,
                   }))
                 : [];
 
         return {
-            featured: rankedItems.slice(0, TOP_PICKS_FEATURED_COUNT),
-            secondary: rankedItems.slice(TOP_PICKS_FEATURED_COUNT),
+            featured: topPickItems.slice(0, TOP_PICKS_FEATURED_COUNT),
+            secondary: topPickItems.slice(TOP_PICKS_FEATURED_COUNT),
         };
+    }
+
+    private toAiringTodayItem(item: TvSeriesListItem): AiringTodayItem {
+        const cardItem = toCardItem(item, 'tv');
+
+        return {
+            ...cardItem,
+            year: cardItem.date.slice(0, 4),
+        };
+    }
+
+    private toStreamingArrivalsFeature(
+        items: LoadableItems<CardItem>,
+    ): StreamingArrivalsFeature {
+        const month = getCurrentMonthName();
+
+        return {
+            title: `What's streaming in ${month}`,
+            description:
+                'Popular TV premieres and returning seasons from major streaming services.',
+            ctaLabel: `Browse ${month} TV arrivals`,
+            items,
+        };
+    }
+
+    private getTimeZone(): string | undefined {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 }

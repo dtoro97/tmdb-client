@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import {
+    BadgeComponent,
     HeroSurfaceComponent,
     RatingComponent,
     SkeletonComponent,
@@ -13,6 +14,7 @@ import type { SpotlightItem } from '../spotlight-item';
     selector: 'app-hero-spotlight',
     imports: [
         RouterLink,
+        BadgeComponent,
         HeroSurfaceComponent,
         RatingComponent,
         SkeletonComponent,
