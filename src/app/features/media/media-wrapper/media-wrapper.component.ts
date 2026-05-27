@@ -11,6 +11,7 @@ import { MediaSeasonsStoreService } from '../media-seasons-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
 import { MediaType, RATING_ACTIONS } from '../../../shared';
 import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
+import { EpisodeDetailStoreService } from '../episode-detail-page/episode-detail-store.service';
 
 @Component({
     selector: 'app-media-wrapper',
@@ -19,6 +20,7 @@ import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
     providers: [
         MediaDetailStoreService,
         MediaDetailActionsStore,
+        EpisodeDetailStoreService,
         MediaReviewsStoreService,
         MediaSeasonsStoreService,
         MediaVideoStoreService,

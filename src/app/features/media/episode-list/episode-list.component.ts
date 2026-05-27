@@ -38,6 +38,8 @@ export class EpisodeListComponent implements OnChanges {
             return;
         }
 
+        const topRatedEpisode = getTopRatedEpisode(this.state.value);
+
         this.episodeItems = this.state.value.map((episode) => ({
             id: `${episode.season_number ?? 'season'}-${episode.episode_number ?? 'episode'}-${episode.id ?? episode.name ?? 'unknown'}`,
             item: {
@@ -50,6 +52,10 @@ export class EpisodeListComponent implements OnChanges {
                 airDate: episode.air_date ?? null,
                 runtime: episode.runtime ?? null,
                 voteAverage: episode.vote_average ?? null,
+                badges:
+                    episode === topRatedEpisode
+                        ? [{ label: 'Top rated', variant: 'accent' as const }]
+                        : undefined,
                 routeCommands: [
                     ...this.routePrefix,
                     episode.season_number as number,
@@ -58,4 +64,23 @@ export class EpisodeListComponent implements OnChanges {
             },
         }));
     }
+}
+
+function getTopRatedEpisode(episodes: readonly TvEpisode[]): TvEpisode | null {
+    const ratedEpisodes = episodes.filter((episode) => (episode.vote_average ?? 0) > 0);
+
+    if (!ratedEpisodes.length) {
+        return null;
+    }
+
+    return ratedEpisodes.reduce((best, episode) => {
+        const currentRating = episode.vote_average ?? 0;
+        const bestRating = best.vote_average ?? 0;
+
+        if (currentRating !== bestRating) {
+            return currentRating > bestRating ? episode : best;
+        }
+
+        return (episode.vote_count ?? 0) > (best.vote_count ?? 0) ? episode : best;
+    });
 }

@@ -2,120 +2,84 @@
     @if (vm$ | async; as vm) {
         <app-sub-page-header
             [backdropPath]="vm.media?.backdropPath"
-            parentTitle="episodes"
+            parentTitle="Episodes"
             [backLink]="vm.episodesLink"
-            [subtitle]="vm.media?.year ? '(' + vm.media?.year + ')' : ''"
-            [pageTitle]="vm.media?.title ?? ''"
-            [loading]="!vm.media"
+            [subtitle]="vm.media?.title ? vm.media?.title + (vm.media?.year ? ' (' + vm.media?.year + ')' : '') : ''"
+            [pageTitle]="vm.episode?.name ?? ''"
+            [loading]="!vm.episode || !vm.media"
         />
 
         <main class="page-main detail">
             @if (vm.isLoading) {
-                <nav class="detail__nav detail__nav--skeleton" aria-hidden="true">
-                    <app-skeleton class="detail__nav-skeleton" />
-                    <app-skeleton class="detail__nav-skeleton detail__nav-skeleton--next" />
-                </nav>
+                <section class="episode-summary">
+                    <app-skeleton class="episode-summary__still episode-summary__still--skeleton aspect-landscape" />
 
-                <section class="lead">
-                    <app-skeleton class="lead__still lead__still--skeleton aspect-landscape" />
-
-                    <div class="lead__content">
-                        <app-skeleton class="lead__chip-skeleton" />
-                        <app-skeleton class="lead__title-skeleton" />
-
-                        <div class="lead__group">
-                            <app-skeleton class="lead__line-skeleton lead__line-skeleton--rating" />
-                            <app-skeleton class="lead__line-skeleton lead__line-skeleton--user-rating" />
+                    <div class="episode-summary__content">
+                        <div class="episode-summary__meta">
+                            <app-skeleton class="episode-summary__line-skeleton episode-summary__line-skeleton--meta" />
+                            <app-skeleton class="episode-summary__line-skeleton episode-summary__line-skeleton--rating" />
                         </div>
 
-                        <app-skeleton class="lead__line-skeleton lead__line-skeleton--details" />
+                        <div class="episode-summary__overview" aria-hidden="true">
+                            <app-skeleton class="episode-summary__copy-skeleton episode-summary__copy-skeleton--full" />
+                            <app-skeleton class="episode-summary__copy-skeleton episode-summary__copy-skeleton--wide" />
+                            <app-skeleton class="episode-summary__copy-skeleton episode-summary__copy-skeleton--medium" />
+                        </div>
 
-                        <div class="lead__group">
-                            <app-skeleton class="lead__line-skeleton lead__line-skeleton--crew-primary" />
-                            <app-skeleton class="lead__line-skeleton lead__line-skeleton--crew-secondary" />
+                        <div class="episode-summary__crew">
+                            <app-skeleton class="episode-summary__line-skeleton episode-summary__line-skeleton--crew-primary" />
+                            <app-skeleton class="episode-summary__line-skeleton episode-summary__line-skeleton--crew-secondary" />
                         </div>
                     </div>
                 </section>
 
-                <section class="copy" aria-hidden="true">
-                    <app-skeleton class="copy__line copy__line--full" />
-                    <app-skeleton class="copy__line copy__line--wide" />
-                    <app-skeleton class="copy__line copy__line--medium" />
-                </section>
             } @else if (vm.episode; as episode) {
-                <nav class="detail__nav">
-                    @if (vm.previousEpisode) {
-                        <a class="detail__nav-link" [routerLink]="vm.previousEpisodeLink">
-                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-                            Previous episode
-                        </a>
-                    }
+                <section class="episode-summary">
+                    <app-image
+                        class="episode-summary__still aspect-landscape"
+                        [src]="episode.still_path ?? null"
+                        [alt]="episode.name ?? ''"
+                        params="w780"
+                    />
 
-                    @if (vm.nextEpisode) {
-                        <a class="detail__nav-link detail__nav-link--next" [routerLink]="vm.nextEpisodeLink">
-                            Next episode
-                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-                        </a>
-                    }
-                </nav>
-
-                <section class="lead">
-                    <app-image class="lead__still aspect-landscape" [src]="episode.still_path ?? null" params="w300" />
-
-                    <div class="lead__content">
-                        <mat-chip class="chip--accent lead__chip">
-                            S{{ episode.season_number }}E{{ episode.episode_number }}
-                        </mat-chip>
-
-                        <h2 class="lead__title text-title">
-                            {{ episode.name }}
-                        </h2>
+                    <div class="episode-summary__content">
+                        <div class="episode-summary__meta text-card-meta">
+                            <span>S{{ episode.season_number }}E{{ episode.episode_number }}</span>
+                            @if (episode.air_date) {
+                                <span>{{ episode.air_date | date: 'MMM d, y' }}</span>
+                            }
+                            @if (episode.runtime) {
+                                <span>{{ episode.runtime | m2h }}</span>
+                            }
+                        </div>
 
                         @if ((episode.vote_average && episode.vote_average > 0) || vm.canRateEpisode) {
-                            <div class="lead__ratings">
+                            <div class="episode-summary__ratings">
                                 @if (episode.vote_average && episode.vote_average > 0) {
-                                    <div class="rating">
-                                        <span class="rating__label text-overline">TMDb rating</span>
-
-                                        <div class="rating__summary">
-                                            <span class="rating__primary">
-                                                <i class="rating__icon fa-solid fa-star" aria-hidden="true"></i>
-                                                <span class="rating__value text-title">
-                                                    {{ episode.vote_average | number: '1.1-1' }}
-                                                </span>
-                                                <span class="rating__scale text-caption">/10</span>
-                                            </span>
-
-                                            @if (episode.vote_count) {
-                                                <span class="rating__meta text-caption">
-                                                    ({{ episode.vote_count | voteCount }})
-                                                </span>
-                                            }
-                                        </div>
-                                    </div>
+                                    <app-tmdb-rating
+                                        [value]="episode.vote_average"
+                                        [voteCount]="episode.vote_count"
+                                    />
                                 }
 
                                 @if (vm.canRateEpisode) {
                                     <app-user-rating
-                                        class="lead__user-rating lead__user-rating--with-divider"
+                                        class="episode-summary__user-rating episode-summary__user-rating--with-divider"
                                         [title]="episode.name ?? 'this episode'"
                                     />
                                 }
                             </div>
                         }
 
-                        <div class="lead__meta text-meta">
-                            @if (episode.air_date) {
-                                <span>Episode air date {{ episode.air_date | date }}</span>
-                            }
-                            @if (episode.runtime) {
-                                &#x2022;
-                                <span>{{ episode.runtime | m2h }}</span>
-                            }
-                        </div>
+                        <p
+                            class="episode-summary__overview text-hero-summary"
+                            [class.episode-summary__overview--empty]="!episode.overview"
+                        >
+                            {{ episode.overview || 'No overview available.' }}
+                        </p>
 
                         @if (vm.headerCrew.hasCrew) {
-                            <div class="lead__crew text-body-sm">
+                            <div class="episode-summary__crew text-body-sm">
                                 @if (vm.headerCrew.director; as director) {
                                     <span>
                                         Directed by
@@ -137,26 +101,23 @@
                     </div>
                 </section>
 
-                <section class="copy">
-                    <p class="copy__text text-body" [class.copy__text--empty]="!episode.overview">
-                        {{ episode.overview || 'No overview available.' }}
-                    </p>
-                </section>
             }
 
             <div class="sections">
                 @if (vm.stillsState.type !== 'loaded' || vm.stillsTotalCount) {
                     <app-page-section subtitle="Stills">
                         @if (vm.stillsTotalCount) {
-                            <span section-controls class="text-caption">
-                                {{ vm.stillsTotalCount }}
-                            </span>
+                            <a section-controls class="section-link text-body-sm" [routerLink]="['photos']">
+                                Browse all photos ({{ vm.stillsTotalCount }})
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
                         }
                         <app-photos-preview
                             [state]="vm.stillsState"
                             [totalCount]="vm.stillsTotalCount"
-                            [showMoreTile]="false"
+                            variant="compact"
                             (photoClick)="openPhotoViewer($event)"
+                            (moreClick)="openPhotosPage()"
                         />
                     </app-page-section>
                 }
@@ -168,9 +129,11 @@
                 }
 
                 @if (vm.guestStars.length || vm.groupedCrew.length) {
-                    <section class="credits surface-panel">
-                        <app-cast-crew-grid [cast]="vm.guestStars" [groupedCrew]="vm.groupedCrew" />
-                    </section>
+                    <app-page-section subtitle="Credits">
+                        <section class="credits surface-panel">
+                            <app-cast-crew-grid [cast]="vm.guestStars" [groupedCrew]="vm.groupedCrew" />
+                        </section>
+                    </app-page-section>
                 }
             </div>
         </main>

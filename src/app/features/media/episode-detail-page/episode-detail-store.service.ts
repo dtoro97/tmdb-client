@@ -18,20 +18,30 @@ import {
     MediaDetails,
     groupCrewMembers,
     LoadableItems,
+    LocaleStoreService,
     ViewerImage,
     loadedValue,
     GroupedCrew,
+    toYoutubeTrailerFirstVideoState,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaSeasonsStoreService } from '../media-seasons-store.service';
 
 export interface EpisodeDetailState {
+    target: EpisodeDetailTarget | null;
     episode: LoadableItems<TvEpisode>;
     images: LoadableItems<TvEpisodeImages>;
     videos: LoadableItems<Video>;
 }
 
+interface EpisodeDetailTarget {
+    readonly seriesId: number;
+    readonly seasonNumber: number;
+    readonly episodeNumber: number;
+}
+
 const INITIAL_STATE: EpisodeDetailState = {
+    target: null,
     episode: { type: 'idle' },
     images: { type: 'idle' },
     videos: { type: 'idle' },
@@ -63,11 +73,14 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
         private tvEpisodeRestControllerService: TvEpisodeRestControllerService,
         private mediaSeasonsStoreService: MediaSeasonsStoreService,
         private mediaDetailStoreService: MediaDetailStoreService,
+        private localeStore: LocaleStoreService,
     ) {
         super(INITIAL_STATE);
     }
 
-    readonly stillsState$ = this.select((state): LoadableItems<ViewerImage> => {
+    readonly episodeState$ = this.select((state) => state.episode);
+
+    readonly allStillsState$ = this.select((state): LoadableItems<ViewerImage> => {
         if (state.images.type === 'loading') {
             return { type: 'loading' };
         }
@@ -78,11 +91,24 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
 
         return {
             type: 'loaded',
-            value: (loadedValue(state.images)[0]?.stills ?? []).slice(0, 12) as ViewerImage[],
+            value: this.toEpisodeStillImages(loadedValue(state.images)[0]),
         };
     });
 
-    readonly allStills$ = this.select((state) => loadedValue(state.images)[0]?.stills ?? []);
+    readonly stillsState$ = this.allStillsState$.pipe(
+        map((state): LoadableItems<ViewerImage> => {
+            if (state.type !== 'loaded') {
+                return state;
+            }
+
+            return {
+                type: 'loaded',
+                value: state.value.slice(0, 12),
+            };
+        }),
+    );
+
+    readonly allStills$ = this.allStillsState$.pipe(map((state) => loadedValue(state)));
 
     readonly videosState$ = this.select((state): LoadableItems<Video> => {
         if (state.videos.type === 'loading') {
@@ -93,15 +119,12 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
             return { type: 'idle' };
         }
 
-        return {
-            type: 'loaded',
-            value: state.videos.value.filter((video) => video.site === 'YouTube'),
-        };
+        return toYoutubeTrailerFirstVideoState(state.videos);
     });
 
     readonly vm$ = combineLatest([
         this.mediaDetailStoreService.mediaDetailsState$,
-        this.select((state) => state.episode),
+        this.episodeState$,
         this.mediaSeasonsStoreService.seasonEpisodesState$,
         this.stillsState$,
         this.videosState$,
@@ -156,7 +179,10 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
         seasonNumber: number,
         episodeNumber: number,
     ): Observable<[TvEpisode, TvEpisodeImages, VideoList]> {
+        const target = { seriesId, seasonNumber, episodeNumber };
+
         this.patchState({
+            target,
             episode: { type: 'loading' },
             images: { type: 'loading' },
             videos: { type: 'loading' },
@@ -170,6 +196,7 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
         ]).pipe(
             tap(([episode, images, videos]) => {
                 this.patchState({
+                    target,
                     episode: { type: 'loaded', value: [episode] },
                     images: { type: 'loaded', value: [images] },
                     videos: { type: 'loaded', value: videos.results ?? [] },
@@ -182,5 +209,58 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
                 return EMPTY;
             }),
         );
+    }
+
+    getEpisodeImages$(
+        seriesId: number,
+        seasonNumber: number,
+        episodeNumber: number,
+    ): Observable<TvEpisodeImages> {
+        const target = { seriesId, seasonNumber, episodeNumber };
+        const state = this.get();
+
+        if (this.isCurrentTarget(state.target, target) && state.images.type === 'loaded') {
+            return of(state.images.value[0]);
+        }
+
+        this.patchState({
+            target,
+            episode: this.isCurrentTarget(state.target, target) ? state.episode : { type: 'idle' },
+            images: { type: 'loading' },
+            videos: this.isCurrentTarget(state.target, target) ? state.videos : { type: 'idle' },
+        });
+
+        return this.tvEpisodeRestControllerService.tvEpisodeImages(seriesId, seasonNumber, episodeNumber).pipe(
+            tap((images) => {
+                this.patchState({
+                    target,
+                    images: { type: 'loaded', value: [images] },
+                });
+            }),
+            catchError(() => {
+                this.patchState({
+                    images: { type: 'idle' },
+                });
+                return EMPTY;
+            }),
+        );
+    }
+
+    private isCurrentTarget(current: EpisodeDetailTarget | null, next: EpisodeDetailTarget): boolean {
+        return (
+            current?.seriesId === next.seriesId &&
+            current.seasonNumber === next.seasonNumber &&
+            current.episodeNumber === next.episodeNumber
+        );
+    }
+
+    private toEpisodeStillImages(images: TvEpisodeImages | null | undefined): ViewerImage[] {
+        const language = this.localeStore.language() || 'en';
+        return (images?.stills ?? [])
+            .filter((image) => image.iso_639_1 === null || image.iso_639_1 === language || image.iso_639_1 === 'en')
+            .map((image) => ({
+                ...image,
+                photoType: 'still',
+            }));
     }
 }

@@ -1,10 +1,9 @@
-import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 
 import { combineLatest, map, switchMap, take, tap } from 'rxjs';
@@ -17,9 +16,9 @@ import {
     PhotosPreviewComponent,
     SkeletonComponent,
     SubPageHeaderComponent,
+    TmdbRatingComponent,
     UserRatingComponent,
     VideosGridComponent,
-    VoteCountPipe,
 } from '../../../shared';
 import { MinutesToHours } from '../../../shared/pipes/time.pipe';
 import { MediaDetailStoreService } from '../media-detail-store.service';
@@ -33,9 +32,7 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
     imports: [
         AsyncPipe,
         DatePipe,
-        DecimalPipe,
         RouterLink,
-        MatChipsModule,
         MatDialogModule,
         CastCrewGridComponent,
         UserRatingComponent,
@@ -45,11 +42,10 @@ import { EpisodeDetailStoreService } from './episode-detail-store.service';
         SkeletonComponent,
         MinutesToHours,
         SubPageHeaderComponent,
+        TmdbRatingComponent,
         VideosGridComponent,
-        VoteCountPipe,
     ],
     providers: [
-        EpisodeDetailStoreService,
         EpisodeDetailActionsStore,
         { provide: RATING_ACTIONS, useExisting: EpisodeDetailActionsStore },
     ],
@@ -70,26 +66,6 @@ export class EpisodeDetailComponent {
         map(({ detail, routeMeta }) => ({
             ...detail,
             episodesLink: ['/title', routeMeta.seriesId, routeMeta.mediaType, 'episodes'] as const,
-            previousEpisodeLink: detail.previousEpisode
-                ? ([
-                      '/title',
-                      routeMeta.seriesId,
-                      routeMeta.mediaType,
-                      'episodes',
-                      detail.previousEpisode.season_number,
-                      detail.previousEpisode.episode_number,
-                  ] as const)
-                : null,
-            nextEpisodeLink: detail.nextEpisode
-                ? ([
-                      '/title',
-                      routeMeta.seriesId,
-                      routeMeta.mediaType,
-                      'episodes',
-                      detail.nextEpisode.season_number,
-                      detail.nextEpisode.episode_number,
-                  ] as const)
-                : null,
         })),
     );
 
@@ -99,6 +75,7 @@ export class EpisodeDetailComponent {
         private mediaStore: MediaDetailStoreService,
         public mediaSeasonsStore: MediaSeasonsStoreService,
         private route: ActivatedRoute,
+        private router: Router,
         private titleService: Title,
         private dialog: MatDialog,
     ) {
@@ -163,6 +140,12 @@ export class EpisodeDetailComponent {
                     height: '100vh',
                     autoFocus: false,
                 });
-            });
+        });
+    }
+
+    openPhotosPage(): void {
+        this.router.navigate(['photos'], {
+            relativeTo: this.route,
+        });
     }
 }

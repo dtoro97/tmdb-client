@@ -11,6 +11,8 @@ import {
     MovieRestControllerService,
     ReleaseDateList,
     ReviewPage,
+    ReviewDetails,
+    ReviewRestControllerService,
     TvSeries,
     TvSeriesRestControllerService,
     WatchProviderList,
@@ -23,6 +25,7 @@ export class MediaApiService {
     constructor(
         private readonly movieService: MovieRestControllerService,
         private readonly tvService: TvSeriesRestControllerService,
+        private readonly reviewService: ReviewRestControllerService,
     ) {}
 
     getDetails$(id: number, type: MediaType): Observable<Movie | TvSeries> {
@@ -77,5 +80,9 @@ export class MediaApiService {
         return type === 'tv'
             ? this.tvService.tvSeriesReviews(id, undefined, page, 'body', false, API_JSON_OPTIONS)
             : this.movieService.movieReviews(id, undefined, page, 'body', false, API_JSON_OPTIONS);
+    }
+
+    getReviewDetails$(reviewId: string): Observable<ReviewDetails> {
+        return this.reviewService.reviewDetails(reviewId, 'body', false, API_JSON_OPTIONS);
     }
 }

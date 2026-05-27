@@ -20,13 +20,6 @@ interface CollectionState {
     parts: LoadableItems<MediaListItem>;
 }
 
-export interface CollectionArcEntry {
-    readonly id: string;
-    readonly label: string;
-    readonly description: string;
-    readonly item: MediaListItem;
-}
-
 @Injectable()
 export class CollectionStoreService extends ComponentStore<CollectionState> {
     private readonly opts = API_JSON_OPTIONS;
@@ -50,63 +43,6 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         const firstYear = datedParts[0].date;
         const lastYear = datedParts[datedParts.length - 1].date;
         return firstYear === lastYear ? firstYear : `${firstYear}-${lastYear}`;
-    });
-
-    collectionArcSummary$ = this.select((state) => {
-        if (state.parts.type !== 'loaded' || !state.parts.value.length) {
-            return null;
-        }
-
-        const highestRated = getHighestRatedPart(state.parts.value);
-        const latestReleased = getLatestReleasedPart(state.parts.value);
-
-        if (highestRated && latestReleased) {
-            if (highestRated.id === latestReleased.id) {
-                return `${highestRated.title} is both the highest rated and latest released entry.`;
-            }
-
-            return `${highestRated.title} leads on rating, while ${latestReleased.title} is the latest released chapter.`;
-        }
-
-        if (highestRated) {
-            return `${highestRated.title} is the highest rated entry in the collection.`;
-        }
-
-        if (latestReleased) {
-            return `${latestReleased.title} is the latest released entry in the collection.`;
-        }
-
-        return null;
-    });
-
-    arcEntries$ = this.select((state): CollectionArcEntry[] => {
-        if (state.parts.type !== 'loaded' || !state.parts.value.length) {
-            return [];
-        }
-
-        const highestRated = getHighestRatedPart(state.parts.value);
-        const latestReleased = getLatestReleasedPart(state.parts.value);
-        const entries: CollectionArcEntry[] = [];
-
-        if (highestRated) {
-            entries.push({
-                id: `highest-rated-${highestRated.id}`,
-                label: 'Top rated',
-                description: 'The strongest-rated entry across the full collection.',
-                item: highestRated,
-            });
-        }
-
-        if (latestReleased && !entries.some((entry) => entry.item.id === latestReleased.id)) {
-            entries.push({
-                id: `latest-released-${latestReleased.id}`,
-                label: 'Latest',
-                description: 'The newest chapter with a real release date.',
-                item: latestReleased,
-            });
-        }
-
-        return entries;
     });
 
     backdropPath$ = this.collection$.pipe(
@@ -159,7 +95,9 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
                         toCollectionPartMediaListItem(part, 'year'),
                     );
 
-                    return this.enrichCastLinks$(mappedItems).pipe(map((items) => ({ collection, items })));
+                    return this.enrichCastLinks$(withCollectionBadges(mappedItems)).pipe(
+                        map((items) => ({ collection, items })),
+                    );
                 }),
                 tap(({ collection, items }) =>
                     this.patchState({
@@ -226,6 +164,29 @@ function getHighestRatedPart(items: MediaListItem[]): MediaListItem | null {
         }
 
         return (current.voteCount ?? 0) > (best.voteCount ?? 0) ? current : best;
+    });
+}
+
+function withCollectionBadges(items: MediaListItem[]): MediaListItem[] {
+    const highestRated = getHighestRatedPart(items);
+    const latestReleased = getLatestReleasedPart(items);
+
+    if (!highestRated && !latestReleased) {
+        return items;
+    }
+
+    return items.map((item) => {
+        const badges = [...(item.badges ?? [])];
+
+        if (highestRated?.id === item.id) {
+            badges.push({ label: 'Top rated', variant: 'accent' });
+        }
+
+        if (latestReleased?.id === item.id) {
+            badges.push({ label: 'Latest', variant: 'neutral' });
+        }
+
+        return badges.length === (item.badges?.length ?? 0) ? item : { ...item, badges };
     });
 }
 

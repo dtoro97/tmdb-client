@@ -9,6 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs';
 
 import {
+    BadgeComponent,
     EpisodeListItemComponent,
     HeroSurfaceComponent,
     ImageComponent,
@@ -17,11 +18,10 @@ import {
     PhotosPreviewComponent,
     RepeatPipe,
     SkeletonComponent,
+    TmdbRatingComponent,
     ExternalLinksComponent,
-    VoteCountPipe,
     VideosGridComponent,
     MediaCarouselPanelComponent,
-    RatingDistributionComponent,
     RecentlyViewedStoreService,
     buildYoutubeWatchUrl,
 } from '../../../shared';
@@ -46,16 +46,16 @@ import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
         MatButtonModule,
         MatChipsModule,
         MatDialogModule,
+        BadgeComponent,
         KeywordsListComponent,
         HeroSurfaceComponent,
         ImageComponent,
         PhotosPreviewComponent,
-        RatingDistributionComponent,
         ReviewCardComponent,
         SkeletonComponent,
+        TmdbRatingComponent,
         ExternalLinksComponent,
         VideosGridComponent,
-        VoteCountPipe,
         MinutesToHours,
         PageSectionComponent,
         RepeatPipe,
@@ -101,7 +101,7 @@ export class MediaDetailsComponent {
                         imagePath: mediaDetail.posterPath,
                         backdropPath: mediaDetail.backdropPath,
                         rating: mediaDetail.voteAverage,
-                        date: mediaDetail.releaseDate ?? mediaDetail.firstAirDate ?? '',
+                        date: '',
                         overview: mediaDetail.overview,
                     });
                     this.mediaActionsStoreService.setMedia(mediaDetail.id, mediaDetail.mediaType);

@@ -42,6 +42,13 @@
     border-radius: inherit;
 }
 
+.discover-footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    background: transparent;
+}
+
 @include mobile() {
     .discover-header {
         padding-block: var(--space-5) var(--space-3);
@@ -49,5 +56,9 @@
 
     .discover-body {
         flex-direction: column;
+    }
+
+    .discover-footer {
+        padding-inline: var(--space-3);
     }
 }

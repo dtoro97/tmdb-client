@@ -8,18 +8,3 @@
 .action {
     display: inline-flex;
 }
-
-.action--active {
-    --control-subtle-surface: var(--surface-brand-soft);
-    --control-subtle-surface-hover: var(--surface-brand-soft);
-    --control-subtle-surface-active: var(--surface-brand-soft);
-}
-
-.icon {
-    color: var(--text-accent);
-    transition: color var(--motion-fast);
-}
-
-.action--active .icon {
-    color: var(--color-brand);
-}

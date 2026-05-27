@@ -1,86 +1,77 @@
 <div class="media-list-dialog">
-    <header class="media-list-dialog__header u-flex-column u-gap-2">
-        <h2 class="text-title">Save {{ data.title }}</h2>
-        <p class="text-body-sm">Choose one of your TMDb lists, or create a new list right here.</p>
+    <header class="media-list-dialog__header">
+        <h2 class="text-title">Add to list</h2>
+        <p class="text-body-sm media-list-dialog__subtitle">
+            Choose a list for {{ data.title }}.
+        </p>
     </header>
 
-    <mat-dialog-content class="media-list-dialog__content u-flex-column u-gap-3">
-        @if (!createMode) {
-            <button class="media-list-dialog__new-list-button" type="button" (click)="openCreateMode()">
-                Create new list
-            </button>
-        }
-
-        @if (createMode) {
-            <form
-                class="media-list-dialog__create-form u-flex-column u-gap-3"
-                [formGroup]="createListForm"
-                (ngSubmit)="submitCreateList()"
-            >
-                <label class="media-list-dialog__field u-flex-column u-gap-2">
-                    <span class="text-body-sm">Name</span>
-                    <mat-form-field appearance="outline" subscriptSizing="fixed">
-                        <input matInput type="text" formControlName="name" placeholder="Weekend picks" />
-                        @if (
-                            createListForm.controls.name.touched && createListForm.controls.name.hasError('required')
-                        ) {
-                            <mat-error>Give your list a name.</mat-error>
-                        }
-                    </mat-form-field>
-                </label>
-
-                <label class="media-list-dialog__field u-flex-column u-gap-2">
-                    <span class="text-body-sm">Description</span>
-                    <mat-form-field class="media-list-dialog__textarea" appearance="outline" subscriptSizing="dynamic">
-                        <textarea
-                            matInput
-                            rows="3"
-                            formControlName="description"
-                            placeholder="A place for titles worth revisiting."
-                        ></textarea>
-                    </mat-form-field>
-                </label>
-
-                <div class="media-list-dialog__create-actions">
-                    <button matButton class="text-button" type="button" (click)="cancelCreateMode()">Cancel</button>
-                    <button matButton="filled" type="submit">Create and add</button>
-                </div>
-            </form>
-        }
-
+    <mat-dialog-content class="media-list-dialog__content">
         @if (data.customLists.length) {
-            <div class="media-list-dialog__list u-flex-column u-gap-1" role="listbox">
+            <div
+                class="media-list-dialog__list"
+                role="listbox"
+                aria-label="Your lists"
+            >
                 @for (list of data.customLists; track list.id) {
                     <button
                         class="media-list-dialog__list-item"
+                        [class.media-list-dialog__list-item--present]="list.itemPresent"
                         type="button"
                         role="option"
+                        [disabled]="list.itemPresent"
+                        [attr.aria-selected]="list.itemPresent ? 'true' : 'false'"
+                        [attr.aria-label]="
+                            list.itemPresent
+                                ? data.title + ' is already in ' + list.name
+                                : 'Add ' + data.title + ' to ' + list.name
+                        "
                         (click)="selectList(list.id)"
                     >
-                        <span class="media-list-dialog__list-item-head u-flex u-gap-2">
-                            <span class="text-subtitle">{{ list.name }}</span>
-                            <span class="media-list-dialog__count text-caption-strong u-nowrap">
-                                {{ list.itemCount }}
-                                {{ list.itemCount === 1 ? 'title' : 'titles' }}
+                        <span class="media-list-dialog__thumb" aria-hidden="true">
+                            <app-image [src]="list.posterPath" params="w92" />
+                        </span>
+
+                        <span class="media-list-dialog__copy">
+                            <span class="media-list-dialog__name text-subtitle">
+                                {{ list.name }}
+                            </span>
+                            <span
+                                class="media-list-dialog__description text-body-sm"
+                                [class.media-list-dialog__description--empty]="!list.description"
+                            >
+                                {{ list.description || 'No description.' }}
                             </span>
                         </span>
 
-                        <span class="media-list-dialog__description text-body-sm">
-                            @if (list.description) {
-                                {{ list.description }}
-                            } @else {
-                                -
+                        <span class="media-list-dialog__meta">
+                            <span class="media-list-dialog__count text-caption u-nowrap">
+                                {{ list.itemCount }}
+                                {{ list.itemCount === 1 ? 'title' : 'titles' }}
+                            </span>
+                            @if (list.itemPresent) {
+                                <span class="media-list-dialog__status text-caption u-nowrap">
+                                    <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                    Already in list
+                                </span>
                             }
                         </span>
                     </button>
                 }
             </div>
-        } @else if (!createMode) {
-            <p class="text-body-sm">You do not have any custom lists yet.</p>
+        } @else {
+            <div class="media-list-dialog__empty">
+                <i
+                    class="media-list-dialog__empty-icon fa-solid fa-list"
+                    aria-hidden="true"
+                ></i>
+                <p class="text-body-sm">You do not have any lists yet.</p>
+            </div>
         }
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
         <button matButton class="text-button" type="button" (click)="cancel()">Close</button>
+        <button matButton="filled" type="button" (click)="createList()">Create list</button>
     </mat-dialog-actions>
 </div>

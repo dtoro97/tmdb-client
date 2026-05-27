@@ -13,6 +13,7 @@ import {
     MediaType,
     normalizeRatingValue,
     TmdbUserAuthService,
+    UserSessionStoreService,
 } from '../../shared';
 
 interface MediaActionsState {
@@ -73,15 +74,18 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
         private readonly tmdbListService: TmdbListService,
         private readonly mediaRatingService: MediaRatingService,
         private readonly tmdbUserAuthService: TmdbUserAuthService,
+        private readonly userSessionStore: UserSessionStoreService,
     ) {
         super(INITIAL_STATE);
+
         this.fetchMediaActionsEffect(
             this.select(this.mediaId$, this.mediaType$, (mediaId, mediaType) =>
                 mediaId !== null && mediaType !== null ? { mediaId, mediaType } : null,
             ).pipe(
                 filter((payload): payload is MediaActionTarget => payload !== null),
                 distinctUntilChanged(
-                    (previous, next) => previous.mediaId === next.mediaId && previous.mediaType === next.mediaType,
+                    (previous, next) =>
+                        previous.mediaId === next.mediaId && previous.mediaType === next.mediaType,
                 ),
             ),
         );
@@ -230,16 +234,6 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> i
         }
 
         return this.tmdbListService.addToList$(listId, state.mediaId, state.mediaType);
-    }
-
-    createListAndAdd$(name: string, description: string): Observable<unknown> {
-        const state = this.get();
-
-        if (state.mediaId === null || state.mediaType === null) {
-            return throwError(() => new Error('No media action context is available.'));
-        }
-
-        return this.tmdbListService.createListAndAdd$(name, description, state.mediaId, state.mediaType);
     }
 
     private reloadUserRating$() {

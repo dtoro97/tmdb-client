@@ -34,7 +34,6 @@
     &__stage {
         border-radius: var(--radius-xl);
         overflow: hidden;
-        box-shadow: var(--shadow-xl);
     }
 
     &__stage-skeleton {
@@ -115,8 +114,8 @@
 
     &__badge-skeleton {
         width: 5.75rem;
-        height: 1.35rem;
-        --skeleton-radius: var(--radius-pill);
+        height: var(--badge-height);
+        --skeleton-radius: var(--badge-radius);
     }
 
     &__badge-skeleton--short {
@@ -189,7 +188,6 @@
 
         &__stage {
             border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
         }
 
         &__info {

@@ -16,6 +16,8 @@ import {
     MediaDetails,
     SortDirection,
     buildYoutubeThumbnailUrl,
+    compareValues,
+    compareVideosTrailerFirst,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
@@ -62,11 +64,19 @@ export class VideosPageComponent {
     ]).pipe(
         map(([videos, field, direction]) => {
             const sorted = [...videos].sort((a, b) => {
-                const aVal = String((a as Video)[field] ?? '');
-                const bVal = String((b as Video)[field] ?? '');
-                return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                const trailerComparison = compareVideosTrailerFirst(a, b);
+                if (trailerComparison) {
+                    return trailerComparison;
+                }
+
+                const valueComparison = compareValues(
+                    this.getVideoSortValue(a, field),
+                    this.getVideoSortValue(b, field),
+                );
+
+                return direction === 'desc' ? valueComparison * -1 : valueComparison;
             });
-            return direction === 'desc' ? sorted.reverse() : sorted;
+            return sorted;
         }),
     );
 
@@ -120,6 +130,20 @@ export class VideosPageComponent {
         this.sortDirectionSubject.next(
             this.sortDirectionSubject.value === 'asc' ? 'desc' : 'asc',
         );
+    }
+
+    private getVideoSortValue(
+        video: Video,
+        field: SortField,
+    ): string | undefined {
+        switch (field) {
+            case 'published_at':
+                return video.published_at;
+            case 'type':
+                return video.type;
+            case 'name':
+                return video.name;
+        }
     }
 
     private toVideoCardItem(

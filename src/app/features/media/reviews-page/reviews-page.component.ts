@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EMPTY, catchError, tap } from 'rxjs';
 
@@ -11,8 +10,10 @@ import {
     EmptyStateComponent,
     RepeatPipe,
     SkeletonComponent,
+    SnackbarComponent,
+    SnackbarService,
+    SnackbarType,
     SubPageHeaderComponent,
-    toUserFacingErrorMessage,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaReviewsStoreService } from '../media-reviews-store.service';
@@ -40,7 +41,7 @@ export class MediaReviewsPageComponent {
     constructor(
         public mediaStoreService: MediaDetailStoreService,
         public mediaReviewsStoreService: MediaReviewsStoreService,
-        private snackBar: MatSnackBar,
+        private snackbar: SnackbarService,
         private title: Title,
     ) {
         this.mediaStoreService.title$
@@ -57,12 +58,11 @@ export class MediaReviewsPageComponent {
         this.mediaReviewsStoreService
             .loadMoreReviews$()
             .pipe(
-                catchError((error) => {
-                    this.snackBar.open(
-                        toUserFacingErrorMessage(error, 'Could not load more reviews.'),
-                        'Dismiss',
-                        { duration: 5000, panelClass: 'snackbar-error' },
-                    );
+                catchError(() => {
+                    this.snackbar.openSnackbar(SnackbarComponent, {
+                        message: 'Could not load more reviews.',
+                        type: SnackbarType.Error,
+                    });
                     return EMPTY;
                 }),
             )

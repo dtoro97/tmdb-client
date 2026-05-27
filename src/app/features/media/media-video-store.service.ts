@@ -5,7 +5,14 @@ import { ComponentStore } from '@ngrx/component-store';
 
 import { MovieRestControllerService, TvSeriesRestControllerService, Video } from '../../api';
 import { API_JSON_OPTIONS, RELATED_COUNT } from '../../constants';
-import { ConfigStoreService, LoadableItems, pickBestYoutubeTrailer, isDefined, loadedValue } from '../../shared';
+import {
+    ConfigStoreService,
+    LoadableItems,
+    pickBestYoutubeTrailer,
+    isDefined,
+    loadedValue,
+    toYoutubeTrailerFirstVideoState,
+} from '../../shared';
 import { MediaType } from '../../shared';
 
 interface MediaVideoState {
@@ -20,10 +27,10 @@ const INITIAL_STATE: MediaVideoState = {
 
 @Injectable()
 export class MediaVideoStoreService extends ComponentStore<MediaVideoState> {
-    videosState$ = this.select((state) => state.videos);
+    videosState$ = this.select((state) => toYoutubeTrailerFirstVideoState(state.videos));
     private selectedVideoId$ = this.select((state) => state.selectedVideoId);
 
-    allVideos$ = this.videosState$.pipe(map((state) => loadedValue(state).filter((video) => video.site === 'YouTube')));
+    allVideos$ = this.videosState$.pipe(map((state) => loadedValue(state)));
 
     youtubeVideosTotalCount$ = this.allVideos$.pipe(map((videos) => videos.length));
 
