@@ -1,0 +1,32 @@
+:root {
+    --mat-slide-toggle-track-width: var(--slide-toggle-track-width);
+    --mat-slide-toggle-track-height: var(--slide-toggle-track-height);
+    --mat-slide-toggle-track-outline-width: var(--slide-toggle-track-outline-width);
+    --mat-slide-toggle-selected-track-outline-width: var(--slide-toggle-track-outline-width);
+    --mat-slide-toggle-disabled-unselected-track-outline-width: var(--slide-toggle-track-outline-width);
+
+    --mat-slide-toggle-with-icon-handle-size: var(--slide-toggle-handle-size);
+    --mat-slide-toggle-selected-handle-size: var(--slide-toggle-handle-size);
+    --mat-slide-toggle-unselected-handle-size: var(--slide-toggle-handle-size);
+    --mat-slide-toggle-pressed-handle-size: var(--slide-toggle-pressed-handle-size);
+
+    --mat-slide-toggle-selected-icon-size: var(--slide-toggle-icon-size);
+    --mat-slide-toggle-unselected-icon-size: var(--slide-toggle-icon-size);
+    --mat-slide-toggle-state-layer-size: var(--slide-toggle-state-layer-size);
+    --mat-slide-toggle-touch-target-size: var(--slide-toggle-touch-target-size);
+
+    --mat-slide-toggle-selected-handle-horizontal-margin: 0 var(--slide-toggle-selected-handle-offset);
+    --mat-slide-toggle-selected-with-icon-handle-horizontal-margin: 0 var(--slide-toggle-selected-handle-offset);
+    --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0
+        var(--slide-toggle-selected-pressed-handle-offset);
+    --mat-slide-toggle-unselected-handle-horizontal-margin: 0 var(--slide-toggle-handle-offset);
+    --mat-slide-toggle-unselected-with-icon-handle-horizontal-margin: 0 var(--slide-toggle-handle-offset);
+    --mat-slide-toggle-unselected-pressed-handle-horizontal-margin: 0
+        var(--slide-toggle-unselected-pressed-handle-offset);
+
+    --mat-slide-toggle-label-text-color: var(--text-secondary);
+    --mat-slide-toggle-label-text-size: var(--text-sm);
+    --mat-slide-toggle-label-text-line-height: var(--lh-normal);
+    --mat-slide-toggle-label-text-weight: var(--weight-medium);
+    --mat-slide-toggle-label-text-tracking: 0;
+}

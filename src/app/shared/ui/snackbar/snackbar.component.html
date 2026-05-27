@@ -1,0 +1,15 @@
+<div class="snackbar">
+    <span class="snackbar__message">{{ data.message }}</span>
+
+    <span class="snackbar__actions">
+        @if (data.link) {
+            <a class="snackbar__link" [routerLink]="data.link.routerLink" (click)="dismiss()">
+                {{ data.link.label }}
+            </a>
+        }
+
+        <button class="snackbar__dismiss" type="button" (click)="dismiss()">
+            Dismiss
+        </button>
+    </span>
+</div>

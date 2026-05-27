@@ -1,0 +1,26 @@
+.confirmation-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+
+    &__header {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    &__message {
+        color: var(--text-secondary);
+    }
+
+    &__actions {
+        gap: var(--space-2);
+    }
+
+    &__confirm--danger {
+        --mdc-filled-button-container-color: var(--surface-danger-soft);
+        --mdc-filled-button-label-text-color: var(--color-danger-light);
+        --mat-filled-button-hover-state-layer-color: var(--ripple-danger-soft);
+        --mat-filled-button-pressed-state-layer-color: var(--ripple-danger-soft);
+    }
+}

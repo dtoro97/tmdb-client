@@ -23,13 +23,16 @@ import { FindResult } from '../model/findResult';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    FindRestControllerServiceInterface
+} from './find.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class FindRestControllerService extends BaseService {
+export class FindRestControllerService extends BaseService implements FindRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

@@ -23,13 +23,16 @@ import { MediaChangePage } from '../model/mediaChangePage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    ChangesRestControllerServiceInterface
+} from './changes.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class ChangesRestControllerService extends BaseService {
+export class ChangesRestControllerService extends BaseService implements ChangesRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

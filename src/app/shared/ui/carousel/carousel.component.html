@@ -21,23 +21,23 @@
     </div>
 
     @if (hasOverflow) {
-        <app-icon-button
+        <app-overlay-icon-button
             class="carousel__nav carousel__nav--prev"
             ariaLabel="Scroll carousel backward"
             [disabled]="!canPrev"
             (onClick)="prev()"
         >
             <i class="fa-solid fa-chevron-left"></i>
-        </app-icon-button>
+        </app-overlay-icon-button>
     }
     @if (hasOverflow) {
-        <app-icon-button
+        <app-overlay-icon-button
             class="carousel__nav carousel__nav--next"
             ariaLabel="Scroll carousel forward"
             [disabled]="!canNext"
             (onClick)="next()"
         >
             <i class="fa-solid fa-chevron-right"></i>
-        </app-icon-button>
+        </app-overlay-icon-button>
     }
 </div>

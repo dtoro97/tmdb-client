@@ -1,3 +1,5 @@
+@use 'mixins' as *;
+
 .external-links {
     display: flex;
     align-items: center;
@@ -8,16 +10,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
-    transition: color var(--motion-base);
-
     font-size: var(--text-2xl);
-    color: var(--text-muted);
-    @media (hover: hover) and (pointer: fine) {
-        &:hover {
-            color: var(--text-accent);
-        }
-    }
+    @include text-link(var(--text-muted));
 }
 
 mat-divider {

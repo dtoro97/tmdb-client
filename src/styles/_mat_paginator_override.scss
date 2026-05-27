@@ -1,0 +1,123 @@
+@use "./breakpoints" as *;
+
+:root {
+    --mat-paginator-container-background-color: transparent;
+    --mat-paginator-container-text-color: var(--text-secondary);
+    --mat-paginator-enabled-icon-color: var(--text-muted);
+    --mat-paginator-disabled-icon-color: var(--text-disabled);
+    --mat-paginator-container-text-font: var(--font-body);
+    --mat-paginator-container-text-line-height: var(--lh-normal);
+    --mat-paginator-container-text-size: var(--text-xs);
+    --mat-paginator-container-text-weight: var(--weight-medium);
+    --mat-paginator-container-text-tracking: 0;
+    --mat-paginator-select-trigger-text-size: var(--text-xs);
+    --mat-paginator-container-size: var(--control-height-lg);
+    --mat-paginator-form-field-container-height: var(--control-height-sm);
+    --mat-paginator-form-field-container-vertical-padding: var(--space-2);
+    --mat-paginator-page-size-select-width: 5rem;
+    --mat-paginator-page-size-select-touch-target-height: var(--control-height-md);
+}
+
+.mat-mdc-paginator {
+    background: transparent;
+    color: var(--mat-paginator-container-text-color);
+}
+
+.mat-mdc-paginator-container {
+    min-height: var(--mat-paginator-container-size);
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 0;
+}
+
+.mat-mdc-paginator-page-size {
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 var(--space-3) 0 0;
+}
+
+[dir="rtl"] .mat-mdc-paginator-page-size {
+    margin: 0 0 0 var(--space-3);
+}
+
+.mat-mdc-paginator-page-size-label,
+.mat-mdc-paginator-page-size-value,
+.mat-mdc-paginator-range-label {
+    margin: 0;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.mat-mdc-paginator-page-size-select {
+    width: var(--mat-paginator-page-size-select-width);
+    margin: 0;
+}
+
+.mat-mdc-paginator-range-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.mat-mdc-paginator-range-label {
+    min-inline-size: 8.5rem;
+    text-align: center;
+}
+
+.mat-mdc-paginator-range-actions .mat-mdc-icon-button {
+    --mat-icon-button-state-layer-size: var(--control-height-sm);
+    --mdc-icon-button-state-layer-size: var(--control-height-sm);
+    --mat-icon-button-icon-size: 1rem;
+    --mat-icon-button-icon-color: currentColor;
+    --mat-icon-button-state-layer-color: transparent;
+    --mat-icon-button-ripple-color: transparent;
+    --mat-icon-button-hover-state-layer-opacity: 0;
+    --mat-icon-button-focus-state-layer-opacity: 0;
+    --mat-icon-button-pressed-state-layer-opacity: 0;
+
+    inline-size: var(--control-height-sm);
+    block-size: var(--control-height-sm);
+    padding: 0;
+    border-radius: var(--control-radius);
+    color: var(--text-muted);
+    transition:
+        background-color var(--motion-base),
+        color var(--motion-base);
+}
+
+.mat-mdc-paginator-range-actions .mat-mdc-icon-button:not([aria-disabled="true"]):is(:hover, :focus-visible) {
+    --mat-paginator-enabled-icon-color: var(--text-primary);
+
+    background: var(--control-subtle-surface-hover);
+    color: var(--text-primary);
+}
+
+.mat-mdc-paginator-range-actions .mat-mdc-icon-button:not([aria-disabled="true"]):active {
+    --mat-paginator-enabled-icon-color: var(--text-primary);
+
+    background: var(--control-subtle-surface-active);
+    color: var(--text-primary);
+}
+
+.mat-mdc-paginator-range-actions .mat-mdc-icon-button[aria-disabled="true"] {
+    --mat-paginator-disabled-icon-color: var(--text-disabled);
+
+    color: var(--text-disabled);
+    cursor: default;
+    opacity: 1;
+}
+
+.mat-mdc-paginator-icon {
+    width: 1.15rem;
+    transition: fill var(--motion-base);
+}
+
+@include mobile() {
+    .mat-mdc-paginator-container {
+        gap: var(--space-2);
+    }
+
+    .mat-mdc-paginator-range-label {
+        min-inline-size: 7.5rem;
+    }
+}

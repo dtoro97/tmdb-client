@@ -1,23 +1,22 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
 
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import type { ConfigurationImages } from '../../../api';
 import { PHOTOS_BROWSER_BATCH } from '../../../constants';
-import { isDefined, type SortDirection } from '../../utils';
+import type { SelectOption, SortDirection } from '../../types';
+import { isDefined } from '../../utils';
 import type { PhotosBrowserSelection, ViewerImage } from '../../models';
 import { ConfigStoreService } from '../../services/config-store.service';
-import { LocaleStoreService } from '../../services/locale-store.service';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { BrowseToolbarComponent } from '../browse-toolbar/browse-toolbar.component';
 import { PillToggleComponent } from '../pill-toggle/pill-toggle.component';
 import { SortButtonComponent } from '../sort-button/sort-button.component';
 import { ImageComponent } from '../image/image.component';
 
-type SortField = 'rating' | 'votes' | 'resolution' | 'language';
+type SortField = 'rating' | 'votes' | 'resolution';
 
 interface PhotoTileVm {
     image: ViewerImage;
@@ -31,7 +30,6 @@ interface PhotoTileVm {
         AsyncPipe,
         BrowseToolbarComponent,
         MatButtonModule,
-        MatSelectModule,
         EmptyStateComponent,
         ImageComponent,
         PillToggleComponent,
@@ -42,25 +40,21 @@ interface PhotoTileVm {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PhotosBrowserComponent {
-    readonly sortOptions: ReadonlyArray<{ label: string; value: SortField }> = [
+    readonly sortOptions: ReadonlyArray<SelectOption<SortField>> = [
         { label: 'Rating', value: 'rating' as const },
         { label: 'Votes', value: 'votes' as const },
         { label: 'Resolution', value: 'resolution' as const },
-        { label: 'Language', value: 'language' as const },
     ];
 
     private readonly imagesSubject = new BehaviorSubject<ViewerImage[]>([]);
     private readonly selectedTypesSubject = new BehaviorSubject<string[]>([]);
-    private readonly selectedLanguagesSubject = new BehaviorSubject<string[]>([]);
     private readonly visibleCountSubject = new BehaviorSubject<number>(PHOTOS_BROWSER_BATCH);
     private readonly sortFieldSubject = new BehaviorSubject<SortField>('rating');
     private readonly sortDirectionSubject = new BehaviorSubject<SortDirection>('desc');
-    private readonly userLanguage = this.localeStore.language();
 
     private readonly sortField$ = this.sortFieldSubject.asObservable();
     private readonly sortDirection$ = this.sortDirectionSubject.asObservable();
     private readonly selectedTypes$ = this.selectedTypesSubject.asObservable();
-    private readonly selectedLanguages$ = this.selectedLanguagesSubject.asObservable();
     private readonly configImages$ = this.configStoreService.configuration$.pipe(
         map(
             (configuration) =>
@@ -69,20 +63,6 @@ export class PhotosBrowserComponent {
                         images?: ConfigurationImages;
                     }
                 ).images,
-        ),
-    );
-
-    private readonly languageLookup$ = this.configStoreService.languages$.pipe(
-        map(
-            (languages) =>
-                new Map(
-                    languages
-                        .filter((language) => !!language.iso_639_1)
-                        .map((language) => [
-                            language.iso_639_1 as string,
-                            language.english_name || language.name || '',
-                        ]),
-                ),
         ),
     );
 
@@ -98,35 +78,16 @@ export class PhotosBrowserComponent {
         }),
     );
 
-    private readonly languageOptions$ = combineLatest([this.imagesSubject, this.languageLookup$]).pipe(
-        map(([images, languageLookup]) => {
-            const uniqueLanguages = new Set(
-                images.map((image) => image.iso_639_1).filter((language): language is string => !!language),
-            );
-
-            return [...uniqueLanguages]
-                .sort((a, b) =>
-                    this.getLanguageLabel(a, languageLookup).localeCompare(this.getLanguageLabel(b, languageLookup)),
-                )
-                .map((language) => ({
-                    label: this.getLanguageLabel(language, languageLookup),
-                    value: language,
-                }));
-        }),
-    );
-
     private readonly filteredSortedImages$ = combineLatest([
         this.imagesSubject,
-        this.languageLookup$,
         this.selectedTypes$,
-        this.selectedLanguages$,
         this.sortField$,
         this.sortDirection$,
     ]).pipe(
-        map(([images, languageLookup, selectedTypes, selectedLanguages, sortField, sortDirection]) => {
-            const filteredImages = this.getFilteredImages(images, selectedTypes, selectedLanguages);
+        map(([images, selectedTypes, sortField, sortDirection]) => {
+            const filteredImages = this.getFilteredImages(images, selectedTypes);
 
-            return this.getSortedImages(filteredImages, sortField, sortDirection, languageLookup);
+            return this.getSortedImages(filteredImages, sortField, sortDirection);
         }),
     );
 
@@ -150,26 +111,11 @@ export class PhotosBrowserComponent {
         ),
     );
 
-    private readonly selectedLanguageLabel$ = combineLatest([this.selectedLanguages$, this.languageOptions$]).pipe(
-        map(([selectedLanguages, options]) => {
-            if (!selectedLanguages.length) {
-                return 'Languages';
-            }
-
-            const selectedLookup = new Map(options.map((option) => [option.value as string, option.label]));
-
-            return selectedLanguages.map((language) => selectedLookup.get(language) ?? language).join(', ');
-        }),
-    );
-
     readonly vm$ = combineLatest([
         this.imagesSubject,
         this.visibleCountLabel$,
         this.typePillOptions$,
         this.selectedTypes$,
-        this.languageOptions$,
-        this.selectedLanguages$,
-        this.selectedLanguageLabel$,
         this.sortField$,
         this.sortDirection$,
         this.filteredSortedImages$,
@@ -182,9 +128,6 @@ export class PhotosBrowserComponent {
                 visibleCountLabel,
                 typePillOptions,
                 selectedTypes,
-                languageOptions,
-                selectedLanguages,
-                selectedLanguageLabel,
                 sortField,
                 sortDirection,
                 filteredImages,
@@ -195,10 +138,6 @@ export class PhotosBrowserComponent {
                 visibleCountLabel,
                 typePillOptions,
                 selectedTypes,
-                languageOptions,
-                selectedLanguages,
-                selectedLanguageLabel,
-                hasSelectedLanguages: selectedLanguages.length > 0,
                 sortField,
                 sortDirection,
                 images: visibleImages,
@@ -208,10 +147,7 @@ export class PhotosBrowserComponent {
         ),
     );
 
-    constructor(
-        private readonly configStoreService: ConfigStoreService,
-        private readonly localeStore: LocaleStoreService,
-    ) {}
+    constructor(private readonly configStoreService: ConfigStoreService) {}
 
     @Input() initialCount = PHOTOS_BROWSER_BATCH;
     @Input() incrementCount = PHOTOS_BROWSER_BATCH;
@@ -220,10 +156,6 @@ export class PhotosBrowserComponent {
         this.imagesSubject.next(images);
         this.visibleCountSubject.next(this.initialCount);
         this.selectedTypesSubject.next([]);
-
-        const appLanguage = this.localeStore.language();
-        const hasAppLanguage = images.some((image) => image.iso_639_1 === appLanguage);
-        this.selectedLanguagesSubject.next(hasAppLanguage ? [appLanguage] : []);
     }
 
     @Output() photoSelect = new EventEmitter<PhotosBrowserSelection>();
@@ -241,11 +173,6 @@ export class PhotosBrowserComponent {
         this.visibleCountSubject.next(this.initialCount);
     }
 
-    setSelectedLanguages(value: unknown): void {
-        this.selectedLanguagesSubject.next((value as string[]) ?? []);
-        this.visibleCountSubject.next(this.initialCount);
-    }
-
     showMore(): void {
         this.visibleCountSubject.next(this.visibleCountSubject.value + this.incrementCount);
     }
@@ -257,24 +184,16 @@ export class PhotosBrowserComponent {
     private getFilteredImages(
         images: readonly ViewerImage[],
         selectedTypes: readonly string[],
-        selectedLanguages: readonly string[],
     ): ViewerImage[] {
-        const typeFiltered = selectedTypes.length
+        return selectedTypes.length
             ? images.filter((image) => selectedTypes.includes(image.photoType ?? ''))
-            : images;
-
-        return selectedLanguages.length
-            ? typeFiltered.filter(
-                  (image) => selectedLanguages.includes(image.iso_639_1 ?? '') || image.photoType === 'profile',
-              )
-            : [...typeFiltered];
+            : [...images];
     }
 
     private getSortedImages(
         images: readonly ViewerImage[],
         sortField: SortField,
         sortDirection: SortDirection,
-        languageLookup: ReadonlyMap<string, string>,
     ): ViewerImage[] {
         const sortedImages = [...images].sort((a, b) => {
             const aValue = this.getSortValue(a, sortField);
@@ -282,12 +201,6 @@ export class PhotosBrowserComponent {
 
             if (aValue !== bValue) {
                 return aValue - bValue;
-            }
-
-            if (sortField === 'language') {
-                return this.getLanguageLabel(a.iso_639_1, languageLookup).localeCompare(
-                    this.getLanguageLabel(b.iso_639_1, languageLookup),
-                );
             }
 
             return 0;
@@ -303,31 +216,7 @@ export class PhotosBrowserComponent {
         if (sortField === 'resolution') {
             return (image.width ?? 0) * (image.height ?? 0);
         }
-        if (sortField === 'language') {
-            const language = image.iso_639_1;
-
-            if (!language) {
-                return 0;
-            }
-
-            if (language === this.userLanguage) {
-                return 2;
-            }
-
-            return 1;
-        }
         return image.vote_average ?? 0;
-    }
-
-    private getLanguageLabel(
-        languageCode: string | null | undefined,
-        languageLookup: ReadonlyMap<string, string>,
-    ): string {
-        if (!languageCode) {
-            return '';
-        }
-
-        return languageLookup.get(languageCode) || languageCode.toUpperCase();
     }
 
     private getThumbnailSize(image: ViewerImage, configImages: ConfigurationImages | undefined): string {

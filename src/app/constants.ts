@@ -9,8 +9,6 @@ export const GRID_COUNT = 4;
 export const MAX_VISIBLE_PHOTOS = 9;
 export const PHOTOS_BROWSER_BATCH = 18;
 
-export const VIDEOS_GRID_FEATURED_COUNT = 2;
-
 export const SEED_COUNT = 30;
 export const CAROUSEL_COUNT = 6;
 
@@ -20,4 +18,9 @@ export const PHOTOS_SKELETON_COUNT = 9;
 
 export const API_JSON_OPTIONS = {
     httpHeaderAccept: 'application/json' as const,
+};
+
+export const API_PRIVATE_JSON_OPTIONS = {
+    httpHeaderAccept: 'application/json' as const,
+    transferCache: false,
 };

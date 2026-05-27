@@ -4,69 +4,29 @@
 }
 
 .app-badge {
-    --app-badge-slant-cut: 0.45rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    min-height: 1.4rem;
-    padding-inline: var(--space-2);
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--mat-sys-outline-variant);
-    background: var(--mat-sys-surface-container-low);
-    color: var(--mat-sys-on-surface);
-    font-size: var(--text-2xs);
-    font-weight: var(--weight-semibold);
+    min-height: var(--badge-height);
+    padding-inline: var(--badge-padding-x);
+    border: 1px solid var(--badge-border);
+    border-radius: var(--badge-radius);
+    background: var(--badge-surface);
+    color: var(--badge-text);
+    font-size: var(--badge-font-size);
+    font-weight: var(--badge-font-weight);
     line-height: 1;
-    text-transform: uppercase;
     white-space: nowrap;
 }
 
-.app-badge--slant {
-    margin-right: var(--app-badge-slant-cut);
-    padding-inline: var(--space-2) calc(var(--space-2) + 0.2rem);
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-
-    &::after {
-        content: "";
-        position: absolute;
-        top: -1px;
-        right: calc(var(--app-badge-slant-cut) * -1);
-        bottom: -1px;
-        width: calc(var(--app-badge-slant-cut) + 0.2rem);
-        background: inherit;
-        border-top: 1px solid currentColor;
-        border-right: 1px solid currentColor;
-        border-bottom: 1px solid currentColor;
-        border-color: inherit;
-        clip-path: polygon(0 0, 100% 0, 64% 100%, 0 100%);
-    }
-}
-
 .app-badge--accent {
-    background: var(--color-brand);
-    color: var(--mat-sys-on-primary);
-    border-color: var(--border-brand-soft);
+    background: var(--badge-accent-surface);
+    color: var(--badge-accent-text);
+    border-color: var(--badge-accent-border);
 }
 
 .app-badge--outline {
-    background: var(--surface-brand-soft);
-    color: var(--color-brand);
-    border-color: var(--border-brand-soft);
-}
-
-.app-badge--rank {
-    min-height: 1.5rem;
-    padding-inline: var(--space-2) calc(var(--space-2) + 0.1rem);
-    border-radius: var(--radius-sm);
-    background: var(--color-rank);
-    color: var(--color-on-rank);
-    border-color: var(--color-rank-border);
-    font-weight: var(--weight-bold);
-}
-
-.app-badge--rank.app-badge--slant::after {
-    background: var(--color-rank-cap);
-    border-color: var(--color-rank-border);
+    background: var(--badge-outline-surface);
+    color: var(--badge-outline-text);
+    border-color: var(--badge-outline-border);
 }

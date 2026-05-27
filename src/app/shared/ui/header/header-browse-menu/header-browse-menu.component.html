@@ -1,0 +1,49 @@
+<button
+    class="browse-menu__button text-meta"
+    type="button"
+    [attr.aria-expanded]="menuOpen"
+    [attr.aria-controls]="menuOpen ? 'browse-menu-panel' : null"
+    (click)="toggleMenu()"
+>
+    <mat-icon class="browse-menu__button-icon">menu</mat-icon>
+    <span>Menu</span>
+</button>
+
+@if (menuOpen) {
+    <nav id="browse-menu-panel" class="browse-menu__panel" aria-label="Browse">
+        <div class="browse-menu__inner inner-container">
+            <div class="browse-menu__groups">
+                @for (group of browseGroups; track group.title) {
+                    <section class="browse-menu__group" [attr.aria-labelledby]="'browse-menu-' + group.id">
+                        <h2 class="browse-menu__group-title text-title" [id]="'browse-menu-' + group.id">
+                            <mat-icon class="browse-menu__group-icon">{{ group.icon }}</mat-icon>
+                            <span>{{ group.title }}</span>
+                        </h2>
+
+                        <ul class="browse-menu__links u-list-none">
+                            @for (link of group.links; track link.label) {
+                                <li>
+                                    <a
+                                        class="browse-menu__link"
+                                        [routerLink]="link.routerLink"
+                                        [queryParams]="link.queryParams"
+                                        routerLinkActive="browse-menu__link--active"
+                                        [routerLinkActiveOptions]="link.activeOptions"
+                                        [attr.aria-current]="rla.isActive ? 'page' : null"
+                                        #rla="routerLinkActive"
+                                        (click)="closeMenu()"
+                                    >
+                                        <span class="text-body-sm browse-menu__link-label">{{ link.label }}</span>
+                                        @if (link.description) {
+                                            <span class="text-caption">{{ link.description }}</span>
+                                        }
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                }
+            </div>
+        </div>
+    </nav>
+}

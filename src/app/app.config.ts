@@ -25,7 +25,7 @@ import {
     withEventReplay,
 } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
-import { UserSessionStoreService } from './shared';
+import { UserSessionStoreService, WatchProviderStoreService } from './shared';
 import { TmdbUserAuthService } from './shared/services/tmdb-user-auth.service';
 import { delayInterceptor } from './shared/utils/delay-interceptor';
 import { localeInterceptor } from './shared/utils/locale-interceptor';
@@ -69,6 +69,9 @@ export const appConfig: ApplicationConfig = {
         provideAppInitializer(() =>
             firstValueFrom(inject(TmdbUserAuthService).tryCompleteLoginFromUrl$()),
         ),
+        provideAppInitializer(() => {
+            inject(WatchProviderStoreService).load();
+        }),
         provideClientHydration(withEventReplay()),
         //provideServerRendering(withRoutes(serverRoutes)),
     ],

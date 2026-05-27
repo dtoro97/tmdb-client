@@ -25,13 +25,16 @@ import { TvSeriesPage } from '../model/tvSeriesPage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    TvSeriesListRestControllerServiceInterface
+} from './tvSeriesList.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class TvSeriesListRestControllerService extends BaseService {
+export class TvSeriesListRestControllerService extends BaseService implements TvSeriesListRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

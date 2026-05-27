@@ -1,5 +1,5 @@
 /**
- * TMDB API
+ * TMDB API v4 Lists
  *
  * 
  *
@@ -7,11 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ConfigurationImages } from './configurationImages';
 
 
-export interface Configuration { 
-    images?: ConfigurationImages;
-    change_keys?: Array<string>;
+export interface V4ListDetailsCreatedBy { 
+    avatar_path?: string | null;
+    gravatar_hash?: string;
+    id?: string;
+    name?: string;
+    username?: string;
 }
 

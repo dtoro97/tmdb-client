@@ -29,10 +29,12 @@ export type MediaCarouselPanelVariant = 'card' | 'backdrop';
 })
 export class MediaCarouselPanelComponent {
     @Input({ required: true }) state!: LoadableItems<CardItem>;
+    @Input() ariaLabel = 'Media carousel';
     @Input() dateFormat: CardDateFormat = 'year';
+    @Input() imageParams?: string;
     @Input() showRating = true;
     @Input() showDate = false;
     @Input() variant: MediaCarouselPanelVariant = 'card';
     @Input() columns: number | null = null;
-    readonly skeletonCount = PAGE_SIZE;
+    @Input() skeletonCount = PAGE_SIZE;
 }

@@ -23,13 +23,16 @@ import { ReviewDetails } from '../model/reviewDetails';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    ReviewRestControllerServiceInterface
+} from './review.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class ReviewRestControllerService extends BaseService {
+export class ReviewRestControllerService extends BaseService implements ReviewRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

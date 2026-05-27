@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Out
 
 import { LoadableItems } from '../../types';
 import type { ViewerImage } from '../../models';
-import { LocaleStoreService } from '../../services/locale-store.service';
 import { ImageComponent, type ImageType } from '../image/image.component';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
 
 type PhotosPreviewMode = 'media' | 'person';
+type PhotosPreviewVariant = 'mosaic' | 'compact';
 
 interface PhotosPreviewEntry {
     image: ViewerImage;
@@ -23,8 +23,10 @@ interface PhotosPreviewTile extends PhotosPreviewEntry {
 
 const MAX_MEDIA_PREVIEW_PHOTOS = 9;
 const MAX_PERSON_PREVIEW_PHOTOS = 7;
+const MAX_COMPACT_PREVIEW_PHOTOS = 4;
 const PERSON_PROFILE_COUNT = 3;
 const SKELETON_TILE_COUNT = 9;
+const COMPACT_SKELETON_TILE_COUNT = 4;
 
 @Component({
     selector: 'app-photos-preview',
@@ -38,20 +40,21 @@ export class PhotosPreviewComponent implements OnChanges {
     @Input() totalCount = 0;
     @Input() maxVisible: number | null = null;
     @Input() mode: PhotosPreviewMode = 'media';
+    @Input() variant: PhotosPreviewVariant = 'mosaic';
     @Input() showMoreTile = true;
     @Output() photoClick = new EventEmitter<number>();
     @Output() moreClick = new EventEmitter<void>();
 
-    readonly skeletonTiles = Array.from({ length: SKELETON_TILE_COUNT }, (_, index) => index);
+    skeletonTiles: readonly number[] = Array.from({ length: SKELETON_TILE_COUNT }, (_, index) => index);
     tiles: PhotosPreviewTile[] = [];
-
-    constructor(private readonly localeStore: LocaleStoreService) {}
 
     ngOnChanges(): void {
         this.updateViewModel();
     }
 
     private updateViewModel(): void {
+        this.skeletonTiles = Array.from({ length: this.getSkeletonCount() }, (_, index) => index);
+
         if (this.state.type !== 'loaded' || !this.state.value.length) {
             this.tiles = [];
             return;
@@ -68,10 +71,22 @@ export class PhotosPreviewComponent implements OnChanges {
     }
 
     private getVisibleCount(): number {
-        const defaultCount = this.mode === 'person' ? MAX_PERSON_PREVIEW_PHOTOS : MAX_MEDIA_PREVIEW_PHOTOS;
+        const defaultCount = this.getDefaultVisibleCount();
         const maxVisible = this.maxVisible ?? defaultCount;
 
         return Math.min(Math.max(maxVisible, 0), MAX_MEDIA_PREVIEW_PHOTOS);
+    }
+
+    private getDefaultVisibleCount(): number {
+        if (this.variant === 'compact') {
+            return MAX_COMPACT_PREVIEW_PHOTOS;
+        }
+
+        return this.mode === 'person' ? MAX_PERSON_PREVIEW_PHOTOS : MAX_MEDIA_PREVIEW_PHOTOS;
+    }
+
+    private getSkeletonCount(): number {
+        return this.variant === 'compact' ? COMPACT_SKELETON_TILE_COUNT : SKELETON_TILE_COUNT;
     }
 
     private selectEntries(images: readonly ViewerImage[], visibleCount: number): PhotosPreviewEntry[] {
@@ -85,14 +100,14 @@ export class PhotosPreviewComponent implements OnChanges {
     }
 
     private selectMediaEntries(entries: readonly PhotosPreviewEntry[], visibleCount: number): PhotosPreviewEntry[] {
-        const groups = [...this.groupByPhotoType(entries).values()].map((group) => this.preferCurrentLanguage(group));
+        const groups = [...this.groupByPhotoType(entries).values()];
 
         return this.mixEntries(groups, visibleCount);
     }
 
     private selectPersonEntries(entries: readonly PhotosPreviewEntry[], visibleCount: number): PhotosPreviewEntry[] {
         const profiles = entries.filter((entry) => entry.image.photoType === 'profile').slice(0, PERSON_PROFILE_COUNT);
-        const tagged = this.preferCurrentLanguage(entries.filter((entry) => entry.image.photoType === 'tagged'));
+        const tagged = entries.filter((entry) => entry.image.photoType === 'tagged');
         const mixed = this.mixEntries([profiles, tagged], visibleCount);
 
         return mixed.length ? mixed : entries.slice(0, visibleCount);
@@ -107,13 +122,6 @@ export class PhotosPreviewComponent implements OnChanges {
         }
 
         return groups;
-    }
-
-    private preferCurrentLanguage(entries: readonly PhotosPreviewEntry[]): PhotosPreviewEntry[] {
-        const language = this.localeStore.language();
-        const matches = entries.filter((entry) => entry.image.iso_639_1 === language || entry.image.iso_639_1 === 'en');
-
-        return matches.length ? matches : [...entries];
     }
 
     private mixEntries(groups: readonly PhotosPreviewEntry[][], count: number): PhotosPreviewEntry[] {

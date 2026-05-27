@@ -27,13 +27,16 @@ import { RatedTvSeriesPage } from '../model/ratedTvSeriesPage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    GuestSessionRestControllerServiceInterface
+} from './guestSession.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class GuestSessionRestControllerService extends BaseService {
+export class GuestSessionRestControllerService extends BaseService implements GuestSessionRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

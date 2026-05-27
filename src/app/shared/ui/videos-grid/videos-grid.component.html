@@ -1,32 +1,16 @@
 @if (state.type === "loading") {
-    <div class="videos-grid__section videos-grid__section--featured">
-        @for (index of featuredCount | repeat; track index) {
-            <ng-container *ngTemplateOutlet="skeletonCard" />
-        }
-    </div>
-
-    <div class="videos-grid__section videos-grid__section--list">
+    <div class="videos-grid__section">
         @for (index of gridCount | repeat; track index) {
             <ng-container *ngTemplateOutlet="skeletonCard" />
         }
     </div>
 } @else if (state.type === "loaded" || state.type === "loading-more") {
-    @if (featuredItems.length || gridItems.length) {
-        @if (featuredItems.length) {
-            <div class="videos-grid__section videos-grid__section--featured">
-                @for (item of featuredItems; track item.id) {
-                    <app-video-card [item]="item" />
-                }
-            </div>
-        }
-
-        @if (gridItems.length) {
-            <div class="videos-grid__section videos-grid__section--list">
-                @for (item of gridItems; track item.id) {
-                    <app-video-card [item]="item" />
-                }
-            </div>
-        }
+    @if (items.length) {
+        <div class="videos-grid__section">
+            @for (item of items; track item.id) {
+                <app-video-card [item]="item" />
+            }
+        </div>
     }
 }
 

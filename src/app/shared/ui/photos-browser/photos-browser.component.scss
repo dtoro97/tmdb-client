@@ -3,7 +3,6 @@
 
 :host {
     --photos-browser-gap: var(--space-4);
-    --photos-browser-language-width: 18rem;
     --photos-browser-row-height: 220px;
 }
 
@@ -24,22 +23,6 @@
     &__filters {
         flex: 1;
         min-width: 0;
-    }
-
-    &__language-select {
-        display: inline-flex;
-        flex: 0 1 var(--photos-browser-language-width);
-        align-items: center;
-        width: 100%;
-        max-width: var(--photos-browser-language-width);
-        min-width: 0;
-    }
-
-    &__language-trigger {
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
 
     &__grid {
@@ -101,13 +84,6 @@
             align-items: flex-start;
             flex-direction: column;
         }
-
-        &__language-select {
-            flex: none;
-            width: 100%;
-            max-width: none;
-        }
-
         &__spacer {
             display: none;
         }

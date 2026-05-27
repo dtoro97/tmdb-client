@@ -14,21 +14,11 @@ export interface MediaRatingDialogData {
     authMode: UserSessionMode;
 }
 
-export type MediaRatingDialogResult =
-    | number
-    | 'remove'
-    | 'login'
-    | { guestValue: number };
+export type MediaRatingDialogResult = number | 'remove' | 'login' | { guestValue: number };
 
 @Component({
     selector: 'app-media-rating-dialog',
-    imports: [
-        DecimalPipe,
-        FormsModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatSliderModule,
-    ],
+    imports: [DecimalPipe, FormsModule, MatButtonModule, MatDialogModule, MatSliderModule],
     templateUrl: './media-rating-dialog.component.html',
     styleUrl: './media-rating-dialog.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,10 +29,7 @@ export class MediaRatingDialogComponent {
     constructor(
         @Inject(MAT_DIALOG_DATA)
         public readonly data: MediaRatingDialogData,
-        private readonly dialogRef: MatDialogRef<
-            MediaRatingDialogComponent,
-            MediaRatingDialogResult
-        >,
+        private readonly dialogRef: MatDialogRef<MediaRatingDialogComponent, MediaRatingDialogResult>,
     ) {}
 
     removeRating(): void {
@@ -51,6 +38,10 @@ export class MediaRatingDialogComponent {
 
     save(): void {
         this.dialogRef.close(normalizeRatingValue(this.value()));
+    }
+
+    cancel(): void {
+        this.dialogRef.close(undefined);
     }
 
     loginToSave(): void {

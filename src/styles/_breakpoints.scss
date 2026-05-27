@@ -1,6 +1,5 @@
 $mobile-max: 768px;
 $tablet-max: 1024px;
-$desktop-max: 1280px;
 $content-md-max: 1200px;
 $content-sm-max: 960px;
 $carousel-md-max: 1600px;
@@ -15,12 +14,6 @@ $carousel-xs-max: 920px;
 
 @mixin tablet() {
     @media (max-width: $tablet-max) {
-        @content;
-    }
-}
-
-@mixin desktop() {
-    @media (max-width: $desktop-max) {
         @content;
     }
 }

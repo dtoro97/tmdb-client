@@ -13,11 +13,11 @@ import {
     ViewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { IconButtonComponent } from '../icon-button/icon-button.component';
+import { OverlayIconButtonComponent } from '../overlay-icon-button/overlay-icon-button.component';
 
 @Component({
     selector: 'app-carousel',
-    imports: [NgTemplateOutlet, IconButtonComponent],
+    imports: [NgTemplateOutlet, OverlayIconButtonComponent],
     templateUrl: './carousel.component.html',
     styleUrl: './carousel.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

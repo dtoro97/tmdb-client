@@ -82,8 +82,9 @@ export interface ListServiceInterface {
      * @param listId 
      * @param mediaId 
      * @param mediaType 
+     * @param language 
      */
-    listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, extraHttpRequestParams?: any): Observable<V4ListItemStatus>;
+    listV4ItemStatus(listId: number, mediaId: number, mediaType: V4ListMediaType, language?: string, extraHttpRequestParams?: any): Observable<V4ListItemStatus>;
 
     /**
      * Remove Items

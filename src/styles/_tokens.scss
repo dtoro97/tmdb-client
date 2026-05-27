@@ -1,6 +1,8 @@
-@use './breakpoints' as *;
-
 :root {
+    --font-body: "IBM Plex Sans", system-ui, sans-serif;
+    --font-display: "Newsreader", "IBM Plex Sans", system-ui, sans-serif;
+    --font-brand: var(--font-display);
+
     --text-2xs: 0.75rem;
     --text-xs: 0.8125rem;
     --text-sm: 0.875rem;
@@ -11,7 +13,6 @@
     --text-3xl: 1.875rem;
     --text-4xl: 2.5rem;
     --text-5xl: 3rem;
-    --text-6xl: 4.5rem;
 
     --weight-regular: 400;
     --weight-medium: 500;
@@ -32,122 +33,128 @@
     --space-8: 2rem;
     --space-10: 2.5rem;
     --space-12: 3rem;
-    --space-16: 4rem;
     --space-20: 5rem;
-    --space-24: 6rem;
 
     --layout-content-max-width: 1440px;
 
     --control-height-sm: 2.125rem;
     --control-height-md: 2.375rem;
     --control-height-lg: 2.5rem;
-    --control-radius: var(--radius-pill);
+    --control-radius: var(--radius-md);
     --control-transition:
-        background-color var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast),
+        background-color var(--motion-fast), color var(--motion-fast), opacity var(--motion-fast),
         box-shadow var(--motion-fast);
 
-    --control-surface: #181818;
-    --control-surface-hover: #212121;
+    --control-surface: #171512;
+    --control-surface-hover: #1e1b17;
     --control-border: var(--color-border-subtle);
-    --control-border-hover: #313131;
     --control-text: var(--text-secondary);
     --control-text-hover: var(--text-primary);
     --control-focus-border: var(--color-brand);
-    --control-focus-outline: #d76a6a;
-    --control-focus-ring-inner: rgba(198, 40, 40, 0.25);
-    --control-focus-ring-outer: rgba(198, 40, 40, 0.15);
+    --control-focus-ring-inner: rgba(199, 166, 110, 0.24);
+    --control-focus-ring-outer: rgba(199, 166, 110, 0.14);
 
-    --control-subtle-surface: rgba(18, 18, 20, 0.82);
-    --control-subtle-surface-hover: rgba(33, 33, 37, 0.98);
-    --control-subtle-surface-active: #202023;
+    --control-subtle-surface: rgba(20, 18, 15, 0.86);
+    --control-subtle-surface-hover: rgba(29, 26, 22, 0.98);
+    --control-subtle-surface-active: #211d18;
     --control-subtle-border: var(--color-border-subtle);
-    --control-subtle-border-hover: var(--color-border);
     --control-subtle-text: var(--text-muted);
     --control-subtle-text-hover: var(--text-primary);
     --control-subtle-text-active: var(--text-primary);
-    --control-subtle-focus-border: var(--color-border);
     --control-subtle-shadow-active: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
     --control-accent-surface: var(--color-brand);
     --control-accent-surface-hover: var(--color-brand-hover);
     --control-accent-border: var(--color-brand);
-    --control-accent-border-hover: var(--color-brand-hover);
-    --control-accent-text: #ffffff;
+    --control-accent-text: var(--color-surface);
     --control-accent-ripple: rgba(255, 255, 255, 0.15);
 
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    --radius-2xl: 1.5rem;
+    --slide-toggle-track-width: 2.5rem;
+    --slide-toggle-track-height: 1.375rem;
+    --slide-toggle-handle-size: 1.125rem;
+    --slide-toggle-pressed-handle-size: 1.25rem;
+    --slide-toggle-icon-size: 0.75rem;
+    --slide-toggle-state-layer-size: 2rem;
+    --slide-toggle-touch-target-size: 3rem;
+    --slide-toggle-track-outline-width: 1px;
+    --slide-toggle-handle-offset: 0.1875rem;
+    --slide-toggle-selected-handle-offset: 1.1875rem;
+    --slide-toggle-selected-pressed-handle-offset: 1.125rem;
+    --slide-toggle-unselected-pressed-handle-offset: 0.125rem;
+
+    --badge-height: 1.375rem;
+    --badge-padding-x: var(--space-2);
+    --badge-radius: var(--radius-sm);
+    --badge-font-size: var(--text-2xs);
+    --badge-font-weight: var(--weight-semibold);
+    --badge-surface: var(--control-subtle-surface);
+    --badge-text: var(--text-secondary);
+    --badge-border: var(--color-border-subtle);
+    --badge-accent-surface: var(--color-brand);
+    --badge-accent-text: var(--control-accent-text);
+    --badge-accent-border: var(--border-brand-soft);
+    --badge-outline-surface: var(--surface-brand-soft);
+    --badge-outline-text: var(--color-brand);
+    --badge-outline-border: var(--border-brand-soft);
+
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
     --radius-pill: 999px;
     --radius-full: 50%;
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.22);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.28);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
-    --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.38);
+    --shadow-dialog: 0 18px 48px rgba(0, 0, 0, 0.38);
 
+    --motion-fast: 0.08s ease-out;
     --motion-base: 0.1s ease-out;
 
-    --transition-bg-color: background-color var(--motion-base), color var(--motion-fast);
-
-    --transition-lift: transform var(--motion-base), box-shadow var(--motion-base);
-
-    --color-brand-300: #ef5350;
-    --color-brand-400: #e53935;
-    --color-brand-500: #c62828;
-    --color-brand-600: #b71c1c;
-    --color-brand-700: #8e1515;
+    --color-brand-300: #e4cc95;
+    --color-brand-400: #d6ba80;
+    --color-brand-500: #c7a66e;
+    --color-brand-600: #a48655;
 
     --color-brand: var(--color-brand-500);
     --color-brand-hover: var(--color-brand-400);
     --color-brand-active: var(--color-brand-600);
     --color-brand-light: var(--color-brand-300);
 
-    --color-surface: #080808;
-    --color-surface-dim: #0d0d0d;
-    --color-surface-raised: #151515;
-    --color-surface-overlay: rgba(10, 10, 10, 0.88);
+    --color-surface: #0b0b0a;
+    --color-surface-dim: #10100e;
+    --color-surface-raised: #181713;
+    --color-surface-overlay: rgba(12, 12, 10, 0.9);
 
-    --color-border: #232323;
-    --color-border-subtle: rgba(255, 255, 255, 0.05);
+    --color-border: #26231d;
+    --color-border-subtle: rgba(245, 235, 220, 0.08);
 
-    --text-primary: #f5f3ef;
-    --text-secondary: #b4afa7;
-    --text-muted: #8f8a83;
-    --text-disabled: #68645f;
+    --text-primary: #f4eee6;
+    --text-secondary: #c4b9aa;
+    --text-muted: #948879;
+    --text-disabled: #675e52;
 
     --text-accent: var(--color-brand-light);
-    --color-danger-text: var(--color-brand-300);
+    --color-danger-text: #ef5350;
+    --color-danger-light: #ff9f87;
 
     --color-success: #2f8f52;
     --color-success-light: #78d79f;
 
-    --color-rating: #f5c518;
-    --color-rank: #f1bc16;
-    --color-on-rank: #231900;
-
-    --color-rank-border: #a98712;
-
-    --color-rank-cap: #dcaa12;
-
+    --color-rating: #d9b45a;
     --surface-page: var(--color-surface);
-    --surface-panel: #131313;
-    --surface-panel-soft: #101010;
-    --surface-brand-soft: rgba(198, 40, 40, 0.08);
-    --surface-brand-strong: #351919;
+    --surface-panel: #141310;
+    --surface-panel-soft: #11100e;
+    --surface-brand-soft: rgba(199, 166, 110, 0.1);
     --surface-success-soft: #183626;
-    --border-brand-soft: rgba(198, 40, 40, 0.24);
+    --surface-danger-soft: #321b14;
+    --border-brand-soft: rgba(199, 166, 110, 0.28);
     --border-overlay-soft: rgba(255, 255, 255, 0.1);
     --border-success-soft: rgba(47, 143, 82, 0.3);
+    --border-danger-soft: rgba(255, 159, 135, 0.34);
     --ripple-success-soft: rgba(120, 215, 159, 0.22);
-    --interactive-media-hover-opacity: 0.75;
-    --control-hover-opacity: 0.8;
+    --ripple-danger-soft: rgba(255, 159, 135, 0.18);
+    --interactive-media-hover-opacity: 0.88;
     --control-disabled-opacity: 0.6;
-    --text-faint: rgba(245, 243, 239, 0.45);
-
-    --text-soft: rgba(245, 243, 239, 0.68);
+    --text-soft: rgba(244, 238, 230, 0.68);
 
     --skeleton-base: rgba(255, 255, 255, 0.06);
     --skeleton-highlight: rgba(255, 255, 255, 0.12);
@@ -159,14 +166,11 @@
 
     --poster-ratio: 2 / 3;
     --backdrop-ratio: 16 / 9;
-    --profile-ratio: 2 / 3;
-
     --media-square-sm: 44px;
     --media-square-md: 48px;
     --media-square-lg: 56px;
     --round-media-sm: 2.25rem;
     --round-media-md: 2.5rem;
-    --round-media-lg: 3rem;
 
     --gradient-overlay-bottom: linear-gradient(
         to top,
@@ -179,15 +183,4 @@
 
     --z-overlay: 1000;
     --z-dialog: 1100;
-    --z-toast: 1200;
 }
-
-/* @include mobile() {
-    :root {
-        --text-2xs: 0.8125rem;
-        --text-xs: 0.875rem;
-        --text-sm: 1rem;
-        --control-height-sm: 2.5rem;
-    }
-}
- */

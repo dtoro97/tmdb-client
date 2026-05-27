@@ -1,0 +1,23 @@
+<section class="confirmation-dialog">
+    <header class="confirmation-dialog__header">
+        <h2 class="text-title">{{ title }}</h2>
+        <p class="confirmation-dialog__message text-body-sm">
+            {{ message }}
+        </p>
+    </header>
+
+    <mat-dialog-actions class="confirmation-dialog__actions" align="end">
+        <button matButton class="text-button" type="button" mat-dialog-close>
+            {{ cancelLabel }}
+        </button>
+        <button
+            matButton="filled"
+            class="confirmation-dialog__confirm"
+            [class.confirmation-dialog__confirm--danger]="isDanger"
+            type="button"
+            (click)="confirm()"
+        >
+            {{ confirmLabel }}
+        </button>
+    </mat-dialog-actions>
+</section>

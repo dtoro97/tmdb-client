@@ -27,13 +27,16 @@ import { NetworkImages } from '../model/networkImages';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    NetworkRestControllerServiceInterface
+} from './network.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class NetworkRestControllerService extends BaseService {
+export class NetworkRestControllerService extends BaseService implements NetworkRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

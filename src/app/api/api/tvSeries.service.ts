@@ -23,8 +23,6 @@ import { AccountStates } from '../model/accountStates';
 // @ts-ignore
 import { AggregateCredits } from '../model/aggregateCredits';
 // @ts-ignore
-import { AlternativeTitleList } from '../model/alternativeTitleList';
-// @ts-ignore
 import { ChangeList } from '../model/changeList';
 // @ts-ignore
 import { ContentRatingList } from '../model/contentRatingList';
@@ -42,6 +40,8 @@ import { ScreenedTheatricallyList } from '../model/screenedTheatricallyList';
 import { StatusResponse } from '../model/statusResponse';
 // @ts-ignore
 import { TranslationList } from '../model/translationList';
+// @ts-ignore
+import { TvAlternativeTitleList } from '../model/tvAlternativeTitleList';
 // @ts-ignore
 import { TvExternalIds } from '../model/tvExternalIds';
 // @ts-ignore
@@ -61,13 +61,16 @@ import { WatchProviderList } from '../model/watchProviderList';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    TvSeriesRestControllerServiceInterface
+} from './tvSeries.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class TvSeriesRestControllerService extends BaseService {
+export class TvSeriesRestControllerService extends BaseService implements TvSeriesRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);
@@ -422,9 +425,9 @@ export class TvSeriesRestControllerService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public tvSeriesAlternativeTitles(seriesId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AlternativeTitleList>;
-    public tvSeriesAlternativeTitles(seriesId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AlternativeTitleList>>;
-    public tvSeriesAlternativeTitles(seriesId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AlternativeTitleList>>;
+    public tvSeriesAlternativeTitles(seriesId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TvAlternativeTitleList>;
+    public tvSeriesAlternativeTitles(seriesId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TvAlternativeTitleList>>;
+    public tvSeriesAlternativeTitles(seriesId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TvAlternativeTitleList>>;
     public tvSeriesAlternativeTitles(seriesId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (seriesId === null || seriesId === undefined) {
             throw new Error('Required parameter seriesId was null or undefined when calling tvSeriesAlternativeTitles.');
@@ -460,7 +463,7 @@ export class TvSeriesRestControllerService extends BaseService {
 
         let localVarPath = `/tv/${this.configuration.encodeParam({name: "seriesId", value: seriesId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}/alternative_titles`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<AlternativeTitleList>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<TvAlternativeTitleList>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,

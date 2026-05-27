@@ -39,7 +39,7 @@ export class TmdbUserAuthService {
                 const guestSessionId = response.guest_session_id?.trim();
 
                 if (!guestSessionId) {
-                    throw new Error('TMDb did not return a guest session id.');
+                    throw new Error('The sign-in service did not return a guest session id.');
                 }
 
                 this.userSessionStore.setGuestSession(guestSessionId, response.expires_at ?? null);
@@ -65,11 +65,11 @@ export class TmdbUserAuthService {
 
     completeLoginFromCallback$(requestToken: string | null, approved: boolean): Observable<void> {
         if (!requestToken) {
-            return throwError(() => new Error('The TMDb callback did not include a request token.'));
+            return throwError(() => new Error('The sign-in callback did not include a request token.'));
         }
 
         if (!approved) {
-            return throwError(() => new Error('TMDb login was cancelled or not approved.'));
+            return throwError(() => new Error('Sign-in was cancelled or not approved.'));
         }
 
         return this.authenticationV4Service
@@ -97,7 +97,7 @@ export class TmdbUserAuthService {
                         ),
                 ),
                 switchMap(({ sessionId, v4AccessToken, v4AccountId }) =>
-                    this.tmdbUserAccountService.hydrateUserSession$(sessionId, v4AccessToken, v4AccountId),
+                    this.tmdbUserAccountService.loadAccount$(sessionId, v4AccessToken, v4AccountId),
                 ),
                 catchError((error) => {
                     this.userSessionStore.clearUserSession();
@@ -109,6 +109,8 @@ export class TmdbUserAuthService {
 
     deleteUserSession$(): Observable<void> {
         const sessionId = this.userSessionStore.sessionId();
+        this.clearPendingLogin();
+        this.browserStorage.removeItem(LAST_AUTH_ERROR_KEY);
 
         if (!sessionId) {
             this.userSessionStore.clearUserSession();
@@ -131,6 +133,10 @@ export class TmdbUserAuthService {
             );
     }
 
+    signOut$(): Observable<void> {
+        return this.deleteUserSession$();
+    }
+
     tryCompleteLoginFromUrl$(): Observable<void> {
         const window = this.document.defaultView;
 
@@ -138,16 +144,19 @@ export class TmdbUserAuthService {
             return of(undefined);
         }
 
-        const params = new URL(window.location.href).searchParams;
-        const requestToken = params.get('request_token') ?? this.browserStorage.getItem(PENDING_V4_REQUEST_TOKEN_KEY);
+        const currentUrl = new URL(window.location.href);
+        const params = currentUrl.searchParams;
+        const callbackRequestToken = params.get('request_token');
+        const storedRequestToken = this.browserStorage.getItem(PENDING_V4_REQUEST_TOKEN_KEY);
         const approvedParam = params.get('approved');
         const pendingRedirectUrl = this.browserStorage.getItem(PENDING_V4_REDIRECT_URL_KEY);
         const isStoredCallbackReturn =
-            !!requestToken &&
+            !!storedRequestToken &&
             !!pendingRedirectUrl &&
             this.isSameCallbackTarget(window.location.href, pendingRedirectUrl);
+        const requestToken = callbackRequestToken ?? (isStoredCallbackReturn ? storedRequestToken : null);
 
-        if (!requestToken && !isStoredCallbackReturn) {
+        if (!requestToken) {
             return of(undefined);
         }
 
@@ -169,7 +178,7 @@ export class TmdbUserAuthService {
             }),
             catchError((error) => {
                 this.clearPendingLogin();
-                const message = error instanceof Error ? error.message : 'TMDb sign-in could not be completed.';
+                const message = error instanceof Error ? error.message : 'Sign-in could not be completed.';
                 this.browserStorage.setItem(LAST_AUTH_ERROR_KEY, message);
                 return of(undefined);
             }),
@@ -198,7 +207,7 @@ export class TmdbUserAuthService {
         const requestToken = tokenResponse.request_token?.trim();
 
         if (!requestToken) {
-            throw new Error(tokenResponse.status_message || 'TMDb did not return a v4 request token.');
+            throw new Error(tokenResponse.status_message || 'The sign-in service did not return a request token.');
         }
 
         return requestToken;
@@ -208,7 +217,7 @@ export class TmdbUserAuthService {
         const accessToken = tokenResponse.access_token?.trim();
 
         if (!accessToken) {
-            throw new Error(tokenResponse.status_message || 'TMDb did not return a v4 access token.');
+            throw new Error(tokenResponse.status_message || 'The sign-in service did not return an access token.');
         }
 
         return accessToken;
@@ -218,7 +227,7 @@ export class TmdbUserAuthService {
         const accountId = tokenResponse.account_id?.trim();
 
         if (!accountId) {
-            throw new Error('TMDb did not return a v4 account id.');
+            throw new Error('The sign-in service did not return an account id.');
         }
 
         return accountId;
@@ -228,7 +237,7 @@ export class TmdbUserAuthService {
         const sessionId = sessionResponse.session_id?.trim();
 
         if (!sessionId) {
-            throw new Error('TMDb did not return a session id.');
+            throw new Error('The sign-in service did not return a session id.');
         }
 
         return sessionId;

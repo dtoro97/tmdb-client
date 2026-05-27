@@ -11,17 +11,26 @@ import { V4ListMediaType } from './v4ListMediaType';
 
 
 export interface V4ListContentItem { 
+    adult?: boolean;
+    backdrop_path?: string | null;
     id?: number;
     media_type?: V4ListMediaType;
     title?: string;
+    original_language?: string;
+    original_title?: string;
     name?: string;
+    original_name?: string;
     overview?: string;
     poster_path?: string | null;
-    backdrop_path?: string | null;
+    genre_ids?: Array<number>;
+    origin_country?: Array<string>;
+    popularity?: number;
     comment?: string;
     release_date?: string | null;
     first_air_date?: string | null;
     vote_average?: number | null;
+    video?: boolean;
+    vote_count?: number;
 }
 export namespace V4ListContentItem {
 }

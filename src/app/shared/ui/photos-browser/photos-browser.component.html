@@ -13,29 +13,6 @@
                             (selected)="setSelectedTypes($event)"
                         />
                     }
-                    @if (vm.languageOptions.length > 1) {
-                        <mat-select
-                            class="photos-browser__language-select text-caption"
-                            aria-label="Filter by language"
-                            placeholder="Languages"
-                            multiple
-                            [value]="vm.selectedLanguages"
-                            (selectionChange)="setSelectedLanguages($event.value)"
-                        >
-                            @if (vm.hasSelectedLanguages) {
-                                <mat-select-trigger>
-                                    <span class="photos-browser__language-trigger">
-                                        {{ vm.selectedLanguageLabel }}
-                                    </span>
-                                </mat-select-trigger>
-                            }
-                            @for (option of vm.languageOptions; track option.value) {
-                                <mat-option [value]="option.value">
-                                    {{ option.label }}
-                                </mat-option>
-                            }
-                        </mat-select>
-                    }
                 </div>
                 <app-sort-button
                     end

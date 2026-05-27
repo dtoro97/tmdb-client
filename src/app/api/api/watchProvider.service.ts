@@ -25,13 +25,16 @@ import { WatchProviderRegionList } from '../model/watchProviderRegionList';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    WatchProviderRestControllerServiceInterface
+} from './watchProvider.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class WatchProviderRestControllerService extends BaseService {
+export class WatchProviderRestControllerService extends BaseService implements WatchProviderRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

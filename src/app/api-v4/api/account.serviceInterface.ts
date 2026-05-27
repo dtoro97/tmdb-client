@@ -12,6 +12,9 @@ import { HttpHeaders }                                       from '@angular/comm
 import { Observable }                                        from 'rxjs';
 
 import { V4AccountListPage } from '../model/models';
+import { V4AccountMoviePage } from '../model/models';
+import { V4AccountSortBy } from '../model/models';
+import { V4AccountTvPage } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';
@@ -23,6 +26,28 @@ export interface AccountServiceInterface {
     configuration: Configuration;
 
     /**
+     * Favorite Movies
+     * Get a user\&#39;s list of favorite movies.
+     * @endpoint get /account/{account_object_id}/movie/favorites
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     * @param sortBy 
+     */
+    accountV4FavoriteMovies(accountObjectId: string, page?: number, language?: string, sortBy?: V4AccountSortBy, extraHttpRequestParams?: any): Observable<V4AccountMoviePage>;
+
+    /**
+     * Favorite TV Shows
+     * Get a user\&#39;s list of favorite TV shows.
+     * @endpoint get /account/{account_object_id}/tv/favorites
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     * @param sortBy 
+     */
+    accountV4FavoriteTv(accountObjectId: string, page?: number, language?: string, sortBy?: V4AccountSortBy, extraHttpRequestParams?: any): Observable<V4AccountTvPage>;
+
+    /**
      * Lists
      * Get the custom lists that a user has created.
      * @endpoint get /account/{account_object_id}/lists
@@ -30,5 +55,69 @@ export interface AccountServiceInterface {
      * @param page 
      */
     accountV4Lists(accountObjectId: string, page?: number, extraHttpRequestParams?: any): Observable<V4AccountListPage>;
+
+    /**
+     * Recommended Movies
+     * Get a user\&#39;s list of recommended movies.
+     * @endpoint get /account/{account_object_id}/movie/recommendations
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     */
+    accountV4MovieRecommendations(accountObjectId: string, page?: number, language?: string, extraHttpRequestParams?: any): Observable<V4AccountMoviePage>;
+
+    /**
+     * Watchlist Movies
+     * Get a user\&#39;s movie watchlist.
+     * @endpoint get /account/{account_object_id}/movie/watchlist
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     * @param sortBy 
+     */
+    accountV4MovieWatchlist(accountObjectId: string, page?: number, language?: string, sortBy?: V4AccountSortBy, extraHttpRequestParams?: any): Observable<V4AccountMoviePage>;
+
+    /**
+     * Rated Movies
+     * Get a user\&#39;s rated movies.
+     * @endpoint get /account/{account_object_id}/movie/rated
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     * @param sortBy 
+     */
+    accountV4RatedMovies(accountObjectId: string, page?: number, language?: string, sortBy?: V4AccountSortBy, extraHttpRequestParams?: any): Observable<V4AccountMoviePage>;
+
+    /**
+     * Rated TV Shows
+     * Get a user\&#39;s rated TV shows.
+     * @endpoint get /account/{account_object_id}/tv/rated
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     * @param sortBy 
+     */
+    accountV4RatedTv(accountObjectId: string, page?: number, language?: string, sortBy?: V4AccountSortBy, extraHttpRequestParams?: any): Observable<V4AccountTvPage>;
+
+    /**
+     * Recommended TV Shows
+     * Get a user\&#39;s list of recommended TV shows.
+     * @endpoint get /account/{account_object_id}/tv/recommendations
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     */
+    accountV4TvRecommendations(accountObjectId: string, page?: number, language?: string, extraHttpRequestParams?: any): Observable<V4AccountTvPage>;
+
+    /**
+     * Watchlist TV Shows
+     * Get a user\&#39;s TV watchlist.
+     * @endpoint get /account/{account_object_id}/tv/watchlist
+     * @param accountObjectId 
+     * @param page 
+     * @param language 
+     * @param sortBy 
+     */
+    accountV4TvWatchlist(accountObjectId: string, page?: number, language?: string, sortBy?: V4AccountSortBy, extraHttpRequestParams?: any): Observable<V4AccountTvPage>;
 
 }

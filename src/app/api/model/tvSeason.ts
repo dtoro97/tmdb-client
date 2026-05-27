@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { TvEpisode } from './tvEpisode';
+import { Network } from './network';
 
 
 export interface TvSeason { 
@@ -15,6 +16,7 @@ export interface TvSeason {
     air_date?: string;
     episodes?: Array<TvEpisode>;
     name?: string;
+    networks?: Array<Network>;
     overview?: string;
     id?: number;
     poster_path?: string | null;

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-export type BadgeVariant = 'neutral' | 'accent' | 'outline' | 'rank';
+export type BadgeVariant = 'neutral' | 'accent' | 'outline';
 @Component({
     selector: 'app-badge',
     standalone: true,

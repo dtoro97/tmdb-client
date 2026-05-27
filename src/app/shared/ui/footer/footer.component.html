@@ -1,44 +1,64 @@
 <footer class="footer">
-    <div class="footer__inner inner-container">
-        <app-recently-viewed class="footer__recently-viewed" />
+    <div class="footer__inner inner-container u-flex u-flex-column">
+        <app-recently-viewed class="footer__recently-viewed w-100" />
 
-        <div class="footer__links">
-            <nav class="footer__group" aria-label="Project links">
-                <a class="footer__link text-caption" href="https://github.com/dtoro97/tmdb-client" target="_blank" rel="noreferrer">
-                    Source Code
+        <div class="footer__content">
+            <section class="footer__about u-flex u-flex-column u-items-start u-gap-3" aria-label="About Cinegraph">
+                <a class="footer__home u-flex u-items-center u-gap-2" routerLink="/" aria-label="Cinegraph home">
+                    <img class="footer__brand-icon" src="assets/brand-mark.svg" alt="" aria-hidden="true" />
+                    <span class="footer__brand-text" aria-hidden="true">
+                        <span>CINE</span>
+                        <span class="footer__brand-text-accent">GRAPH</span>
+                    </span>
                 </a>
-                <a
-                    class="footer__link text-caption"
-                    href="https://github.com/dtoro97/tmdb-client/issues"
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    Report a Bug
-                </a>
-            </nav>
 
-            <nav class="footer__group" aria-label="Technology links">
-                <a class="footer__link text-caption" href="https://angular.dev/" target="_blank" rel="noreferrer">
-                    Angular
-                </a>
-                <a
-                    class="footer__link text-caption"
-                    href="https://material.angular.io/"
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    Angular Material
-                </a>
-            </nav>
+                <p class="footer__summary text-caption">
+                    Discover movies, TV shows, people, trailers, reviews, and streaming options.
+                </p>
+
+                <p class="footer__notice text-caption">
+                    This website uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by
+                    TMDB.
+                </p>
+            </section>
+
+            <div class="footer__meta u-flex u-flex-column u-gap-4">
+                <nav class="footer__nav u-flex" aria-label="Footer">
+                    <a class="footer__link text-caption" routerLink="/discover">Discover</a>
+                    <a class="footer__link text-caption" routerLink="/search">Search</a>
+                    <a class="footer__link text-caption" routerLink="/watch/streaming">Streaming</a>
+                    <a
+                        class="footer__link text-caption"
+                        href="https://github.com/dtoro97/tmdb-client"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Source code
+                    </a>
+                    <a
+                        class="footer__link text-caption"
+                        href="https://github.com/dtoro97/tmdb-client/issues"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Report a bug
+                    </a>
+                </nav>
+
+                <div class="footer__provider u-flex u-items-center u-gap-2">
+                    <span class="footer__provider-label text-caption">Data by</span>
+                    <a
+                        class="footer__provider-link u-flex u-items-center"
+                        href="https://www.themoviedb.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <img src="assets/tmdb-icon.svg" class="footer__logo" alt="TMDB" />
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <div class="footer__brand">
-            <span class="footer__brand-label text-caption">Powered by</span>
-            <a class="footer__brand-link" href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">
-                <img src="assets/tmdb-icon.svg" class="footer__logo" alt="TMDB" />
-            </a>
-        </div>
-
-        <p class="footer__copyright text-overline">&copy; 2025 Created by D&aacute;vid T&ouml;r&#337;</p>
+        <p class="footer__copyright text-overline">&copy; 2025-2026 D&aacute;vid T&ouml;r&#337;</p>
     </div>
 </footer>

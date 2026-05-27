@@ -1,0 +1,63 @@
+@use 'breakpoints' as *;
+
+.snackbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.snackbar__message {
+    min-width: 0;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    line-height: var(--lh-normal);
+}
+
+.snackbar__actions {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.snackbar__link,
+.snackbar__dismiss {
+    color: var(--snackbar-action-color);
+    font: inherit;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+    transition:
+        color var(--motion-fast),
+        text-decoration-color var(--motion-fast);
+}
+
+.snackbar__link {
+    text-decoration-line: underline;
+}
+
+.snackbar__dismiss {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.snackbar__link:is(:hover, :focus-visible, :active),
+.snackbar__dismiss:is(:hover, :focus-visible, :active) {
+    color: var(--snackbar-action-color);
+    text-decoration-color: currentColor;
+}
+
+@include mobile() {
+    .snackbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+}

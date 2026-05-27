@@ -25,13 +25,16 @@ import { PersonPage } from '../model/personPage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    PersonListRestControllerServiceInterface
+} from './personList.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class PersonListRestControllerService extends BaseService {
+export class PersonListRestControllerService extends BaseService implements PersonListRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

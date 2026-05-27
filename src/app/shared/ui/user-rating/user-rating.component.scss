@@ -15,9 +15,14 @@
     background: transparent;
     text-align: left;
     cursor: pointer;
-    transition: opacity var(--motion-fast);
+    color: var(--text-primary);
+    transition: color var(--motion-fast);
 
-    @include media-hover();
+    @include hover-capable {
+        &:hover:not(:disabled) {
+            color: var(--text-accent);
+        }
+    }
 
     &:disabled {
         cursor: default;
@@ -44,6 +49,7 @@
         color: var(--text-secondary);
         font-size: var(--text-sm);
         line-height: 1;
+        transition: color var(--motion-fast);
 
         &::before {
             display: block;
@@ -55,7 +61,12 @@
         color: var(--color-rating);
     }
 
+    &:hover:not(:disabled) .user-rating__icon {
+        color: currentColor;
+    }
+
     &__value {
+        color: inherit;
         font-variant-numeric: tabular-nums;
         line-height: 1;
     }

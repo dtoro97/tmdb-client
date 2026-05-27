@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import type { SelectOption } from '../../types';
 
-export interface PillToggleOption {
-    label: string;
-    value: unknown;
-}
+export type PillToggleOption = SelectOption<unknown>;
 
 interface PillToggleViewOption extends PillToggleOption {
     selected: boolean;

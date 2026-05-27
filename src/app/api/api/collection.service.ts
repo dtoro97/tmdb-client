@@ -27,13 +27,16 @@ import { TranslationList } from '../model/translationList';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    CollectionRestControllerServiceInterface
+} from './collection.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class CollectionRestControllerService extends BaseService {
+export class CollectionRestControllerService extends BaseService implements CollectionRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

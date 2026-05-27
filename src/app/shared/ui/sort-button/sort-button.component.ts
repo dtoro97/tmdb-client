@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import type { SelectOption } from '../../types';
 import { SortDirection } from '../../utils';
 
 @Component({
@@ -17,7 +18,7 @@ import { SortDirection } from '../../utils';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SortButtonComponent {
-    @Input() options: { label: string; value: unknown }[] = [];
+    @Input() options: ReadonlyArray<SelectOption<unknown>> = [];
     @Input() selectedValue: unknown;
     @Input() direction: SortDirection = 'desc';
     @Output() sortChange = new EventEmitter<unknown>();

@@ -25,13 +25,16 @@ import { KeywordMoviePage } from '../model/keywordMoviePage';
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 import { BaseService } from '../api.base.service';
+import {
+    KeywordRestControllerServiceInterface
+} from './keyword.serviceInterface';
 
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class KeywordRestControllerService extends BaseService {
+export class KeywordRestControllerService extends BaseService implements KeywordRestControllerServiceInterface {
 
     constructor(protected httpClient: HttpClient, @Optional() @Inject(BASE_PATH) basePath: string|string[], @Optional() configuration?: Configuration) {
         super(basePath, configuration);

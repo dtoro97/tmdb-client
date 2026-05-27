@@ -1,0 +1,71 @@
+@if (vm$ | async; as vm) {
+    @if (vm.isAuthenticated) {
+        <button
+            class="account-menu__trigger"
+            type="button"
+            [matMenuTriggerFor]="accountMenu"
+            [matMenuTriggerRestoreFocus]="false"
+            [disabled]="vm.busy"
+            [attr.aria-label]="'Open account menu for ' + vm.displayName"
+        >
+            <app-user-avatar
+                class="account-menu__avatar"
+                [name]="vm.username ?? vm.displayName"
+                [avatarPath]="vm.avatarPath"
+                size="sm"
+            />
+            <mat-icon class="account-menu__chevron" aria-hidden="true">expand_more</mat-icon>
+        </button>
+
+        <mat-menu #accountMenu="matMenu" xPosition="before">
+            <div class="account-menu__panel">
+                <a class="account-menu__identity" routerLink="/me">
+                    <app-user-avatar [name]="vm.username ?? vm.displayName" [avatarPath]="vm.avatarPath" size="sm" />
+                    <span class="account-menu__identity-copy">
+                        <span class="account-menu__identity-name text-body-sm u-truncate">
+                            {{ vm.displayName }}
+                        </span>
+                        <span class="text-caption">View profile</span>
+                    </span>
+                </a>
+
+                <mat-divider class="account-menu__divider" />
+
+                <div class="account-menu__items" aria-label="Account routes">
+                    @for (route of accountRoutes; track route.route) {
+                        <a class="account-menu__item" mat-menu-item [routerLink]="route.route">
+                            <mat-icon class="account-menu__item-icon" aria-hidden="true">
+                                {{ route.icon }}
+                            </mat-icon>
+                            <span>{{ route.label }}</span>
+                        </a>
+                    }
+                </div>
+
+                <mat-divider class="account-menu__divider" />
+
+                <button
+                    class="account-menu__item account-menu__item--danger"
+                    mat-menu-item
+                    type="button"
+                    [disabled]="vm.busy"
+                    (click)="signOut()"
+                >
+                    <mat-icon class="account-menu__item-icon" aria-hidden="true">logout</mat-icon>
+                    <span>Sign out</span>
+                </button>
+            </div>
+        </mat-menu>
+    } @else {
+        <button
+            class="account-menu__signin text-meta"
+            type="button"
+            [disabled]="vm.busy"
+            [attr.aria-busy]="vm.busy ? 'true' : null"
+            (click)="startLogin()"
+        >
+            <mat-icon class="account-menu__signin-icon" aria-hidden="true">login</mat-icon>
+            <span class="account-menu__signin-label">Sign in</span>
+        </button>
+    }
+}

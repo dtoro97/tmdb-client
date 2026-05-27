@@ -1,61 +1,61 @@
-import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    DestroyRef,
-    Input,
-    OnChanges,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Input, OnChanges } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EMPTY, Subject, catchError, switchMap, take } from 'rxjs';
 
-import {
-    TmdbListService,
-    TmdbUserAuthService,
-    UserSessionStoreService,
-    toUserFacingErrorMessage,
-} from '../../index';
+import { SnackbarComponent, SnackbarService, SnackbarType, TmdbListService, UserSessionStoreService } from '../../index';
 import type { MediaType } from '../../types';
+import { IconButtonComponent } from '../icon-button/icon-button.component';
+import { TmdbSigninDialogService } from '../tmdb-signin-dialog/tmdb-signin-dialog.service';
 
 @Component({
     selector: 'app-watchlist-toggle',
-    imports: [MatButtonModule],
+    imports: [IconButtonComponent, MatButtonModule],
     template: `
-        <button
-            mat-stroked-button
-            type="button"
-            class="watchlist-toggle"
-            [class.watchlist-toggle--active]="isInWatchlist"
-            [disabled]="pending"
-            [attr.aria-label]="
-                isInWatchlist
-                    ? title + ' is on your watchlist'
-                    : 'Add ' + title + ' to watchlist'
-            "
-            (click)="toggle($event)"
-        >
-            <i
-                [class.fa-solid]="isInWatchlist"
-                [class.fa-regular]="!isInWatchlist"
-                class="watchlist-toggle__icon fa-bookmark"
-                aria-hidden="true"
-            ></i>
-            <span class="watchlist-toggle__label">{{ watchlistLabel }}</span>
-        </button>
+        @if (iconOnly) {
+            <app-icon-button
+                [ariaLabel]="isInWatchlist ? title + ' is on your watchlist' : 'Add ' + title + ' to watchlist'"
+                [disabled]="pending"
+                [selected]="isInWatchlist"
+                (onClick)="toggle()"
+            >
+                <i
+                    [class.fa-solid]="isInWatchlist"
+                    [class.fa-regular]="!isInWatchlist"
+                    class="watchlist-toggle__icon watchlist-toggle__icon--only fa-bookmark"
+                    aria-hidden="true"
+                ></i>
+            </app-icon-button>
+        } @else {
+            <button
+                mat-stroked-button
+                type="button"
+                class="watchlist-toggle"
+                [class.watchlist-toggle--active]="isInWatchlist"
+                [disabled]="pending"
+                [attr.aria-label]="isInWatchlist ? title + ' is on your watchlist' : 'Add ' + title + ' to watchlist'"
+                (click)="toggle($event)"
+            >
+                <i
+                    [class.fa-solid]="isInWatchlist"
+                    [class.fa-regular]="!isInWatchlist"
+                    class="watchlist-toggle__icon fa-bookmark"
+                    aria-hidden="true"
+                ></i>
+                <span class="watchlist-toggle__label">{{ watchlistLabel }}</span>
+            </button>
+        }
     `,
     styleUrl: './watchlist-toggle.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WatchlistToggleComponent implements OnChanges {
     @Input({ required: true }) mediaId!: number;
-    @Input({ required: true }) mediaType!: Extract<MediaType, 'movie' | 'tv'>;
+    @Input({ required: true }) mediaType!: MediaType;
     @Input({ required: true }) title!: string;
-
+    @Input() iconOnly = false;
     isInWatchlist = false;
     watchlistLabel = 'Add to Watchlist';
     pending = false;
@@ -65,20 +65,14 @@ export class WatchlistToggleComponent implements OnChanges {
     constructor(
         private readonly cdr: ChangeDetectorRef,
         private readonly destroyRef: DestroyRef,
-        private readonly router: Router,
-        private readonly snackBar: MatSnackBar,
+        private readonly snackbar: SnackbarService,
         private readonly tmdbListService: TmdbListService,
-        private readonly tmdbUserAuthService: TmdbUserAuthService,
+        private readonly tmdbSigninDialog: TmdbSigninDialogService,
         private readonly userSessionStore: UserSessionStoreService,
     ) {
         this.refresh$
             .pipe(
-                switchMap(() =>
-                    this.tmdbListService.getWatchlistState$(
-                        this.mediaId,
-                        this.mediaType,
-                    ),
-                ),
+                switchMap(() => this.tmdbListService.getWatchlistState$(this.mediaId, this.mediaType)),
                 catchError(() => {
                     this.pending = false;
                     this.cdr.markForCheck();
@@ -88,9 +82,7 @@ export class WatchlistToggleComponent implements OnChanges {
             )
             .subscribe((inWatchlist) => {
                 this.isInWatchlist = inWatchlist;
-                this.watchlistLabel = inWatchlist
-                    ? 'On Watchlist'
-                    : 'Add to Watchlist';
+                this.watchlistLabel = inWatchlist ? 'On Watchlist' : 'Add to Watchlist';
                 this.pending = false;
                 this.cdr.markForCheck();
             });
@@ -104,15 +96,15 @@ export class WatchlistToggleComponent implements OnChanges {
         this.refresh$.next();
     }
 
-    toggle(event: Event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (this.userSessionStore.mode() !== 'user') {
-            this.tmdbUserAuthService
-                .startLogin$(this.router.url)
+    toggle(event?: Event) {
+        event?.preventDefault();
+        event?.stopPropagation();
+        if (!this.userSessionStore.isAuthenticated()) {
+            this.tmdbSigninDialog
+                .open$()
                 .pipe(
                     take(1),
-                    catchError((error) => this.showError(error)),
+                    catchError(() => this.showError('Could not update your watchlist.')),
                     takeUntilDestroyed(this.destroyRef),
                 )
                 .subscribe();
@@ -128,29 +120,26 @@ export class WatchlistToggleComponent implements OnChanges {
             .updateWatchlist$(this.mediaId, this.mediaType, newValue)
             .pipe(
                 take(1),
-                catchError((error) => {
+                catchError(() => {
                     this.pending = false;
                     this.cdr.markForCheck();
-                    return this.showError(error);
+                    return this.showError('Could not update your watchlist.');
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe(() => {
                 this.isInWatchlist = newValue;
-                this.watchlistLabel = newValue
-                    ? 'On Watchlist'
-                    : 'Add to Watchlist';
+                this.watchlistLabel = newValue ? 'On Watchlist' : 'Add to Watchlist';
                 this.pending = false;
                 this.cdr.markForCheck();
             });
     }
 
-    private showError(error: unknown) {
-        this.snackBar.open(
-            toUserFacingErrorMessage(error, 'Could not update your watchlist.'),
-            'Dismiss',
-            { duration: 5000, panelClass: 'snackbar-error' },
-        );
+    private showError(message: string) {
+        this.snackbar.openSnackbar(SnackbarComponent, {
+            message,
+            type: SnackbarType.Error,
+        });
         return EMPTY;
     }
 }

@@ -11,6 +11,13 @@ export interface PersonLink {
     name: string;
 }
 
+export type MediaListItemBadgeVariant = 'neutral' | 'accent' | 'outline';
+
+export interface MediaListItemBadge {
+    readonly label: string;
+    readonly variant?: MediaListItemBadgeVariant;
+}
+
 export interface MediaListItem {
     id: number;
     thumb: string | null;
@@ -18,10 +25,11 @@ export interface MediaListItem {
     overview: string;
     rating: number | null;
     date: string;
-    mediaType: string;
+    mediaType: MediaType;
     genreIds?: number[];
     voteCount?: number;
     castLinks?: PersonLink[];
+    badges?: readonly MediaListItemBadge[];
 }
 
 export interface PersonListItem {
@@ -60,6 +68,7 @@ export type CardItem<TExtra extends object = object> = {
     rating: number | null;
     date: string;
     overview: string;
+    routeCommands?: readonly (string | number)[];
     role?: string;
 } & TExtra;
 

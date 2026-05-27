@@ -20,7 +20,7 @@ export interface PersonCombinedCastCredit {
     poster_path?: string | null;
     vote_average?: number;
     vote_count?: number;
-    media_type?: PersonCombinedCastCreditMediaTypeEnum;
+    media_type?: PersonCombinedCastCredit.MediaTypeEnum;
     original_title?: string;
     release_date?: string;
     title?: string;
@@ -34,10 +34,12 @@ export interface PersonCombinedCastCredit {
     credit_id?: string;
     order?: number;
 }
-export enum PersonCombinedCastCreditMediaTypeEnum {
-    movie = 'movie',
-    tv = 'tv'
-};
-
+export namespace PersonCombinedCastCredit {
+    export const MediaTypeEnum = {
+        Movie: 'movie',
+        Tv: 'tv'
+    } as const;
+    export type MediaTypeEnum = typeof MediaTypeEnum[keyof typeof MediaTypeEnum];
+}
 
 

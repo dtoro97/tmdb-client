@@ -1,0 +1,198 @@
+@use 'breakpoints' as *;
+@use 'mixins' as *;
+
+:host {
+    display: inline-flex;
+    min-width: 0;
+    flex-shrink: 0;
+}
+
+.account-menu {
+    &__trigger,
+    &__signin {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        height: var(--control-height-sm);
+        border: 0;
+        border-radius: var(--control-radius);
+        background: transparent;
+        color: var(--text-secondary);
+        transition: var(--control-transition);
+        cursor: pointer;
+
+        @include hover-capable {
+            &:hover:not(:disabled) {
+                background: var(--control-subtle-surface-hover);
+                color: var(--text-primary);
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--control-focus-ring-inner);
+            outline-offset: 2px;
+        }
+
+        &:disabled {
+            cursor: default;
+            opacity: var(--control-disabled-opacity);
+        }
+    }
+
+    &__trigger {
+        gap: var(--space-1);
+        padding: 0 var(--space-1) 0 0;
+
+        @include hover-capable {
+            &:hover:not(:disabled) {
+                background: transparent;
+                color: var(--text-accent);
+
+                .account-menu__avatar {
+                    --user-avatar-border: var(--border-brand-soft);
+                    --user-avatar-surface: var(--control-subtle-surface-hover);
+                    --user-avatar-text: var(--text-accent);
+                }
+            }
+        }
+    }
+
+    &__signin {
+        gap: var(--space-2);
+        padding: 0 var(--space-3);
+        white-space: nowrap;
+    }
+
+    &__avatar {
+        --round-media-sm: var(--control-height-sm);
+        --user-avatar-border: var(--color-border);
+        --user-avatar-surface: var(--control-subtle-surface-active);
+        --user-avatar-text: var(--text-primary);
+    }
+
+    &__chevron {
+        @include icon-size(1rem);
+        flex-shrink: 0;
+        color: currentColor;
+    }
+
+    &__signin-icon,
+    &__item-icon {
+        @include icon-size(1.125rem);
+        flex-shrink: 0;
+    }
+
+    &__signin-icon {
+        color: var(--color-brand);
+    }
+
+    &__panel {
+        min-width: 16rem;
+        padding: var(--space-1) 0;
+    }
+
+    &__identity {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        color: var(--text-primary);
+        transition:
+            background-color var(--motion-fast),
+            color var(--motion-fast);
+
+        @include hover-capable {
+            &:hover {
+                background: var(--control-subtle-surface-hover);
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--control-focus-ring-inner);
+            outline-offset: -2px;
+        }
+    }
+
+    &__identity-copy {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    &__identity-name {
+        color: var(--text-primary);
+    }
+
+    &__items {
+        padding-block: var(--space-1);
+    }
+
+    &__item {
+        --mat-menu-item-label-text-color: var(--text-secondary);
+        --mat-menu-item-icon-color: var(--text-muted);
+        --account-menu-icon-color: var(--text-muted);
+
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        color: var(--text-secondary);
+        line-height: 1;
+
+        @include hover-capable {
+            &:hover:not(:disabled) {
+                --mat-menu-item-label-text-color: var(--text-primary);
+                --mat-menu-item-icon-color: var(--text-accent);
+                --account-menu-icon-color: var(--text-accent);
+
+                color: var(--text-primary);
+            }
+        }
+
+        &--danger {
+            --mat-menu-item-label-text-color: var(--color-danger-light);
+            --mat-menu-item-icon-color: var(--color-danger-light);
+            --account-menu-icon-color: var(--color-danger-light);
+
+            color: var(--color-danger-light);
+
+            @include hover-capable {
+                &:hover:not(:disabled) {
+                    --mat-menu-item-label-text-color: var(--color-danger-light);
+                    --mat-menu-item-icon-color: var(--color-danger-light);
+                    --account-menu-icon-color: var(--color-danger-light);
+
+                    color: var(--color-danger-light);
+                }
+            }
+        }
+    }
+
+    &__item-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-inline-end: var(--space-1);
+        color: var(--account-menu-icon-color);
+        line-height: 1;
+    }
+
+    &__divider {
+        margin: 0 var(--space-3);
+        border-top-color: var(--color-border);
+        --mat-divider-color: var(--color-border);
+    }
+}
+
+@include mobile() {
+    .account-menu {
+        &__trigger {
+            padding: 0 var(--space-1) 0 0;
+        }
+
+        &__signin-label {
+            display: none;
+        }
+    }
+}

@@ -7,10 +7,7 @@ const TMDB_BASE = environment.apiUrl;
 const EXCLUDED_URLS = ['/images', '/videos'];
 
 export const localeInterceptor: HttpInterceptorFn = (req, next) => {
-    if (
-        !req.url.startsWith(TMDB_BASE) ||
-        EXCLUDED_URLS.some((excl) => req.url.includes(excl))
-    ) {
+    if (!req.url.startsWith(TMDB_BASE) || EXCLUDED_URLS.some((excl) => req.url.includes(excl))) {
         return next(req);
     }
 

@@ -1,6 +1,6 @@
 # @
 
-Focused OpenAPI spec for TMDB v4 list endpoints. This is intentionally separate from the repo\'s v3 openapi.json so the generated client can target the /4 server cleanly.
+Focused OpenAPI spec for TMDB v4 account, authentication, and list endpoints. This is intentionally separate from the repo\'s v3 openapi.json so the generated client can target the /4 server cleanly.
 
 The version of the OpenAPI document: 4
 

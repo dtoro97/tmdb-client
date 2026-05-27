@@ -1,26 +1,50 @@
 <section class="not-found">
-    <div class="not-found__panel">
-        <span class="not-found__code text-overline">
-            <i class="fa-regular fa-compass" aria-hidden="true"></i>
-            404
-        </span>
+    <div class="not-found__layout">
+        <div class="not-found__poster" aria-hidden="true">
+            <div class="not-found__reel">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
 
-        <div class="not-found__content u-flex-column u-gap-3">
-            <h1 class="text-display">Page not found</h1>
-            <p class="text-body">
-                The title, person, or page you were looking for is not in this
-                corner of the database.
-            </p>
+            <div class="not-found__frame">
+                <span class="not-found__digit">4</span>
+                <span class="not-found__zero">
+                    <i class="fa-solid fa-film" aria-hidden="true"></i>
+                </span>
+                <span class="not-found__digit">4</span>
+            </div>
+
+            <div class="not-found__caption">
+                <span>Missing scene</span>
+                <span>Frame 404</span>
+            </div>
         </div>
 
-        <div class="not-found__actions u-flex u-items-center u-gap-3">
-            <a matButton="filled" [routerLink]="['/']">
-                <i class="fa-solid fa-house" aria-hidden="true"></i>
-                Home
-            </a>
-            <a matButton class="text-button" [routerLink]="['/discover']">
-                Browse titles
-            </a>
+        <div class="not-found__panel">
+            <span class="not-found__code text-card-meta">
+                <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
+                404
+            </span>
+
+            <div class="not-found__content u-flex-column u-gap-3">
+                <h1 class="text-display">Scene missing</h1>
+                <p class="text-body">
+                    This title card points to a page that is not in the cut. Try the lobby, or browse the catalog.
+                </p>
+            </div>
+
+            <div class="not-found__actions u-flex u-items-center u-gap-3">
+                <a matButton="filled" [routerLink]="['/']">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    Home
+                </a>
+                <a matButton class="text-button" [routerLink]="['/discover']">
+                    Browse titles
+                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </a>
+            </div>
         </div>
     </div>
 </section>

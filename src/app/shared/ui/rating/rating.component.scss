@@ -5,15 +5,16 @@
     color: var(--rating-color);
     font-size: var(--rating-font-size);
     font-weight: var(--rating-font-weight);
-    --rating-font-size: var(--text-sm);
-    --rating-font-weight: var(--weight-medium);
-    --rating-color: var(--text-muted);
-    --rating-icon-size: 1em;
+    line-height: 1.4;
+    --rating-font-size: var(--text-xs);
+    --rating-font-weight: var(--weight-semibold);
+    --rating-color: var(--color-rating);
+    --rating-icon-size: 0.85em;
 }
 
 .rating__value {
     display: block;
-    line-height: 1;
+    line-height: inherit;
 }
 
 .rating__icon {

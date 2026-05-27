@@ -1,8 +1,10 @@
+@use "./breakpoints" as *;
+
 .cdk-overlay-pane:not(.photo-viewer-panel) {
     .mat-mdc-dialog-container .mdc-dialog__surface {
         border-radius: var(--radius-lg);
         border: 1px solid var(--color-border-subtle);
-        box-shadow: var(--shadow-xl);
+        box-shadow: var(--shadow-dialog);
         padding: var(--space-6);
     }
 
@@ -16,4 +18,26 @@
     --mat-dialog-with-actions-content-padding: 0;
     --mat-dialog-content-padding: var(--space-4) 0 0;
     --mat-dialog-actions-padding: var(--space-4) 0 0;
+}
+
+.cdk-overlay-pane.user-list-add-items-dialog-panel {
+    height: min(40rem, calc(100dvh - var(--space-8)));
+
+    .mat-mdc-dialog-container,
+    .mdc-dialog__container,
+    .mdc-dialog__surface {
+        height: 100%;
+        max-height: 100%;
+    }
+
+    .mdc-dialog__surface {
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+}
+
+@include mobile() {
+    .cdk-overlay-pane.user-list-add-items-dialog-panel {
+        height: min(36rem, calc(100dvh - var(--space-4)));
+    }
 }

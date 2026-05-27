@@ -1,4 +1,4 @@
-@use "mixins" as *;
+@use 'mixins' as *;
 
 :host {
     display: inline-flex;
@@ -16,13 +16,9 @@
     --mat-button-outlined-container-height: var(--control-height-lg);
     --mat-button-outlined-label-text-color: var(--text-primary);
     --mat-button-outlined-outline-color: var(--control-subtle-border);
-    --mat-button-outlined-hover-container-color: var(
-        --control-subtle-surface-hover
-    );
+    --mat-button-outlined-hover-container-color: var(--control-subtle-surface-hover);
     --mat-button-outlined-hover-label-text-color: var(--text-primary);
-    --mat-button-outlined-hover-outline-color: var(
-        --control-subtle-border-hover
-    );
+    --mat-button-outlined-hover-outline-color: var(--control-subtle-border);
     --mat-button-outlined-hover-state-layer-opacity: 0;
     --mat-button-outlined-focus-state-layer-opacity: 0;
     --mat-button-outlined-pressed-state-layer-opacity: 0;
@@ -36,6 +32,12 @@
 
     &__icon {
         margin-right: var(--space-2);
+
+        &--only {
+            margin: 0;
+
+            line-height: 1;
+        }
     }
 
     &:active:not(:disabled) {

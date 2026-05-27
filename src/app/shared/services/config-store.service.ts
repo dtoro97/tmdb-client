@@ -4,16 +4,16 @@ import {
     ConfigurationRestControllerService,
     Country,
     Language,
+    TmdbConfiguration,
 } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
 import { filter, tap } from 'rxjs';
 import { isDefined } from '../utils';
-import { Configuration } from '../../api/configuration';
 
 export type ConfigStoreState = {
     languages?: Language[];
     countries?: Country[];
-    config?: Configuration;
+    config?: TmdbConfiguration;
 };
 
 @Injectable({ providedIn: 'root' })
