@@ -3318,6 +3318,22 @@
               "type": "string",
               "default": "en-US"
             }
+          },
+          {
+            "name": "session_id",
+            "in": "query",
+            "description": "TMDb user session ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guest_session_id",
+            "in": "query",
+            "description": "TMDb guest session ID",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -5501,6 +5517,22 @@
             "schema": {
               "type": "string",
               "default": "en-US"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "query",
+            "description": "TMDb user session ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guest_session_id",
+            "in": "query",
+            "description": "TMDb guest session ID",
+            "schema": {
+              "type": "string"
             }
           }
         ],

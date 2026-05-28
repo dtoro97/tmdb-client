@@ -136,8 +136,10 @@ export interface TvSeriesRestControllerServiceInterface {
      * @param seriesId 
      * @param appendToResponse comma separated list of endpoints within this namespace, 20 items max
      * @param language 
+     * @param sessionId TMDb user session ID
+     * @param guestSessionId TMDb guest session ID
      */
-    tvSeriesDetails(seriesId: number, appendToResponse?: string, language?: string, extraHttpRequestParams?: any): Observable<TvSeries>;
+    tvSeriesDetails(seriesId: number, appendToResponse?: string, language?: string, sessionId?: string, guestSessionId?: string, extraHttpRequestParams?: any): Observable<TvSeries>;
 
     /**
      * Episode Groups

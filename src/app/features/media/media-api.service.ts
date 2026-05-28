@@ -31,8 +31,26 @@ export class MediaApiService {
 
     getDetails$(id: number, type: MediaType): Observable<Movie | TvSeries> {
         return type === 'tv'
-            ? this.tvService.tvSeriesDetails(id, 'external_ids', undefined, undefined, undefined, API_JSON_OPTIONS)
-            : this.movieService.movieDetails(id, 'external_ids', undefined, undefined, undefined, API_JSON_OPTIONS);
+            ? this.tvService.tvSeriesDetails(
+                  id,
+                  'external_ids',
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  API_JSON_OPTIONS,
+              )
+            : this.movieService.movieDetails(
+                  id,
+                  'external_ids',
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  API_JSON_OPTIONS,
+              );
     }
 
     getCredits$(id: number, type: MediaType): Observable<Credits | AggregateCredits> {
