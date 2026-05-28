@@ -18,9 +18,5 @@ export const localeInterceptor: HttpInterceptorFn = (req, next) => {
         params = params.set('language', localeStore.language());
     }
 
-    if (!params.has('region')) {
-        params = params.set('region', localeStore.region());
-    }
-
     return next(req.clone({ params }));
 };

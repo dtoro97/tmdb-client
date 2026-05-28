@@ -11,7 +11,7 @@ import {
     pickBestYoutubeTrailer,
     isDefined,
     loadedValue,
-    toYoutubeTrailerFirstVideoState,
+    toYoutubeVideoState,
 } from '../../shared';
 import { MediaType } from '../../shared';
 
@@ -27,7 +27,7 @@ const INITIAL_STATE: MediaVideoState = {
 
 @Injectable()
 export class MediaVideoStoreService extends ComponentStore<MediaVideoState> {
-    videosState$ = this.select((state) => toYoutubeTrailerFirstVideoState(state.videos));
+    videosState$ = this.select((state) => toYoutubeVideoState(state.videos));
     private selectedVideoId$ = this.select((state) => state.selectedVideoId);
 
     allVideos$ = this.videosState$.pipe(map((state) => loadedValue(state)));

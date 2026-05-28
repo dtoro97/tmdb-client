@@ -5,9 +5,14 @@ import { StreamingListPageComponent } from './streaming-list/streaming-list-page
 
 export const watchRoutes: Routes = [
     {
+        path: '',
+        redirectTo: 'streaming',
+        pathMatch: 'full',
+    },
+    {
         path: 'streaming',
         component: StreamingHubPageComponent,
-        title: "What's on TV & Streaming",
+        title: 'Current Streaming',
     },
     {
         path: 'streaming/provider/:providerId',

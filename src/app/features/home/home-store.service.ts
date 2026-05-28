@@ -2,7 +2,14 @@ import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { catchError, filter, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
 
-import { API_JSON_OPTIONS, MEDIUM_LIST_COUNT, PAGE_SIZE } from '../../constants';
+import {
+    API_JSON_OPTIONS,
+    DATE_WINDOW_DISCOVER_VOTE_COUNT_GTE,
+    MEDIUM_LIST_COUNT,
+    OPENING_SOON_MOVIE_DAYS_AHEAD,
+    PAGE_SIZE,
+    THEATRICAL_MOVIE_RELEASE_TYPE,
+} from '../../constants';
 import {
     DiscoverRestControllerService,
     MovieListRestControllerService,
@@ -236,13 +243,45 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     private loadAiringToday$() {
         this.patchState({ airingToday: { type: 'loading' } });
 
-        return this.tvListService
-            .tvSeriesAiringTodayList(
+        const today = getISODate(0);
+
+        return this.discoverService
+            .discoverTv(
+                today,
+                today,
+                undefined,
+                undefined,
+                undefined,
+                false,
+                undefined,
                 undefined,
                 1,
-                this.getTimeZone(),
-                'body',
                 undefined,
+                'popularity.desc',
+                this.getTimeZone(),
+                undefined,
+                undefined,
+                DATE_WINDOW_DISCOVER_VOTE_COUNT_GTE,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                'body',
+                false,
                 this.opts,
             )
             .pipe(
@@ -340,7 +379,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         this.patchState({ inTheatres: { type: 'loading' } });
 
         const releaseDateGte = getISODate(0);
-        const releaseDateLte = getISODate(14);
+        const releaseDateLte = getISODate(OPENING_SOON_MOVIE_DAYS_AHEAD);
 
         return this.discoverService
             .discoverMovie(
@@ -353,17 +392,12 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                 undefined,
                 1,
                 undefined,
+                undefined,
+                undefined,
+                this.localeStore.region(),
                 releaseDateGte,
                 releaseDateLte,
-                this.localeStore.region(),
-                undefined,
-                undefined,
-                'popularity.desc',
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                this.localeStore.region(),
+                'primary_release_date.asc',
                 undefined,
                 undefined,
                 undefined,
@@ -372,7 +406,12 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                 undefined,
                 undefined,
                 undefined,
-                3,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                THEATRICAL_MOVIE_RELEASE_TYPE,
                 undefined,
                 undefined,
                 undefined,

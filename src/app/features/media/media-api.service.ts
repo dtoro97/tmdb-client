@@ -18,7 +18,7 @@ import {
     WatchProviderList,
 } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
-import type { MediaType } from '../../shared';
+import { buildImageLanguageFallback, LocaleStoreService, type MediaType } from '../../shared';
 
 @Injectable({ providedIn: 'root' })
 export class MediaApiService {
@@ -26,6 +26,7 @@ export class MediaApiService {
         private readonly movieService: MovieRestControllerService,
         private readonly tvService: TvSeriesRestControllerService,
         private readonly reviewService: ReviewRestControllerService,
+        private readonly localeStore: LocaleStoreService,
     ) {}
 
     getDetails$(id: number, type: MediaType): Observable<Movie | TvSeries> {
@@ -53,9 +54,12 @@ export class MediaApiService {
     }
 
     getImages$(id: number, type: MediaType): Observable<ImageList> {
+        const language = this.localeStore.language();
+        const includeImageLanguage = buildImageLanguageFallback();
+
         return type === 'tv'
-            ? this.tvService.tvSeriesImages(id, undefined, undefined, undefined, undefined, API_JSON_OPTIONS)
-            : this.movieService.movieImages(id, undefined, undefined, undefined, undefined, API_JSON_OPTIONS);
+            ? this.tvService.tvSeriesImages(id, includeImageLanguage, language, undefined, undefined, API_JSON_OPTIONS)
+            : this.movieService.movieImages(id, includeImageLanguage, language, undefined, undefined, API_JSON_OPTIONS);
     }
 
     getKeywords$(id: number, type: MediaType): Observable<{ results?: unknown[]; keywords?: unknown[] }> {

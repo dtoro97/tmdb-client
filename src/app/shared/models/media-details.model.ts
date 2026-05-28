@@ -6,6 +6,12 @@ import {
 } from '../../api';
 import type { MediaType } from '../types';
 
+export interface MediaProductionCompany {
+    id: number;
+    name: string;
+    label: string;
+}
+
 export interface MediaDetails {
     id: number;
     title: string;
@@ -17,6 +23,8 @@ export interface MediaDetails {
     backdropPath: string | null;
     status?: string;
     languages: string[];
+    originCountries: string[];
+    productionCompanies: MediaProductionCompany[];
     mediaType: MediaType;
     homepage?: string;
     tagline?: string;

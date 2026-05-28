@@ -1,125 +1,228 @@
-<div class="discover-page page-container">
-    @if (vm$ | async; as vm) {
-        <div class="discover-header inner-container">
-            <div class="discover-header-top">
-                <h1 class="discover-title">{{ vm.config?.title }}</h1>
-                @if (
-                    vm.resultsState.type === "loaded" ||
-                    vm.resultsState.type === "loading-more"
-                ) {
-                    <span
-                        class="discover-count discover-count--muted text-caption"
-                    >
-                        1 - {{ vm.visibleCount }} of {{ vm.totalResults }}
-                    </span>
-                }
-            </div>
+@if (vm$ | async; as vm) {
+    <div class="discover-page page-container">
+        <header class="discover-page__header inner-container">
+            <h1 class="text-display">{{ vm.title }}</h1>
+            <p class="discover-page__subtitle text-body">{{ vm.subtitle }}</p>
+        </header>
 
+        <main class="discover-page__content inner-container">
             <app-browse-toolbar>
-                <app-pill-toggle
-                    start
-                    [options]="vm.categoryOptions"
-                    [selectedValue]="vm.category"
-                    (selected)="onCategoryChange($event)"
-                />
+                <div start class="discover-page__toolbar-start">
+                    @if (vm.showResultCount) {
+                        <span class="discover-page__result-count text-caption">
+                            {{ vm.resultStart }} - {{ vm.resultEnd }} of {{ vm.totalResults }}
+                        </span>
+                    }
+                </div>
 
-                @if (!vm.browsingPeople) {
-                    <app-sort-button
-                        end
-                        [options]="vm.sortOptions"
-                        [selectedValue]="vm.sortField"
-                        [direction]="vm.sortDirection"
-                        (sortChange)="onSortChange($event)"
-                        (directionToggle)="toggleSortDirection()"
-                    />
-                }
+                <div end class="discover-page__toolbar-actions">
+                    @if (vm.showMediaTypeToggle) {
+                        <app-pill-toggle
+                            [options]="vm.mediaTypeOptions"
+                            [selectedValue]="vm.mediaType"
+                            variant="subtle"
+                            (selected)="onMediaTypeChange($event)"
+                        />
+                    }
+
+                    @if (vm.showSort) {
+                        <app-sort-button
+                            [options]="vm.sortOptions"
+                            [selectedValue]="vm.sortKey"
+                            [direction]="vm.sortDirection"
+                            (sortChange)="onSortChange($event)"
+                            (directionToggle)="onSortDirectionToggle()"
+                        />
+                    }
+
+                    @if (vm.showFilters) {
+                        <button
+                            mat-stroked-button
+                            type="button"
+                            class="discover-page__filter-toggle"
+                            [attr.aria-expanded]="mobileFiltersOpen"
+                            (click)="openFilters()"
+                            >
+                                <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                                <span>Filters</span>
+                            </button>
+                        }
+
+                    @if (vm.showReset) {
+                        <button
+                            mat-stroked-button
+                            type="button"
+                            class="discover-page__reset"
+                            (click)="reset()"
+                        >
+                            Reset
+                        </button>
+                    }
+                </div>
             </app-browse-toolbar>
-        </div>
 
-        <div class="discover-body inner-container">
-            @if (!vm.browsingPeople) {
-                <app-discover-filters
-                    [mediaType]="vm.type === 'person' ? 'movie' : vm.type"
-                    [genres]="vm.genreList"
-                    [selectedGenreIds]="vm.genreIds"
-                    [keywords]="vm.selectedKeywords"
-                    [keywordSuggestions]="vm.keywordSuggestions"
-                    [yearFrom]="vm.yearFrom"
-                    [yearTo]="vm.yearTo"
-                    [minRating]="vm.minRating"
-                    [ratingPlaceholder]="vm.ratingPlaceholder"
-                    [voteCountMin]="vm.voteCountMin"
-                    [runtimeMin]="vm.runtimeMin"
-                    [runtimeMax]="vm.runtimeMax"
-                    [certifications]="vm.certifications"
-                    [certificationOptions]="vm.certificationOptions"
-                    [originalLanguage]="vm.originalLanguage"
-                    [watchProviderIds]="vm.watchProviderIds"
-                    [watchProviderOptions]="vm.watchProviderOptions"
-                    [languageOptions]="vm.languageOptions"
-                    [activeFilterCount]="vm.activeFilterCount"
-                    (genreToggled)="onGenreToggle($event)"
-                    (keywordAdded)="onKeywordAdd($event)"
-                    (keywordRemoved)="onKeywordRemove($event)"
-                    (keywordSearchChanged)="onKeywordSearch($event)"
-                    (yearFromChanged)="onYearFromChange($event, vm.yearTo)"
-                    (yearToChanged)="onYearToChange($event, vm.yearFrom)"
-                    (minRatingChanged)="onMinRatingChange($event)"
-                    (voteCountChanged)="onVoteCountChange($event)"
-                    (runtimeMinChanged)="
-                        onRuntimeMinChange($event, vm.runtimeMax)
-                    "
-                    (runtimeMaxChanged)="
-                        onRuntimeMaxChange($event, vm.runtimeMin)
-                    "
-                    (certificationToggled)="onCertificationToggle($event)"
-                    (languageChanged)="onLanguageChange($event)"
-                    (watchProviderToggled)="onWatchProviderToggle($event)"
-                    (filtersCleared)="onClearFilters()"
-                />
+            @if (vm.lockedFilters.length || vm.activeFilters.length) {
+                <div class="discover-page__active-filters" aria-label="Active filters">
+                    @for (filter of vm.lockedFilters; track filter.id) {
+                        <span
+                            class="discover-page__filter-chip discover-page__filter-chip--locked text-caption"
+                        >
+                            <mat-icon aria-hidden="true">lock</mat-icon>
+                            <span>{{ filter.label }}</span>
+                        </span>
+                    }
+
+                    @for (filter of vm.activeFilters; track filter.id) {
+                        <button
+                            class="discover-page__filter-chip text-caption"
+                            type="button"
+                            [attr.aria-label]="'Remove ' + filter.label"
+                            (click)="clearFilter(filter)"
+                        >
+                            <span>{{ filter.label }}</span>
+                            <mat-icon aria-hidden="true">close</mat-icon>
+                        </button>
+                    }
+                </div>
             }
 
-            <div class="discover-results">
-                <div>
+            <ng-template #filterPanel let-showHeader="showHeader">
+                <app-discover-filter-panel
+                    [showHeader]="showHeader"
+                    [activeFilterCount]="vm.activeFilterCount"
+                    [showGenreFilter]="vm.showGenreFilter"
+                    [showKeywordFilter]="vm.showKeywordFilter"
+                    [showCompanyFilter]="vm.showCompanyFilter"
+                    [showYearRangeFilter]="vm.showYearRangeFilter"
+                    [showWatchRegionFilter]="vm.showWatchRegionFilter"
+                    [showProviderFilter]="vm.showProviderFilter"
+                    [showCertificationFilter]="vm.showCertificationFilter"
+                    [showReleaseTypeFilter]="vm.showReleaseTypeFilter"
+                    [showLanguageFilter]="vm.showLanguageFilter"
+                    [showRatingFilter]="vm.showRatingFilter"
+                    [showVoteCountFilter]="vm.showVoteCountFilter"
+                    [showRuntimeFilter]="vm.showRuntimeFilter"
+                    [genreOptions]="vm.genreOptions"
+                    [selectedGenreIds]="vm.selectedGenreIds"
+                    [keywordSuggestions]="vm.keywordSuggestions"
+                    [companySuggestions]="vm.companySuggestions"
+                    [selectedYearFrom]="vm.selectedYearFrom"
+                    [selectedYearTo]="vm.selectedYearTo"
+                    [watchRegionOptions]="vm.watchRegionOptions"
+                    [watchRegion]="vm.watchRegion"
+                    [providerOptions]="vm.providerOptions"
+                    [selectedProviderIds]="vm.selectedProviderIds"
+                    [certificationOptions]="vm.certificationOptions"
+                    [selectedCertification]="vm.selectedCertification"
+                    [releaseTypeOptions]="vm.releaseTypeOptions"
+                    [selectedReleaseType]="vm.selectedReleaseType"
+                    [languageOptions]="vm.languageOptions"
+                    [selectedOriginalLanguage]="vm.selectedOriginalLanguage"
+                    [ratingOptions]="vm.ratingOptions"
+                    [selectedRating]="vm.selectedRating"
+                    [voteCountOptions]="vm.voteCountOptions"
+                    [selectedVoteCount]="vm.selectedVoteCount"
+                    [runtimeOptions]="vm.runtimeOptions"
+                    [selectedRuntime]="vm.selectedRuntime"
+                    (genresChange)="onGenresChange($event)"
+                    (keywordSearchChange)="onKeywordSearchChange($event)"
+                    (keywordAdd)="onKeywordAdd($event)"
+                    (companySearchChange)="onCompanySearchChange($event)"
+                    (companyAdd)="onCompanyAdd($event)"
+                    (yearFromChange)="onYearFromChange($event)"
+                    (yearToChange)="onYearToChange($event)"
+                    (watchRegionChange)="onWatchRegionChange($event)"
+                    (providersChange)="onProvidersChange($event)"
+                    (certificationChange)="onCertificationChange($event)"
+                    (releaseTypeChange)="onReleaseTypeChange($event)"
+                    (originalLanguageChange)="onOriginalLanguageChange($event)"
+                    (ratingChange)="onRatingChange($event)"
+                    (voteCountChange)="onVoteCountChange($event)"
+                    (runtimeChange)="onRuntimeChange($event)"
+                    (resetFilters)="reset()"
+                    (closePanel)="closeFilters()"
+                />
+            </ng-template>
+
+            <div
+                class="discover-page__layout"
+                [class.discover-page__layout--with-filters]="vm.showFilters"
+            >
+                @if (vm.showFilters) {
+                    <aside class="discover-page__filters" aria-label="Filters">
+                        <ng-container
+                            *ngTemplateOutlet="
+                                filterPanel;
+                                context: { showHeader: false }
+                            "
+                        />
+                    </aside>
+                }
+
+                <section class="discover-page__results" aria-label="Results">
                     @if (vm.showEmptyState) {
-                        <div class="empty-panel discover-empty-state">
+                        <div class="empty-panel discover-page__empty">
                             <app-empty-state
                                 iconClass="fa-solid fa-filter-circle-xmark"
-                                text="Try a different category or adjust the current filters."
+                                text="No titles matched these filters."
                             />
                         </div>
                     } @else {
-                        <div>
-                            @if (vm.browsingPeople) {
-                                <app-person-list
-                                    [state]="vm.personState"
-                                    [skeletonCount]="browseSkeletonCount"
-                                    [showIndex]="true"
-                                    [indexStart]="vm.startIndex"
-                                />
+                        <div class="discover-page__items">
+                            @if (vm.resultsState.type === 'loading') {
+                                @for (slot of 20 | repeat; track slot) {
+                                    <div class="discover-page__skeleton-card">
+                                        <app-skeleton class="discover-page__poster-skeleton" />
+                                        <div class="discover-page__content-skeleton">
+                                            <app-skeleton class="discover-page__line discover-page__line--title" />
+                                            <app-skeleton class="discover-page__line discover-page__line--meta" />
+                                            <app-skeleton class="discover-page__line discover-page__line--genres" />
+                                        </div>
+                                    </div>
+                                }
                             } @else {
-                                <app-media-list
-                                    [state]="vm.mediaState"
-                                    [genreMap]="vm.genreMap"
-                                    [skeletonCount]="browseSkeletonCount"
-                                    density="compact"
-                                    [showIndex]="true"
-                                    [indexStart]="vm.startIndex"
-                                    [descendingFrom]="vm.descendingFrom"
-                                />
+                                @for (entry of vm.displayItems; track entry.item.id) {
+                                    <app-discover-card
+                                        [item]="entry.item"
+                                        [genreNames]="entry.genreNames"
+                                        [link]="entry.routerLink"
+                                    />
+                                }
                             }
                         </div>
                     }
 
-                    @if (vm.hasMore) {
-                        <div class="discover-footer">
-                            <button mat-stroked-button (click)="loadMore()">
-                                Show more
-                            </button>
-                        </div>
+                    @if (vm.showPaginator) {
+                        <mat-paginator
+                            class="discover-page__paginator"
+                            [length]="vm.paginatorLength"
+                            [pageIndex]="vm.pageIndex"
+                            [pageSize]="vm.pageSize"
+                            [hidePageSize]="true"
+                            (page)="onPageChange($event)"
+                        />
                     }
-                </div>
+                </section>
             </div>
-        </div>
-    }
-</div>
+
+            @if (vm.showFilters && mobileFiltersOpen) {
+                <div class="discover-page__filter-overlay" aria-hidden="true" (click)="closeFilters()"></div>
+                <section
+                    class="discover-page__filter-drawer"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Filters"
+                    cdkTrapFocus
+                    cdkTrapFocusAutoCapture
+                >
+                    <ng-container
+                        *ngTemplateOutlet="
+                            filterPanel;
+                            context: { showHeader: true }
+                        "
+                    />
+                </section>
+            }
+        </main>
+    </div>
+}

@@ -112,21 +112,22 @@
                     vm.items.type === "loading" ||
                     vm.items.type === "idle"
                 ) {
-                    <app-media-list
-                        [state]="loadingListState"
-                        [skeletonCount]="initialSkeletonCount"
-                    />
+                    <div class="detail__items" aria-hidden="true">
+                        @for (placeholder of initialSkeletonCount | repeat; track placeholder) {
+                            <app-account-media-item [loading]="true" />
+                        }
+                    </div>
                 } @else if (vm.items.type === "loaded") {
                     @if (vm.items.value.length) {
                         <div class="detail__items">
                             @for (item of vm.items.value; track item.key) {
-                                <app-media-list-item
+                                <app-account-media-item
                                     [item]="item.mediaItem"
                                     [link]="item.link"
                                 >
                                     @if (vm.ownedByCurrentUser) {
                                         <div
-                                            media-list-item-action
+                                            account-media-item-action
                                             class="detail__item-actions"
                                         >
                                             <app-icon-button
@@ -155,7 +156,7 @@
 
                                     @if (item.comment) {
                                         <p
-                                            media-list-item-note
+                                            account-media-item-note
                                             class="detail__comment text-body-sm"
                                         >
                                             <i
@@ -171,7 +172,7 @@
                                         editingCommentKey() === item.key
                                     ) {
                                         <div
-                                            media-list-item-note
+                                            account-media-item-note
                                             class="detail__comment-editor"
                                         >
                                             <textarea
@@ -200,7 +201,7 @@
                                             </div>
                                         </div>
                                     }
-                                </app-media-list-item>
+                                </app-account-media-item>
                             }
                         </div>
 
@@ -246,10 +247,11 @@
             />
 
             <main class="page-main detail__main">
-                <app-media-list
-                    [state]="loadingListState"
-                    [skeletonCount]="initialSkeletonCount"
-                />
+                <div class="detail__items" aria-hidden="true">
+                    @for (placeholder of initialSkeletonCount | repeat; track placeholder) {
+                        <app-account-media-item [loading]="true" />
+                    }
+                </div>
             </main>
         }
     </div>

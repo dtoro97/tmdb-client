@@ -47,8 +47,7 @@
                 <ng-container section-controls>
                     <a
                         class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
-                        routerLink="/discover"
-                        [queryParams]="{ type: 'tv', category: 'airing_today' }"
+                        routerLink="/tv/airing-today"
                     >
                         <span>Browse airing today</span>
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
@@ -116,8 +115,7 @@
                 <a
                     section-controls
                     class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
-                    routerLink="/discover"
-                    [queryParams]="{ type: 'person' }"
+                    routerLink="/people/popular"
                 >
                     <span>Browse people</span>
                     <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
@@ -191,8 +189,7 @@
                 <a
                     section-controls
                     class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
-                    routerLink="/discover"
-                    [queryParams]="{ type: 'movie' }"
+                    routerLink="/movies/upcoming"
                 >
                     <span>Browse upcoming movies</span>
                     <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>

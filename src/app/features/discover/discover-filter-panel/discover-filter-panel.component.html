@@ -1,0 +1,242 @@
+<div class="discover-filter-panel">
+    @if (showHeader) {
+        <header class="discover-filter-panel__header">
+            <div class="discover-filter-panel__heading">
+                <h2 class="text-title">Filters</h2>
+                @if (activeFilterCount) {
+                    <span class="discover-filter-panel__count text-caption">
+                        {{ activeFilterCount }}
+                    </span>
+                }
+            </div>
+
+            <div class="discover-filter-panel__header-actions">
+                <button
+                    mat-button
+                    type="button"
+                    class="discover-filter-panel__text-button"
+                    (click)="resetFilters.emit()"
+                >
+                    Reset
+                </button>
+                <button mat-icon-button type="button" aria-label="Close filters" (click)="closePanel.emit()">
+                    <mat-icon aria-hidden="true">close</mat-icon>
+                </button>
+            </div>
+        </header>
+    }
+
+    @if (showGenreFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Genres</h2>
+            <app-pill-toggle
+                [options]="genreOptions"
+                [selectedValues]="selectedGenreIds"
+                [multiple]="true"
+                variant="subtle"
+                (selected)="genresChange.emit($event)"
+            />
+        </section>
+    }
+
+    @if (showKeywordFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Keywords</h2>
+            <mat-form-field class="discover-filter-panel__select-field" appearance="outline" subscriptSizing="dynamic">
+                <input
+                    matInput
+                    placeholder="Search keywords"
+                    [value]="keywordSearchText"
+                    [matAutocomplete]="keywordAuto"
+                    (input)="onKeywordSearch($event)"
+                />
+                <mat-autocomplete #keywordAuto="matAutocomplete" (optionSelected)="onKeywordAdd($event.option.value)">
+                    @for (option of keywordSuggestions; track option.value) {
+                        <mat-option [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    }
+                </mat-autocomplete>
+            </mat-form-field>
+        </section>
+    }
+
+    @if (showCompanyFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Production companies</h2>
+            <mat-form-field class="discover-filter-panel__select-field" appearance="outline" subscriptSizing="dynamic">
+                <input
+                    matInput
+                    placeholder="Search companies"
+                    [value]="companySearchText"
+                    [matAutocomplete]="companyAuto"
+                    (input)="onCompanySearch($event)"
+                />
+                <mat-autocomplete #companyAuto="matAutocomplete" (optionSelected)="onCompanyAdd($event.option.value)">
+                    @for (option of companySuggestions; track option.value) {
+                        <mat-option [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    }
+                </mat-autocomplete>
+            </mat-form-field>
+        </section>
+    }
+
+    @if (showYearRangeFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Year range</h2>
+            <div class="discover-filter-panel__range-row">
+                <app-stepper-input
+                    [value]="selectedYearFrom"
+                    [step]="1"
+                    [min]="1874"
+                    [max]="2100"
+                    placeholder="From"
+                    (valueChanged)="yearFromChange.emit($event)"
+                />
+                <span class="discover-filter-panel__range-separator text-caption">to</span>
+                <app-stepper-input
+                    [value]="selectedYearTo"
+                    [step]="1"
+                    [min]="1874"
+                    [max]="2100"
+                    placeholder="To"
+                    (valueChanged)="yearToChange.emit($event)"
+                />
+            </div>
+        </section>
+    }
+
+    @if (showWatchRegionFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Region</h2>
+            <mat-form-field class="discover-filter-panel__select-field" appearance="outline" subscriptSizing="dynamic">
+                <mat-select
+                    aria-label="Region"
+                    [value]="watchRegion"
+                    (selectionChange)="watchRegionChange.emit($event.value)"
+                >
+                    @for (option of watchRegionOptions; track option.value) {
+                        <mat-option [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </section>
+    }
+
+    @if (showProviderFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Where to watch</h2>
+            <mat-form-field class="discover-filter-panel__select-field" appearance="outline" subscriptSizing="dynamic">
+                <mat-select
+                    multiple
+                    aria-label="Where to watch"
+                    placeholder="Any provider"
+                    [value]="selectedProviderIds"
+                    (selectionChange)="providersChange.emit($event.value)"
+                >
+                    @if (!providerOptions.length) {
+                        <mat-option disabled>No providers available</mat-option>
+                    }
+                    @for (option of providerOptions; track option.value) {
+                        <mat-option [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </section>
+    }
+
+    @if (showCertificationFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Certification</h2>
+            <app-pill-toggle
+                [options]="certificationPillOptions"
+                [selectedValue]="selectedCertification"
+                variant="subtle"
+                (selected)="certificationChange.emit($event)"
+            />
+        </section>
+    }
+
+    @if (showReleaseTypeFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Release type</h2>
+            <app-pill-toggle
+                [options]="releaseTypeOptions"
+                [selectedValue]="selectedReleaseType"
+                variant="subtle"
+                (selected)="releaseTypeChange.emit($event)"
+            />
+        </section>
+    }
+
+    @if (showLanguageFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Original language</h2>
+            <mat-form-field class="discover-filter-panel__select-field" appearance="outline" subscriptSizing="dynamic">
+                <mat-select
+                    aria-label="Original language"
+                    placeholder="Any language"
+                    [value]="selectedOriginalLanguage"
+                    (selectionChange)="originalLanguageChange.emit($event.value)"
+                >
+                    <mat-option>
+                        <ngx-mat-select-search
+                            placeholderLabel="Search languages"
+                            noEntriesFoundLabel="No matching languages"
+                            ngModel
+                            (ngModelChange)="updateLanguageFilter($event)"
+                        />
+                    </mat-option>
+                    <mat-option [value]="null">Any language</mat-option>
+                    @for (option of filteredLanguageOptions; track option.value) {
+                        <mat-option [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </section>
+    }
+
+    @if (showRatingFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Rating</h2>
+            <app-pill-toggle
+                [options]="ratingOptions"
+                [selectedValue]="selectedRating"
+                variant="subtle"
+                (selected)="ratingChange.emit($event)"
+            />
+        </section>
+    }
+
+    @if (showVoteCountFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Votes</h2>
+            <app-pill-toggle
+                [options]="voteCountOptions"
+                [selectedValue]="selectedVoteCount"
+                variant="subtle"
+                (selected)="voteCountChange.emit($event)"
+            />
+        </section>
+    }
+
+    @if (showRuntimeFilter) {
+        <section class="discover-filter-panel__group">
+            <h2 class="discover-filter-panel__title text-title">Runtime</h2>
+            <app-pill-toggle
+                [options]="runtimeOptions"
+                [selectedValue]="selectedRuntime"
+                variant="subtle"
+                (selected)="runtimeChange.emit($event)"
+            />
+        </section>
+    }
+</div>

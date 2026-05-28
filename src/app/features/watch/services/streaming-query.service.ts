@@ -4,7 +4,14 @@ import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 import { DiscoverRestControllerService, MovieListItem, TvSeriesListItem } from '../../../api';
 import { API_JSON_OPTIONS } from '../../../constants';
-import { LocaleStoreService, MediaType, SortDirection, toISODate, toMediaListItem } from '../../../shared';
+import {
+    LocaleStoreService,
+    MediaType,
+    serializeNumberListParam,
+    SortDirection,
+    toISODate,
+    toMediaListItem,
+} from '../../../shared';
 import {
     StreamingBaseQuery,
     StreamingDatePreset,
@@ -96,6 +103,12 @@ export class StreamingQueryService {
     private discoverMovies$(query: StreamingBaseQuery): Observable<StreamingPreviewItem[]> {
         const dateWindow = this.resolveDateWindow(query.datePreset);
         const region = this.localeStore.region() || 'US';
+        const releaseRegion = this.resolveMovieReleaseRegion(
+            query,
+            dateWindow,
+            region,
+        );
+        const watchRegion = this.resolveWatchRegion(query, region);
 
         return this.discoverService
             .discoverMovie(
@@ -110,7 +123,7 @@ export class StreamingQueryService {
                 undefined,
                 dateWindow.from,
                 dateWindow.to,
-                region,
+                releaseRegion,
                 undefined,
                 undefined,
                 this.toMovieSort(query),
@@ -118,12 +131,12 @@ export class StreamingQueryService {
                 undefined,
                 query.voteCountMin,
                 query.voteCountMax,
-                query.providerId || query.monetization ? region : undefined,
+                watchRegion,
                 undefined,
                 undefined,
                 undefined,
-                this.joinNumbers(query.genreIds),
-                this.joinNumbers(query.keywordIds),
+                serializeNumberListParam(query.genreIds) ?? undefined,
+                serializeNumberListParam(query.keywordIds) ?? undefined,
                 query.originCountry,
                 query.originalLanguage,
                 undefined,
@@ -154,6 +167,7 @@ export class StreamingQueryService {
     private discoverTv$(query: StreamingBaseQuery): Observable<StreamingPreviewItem[]> {
         const dateWindow = this.resolveDateWindow(query.datePreset);
         const region = this.localeStore.region() || 'US';
+        const watchRegion = this.resolveWatchRegion(query, region);
 
         return this.discoverService
             .discoverTv(
@@ -173,10 +187,10 @@ export class StreamingQueryService {
                 undefined,
                 query.voteCountMin,
                 query.voteCountMax,
-                query.providerId || query.monetization ? region : undefined,
+                watchRegion,
                 undefined,
-                this.joinNumbers(query.genreIds),
-                this.joinNumbers(query.keywordIds),
+                serializeNumberListParam(query.genreIds) ?? undefined,
+                serializeNumberListParam(query.keywordIds) ?? undefined,
                 undefined,
                 query.originCountry,
                 query.originalLanguage,
@@ -212,6 +226,12 @@ export class StreamingQueryService {
     ): Observable<StreamingListResult> {
         const dateWindow = this.resolveDateWindow(query.datePreset);
         const region = this.localeStore.region() || 'US';
+        const releaseRegion = this.resolveMovieReleaseRegion(
+            query,
+            dateWindow,
+            region,
+        );
+        const watchRegion = this.resolveWatchRegion(query, region);
 
         return this.discoverService
             .discoverMovie(
@@ -226,7 +246,7 @@ export class StreamingQueryService {
                 undefined,
                 dateWindow.from,
                 dateWindow.to,
-                region,
+                releaseRegion,
                 undefined,
                 undefined,
                 this.toMovieSortValue(sortKey, direction),
@@ -234,12 +254,12 @@ export class StreamingQueryService {
                 undefined,
                 query.voteCountMin,
                 query.voteCountMax,
-                query.providerId || query.monetization ? region : undefined,
+                watchRegion,
                 undefined,
                 undefined,
                 undefined,
-                this.joinNumbers(query.genreIds),
-                this.joinNumbers(query.keywordIds),
+                serializeNumberListParam(query.genreIds) ?? undefined,
+                serializeNumberListParam(query.keywordIds) ?? undefined,
                 query.originCountry,
                 query.originalLanguage,
                 undefined,
@@ -275,6 +295,7 @@ export class StreamingQueryService {
     ): Observable<StreamingListResult> {
         const dateWindow = this.resolveDateWindow(query.datePreset);
         const region = this.localeStore.region() || 'US';
+        const watchRegion = this.resolveWatchRegion(query, region);
 
         return this.discoverService
             .discoverTv(
@@ -294,10 +315,10 @@ export class StreamingQueryService {
                 undefined,
                 query.voteCountMin,
                 query.voteCountMax,
-                query.providerId || query.monetization ? region : undefined,
+                watchRegion,
                 undefined,
-                this.joinNumbers(query.genreIds),
-                this.joinNumbers(query.keywordIds),
+                serializeNumberListParam(query.genreIds) ?? undefined,
+                serializeNumberListParam(query.keywordIds) ?? undefined,
                 undefined,
                 query.originCountry,
                 query.originalLanguage,
@@ -431,7 +452,21 @@ export class StreamingQueryService {
         };
     }
 
-    private joinNumbers(values?: readonly number[]): string | undefined {
-        return values?.length ? values.join(',') : undefined;
+    private resolveMovieReleaseRegion(
+        query: StreamingBaseQuery,
+        dateWindow: DateWindow,
+        region: string,
+    ): string | undefined {
+        return dateWindow.from || dateWindow.to || query.releaseType
+            ? region
+            : undefined;
     }
+
+    private resolveWatchRegion(
+        query: StreamingBaseQuery,
+        region: string,
+    ): string | undefined {
+        return query.providerId || query.monetization ? region : undefined;
+    }
+
 }

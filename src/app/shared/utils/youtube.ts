@@ -19,7 +19,7 @@ export const compareVideosTrailerFirst = (left: Video, right: Video): number =>
 export const sortVideosTrailerFirst = <T extends Video>(videos: readonly T[]): T[] =>
     [...videos].sort(compareVideosTrailerFirst);
 
-export const toYoutubeTrailerFirstVideoState = (
+export const toYoutubeVideoState = (
     state: LoadableItems<Video>,
 ): LoadableItems<Video> => {
     if (state.type === 'loaded') {
@@ -41,7 +41,7 @@ export const toYoutubeTrailerFirstVideoState = (
 };
 
 export const pickBestYoutubeTrailer = (
-    videos: Video[],
+    videos: readonly Video[],
     preferredLanguage?: string,
     options: PickBestYoutubeTrailerOptions = {},
 ): Video | null => {
@@ -62,7 +62,9 @@ export const pickBestYoutubeTrailer = (
         const preferredOfficial = candidates.find(
             (video) => video.official && isVideoLanguage(video, normalizedLanguage),
         );
-        const preferred = candidates.find((video) => isVideoLanguage(video, normalizedLanguage));
+        const preferred = candidates.find((video) =>
+            isVideoLanguage(video, normalizedLanguage),
+        );
 
         if (options.requirePreferredLanguage) {
             return preferredOfficial ?? preferred ?? null;
@@ -76,10 +78,7 @@ export const pickBestYoutubeTrailer = (
         );
     }
 
-    return (
-        candidates.find((video) => video.type === 'Trailer' && video.official) ??
-        candidates[0]
-    );
+    return candidates.find((video) => video.official) ?? candidates[0];
 };
 
 const videoTypeRank = (video: Video): number =>

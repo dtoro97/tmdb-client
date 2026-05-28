@@ -31,6 +31,27 @@ export const routes: Routes = [
             ),
     },
     {
+        path: 'movies',
+        loadChildren: () =>
+            import('./features/discover/discover.routes').then(
+                (m) => m.movieBrowseRoutes,
+            ),
+    },
+    {
+        path: 'tv',
+        loadChildren: () =>
+            import('./features/discover/discover.routes').then(
+                (m) => m.tvBrowseRoutes,
+            ),
+    },
+    {
+        path: 'people',
+        loadChildren: () =>
+            import('./features/discover/discover.routes').then(
+                (m) => m.peopleBrowseRoutes,
+            ),
+    },
+    {
         path: 'search',
         loadChildren: () =>
             import('./features/search/search.routes').then(
@@ -62,5 +83,6 @@ export const routes: Routes = [
         loadChildren: () =>
             import('./features/home/home.routes').then((m) => m.homeRoutes),
     },
+    { path: 'not-found', component: NotFoundComponent },
     { path: '**', component: NotFoundComponent },
 ];

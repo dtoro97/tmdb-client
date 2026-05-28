@@ -14,7 +14,7 @@ import type { LoadableItems } from '../../types';
 import {
     buildYoutubeThumbnailUrl,
     buildYoutubeWatchUrl,
-    toYoutubeTrailerFirstVideoState,
+    toYoutubeVideoState,
 } from '../../utils/youtube';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
 import { VideoCardComponent } from '../video-card/video-card.component';
@@ -41,7 +41,7 @@ export class VideosGridComponent implements OnChanges {
             this.state.type === 'loaded' ||
             this.state.type === 'loading-more'
         ) {
-            const state = toYoutubeTrailerFirstVideoState(this.state);
+            const state = toYoutubeVideoState(this.state);
             const videos =
                 state.type === 'loaded' || state.type === 'loading-more'
                     ? state.value

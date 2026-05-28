@@ -36,9 +36,23 @@
                 }
             </div>
 
+            @if (currentItem.badges; as badges) {
+                @if (badges.length) {
+                    <div class="badges">
+                        @for (badge of badges; track badge.label) {
+                            <app-badge [label]="badge.label" [variant]="badge.variant ?? 'neutral'" />
+                        }
+                    </div>
+                }
+            }
+
             <p class="overview text-body-sm">
                 {{ currentItem.overview || 'No overview available.' }}
             </p>
+
+            <div class="note">
+                <ng-content select="[account-media-item-note]" />
+            </div>
         </div>
 
         @if (currentItem.rating !== null) {

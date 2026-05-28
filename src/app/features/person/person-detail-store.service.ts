@@ -23,6 +23,7 @@ import {
     SortDirection,
     ViewerImage,
     buildExternalLinks,
+    isPreferredImageLanguage,
     shuffle,
 } from '../../shared';
 import { API_JSON_OPTIONS, CAROUSEL_COUNT } from '../../constants';
@@ -201,7 +202,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                 }),
             ),
             ...tagged
-                .filter((img) => img.iso_639_1 === null || img.iso_639_1 === language || img.iso_639_1 === 'en')
+                .filter((img) => isPreferredImageLanguage(img.iso_639_1, language))
                 .map(
                     (img): ViewerImage => ({
                         file_path: img.file_path,

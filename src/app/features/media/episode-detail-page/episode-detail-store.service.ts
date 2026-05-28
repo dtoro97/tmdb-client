@@ -14,6 +14,7 @@ import {
     VideoList,
 } from '../../../api';
 import {
+    buildImageLanguageFallback,
     getISODate,
     MediaDetails,
     groupCrewMembers,
@@ -22,7 +23,7 @@ import {
     ViewerImage,
     loadedValue,
     GroupedCrew,
-    toYoutubeTrailerFirstVideoState,
+    toYoutubeVideoState,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaSeasonsStoreService } from '../media-seasons-store.service';
@@ -119,7 +120,7 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
             return { type: 'idle' };
         }
 
-        return toYoutubeTrailerFirstVideoState(state.videos);
+        return toYoutubeVideoState(state.videos);
     });
 
     readonly vm$ = combineLatest([
@@ -187,9 +188,18 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
             images: { type: 'loading' },
             videos: { type: 'loading' },
         });
+        const language = this.localeStore.language();
+        const includeImageLanguage = buildImageLanguageFallback();
+
         return forkJoin([
             this.tvEpisodeRestControllerService.tvEpisodeDetails(seriesId, seasonNumber, episodeNumber),
-            this.tvEpisodeRestControllerService.tvEpisodeImages(seriesId, seasonNumber, episodeNumber),
+            this.tvEpisodeRestControllerService.tvEpisodeImages(
+                seriesId,
+                seasonNumber,
+                episodeNumber,
+                includeImageLanguage,
+                language,
+            ),
             this.tvEpisodeRestControllerService
                 .tvEpisodeVideos(seriesId, seasonNumber, episodeNumber)
                 .pipe(catchError(() => of({ results: [] }))),
@@ -230,7 +240,16 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
             videos: this.isCurrentTarget(state.target, target) ? state.videos : { type: 'idle' },
         });
 
-        return this.tvEpisodeRestControllerService.tvEpisodeImages(seriesId, seasonNumber, episodeNumber).pipe(
+        const language = this.localeStore.language();
+        const includeImageLanguage = buildImageLanguageFallback();
+
+        return this.tvEpisodeRestControllerService.tvEpisodeImages(
+            seriesId,
+            seasonNumber,
+            episodeNumber,
+            includeImageLanguage,
+            language,
+        ).pipe(
             tap((images) => {
                 this.patchState({
                     target,
@@ -255,9 +274,7 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
     }
 
     private toEpisodeStillImages(images: TvEpisodeImages | null | undefined): ViewerImage[] {
-        const language = this.localeStore.language() || 'en';
         return (images?.stills ?? [])
-            .filter((image) => image.iso_639_1 === null || image.iso_639_1 === language || image.iso_639_1 === 'en')
             .map((image) => ({
                 ...image,
                 photoType: 'still',

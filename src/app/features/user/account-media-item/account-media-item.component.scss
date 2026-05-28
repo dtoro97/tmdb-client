@@ -21,6 +21,7 @@
 .poster-link,
 .poster {
     grid-area: poster;
+    align-self: start;
     width: 3.5rem;
     aspect-ratio: var(--poster-ratio);
 }
@@ -51,6 +52,12 @@
     gap: var(--space-1);
 }
 
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+}
+
 .title {
     min-width: 0;
     @include line-clamp(1);
@@ -62,6 +69,14 @@
 
 .overview {
     @include line-clamp(1);
+}
+
+.note {
+    min-width: 0;
+
+    &:empty {
+        display: none;
+    }
 }
 
 .rating {

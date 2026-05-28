@@ -1,127 +1,153 @@
-import { AsyncPipe } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, HostListener } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
-import { PAGE_SIZE } from '../../../constants';
 import {
     BrowseToolbarComponent,
     EmptyStateComponent,
-    MediaListComponent,
-    PersonListComponent,
+    PageScrollService,
     PillToggleComponent,
+    RepeatPipe,
+    SkeletonComponent,
     SortButtonComponent,
 } from '../../../shared';
 import {
-    DiscoverFiltersComponent,
-    KeywordChip,
-} from '../discover-filters/discover-filters.component';
-import { DiscoverStoreService } from '../discover-store.service';
+    DiscoverActiveFilter,
+    DiscoverStoreService,
+} from '../discover-store.service';
+import { DiscoverCardComponent } from '../discover-card/discover-card.component';
+import { DiscoverFilterPanelComponent } from '../discover-filter-panel/discover-filter-panel.component';
 
 @Component({
     selector: 'app-discover-page',
-    templateUrl: './discover-page.component.html',
-    styleUrl: './discover-page.component.scss',
     imports: [
+        A11yModule,
         AsyncPipe,
-        MatButtonModule,
-        DiscoverFiltersComponent,
-        EmptyStateComponent,
-        MediaListComponent,
-        PersonListComponent,
-        PillToggleComponent,
-        SortButtonComponent,
         BrowseToolbarComponent,
+        DiscoverCardComponent,
+        DiscoverFilterPanelComponent,
+        EmptyStateComponent,
+        MatButtonModule,
+        MatIconModule,
+        MatPaginatorModule,
+        NgTemplateOutlet,
+        PillToggleComponent,
+        RepeatPipe,
+        SkeletonComponent,
+        SortButtonComponent,
     ],
     providers: [DiscoverStoreService],
+    templateUrl: './discover-page.component.html',
+    styleUrl: './discover-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiscoverPageComponent {
-    readonly browseSkeletonCount = PAGE_SIZE;
     readonly vm$ = this.store.vm$;
+    mobileFiltersOpen = false;
 
     constructor(
-        private readonly route: ActivatedRoute,
+        private readonly pageScroll: PageScrollService,
         private readonly store: DiscoverStoreService,
-    ) {
-        this.route.queryParamMap
-            .pipe(takeUntilDestroyed())
-            .subscribe((params) => {
-                this.store.applyQueryParams(params);
-            });
+    ) {}
+
+    onMediaTypeChange(value: unknown): void {
+        this.store.updateMediaType(value);
     }
 
-    loadMore(): void {
-        this.store.loadMore();
+    onSortChange(value: unknown): void {
+        this.store.updateSort(value);
     }
 
-    onCategoryChange(category: unknown): void {
-        this.store.setCategory(category as string);
-    }
-
-    onSortChange(sortField: unknown): void {
-        this.store.setSort(sortField as string);
-    }
-
-    toggleSortDirection(): void {
+    onSortDirectionToggle(): void {
         this.store.toggleSortDirection();
     }
 
-    onGenreToggle(genreId: number): void {
-        this.store.toggleGenre(genreId);
+    onGenresChange(value: unknown): void {
+        this.store.updateGenres(value);
     }
 
-    onKeywordSearch(query: string): void {
-        this.store.searchKeywords(query);
+    onKeywordSearchChange(value: string): void {
+        this.store.updateKeywordSearch(value);
     }
 
-    onKeywordAdd(keyword: KeywordChip): void {
-        this.store.addKeyword(keyword);
+    onKeywordAdd(value: unknown): void {
+        this.store.addKeyword(value);
     }
 
-    onKeywordRemove(keywordId: number): void {
-        this.store.removeKeyword(keywordId);
+    onCompanySearchChange(value: string): void {
+        this.store.updateCompanySearch(value);
     }
 
-    onYearFromChange(value: number | null, yearTo: number | null): void {
-        this.store.setYearRange(value, yearTo);
+    onCompanyAdd(value: unknown): void {
+        this.store.addCompany(value);
     }
 
-    onYearToChange(value: number | null, yearFrom: number | null): void {
-        this.store.setYearRange(yearFrom, value);
+    onYearFromChange(value: unknown): void {
+        this.store.updateYearFrom(value);
     }
 
-    onMinRatingChange(value: number | null): void {
-        this.store.setMinRating(value);
+    onYearToChange(value: unknown): void {
+        this.store.updateYearTo(value);
     }
 
-    onClearFilters(): void {
-        this.store.clearFilters();
+    onProvidersChange(value: unknown): void {
+        this.store.updateProviders(value);
     }
 
-    onVoteCountChange(value: number | null): void {
-        this.store.setVoteCount(value);
+    onWatchRegionChange(value: unknown): void {
+        this.store.updateWatchRegion(value);
     }
 
-    onRuntimeMinChange(value: number | null, runtimeMax: number | null): void {
-        this.store.setRuntime(value, runtimeMax);
+    onCertificationChange(value: unknown): void {
+        this.store.updateCertification(value);
     }
 
-    onRuntimeMaxChange(value: number | null, runtimeMin: number | null): void {
-        this.store.setRuntime(runtimeMin, value);
+    onReleaseTypeChange(value: unknown): void {
+        this.store.updateReleaseType(value);
     }
 
-    onCertificationToggle(cert: string): void {
-        this.store.toggleCertification(cert);
+    onOriginalLanguageChange(value: unknown): void {
+        this.store.updateOriginalLanguage(value);
     }
 
-    onLanguageChange(language: string | null): void {
-        this.store.setLanguage(language);
+    onRatingChange(value: unknown): void {
+        this.store.updateRating(value);
     }
 
-    onWatchProviderToggle(providerId: number): void {
-        this.store.toggleWatchProvider(providerId);
+    onVoteCountChange(value: unknown): void {
+        this.store.updateVoteCount(value);
+    }
+
+    onRuntimeChange(value: unknown): void {
+        this.store.updateRuntime(value);
+    }
+
+    clearFilter(filter: DiscoverActiveFilter): void {
+        this.store.clearFilter(filter);
+    }
+
+    reset(): void {
+        this.store.reset();
+    }
+
+    openFilters(): void {
+        this.mobileFiltersOpen = true;
+    }
+
+    closeFilters(): void {
+        this.mobileFiltersOpen = false;
+    }
+
+    onPageChange(event: PageEvent): void {
+        this.pageScroll.scrollToTop();
+        this.store.updatePage(event.pageIndex);
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        this.closeFilters();
     }
 }

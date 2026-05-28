@@ -156,10 +156,11 @@
     --control-disabled-opacity: 0.6;
     --text-soft: rgba(244, 238, 230, 0.68);
 
-    --skeleton-base: rgba(255, 255, 255, 0.06);
-    --skeleton-highlight: rgba(255, 255, 255, 0.12);
+    --skeleton-base: rgba(244, 238, 230, 0.055);
+    --skeleton-highlight: rgba(244, 238, 230, 0.115);
+    --skeleton-duration: 1.8s;
 
-    --media-placeholder-surface: var(--surface-panel-soft);
+    --media-placeholder-surface: var(--color-surface-raised);
     --media-placeholder-color: var(--text-muted);
     --media-placeholder-opacity: 0.45;
     --media-placeholder-icon-size: 45%;

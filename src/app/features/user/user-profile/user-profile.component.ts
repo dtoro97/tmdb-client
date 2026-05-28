@@ -3,16 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import {
-    EMPTY,
-    Observable,
-    catchError,
-    combineLatest,
-    defer,
-    map,
-    merge,
-    switchMap,
-} from 'rxjs';
+import { EMPTY, Observable, catchError, combineLatest, defer, map, merge, switchMap } from 'rxjs';
 
 import {
     EmptyStateComponent,
@@ -52,15 +43,10 @@ import { UserWatchlistStore } from '../user-watchlist-store.service';
     templateUrl: './user-profile.component.html',
     styleUrl: './user-profile.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        UserFavouritesStore,
-        UserProfileStore,
-        UserRatingsStore,
-        UserWatchlistStore,
-    ],
+    providers: [UserFavouritesStore, UserProfileStore, UserRatingsStore, UserWatchlistStore],
 })
 export class UserProfileComponent {
-    readonly previewCarouselColumns = 10;
+    readonly previewCarouselColumns = 5;
     readonly previewPosterImageParams = 'w185';
 
     readonly vm$ = combineLatest([
@@ -104,26 +90,11 @@ export class UserProfileComponent {
             .pipe(
                 switchMap(() =>
                     merge(
-                        this.loadSection$(
-                            () => this.profileStore.load$(),
-                            'Could not load your profile summary.',
-                        ),
-                        this.loadSection$(
-                            () => this.watchlistStore.load$(),
-                            'Could not load your watchlist.',
-                        ),
-                        this.loadSection$(
-                            () => this.ratingsStore.load$(),
-                            'Could not load your ratings.',
-                        ),
-                        this.loadSection$(
-                            () => this.favouritesStore.load$(),
-                            'Could not load your favourites.',
-                        ),
-                        this.loadSection$(
-                            () => this.listsStore.load$(),
-                            'Could not load your lists.',
-                        ),
+                        this.loadSection$(() => this.profileStore.load$(), 'Could not load your profile summary.'),
+                        this.loadSection$(() => this.watchlistStore.load$(), 'Could not load your watchlist.'),
+                        this.loadSection$(() => this.ratingsStore.load$(), 'Could not load your ratings.'),
+                        this.loadSection$(() => this.favouritesStore.load$(), 'Could not load your favourites.'),
+                        this.loadSection$(() => this.listsStore.load$(), 'Could not load your lists.'),
                     ),
                 ),
                 catchError(() => this.showError('Could not load your profile.')),
@@ -132,10 +103,7 @@ export class UserProfileComponent {
             .subscribe();
     }
 
-    private loadSection$(
-        request: () => Observable<unknown>,
-        errorMessage: string,
-    ): Observable<unknown> {
+    private loadSection$(request: () => Observable<unknown>, errorMessage: string): Observable<unknown> {
         return defer(request).pipe(catchError(() => this.showError(errorMessage)));
     }
 

@@ -66,7 +66,7 @@
                     </ul>
 
                     @if (vm.showMore || vm.trailersState.type === 'loading-more') {
-                        <footer class="u-justify-center u-flex">
+                        <div class="u-justify-center u-flex">
                             <button
                                 mat-stroked-button
                                 type="button"
@@ -75,7 +75,7 @@
                             >
                                 {{ vm.trailersState.type === 'loading-more' ? 'Loading more' : 'Show more' }}
                             </button>
-                        </footer>
+                        </div>
                     }
                 }
             </section>

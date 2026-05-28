@@ -23,12 +23,13 @@ import {
 } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
+    buildImageLanguageFallback,
     isDefined,
     LoadableItems,
     LocaleStoreService,
     ViewerImage,
     loadedItems,
-    toYoutubeTrailerFirstVideoState,
+    toYoutubeVideoState,
 } from '../../shared';
 
 export interface SelectedSeasonInfo {
@@ -155,7 +156,7 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
                 return season.videos;
             }
 
-            return toYoutubeTrailerFirstVideoState(season.videos);
+            return toYoutubeVideoState(season.videos);
         }),
     );
 
@@ -289,11 +290,14 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
     }
 
     private fetchSeasonImages$(seriesId: number, seasonNumber: number) {
+        const language = this.localeStore.language();
+        const includeImageLanguage = buildImageLanguageFallback();
+
         return this.tvSeasonRestControllerService.tvSeasonImages(
             seriesId,
             seasonNumber,
-            undefined,
-            undefined,
+            includeImageLanguage,
+            language,
             undefined,
             undefined,
             API_JSON_OPTIONS,
@@ -413,9 +417,7 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
     }
 
     private toSeasonImages(images: TvSeasonImages): ViewerImage[] {
-        const language = this.localeStore.language() || 'en';
         return (images.posters ?? [])
-            .filter((image) => image.iso_639_1 === language || image.iso_639_1 === 'en')
             .map((image) => ({
                 ...image,
                 photoType: 'poster',

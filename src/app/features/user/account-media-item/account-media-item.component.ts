@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import {
+    BadgeComponent,
     ImageComponent,
     MediaListItem,
     RatingComponent,
@@ -11,7 +12,7 @@ import {
 
 @Component({
     selector: 'app-account-media-item',
-    imports: [DatePipe, ImageComponent, RatingComponent, RouterLink, SkeletonComponent],
+    imports: [BadgeComponent, DatePipe, ImageComponent, RatingComponent, RouterLink, SkeletonComponent],
     templateUrl: './account-media-item.component.html',
     styleUrl: './account-media-item.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,45 @@
+@if (vm$ | async; as vm) {
+    <div class="popular-people page-container">
+        <header class="popular-people__header inner-container">
+            <h1 class="text-display">{{ vm.title }}</h1>
+            <p class="popular-people__subtitle text-body">{{ vm.subtitle }}</p>
+        </header>
+
+        <main class="popular-people__content inner-container">
+            <app-browse-toolbar>
+                <div start class="popular-people__toolbar-start">
+                    @if (vm.showResultCount) {
+                        <span class="popular-people__result-count text-caption">
+                            {{ vm.resultStart }} - {{ vm.resultEnd }} of {{ vm.totalResults }}
+                        </span>
+                    }
+                </div>
+            </app-browse-toolbar>
+
+            @if (vm.showEmptyState) {
+                <div class="empty-panel popular-people__empty">
+                    <app-empty-state
+                        iconClass="fa-solid fa-user-group"
+                        text="No popular people are available right now."
+                    />
+                </div>
+            } @else {
+                <app-person-list
+                    [state]="vm.resultsState"
+                    [indexStart]="vm.resultStart"
+                />
+            }
+
+            @if (vm.showPaginator) {
+                <mat-paginator
+                    class="popular-people__paginator"
+                    [length]="vm.paginatorLength"
+                    [pageIndex]="vm.pageIndex"
+                    [pageSize]="vm.pageSize"
+                    [hidePageSize]="true"
+                    (page)="onPageChange($event)"
+                />
+            }
+        </main>
+    </div>
+}
