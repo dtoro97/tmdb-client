@@ -587,14 +587,16 @@ export class MovieRestControllerService extends BaseService implements MovieRest
      * @param movieId 
      * @param appendToResponse comma separated list of endpoints within this namespace, 20 items max
      * @param language 
+     * @param sessionId TMDb user session ID
+     * @param guestSessionId TMDb guest session ID
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public movieDetails(movieId: number, appendToResponse?: string, language?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Movie>;
-    public movieDetails(movieId: number, appendToResponse?: string, language?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Movie>>;
-    public movieDetails(movieId: number, appendToResponse?: string, language?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Movie>>;
-    public movieDetails(movieId: number, appendToResponse?: string, language?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public movieDetails(movieId: number, appendToResponse?: string, language?: string, sessionId?: string, guestSessionId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Movie>;
+    public movieDetails(movieId: number, appendToResponse?: string, language?: string, sessionId?: string, guestSessionId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Movie>>;
+    public movieDetails(movieId: number, appendToResponse?: string, language?: string, sessionId?: string, guestSessionId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Movie>>;
+    public movieDetails(movieId: number, appendToResponse?: string, language?: string, sessionId?: string, guestSessionId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (movieId === null || movieId === undefined) {
             throw new Error('Required parameter movieId was null or undefined when calling movieDetails.');
         }
@@ -614,6 +616,24 @@ export class MovieRestControllerService extends BaseService implements MovieRest
             localVarQueryParameters,
             'language',
             <any>language,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'session_id',
+            <any>sessionId,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'guest_session_id',
+            <any>guestSessionId,
             QueryParamStyle.Form,
             true,
         );

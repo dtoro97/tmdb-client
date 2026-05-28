@@ -107,8 +107,10 @@ export interface MovieRestControllerServiceInterface {
      * @param movieId 
      * @param appendToResponse comma separated list of endpoints within this namespace, 20 items max
      * @param language 
+     * @param sessionId TMDb user session ID
+     * @param guestSessionId TMDb guest session ID
      */
-    movieDetails(movieId: number, appendToResponse?: string, language?: string, extraHttpRequestParams?: any): Observable<Movie>;
+    movieDetails(movieId: number, appendToResponse?: string, language?: string, sessionId?: string, guestSessionId?: string, extraHttpRequestParams?: any): Observable<Movie>;
 
     /**
      * External IDs

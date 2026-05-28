@@ -159,7 +159,16 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
     }
 
     private fetchTvVideos$(seriesId: number): Observable<Video[]> {
-        return this.tvService.tvSeriesDetails(seriesId, undefined, undefined, 'body', undefined, this.opts).pipe(
+        return this.tvService.tvSeriesDetails(
+            seriesId,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            'body',
+            undefined,
+            this.opts,
+        ).pipe(
             map((series) => this.getLatestSeasonNumber(series.seasons ?? [])),
             switchMap((seasonNumber) => {
                 if (!seasonNumber) {
