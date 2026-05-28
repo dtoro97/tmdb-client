@@ -481,31 +481,16 @@ export class MediaDetailStoreService extends ComponentStore<MediaState> {
         return this.mediaApiService.getImages$(id, type).pipe(
             catchError(() => of({} as ImageList)),
             tap((images) => {
-                const language = this.localStoreService.language() || 'en';
                 this.patchState({
                     photos: loaded([
-                        ...(images.backdrops ?? [])
-                            .filter(
-                                (image) =>
-                                    image.iso_639_1 === null ||
-                                    image.iso_639_1 === language ||
-                                    image.iso_639_1 === 'en',
-                            )
-                            .map((image) => ({
-                                ...image,
-                                photoType: 'backdrop' as const,
-                            })),
-                        ...(images.posters ?? [])
-                            .filter(
-                                (image) =>
-                                    image.iso_639_1 === null ||
-                                    image.iso_639_1 === language ||
-                                    image.iso_639_1 === 'en',
-                            )
-                            .map((image) => ({
-                                ...image,
-                                photoType: 'poster' as const,
-                            })),
+                        ...(images.backdrops ?? []).map((image) => ({
+                            ...image,
+                            photoType: 'backdrop' as const,
+                        })),
+                        ...(images.posters ?? []).map((image) => ({
+                            ...image,
+                            photoType: 'poster' as const,
+                        })),
                     ]),
                 });
             }),

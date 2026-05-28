@@ -202,7 +202,6 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
 
     private discoverReleaseWindowMovies$(start: string, end: string) {
         const region = TRAILER_CONTENT_REGION;
-        const watchRegion = TRAILER_CONTENT_REGION;
 
         return this.discoverService.discoverMovie(
             undefined,
@@ -224,7 +223,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             undefined,
             undefined,
             undefined,
-            watchRegion,
+            undefined,
             undefined,
             undefined,
             undefined,
@@ -250,8 +249,6 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
     }
 
     private discoverReleaseWindowTv$(start: string, end: string) {
-        const watchRegion = TRAILER_CONTENT_REGION;
-
         return this.discoverService.discoverTv(
             undefined,
             undefined,
@@ -269,7 +266,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
             undefined,
             undefined,
             undefined,
-            watchRegion,
+            undefined,
             undefined,
             undefined,
             undefined,

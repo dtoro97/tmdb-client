@@ -3,6 +3,7 @@ import { ComponentStore } from '@ngrx/component-store';
 
 import { BrowserStorageService } from './browser-storage.service';
 import { getBrowserCountry } from '../utils/browser-country';
+import { parseRegionParam } from '../utils/route-utils';
 
 const STORAGE_KEY_LANGUAGE = 'tmdb_language';
 const STORAGE_KEY_REGION = 'tmdb_region';
@@ -28,13 +29,10 @@ export class LocaleStoreService extends ComponentStore<LocaleState> {
 
     constructor(private readonly browserStorage: BrowserStorageService) {
         super({
-            language: browserStorage.getItemOrDefault(
-                STORAGE_KEY_LANGUAGE,
-                getBrowserLanguage(),
-            ),
-            region: browserStorage.getItemOrDefault(
-                STORAGE_KEY_REGION,
-                getBrowserCountry(),
+            language: browserStorage.getItemOrDefault(STORAGE_KEY_LANGUAGE, getBrowserLanguage()),
+            region: parseRegionParam(
+                browserStorage.getItemOrDefault(STORAGE_KEY_REGION, getBrowserCountry()),
+                'US',
             ),
         });
     }
@@ -50,16 +48,14 @@ export class LocaleStoreService extends ComponentStore<LocaleState> {
     setLanguage(iso639: string): void {
         this.patchState({ language: iso639 });
         this.browserStorage.setItem(STORAGE_KEY_LANGUAGE, iso639);
+        window.location.reload();
     }
 
     setRegion(iso3166: string): void {
-        this.patchState({ region: iso3166 });
-        this.browserStorage.setItem(STORAGE_KEY_REGION, iso3166);
-    }
+        const region = parseRegionParam(iso3166, 'US');
 
-    setLocale(language: string, region: string): void {
-        this.patchState({ language, region });
-        this.browserStorage.setItem(STORAGE_KEY_LANGUAGE, language);
+        this.patchState({ region });
         this.browserStorage.setItem(STORAGE_KEY_REGION, region);
+        window.location.reload();
     }
 }

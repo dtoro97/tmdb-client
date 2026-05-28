@@ -416,7 +416,9 @@
                     media.numberOfEpisodes ||
                     media.status ||
                     media.languages.length ||
-                    media.networks?.length
+                    media.originCountries.length ||
+                    media.networks?.length ||
+                    media.productionCompanies.length
                 ) {
                     <app-page-section subtitle="Details">
                         <dl class="info-grid" aria-label="Media details">
@@ -490,6 +492,15 @@
                                 </div>
                             }
 
+                            @if (media.originCountries.length) {
+                                <div class="info-grid__item">
+                                    <dt class="info-grid__label text-card-meta">Origin Country</dt>
+                                    <dd class="info-grid__value text-body-strong">
+                                        {{ media.originCountries.join(', ') }}
+                                    </dd>
+                                </div>
+                            }
+
                             @if (media.networks?.length) {
                                 <div class="info-grid__item">
                                     <dt class="info-grid__label text-card-meta">Networks</dt>
@@ -497,6 +508,32 @@
                                         @for (network of media.networks; track network.id; let i = $index) {
                                             <span>{{ network.name }}</span>
                                             @if (i !== media.networks!.length - 1) {
+                                                <span>, </span>
+                                            }
+                                        }
+                                    </dd>
+                                </div>
+                            }
+
+                            @if (media.productionCompanies.length) {
+                                <div class="info-grid__item">
+                                    <dt class="info-grid__label text-card-meta">Production Companies</dt>
+                                    <dd class="info-grid__value text-body-strong">
+                                        @for (company of media.productionCompanies; track company.id; let i = $index) {
+                                            <a
+                                                class="info-grid__link"
+                                                [routerLink]="['/discover']"
+                                                [queryParams]="{
+                                                    type: media.mediaType,
+                                                    companies: company.id,
+                                                    sort: 'popularity',
+                                                    direction: 'desc',
+                                                    votes: 'any',
+                                                }"
+                                            >
+                                                {{ company.label }}
+                                            </a>
+                                            @if (i !== media.productionCompanies.length - 1) {
                                                 <span>, </span>
                                             }
                                         }

@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-import { SMALL_LIST_COUNT } from '../../../constants';
+import { MEDIUM_LIST_COUNT } from '../../../constants';
 import { LoadableItems } from '../../types';
 import { PersonListItem } from '../../models';
 import { RepeatPipe } from '../../pipes/repeat.pipe';
@@ -17,8 +17,6 @@ import { SkeletonComponent } from '../skeleton/skeleton.component';
 })
 export class PersonListComponent {
     @Input({ required: true }) state!: LoadableItems<PersonListItem>;
-    @Input() skeletonCount = SMALL_LIST_COUNT;
-    @Input() showIndex = false;
+    @Input() skeletonCount = MEDIUM_LIST_COUNT;
     @Input() indexStart = 1;
 }
-

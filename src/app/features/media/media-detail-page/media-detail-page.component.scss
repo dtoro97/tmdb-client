@@ -241,6 +241,10 @@
     }
 }
 
+.info-grid__link {
+    @include text-link();
+}
+
 .collection {
     position: relative;
     display: flex;

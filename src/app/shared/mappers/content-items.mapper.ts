@@ -170,6 +170,7 @@ export const mediaToSearchResultItem = (
     ...toMediaListItem(item, mediaType, 'year'),
     year: toDateValue(extractMediaFields(item, mediaType).date, 'year'),
     mediaType,
+    mediaTypeLabel: toSearchResultMediaTypeLabel(mediaType),
     department: '',
 });
 
@@ -183,6 +184,7 @@ export const personToSearchResultItem = (
         title: person.name ?? '',
         year: '',
         mediaType: 'person',
+        mediaTypeLabel: toSearchResultMediaTypeLabel('person'),
         overview: '',
         rating: null,
         department: person.known_for_department ?? '',
@@ -200,12 +202,29 @@ export const multiToSearchResultItem = (
         title: item.title || item.name || '',
         year: toDateValue(item.release_date || item.first_air_date, 'year'),
         mediaType: item.media_type || 'movie',
+        mediaTypeLabel: toSearchResultMediaTypeLabel(item.media_type || 'movie'),
         overview: item.overview || '',
         rating: item.vote_average ?? null,
         department: item.known_for_department || '',
         known_for: toKnownForText(knownForLinks),
     };
 };
+
+function toSearchResultMediaTypeLabel(mediaType: string): string {
+    if (mediaType === 'movie') {
+        return 'Movie';
+    }
+
+    if (mediaType === 'tv') {
+        return 'TV show';
+    }
+
+    if (mediaType === 'person') {
+        return 'Person';
+    }
+
+    return mediaType;
+}
 
 export const toCardItem = (
     item: MediaItemLike,

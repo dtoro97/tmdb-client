@@ -1,0 +1,18 @@
+<app-icon-button
+    [ariaLabel]="
+        isFavorite
+            ? title + ' is in your favorites'
+            : 'Add ' + title + ' to favorites'
+    "
+    [disabled]="pending"
+    [selected]="isFavorite"
+    [title]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+    (onClick)="toggle()"
+>
+    <i
+        [class.fa-solid]="isFavorite"
+        [class.fa-regular]="!isFavorite"
+        class="favorite-toggle__icon fa-heart"
+        aria-hidden="true"
+    ></i>
+</app-icon-button>

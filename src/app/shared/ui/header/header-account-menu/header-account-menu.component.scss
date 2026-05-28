@@ -179,9 +179,9 @@
     }
 
     &__divider {
+        --mat-menu-divider-color: var(--color-border);
+
         margin: 0 var(--space-3);
-        border-top-color: var(--color-border);
-        --mat-divider-color: var(--color-border);
     }
 }
 

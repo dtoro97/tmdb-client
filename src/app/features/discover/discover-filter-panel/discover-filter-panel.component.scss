@@ -1,0 +1,71 @@
+@use 'mixins' as *;
+
+.discover-filter-panel {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.discover-filter-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.discover-filter-panel__heading,
+.discover-filter-panel__header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.discover-filter-panel__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--radius-full);
+    background: var(--control-subtle-surface-active);
+    color: var(--control-subtle-text-active);
+}
+
+.discover-filter-panel__text-button {
+    --mat-button-text-container-height: var(--control-height-sm);
+    --mat-button-text-label-text-size: var(--text-sm);
+}
+
+.discover-filter-panel__group {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.discover-filter-panel__title {
+    color: var(--text-primary);
+}
+
+.discover-filter-panel__select-field {
+    width: 100%;
+    --mat-form-field-container-height: var(--control-height-md);
+}
+
+.discover-filter-panel__range-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.discover-filter-panel__range-separator {
+    color: var(--text-muted);
+}
+
+mat-icon {
+    @include icon-size(1.125rem);
+}

@@ -53,6 +53,7 @@ export interface SearchResultItem {
     title: string;
     year: string;
     mediaType: string;
+    mediaTypeLabel: string;
     overview: string;
     rating: number | null;
     department: string;

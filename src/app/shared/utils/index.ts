@@ -9,4 +9,6 @@ export * from './shuffle';
 export * from './sort';
 export * from './is-valid-date';
 export * from './browser-country';
+export * from './company-display';
+export * from './image-language';
 export * from './youtube';

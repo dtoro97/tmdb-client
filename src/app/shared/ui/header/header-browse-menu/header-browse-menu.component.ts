@@ -1,24 +1,13 @@
-import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    ElementRef,
-    HostListener,
-} from '@angular/core';
-import {
-    IsActiveMatchOptions,
-    RouterLink,
-    RouterLinkActive,
-} from '@angular/router';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener } from '@angular/core';
+import { IsActiveMatchOptions, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
 
 interface HeaderBrowseLink {
     readonly label: string;
     readonly routerLink: string;
-    readonly queryParams?: Record<string, string>;
-    readonly description?: string;
     readonly activeOptions: IsActiveMatchOptions;
+    readonly iconClass?: string;
 }
 
 interface HeaderBrowseGroup {
@@ -35,13 +24,6 @@ const EXACT_ACTIVE_OPTIONS: IsActiveMatchOptions = {
     matrixParams: 'ignored',
 };
 
-const DISCOVER_ACTIVE_OPTIONS: IsActiveMatchOptions = {
-    paths: 'exact',
-    queryParams: 'subset',
-    fragment: 'ignored',
-    matrixParams: 'ignored',
-};
-
 @Component({
     selector: 'app-header-browse-menu',
     imports: [MatIconModule, RouterLink, RouterLinkActive],
@@ -50,6 +32,15 @@ const DISCOVER_ACTIVE_OPTIONS: IsActiveMatchOptions = {
     styleUrl: './header-browse-menu.component.scss',
 })
 export class HeaderBrowseMenuComponent {
+    readonly browseActions: readonly HeaderBrowseLink[] = [
+        {
+            label: 'Advanced filter',
+            routerLink: '/discover',
+            activeOptions: EXACT_ACTIVE_OPTIONS,
+            iconClass: 'fa-solid fa-magnifying-glass',
+        },
+    ];
+
     readonly browseGroups: readonly HeaderBrowseGroup[] = [
         {
             id: 'movies',
@@ -57,16 +48,24 @@ export class HeaderBrowseMenuComponent {
             icon: 'movie',
             links: [
                 {
-                    label: 'Top rated movies',
-                    routerLink: '/movies/top-rated',
-                    description: 'Highly rated films with a strong vote floor.',
+                    label: 'Popular',
+                    routerLink: '/movies/popular',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Advanced movie search',
-                    routerLink: '/discover',
-                    queryParams: { type: 'movie' },
-                    activeOptions: DISCOVER_ACTIVE_OPTIONS,
+                    label: 'Top Rated',
+                    routerLink: '/movies/top-rated',
+                    activeOptions: EXACT_ACTIVE_OPTIONS,
+                },
+                {
+                    label: 'Now Playing',
+                    routerLink: '/movies/now-playing',
+                    activeOptions: EXACT_ACTIVE_OPTIONS,
+                },
+                {
+                    label: 'Upcoming',
+                    routerLink: '/movies/upcoming',
+                    activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
             ],
         },
@@ -76,47 +75,23 @@ export class HeaderBrowseMenuComponent {
             icon: 'live_tv',
             links: [
                 {
-                    label: "What's on TV & streaming",
-                    routerLink: '/watch/streaming',
-                    description: 'Streaming guides, provider picks, and TV premieres.',
-                    activeOptions: EXACT_ACTIVE_OPTIONS,
-                },
-                {
-                    label: 'Airing today',
-                    routerLink: '/tv/airing-today',
-                    description: 'Shows with episodes airing today.',
-                    activeOptions: EXACT_ACTIVE_OPTIONS,
-                },
-                {
-                    label: 'Top TV shows',
-                    routerLink: '/tv/top-rated',
-                    activeOptions: EXACT_ACTIVE_OPTIONS,
-                },
-                {
-                    label: 'Most popular TV shows',
+                    label: 'Popular',
                     routerLink: '/tv/popular',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'TV shows by genre',
-                    routerLink: '/tv/genres',
-                    activeOptions: EXACT_ACTIVE_OPTIONS,
-                },
-            ],
-        },
-        {
-            id: 'watch',
-            title: 'Watch',
-            icon: 'play_circle',
-            links: [
-                {
-                    label: 'Trending trailers',
-                    routerLink: '/trailers/trending',
+                    label: 'Top Rated',
+                    routerLink: '/tv/top-rated',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'New trailers',
-                    routerLink: '/trailers/new',
+                    label: 'Airing Today',
+                    routerLink: '/tv/airing-today',
+                    activeOptions: EXACT_ACTIVE_OPTIONS,
+                },
+                {
+                    label: 'On TV',
+                    routerLink: '/tv/on-the-air',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
             ],
@@ -127,21 +102,25 @@ export class HeaderBrowseMenuComponent {
             icon: 'groups',
             links: [
                 {
-                    label: 'Popular people',
-                    routerLink: '/discover',
-                    queryParams: { type: 'person' },
-                    activeOptions: DISCOVER_ACTIVE_OPTIONS,
+                    label: 'Popular People',
+                    routerLink: '/people/popular',
+                    activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
             ],
         },
         {
-            id: 'explore',
-            title: 'Explore',
-            icon: 'travel_explore',
+            id: 'watch',
+            title: 'Watch',
+            icon: 'play_circle',
             links: [
                 {
-                    label: 'Advanced search',
-                    routerLink: '/discover',
+                    label: 'Streaming',
+                    routerLink: '/watch/streaming',
+                    activeOptions: EXACT_ACTIVE_OPTIONS,
+                },
+                {
+                    label: 'Trailers',
+                    routerLink: '/trailers/trending',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
             ],
@@ -164,6 +143,11 @@ export class HeaderBrowseMenuComponent {
 
     @HostListener('document:keydown.escape')
     onEscape(): void {
+        this.closeMenu();
+    }
+
+    @HostListener('window:scroll')
+    onWindowScroll(): void {
         this.closeMenu();
     }
 

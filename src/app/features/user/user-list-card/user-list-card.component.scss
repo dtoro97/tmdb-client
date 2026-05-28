@@ -92,18 +92,17 @@
 
     &__actions {
         position: absolute;
-        top: var(--space-3);
-        right: var(--space-3);
-        gap: var(--space-1);
-        opacity: 0;
-        pointer-events: none;
+        top: var(--space-2);
+        right: var(--space-2);
+        opacity: 1;
         transition: opacity var(--motion-base);
+        @include overlay-action-surface();
     }
 
     &__status {
         justify-content: center;
-        width: 1.75rem;
-        height: 1.75rem;
+        width: var(--control-height-sm);
+        height: var(--control-height-sm);
         padding: 0;
         border: 1px solid transparent;
         border-radius: var(--radius-md);
@@ -116,6 +115,11 @@
 
 @include hover-capable {
     .list-card {
+        &__actions {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         &:hover &__actions,
         &:focus-within &__actions {
             opacity: 1;
@@ -125,15 +129,6 @@
         &:hover &__title,
         &:focus-within &__title {
             color: var(--text-accent);
-        }
-    }
-}
-
-@media (hover: none) {
-    .list-card {
-        &__actions {
-            opacity: 1;
-            pointer-events: auto;
         }
     }
 }

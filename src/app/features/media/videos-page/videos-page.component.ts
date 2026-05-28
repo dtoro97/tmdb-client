@@ -17,14 +17,13 @@ import {
     SortDirection,
     buildYoutubeThumbnailUrl,
     compareValues,
-    compareVideosTrailerFirst,
 } from '../../../shared';
 import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
 import { Title } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-type SortField = 'published_at' | 'type' | 'name';
+type SortField = 'published_at' | 'name';
 
 @Component({
     selector: 'app-videos-page',
@@ -47,7 +46,6 @@ export class VideosPageComponent {
 
     readonly sortOptions = [
         { label: 'Date', value: 'published_at' as const },
-        { label: 'Type', value: 'type' as const },
         { label: 'Name', value: 'name' as const },
     ];
 
@@ -64,11 +62,6 @@ export class VideosPageComponent {
     ]).pipe(
         map(([videos, field, direction]) => {
             const sorted = [...videos].sort((a, b) => {
-                const trailerComparison = compareVideosTrailerFirst(a, b);
-                if (trailerComparison) {
-                    return trailerComparison;
-                }
-
                 const valueComparison = compareValues(
                     this.getVideoSortValue(a, field),
                     this.getVideoSortValue(b, field),
@@ -139,8 +132,6 @@ export class VideosPageComponent {
         switch (field) {
             case 'published_at':
                 return video.published_at;
-            case 'type':
-                return video.type;
             case 'name':
                 return video.name;
         }

@@ -11,13 +11,12 @@ import { BehaviorSubject, combineLatest, map, startWith } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 import { Country, Language } from '../../../../api';
+import { toLanguageOptions, toRegionOptions } from '../../../mappers';
 import { ConfigStoreService } from '../../../services/config-store.service';
 import { LocaleStoreService } from '../../../services/locale-store.service';
+import type { SelectOption } from '../../../types';
 
-interface LocaleOption {
-    readonly value: string;
-    readonly label: string;
-}
+type LocaleOption = SelectOption<string>;
 
 interface HeaderLocaleRegionViewModel {
     readonly language: string;
@@ -76,43 +75,41 @@ export class HeaderLocaleRegionMenuComponent {
             ]): HeaderLocaleRegionViewModel => {
                 const allLanguageOptions = toLanguageOptions(languages);
                 const allRegionOptions = toRegionOptions(countries);
-                const featuredLanguageOptions = toFeaturedOptions(
-                    allLanguageOptions,
-                    FEATURED_LANGUAGE_VALUES,
-                );
-                const featuredRegionOptions = toFeaturedOptions(
-                    allRegionOptions,
-                    FEATURED_REGION_VALUES,
-                );
-                const languageOptions = toFilteredOptions(
-                    allLanguageOptions,
-                    languages,
-                    languageFilter,
-                    FEATURED_LANGUAGE_VALUES,
-                );
-                const regionOptions = toFilteredOptions(
-                    allRegionOptions,
-                    countries,
-                    regionFilter,
-                    FEATURED_REGION_VALUES,
-                );
-                const trigger = formatLocaleTrigger(
-                    locale.language,
-                    locale.region,
-                );
+                const languageCode = (
+                    locale.language.split('-')[0] || 'en'
+                ).toUpperCase();
+                const regionCode = locale.region.trim().toUpperCase();
 
                 return {
                     language: locale.language,
                     region: locale.region,
-                    languageCode: trigger.languageCode,
-                    regionCode: trigger.regionCode,
-                    ariaLabel: trigger.ariaLabel,
+                    languageCode,
+                    regionCode,
+                    ariaLabel: regionCode
+                        ? `Change language and region, currently ${languageCode} and ${regionCode}`
+                        : `Change language and region, currently ${languageCode}`,
                     languageFilter,
                     regionFilter,
-                    featuredLanguageOptions,
-                    featuredRegionOptions,
-                    languageOptions,
-                    regionOptions,
+                    featuredLanguageOptions: toFeaturedOptions(
+                        allLanguageOptions,
+                        FEATURED_LANGUAGE_VALUES,
+                    ),
+                    featuredRegionOptions: toFeaturedOptions(
+                        allRegionOptions,
+                        FEATURED_REGION_VALUES,
+                    ),
+                    languageOptions: toFilteredOptions(
+                        allLanguageOptions,
+                        languages.length > 0,
+                        languageFilter,
+                        FEATURED_LANGUAGE_VALUES,
+                    ),
+                    regionOptions: toFilteredOptions(
+                        allRegionOptions,
+                        countries.length > 0,
+                        regionFilter,
+                        FEATURED_REGION_VALUES,
+                    ),
                     languageEmptyLabel: languages.length
                         ? 'No matching languages'
                         : 'Loading languages',
@@ -154,99 +151,33 @@ export class HeaderLocaleRegionMenuComponent {
     }
 }
 
-function toLanguageOptions(languages: readonly Language[]): readonly LocaleOption[] {
-    return languages
-        .map((language) => {
-            const value = language.iso_639_1?.trim().toLowerCase() ?? '';
-            const label =
-                language.english_name?.trim() || language.name?.trim() || value;
-
-            return {
-                value,
-                label,
-            };
-        })
-        .filter((option) => !!option.value)
-        .sort(compareOptions);
-}
-
-function toRegionOptions(countries: readonly Country[]): readonly LocaleOption[] {
-    return countries
-        .map((country) => {
-            const value = country.iso_3166_1?.trim().toUpperCase() ?? '';
-            const label =
-                country.english_name?.trim() ||
-                country.native_name?.trim() ||
-                value;
-
-            return {
-                value,
-                label,
-            };
-        })
-        .filter((option) => !!option.value)
-        .sort(compareOptions);
-}
-
 function toFeaturedOptions(
     options: readonly LocaleOption[],
     featuredValues: readonly string[],
 ): readonly LocaleOption[] {
     const featuredValueSet = new Set(featuredValues);
 
-    return options
-        .filter((option) => featuredValueSet.has(option.value))
-        .sort(compareOptions);
+    return options.filter((option) => featuredValueSet.has(option.value));
 }
 
 function toFilteredOptions(
     options: readonly LocaleOption[],
-    source: readonly unknown[],
+    hasSource: boolean,
     filter: string,
     excludedValues: readonly string[],
 ): readonly LocaleOption[] {
-    if (!source.length) {
+    if (!hasSource) {
         return [];
     }
 
     const excludedValueSet = new Set(excludedValues);
-
-    return options
-        .filter((option) => !excludedValueSet.has(option.value))
-        .filter((option) => optionMatchesFilter(option, filter));
-}
-
-function optionMatchesFilter(option: LocaleOption, filter: string): boolean {
     const query = filter.trim().toLocaleLowerCase();
 
-    if (!query) {
-        return true;
-    }
-
-    return [option.value, option.label].some((candidate) =>
-        candidate.toLocaleLowerCase().includes(query),
+    return options.filter(
+        (option) =>
+            !excludedValueSet.has(option.value) &&
+            (!query ||
+                option.value.toLocaleLowerCase().includes(query) ||
+                option.label.toLocaleLowerCase().includes(query)),
     );
-}
-
-function compareOptions(first: LocaleOption, second: LocaleOption): number {
-    return first.label.localeCompare(second.label);
-}
-
-interface LocaleTrigger {
-    readonly languageCode: string;
-    readonly regionCode: string;
-    readonly ariaLabel: string;
-}
-
-function formatLocaleTrigger(language: string, region: string): LocaleTrigger {
-    const languageCode = (language.split('-')[0] || 'en').toUpperCase();
-    const regionCode = region.trim().toUpperCase();
-
-    return {
-        languageCode,
-        regionCode,
-        ariaLabel: regionCode
-            ? `Change language and region, currently ${languageCode} and ${regionCode}`
-            : `Change language and region, currently ${languageCode}`,
-    };
 }

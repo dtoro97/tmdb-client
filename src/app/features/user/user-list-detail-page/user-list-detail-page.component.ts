@@ -18,17 +18,15 @@ import {
     ConfirmationDialogService,
     EmptyStateComponent,
     IconButtonComponent,
-    LoadableItems,
-    MediaListComponent,
-    MediaListItem,
-    MediaListItemComponent,
     PageScrollService,
+    RepeatPipe,
     SnackbarComponent,
     SnackbarService,
     SnackbarType,
     SubPageHeaderComponent,
     UserAvatarComponent,
 } from '../../../shared';
+import { AccountMediaItemComponent } from '../account-media-item/account-media-item.component';
 import {
     UserListAddItemsDialogComponent,
     UserListAddItemsDialogData,
@@ -50,9 +48,9 @@ import { USER_LIST_SORT_OPTIONS } from '../user-list-sort-options';
         MatPaginatorModule,
         MatSelectModule,
         MatTooltipModule,
+        AccountMediaItemComponent,
         IconButtonComponent,
-        MediaListComponent,
-        MediaListItemComponent,
+        RepeatPipe,
         SubPageHeaderComponent,
         UserAvatarComponent,
     ],
@@ -65,9 +63,6 @@ export class UserListDetailPageComponent {
     readonly vm$ = this.store.userListDetailVm$;
     readonly backLink = ['/', 'me', 'lists'];
     readonly initialSkeletonCount = 6;
-    readonly loadingListState: LoadableItems<MediaListItem> = {
-        type: 'loading',
-    };
     readonly sortOptions = USER_LIST_SORT_OPTIONS;
     readonly editingCommentKey = signal<string | null>(null);
     readonly commentDraft = signal('');
