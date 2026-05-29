@@ -1,21 +1,30 @@
-import { ExternalIds } from '../../api';
+import { ExternalIds, TvExternalIds } from '../../api';
 
 export type ExternalLinkImdbType = 'name' | 'title';
+type ExternalIdsResource = ExternalIds | TvExternalIds;
 
 export interface ExternalLinks {
-    readonly links: ExternalIds | null;
+    readonly links: ExternalIdsResource | null;
     readonly homepage: string | null;
     readonly imdbType: ExternalLinkImdbType;
 }
 
-export const buildExternalLinks = (
-    links: ExternalIds | null,
-    homepage: string | null,
-    imdbType: ExternalLinkImdbType,
-): ExternalLinks | null => {
-    if (!links && !homepage) {
+export interface ExternalLinksParams {
+    readonly links?: ExternalIdsResource | null;
+    readonly homepage?: string | null;
+    readonly imdbType: ExternalLinkImdbType;
+}
+
+export const buildExternalLinks = ({
+    links = null,
+    homepage = null,
+    imdbType,
+}: ExternalLinksParams): ExternalLinks | null => {
+    const normalizedHomepage = homepage || null;
+
+    if (!links && !normalizedHomepage) {
         return null;
     }
 
-    return { links, homepage, imdbType };
+    return { links, homepage: normalizedHomepage, imdbType };
 };

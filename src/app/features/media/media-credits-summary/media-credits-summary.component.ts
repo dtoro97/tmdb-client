@@ -2,23 +2,23 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import {
-    LoadableValue,
     PersonCarouselPanelComponent,
+    RemoteData,
     SkeletonComponent,
 } from '../../../shared';
-import { MediaCreditsPanelData } from '../media-detail.models';
+import { type CreditsSummary } from './media-credits-summary.model';
 
 @Component({
-    selector: 'app-media-credits-panel',
+    selector: 'app-media-credits-summary',
     imports: [
         RouterLink,
         PersonCarouselPanelComponent,
         SkeletonComponent,
     ],
-    templateUrl: './media-credits-panel.component.html',
-    styleUrl: './media-credits-panel.component.scss',
+    templateUrl: './media-credits-summary.component.html',
+    styleUrl: './media-credits-summary.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MediaCreditsPanelComponent {
-    @Input({ required: true }) data!: LoadableValue<MediaCreditsPanelData | null>;
+export class MediaCreditsSummaryComponent {
+    @Input({ required: true }) data!: RemoteData<CreditsSummary | null>;
 }

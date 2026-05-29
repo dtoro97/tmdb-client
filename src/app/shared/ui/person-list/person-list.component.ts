@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { MEDIUM_LIST_COUNT } from '../../../constants';
-import { LoadableItems } from '../../types';
+import { RemoteData } from '../../types';
 import { PersonListItem } from '../../models';
 import { RepeatPipe } from '../../pipes/repeat.pipe';
 import { PersonListItemComponent } from '../person-list-item/person-list-item.component';
@@ -16,7 +16,7 @@ import { SkeletonComponent } from '../skeleton/skeleton.component';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonListComponent {
-    @Input({ required: true }) state!: LoadableItems<PersonListItem>;
+    @Input({ required: true }) state!: RemoteData<PersonListItem[]>;
     @Input() skeletonCount = MEDIUM_LIST_COUNT;
     @Input() indexStart = 1;
 }

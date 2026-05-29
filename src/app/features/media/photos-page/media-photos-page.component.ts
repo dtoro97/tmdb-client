@@ -3,17 +3,21 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 
-import { tap } from 'rxjs';
+import { combineLatest, filter, map, switchMap, tap } from 'rxjs';
 
 import {
+    MediaType,
     PhotoViewerComponent,
     PhotosBrowserComponent,
     PhotosBrowserSelection,
     SubPageHeaderComponent,
     PhotosBrowserSkeletonComponent,
+    remoteData,
 } from '../../../shared';
-import { MediaDetailStoreService } from '../media-detail-store.service';
+import { MediaImagesStoreService } from '../media-images-store.service';
+import { MediaStoreService } from '../media-store.service';
 
 @Component({
     selector: 'app-media-photos-page',
@@ -28,12 +32,37 @@ import { MediaDetailStoreService } from '../media-detail-store.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaPhotosPageComponent {
+    readonly vm$ = combineLatest({
+        mediaState: this.mediaStore.mediaDetailsState$,
+        photosState: this.mediaImagesStoreService.imagesState$,
+    }).pipe(
+        map(({ mediaState, photosState }) => ({
+            media: mediaState.state === 'success' ? mediaState.data : null,
+            photosState,
+            images: remoteData(photosState, []),
+        })),
+    );
+
     constructor(
-        public mediaStoreService: MediaDetailStoreService,
-        private dialog: MatDialog,
-        private title: Title,
+        private readonly mediaStore: MediaStoreService,
+        private readonly mediaImagesStoreService: MediaImagesStoreService,
+        private readonly dialog: MatDialog,
+        private readonly title: Title,
+        private readonly route: ActivatedRoute,
     ) {
-        this.mediaStoreService.title$
+        this.route.parent!.paramMap
+            .pipe(
+                map((params) => ({
+                    id: Number(params.get('id')),
+                    type: (params.get('type') ?? 'movie') as MediaType,
+                })),
+                filter(({ id }) => Number.isInteger(id)),
+                switchMap((target) => this.mediaImagesStoreService.load$(target)),
+                takeUntilDestroyed(),
+            )
+            .subscribe();
+
+        this.mediaStore.title$
             .pipe(
                 tap((mediaTitle) =>
                     this.title.setTitle(`${mediaTitle} | Photos`),

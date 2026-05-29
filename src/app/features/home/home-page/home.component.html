@@ -1,15 +1,15 @@
 @if (homeVM$ | async; as homeVM) {
     <main class="page-container">
-        @if (homeVM.spotlight.type === 'loaded' && homeVM.spotlight.value) {
-            <app-hero-spotlight badge="Trending now" [spotlight]="homeVM.spotlight.value">
+        @if (homeVM.spotlight.state === 'success' && homeVM.spotlight.data) {
+            <app-hero-spotlight badge="Trending now" [spotlight]="homeVM.spotlight.data">
                 <a
                     matButton="filled"
-                    [routerLink]="['/title', homeVM.spotlight.value.id, homeVM.spotlight.value.mediaType]"
+                    [routerLink]="['/title', homeVM.spotlight.data.id, homeVM.spotlight.data.mediaType]"
                 >
                     View Details
                 </a>
             </app-hero-spotlight>
-        } @else if (homeVM.spotlight.type !== 'loaded') {
+        } @else if (homeVM.spotlight.state !== 'success') {
             <app-hero-spotlight badge="Trending now" [loading]="true"> </app-hero-spotlight>
         }
 
@@ -25,10 +25,9 @@
 
             <app-page-section title="Most Popular" subtitle="Popular movies and TV shows, split for quick browsing.">
                 <ng-container section-controls>
-                    <app-pill-toggle
+                    <app-toggle-group
                         [options]="homeVM.whatToWatchOptions"
                         [selectedValue]="homeVM.selectedWhatToWatchMediaType"
-                        variant="subtle"
                         (selected)="onWhatToWatchMediaTypeSelected($event)"
                     />
                 </ng-container>
@@ -54,7 +53,7 @@
                     </a>
                 </ng-container>
                 @if (
-                    homeVM.airingToday.type === 'loaded' &&
+                    homeVM.airingToday.state === 'success' &&
                     homeVM.airingTonightPreview.length
                 ) {
                     <div class="tonight-grid">
@@ -88,7 +87,7 @@
                             </a>
                         }
                     </div>
-                } @else if (homeVM.airingToday.type === 'loaded') {
+                } @else if (homeVM.airingToday.state === 'success') {
                     <div class="tonight-empty">
                         <app-empty-state
                             iconClass="fa-solid fa-tv"
@@ -127,14 +126,14 @@
                 title="New on Streaming"
                 subtitle="New TV releases and returning seasons on major streaming services."
             >
-                @if (homeVM.streamingArrivals.items.type === 'loaded') {
-                    @if (homeVM.streamingArrivals.items.value.length) {
+                @if (homeVM.streamingArrivals.items.state === 'success') {
+                    @if (homeVM.streamingArrivals.items.data.length) {
                         <a
                             class="streaming-card"
                             [routerLink]="['/watch', 'streaming', 'list', 'streaming-this-month']"
                         >
                             <span class="streaming-card__preview" aria-hidden="true">
-                                @for (item of homeVM.streamingArrivals.items.value; track item.id) {
+                                @for (item of homeVM.streamingArrivals.items.data; track item.id) {
                                     <app-image
                                         class="streaming-card__image"
                                         [src]="item.imagePath"

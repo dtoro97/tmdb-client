@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, EventEmitter, input, Input, Output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 import {
-    PillToggleComponent,
+    ToggleGroupComponent,
     SelectOption,
     StepperInputComponent,
 } from '../../../shared';
@@ -29,14 +29,14 @@ import {
         MatInputModule,
         MatSelectModule,
         NgxMatSelectSearchModule,
-        PillToggleComponent,
+        ToggleGroupComponent,
         StepperInputComponent,
     ],
     templateUrl: './discover-filter-panel.component.html',
     styleUrl: './discover-filter-panel.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DiscoverFilterPanelComponent implements OnChanges {
+export class DiscoverFilterPanelComponent {
     @Input() showHeader = false;
     @Input() activeFilterCount = 0;
     @Input() showGenreFilter = false;
@@ -61,11 +61,11 @@ export class DiscoverFilterPanelComponent implements OnChanges {
     @Input() watchRegion = '';
     @Input() providerOptions: SelectOption<number>[] = [];
     @Input() selectedProviderIds: number[] = [];
-    @Input() certificationOptions: SelectOption<string>[] = [];
+    readonly certificationOptions = input<readonly SelectOption<string>[]>([]);
     @Input() selectedCertification: string | null = null;
     @Input() releaseTypeOptions: SelectOption<DiscoverMovieReleaseType | null>[] = [];
     @Input() selectedReleaseType: DiscoverMovieReleaseType | null = null;
-    @Input() languageOptions: SelectOption<string>[] = [];
+    readonly languageOptions = input<readonly SelectOption<string>[]>([]);
     @Input() selectedOriginalLanguage: string | null = null;
     @Input() ratingOptions: SelectOption<number | null>[] = [];
     @Input() selectedRating: number | null = null;
@@ -94,17 +94,12 @@ export class DiscoverFilterPanelComponent implements OnChanges {
 
     keywordSearchText = '';
     companySearchText = '';
-    certificationPillOptions: SelectOption<string | null>[] = [];
-    filteredLanguageOptions: SelectOption<string>[] = [];
-    private languageFilter = '';
-
-    ngOnChanges(): void {
-        this.certificationPillOptions = [
-            { label: 'Any certification', value: null },
-            ...this.certificationOptions,
-        ];
-        this.filteredLanguageOptions = this.filterLanguageOptions();
-    }
+    readonly certificationToggleOptions = computed<SelectOption<string | null>[]>(() => [
+        { label: 'Any certification', value: null },
+        ...this.certificationOptions(),
+    ]);
+    readonly filteredLanguageOptions = computed(() => this.filterLanguageOptions());
+    private readonly languageFilter = signal('');
 
     onKeywordSearch(event: Event): void {
         const value = (event.target as HTMLInputElement).value;
@@ -128,18 +123,19 @@ export class DiscoverFilterPanelComponent implements OnChanges {
         this.companyAdd.emit(value);
     }
 
-    updateLanguageFilter(filter: string): void {
-        this.languageFilter = filter;
-        this.filteredLanguageOptions = this.filterLanguageOptions();
+    updateLanguageFilter(filter: string | null): void {
+        this.languageFilter.set(filter ?? '');
     }
 
     private filterLanguageOptions(): SelectOption<string>[] {
-        if (!this.languageFilter) {
-            return [...this.languageOptions];
+        const languageFilter = this.languageFilter();
+
+        if (!languageFilter) {
+            return [...this.languageOptions()];
         }
 
-        const normalizedFilter = this.languageFilter.toLowerCase();
-        return this.languageOptions.filter(
+        const normalizedFilter = languageFilter.toLowerCase();
+        return this.languageOptions().filter(
             (option) =>
                 option.label.toLowerCase().includes(normalizedFilter) ||
                 option.value.toLowerCase().includes(normalizedFilter),

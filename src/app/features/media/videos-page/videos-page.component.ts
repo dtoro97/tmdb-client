@@ -1,9 +1,9 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
-import { BehaviorSubject, combineLatest, map, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, switchMap, tap } from 'rxjs';
 
-import { Video } from '../../../api';
 import {
     BrowseToolbarComponent,
     EmptyStateComponent,
@@ -12,16 +12,15 @@ import {
     SortButtonComponent,
     SubPageHeaderComponent,
     VideoCardComponent,
-    VideoCardItem,
-    MediaDetails,
+    MediaType,
     SortDirection,
-    buildYoutubeThumbnailUrl,
+    VideoCardItem,
     compareValues,
 } from '../../../shared';
-import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
 import { Title } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MediaStoreService } from '../media-store.service';
 
 type SortField = 'published_at' | 'name';
 
@@ -56,12 +55,12 @@ export class VideosPageComponent {
     readonly sortDirection$ = this.sortDirectionSubject.asObservable();
 
     readonly videos$ = combineLatest([
-        this.mediaVideoStoreService.allVideos$,
+        this.mediaVideoStoreService.videoItems$,
         this.sortField$,
         this.sortDirection$,
     ]).pipe(
-        map(([videos, field, direction]) => {
-            const sorted = [...videos].sort((a, b) => {
+        map(([videoItems, field, direction]) => {
+            const sorted = [...videoItems].sort((a, b) => {
                 const valueComparison = compareValues(
                     this.getVideoSortValue(a, field),
                     this.getVideoSortValue(b, field),
@@ -74,20 +73,14 @@ export class VideosPageComponent {
     );
 
     readonly vm$ = combineLatest({
-        mediaState: this.mediaStoreService.mediaDetailsState$,
+        mediaState: this.mediaStore.mediaDetailsState$,
         videosState: this.mediaVideoStoreService.videosState$,
-        videos: this.videos$,
+        videoItems: this.videos$,
         sortField: this.sortField$,
         sortDirection: this.sortDirection$,
     }).pipe(
-        map(({ mediaState, videosState, videos, sortField, sortDirection }) => {
-            const media = mediaState.type === 'loaded' ? mediaState.value : null;
-            const videoItems = media
-                ? videos.flatMap((video) => {
-                      const item = this.toVideoCardItem(video, media);
-                      return item ? [item] : [];
-                  })
-                : [];
+        map(({ mediaState, videosState, videoItems, sortField, sortDirection }) => {
+            const media = mediaState.state === 'success' ? mediaState.data : null;
 
             return {
                 media,
@@ -95,19 +88,30 @@ export class VideosPageComponent {
                 videoItems,
                 sortField,
                 sortDirection,
-                isLoading:
-                    videosState.type === 'loading' ||
-                    videosState.type === 'idle',
+                isLoading: videosState.state === 'loading',
             };
         }),
     );
 
     constructor(
-        public mediaStoreService: MediaDetailStoreService,
+        private readonly mediaStore: MediaStoreService,
         public mediaVideoStoreService: MediaVideoStoreService,
         private title: Title,
+        private route: ActivatedRoute,
     ) {
-        this.mediaStoreService.title$
+        this.route.parent!.paramMap
+            .pipe(
+                map((params) => ({
+                    id: Number(params.get('id')),
+                    type: (params.get('type') ?? 'movie') as MediaType,
+                })),
+                filter(({ id }) => Number.isInteger(id)),
+                switchMap((target) => this.mediaVideoStoreService.load$(target)),
+                takeUntilDestroyed(),
+            )
+            .subscribe();
+
+        this.mediaStore.title$
             .pipe(
                 takeUntilDestroyed(),
                 tap((title) => this.title.setTitle(`${title} | Videos`)),
@@ -126,42 +130,15 @@ export class VideosPageComponent {
     }
 
     private getVideoSortValue(
-        video: Video,
+        video: VideoCardItem,
         field: SortField,
     ): string | undefined {
         switch (field) {
             case 'published_at':
-                return video.published_at;
+                return video.publishedAt;
             case 'name':
-                return video.name;
+                return video.title;
         }
     }
 
-    private toVideoCardItem(
-        video: Video,
-        media: MediaDetails,
-    ): VideoCardItem | null {
-        if (!video.id || !video.key) {
-            return null;
-        }
-
-        const title = video.name ?? media.title;
-
-        return {
-            id: video.id,
-            title,
-            thumbnailUrl: buildYoutubeThumbnailUrl(video.key),
-            alt: title,
-            openLabel: `Open video: ${title}`,
-            typeLabel: video.type,
-            publishedAt: video.published_at,
-            routerLink: [
-                '/title',
-                media.id,
-                media.mediaType,
-                'videos',
-                video.id,
-            ],
-        };
-    }
 }

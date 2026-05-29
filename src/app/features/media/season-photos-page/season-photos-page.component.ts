@@ -5,9 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
-import { combineLatest, filter, map, tap } from 'rxjs';
+import { combineLatest, map, tap } from 'rxjs';
 
-import { TvSeries } from '../../../api';
 import {
     PhotoViewerComponent,
     PhotosBrowserComponent,
@@ -15,8 +14,8 @@ import {
     PhotosBrowserSkeletonComponent,
     SubPageHeaderComponent,
 } from '../../../shared';
-import { MediaDetailStoreService } from '../media-detail-store.service';
 import { MediaSeasonsStoreService } from '../media-seasons-store.service';
+import { MediaStoreService } from '../media-store.service';
 
 @Component({
     selector: 'app-season-photos-page',
@@ -30,27 +29,23 @@ export class SeasonPhotosPageComponent {
     readonly backLink: readonly string[];
 
     readonly vm$ = combineLatest({
-        mediaState: this.mediaStoreService.mediaDetailsState$,
+        mediaState: this.mediaStore.mediaDetailsState$,
         photosState: this.mediaSeasonsStoreService.seasonImagesState$,
     }).pipe(
         map(({ mediaState, photosState }) => {
-            const media = mediaState.type === 'loaded' ? mediaState.value : null;
+            const media = mediaState.state === 'success' ? mediaState.data : null;
 
             return {
                 media,
                 photosState,
-                showSkeleton:
-                    mediaState.type === 'idle' ||
-                    mediaState.type === 'loading' ||
-                    photosState.type === 'idle' ||
-                    photosState.type === 'loading',
+                showSkeleton: mediaState.state === 'loading' || photosState.state === 'loading',
                 subtitle: media?.title ? `${media.title}${media.year ? ` (${media.year})` : ''}` : null,
             };
         }),
     );
 
     constructor(
-        private readonly mediaStoreService: MediaDetailStoreService,
+        private readonly mediaStore: MediaStoreService,
         private readonly mediaSeasonsStoreService: MediaSeasonsStoreService,
         private readonly route: ActivatedRoute,
         private readonly dialog: MatDialog,
@@ -61,19 +56,8 @@ export class SeasonPhotosPageComponent {
         const seasonNumber = Number(this.route.snapshot.paramMap.get('seasonNumber'));
 
         this.pageTitle = `Season ${seasonNumber} Photos`;
-        this.backLink = ['/title', String(seriesId), mediaType, 'episodes'];
-        this.mediaSeasonsStoreService.setSeriesId(seriesId);
-        this.mediaSeasonsStoreService.updateSelectedSeason(seasonNumber);
-
-        this.mediaStoreService.rawMedia$
-            .pipe(
-                filter((media): media is TvSeries => !!media && Array.isArray((media as TvSeries).seasons)),
-                tap((series) => {
-                    this.mediaSeasonsStoreService.initializeFromSeries(series);
-                }),
-                takeUntilDestroyed(),
-            )
-            .subscribe();
+        this.backLink = ['/title', String(seriesId), mediaType, 'episodes', String(seasonNumber)];
+        this.mediaSeasonsStoreService.openSeason({ seriesId, seasonNumber });
 
         this.vm$
             .pipe(

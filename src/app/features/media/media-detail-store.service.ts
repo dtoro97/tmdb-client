@@ -1,642 +1,615 @@
-import { catchError, combineLatest, delay, EMPTY, filter, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
-
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { ComponentStore } from '@ngrx/component-store';
+import { Observable, catchError, filter, forkJoin, map, of, switchMap, take, tap } from 'rxjs';
 
 import {
-    AggregateCredits,
     CollectionDetails,
-    CollectionRestControllerService,
     ContentRatingList,
-    Credits,
-    ExternalIds,
-    ImageList,
+    KeywordList,
     KeywordListItem,
     Movie,
     MovieListItem,
-    ReleaseDate,
     ReleaseDateList,
     Review,
-    TvEpisode,
+    TvKeywordList,
     TvSeries,
     TvSeriesListItem,
     Video,
     WatchProviderItem,
     WatchProviderList,
 } from '../../api';
-import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
+import { THEATRICAL_MOVIE_RELEASE_TYPE } from '../../constants';
 import {
     CardItem,
-    ConfigStoreService,
     ExternalLinks,
-    LoadableItems,
-    LoadableValue,
+    LocaleStoreService,
     MediaDetails,
     MediaType,
     PersonCardItem,
+    RemoteData,
+    VideoCardItem,
     ViewerImage,
-    buildExternalLinks,
     getISODate,
-    isDefined,
-    loaded,
-    loadedItems,
-    toCastPersonCardItem,
+    hasRemoteData,
+    remoteSuccess,
     toCardItem,
-    toMediaDetails,
-    toYear,
-    LocaleStoreService,
+    toVideoCardItems,
 } from '../../shared';
-import {
-    CastCreditWithEpisodes,
-    CrewCreditWithEpisodes,
-    MediaCreditsLinkItem,
-    MediaCreditsPanelData,
-    MediaDetailProviderPreview,
-} from './media-detail.models';
-import { toCastFromAggregate, toCrewFromAggregate } from './media-detail-credits.mapper';
-import { rankRelatedMedia } from './media-detail-recommendations.mapper';
+import { MediaCreditsStoreService } from './media-credits-store.service';
+import { MediaCreditsResource } from './media-credits-store.service';
+import { MediaImagesStoreService } from './media-images-store.service';
 import { MediaApiService } from './media-api.service';
 import { MediaReviewsStoreService } from './media-reviews-store.service';
+import { MediaTarget, isSameMediaTarget } from './media-target';
+import { MediaStoreService } from './media-store.service';
 import { MediaVideoStoreService } from './media-video-store.service';
+import { CreditsSummary } from './media-credits-summary/media-credits-summary.model';
 
-const TOP_CAST_PREVIEW_COUNT = 20;
-const CINEMA_RELEASE_TYPES = new Set([2, 3]);
-const CINEMA_WINDOW_DAYS = 30;
-
-export interface MediaState {
-    mediaId: number | null;
-    media: LoadableValue<Movie | TvSeries | null>;
-    type: MediaType | '';
-    cast: LoadableItems<CastCreditWithEpisodes>;
-    crew: LoadableItems<CrewCreditWithEpisodes>;
-    recommendations: LoadableItems<CardItem>;
-    photos: LoadableItems<ViewerImage>;
-    keywords: LoadableItems<KeywordListItem>;
-    collection: LoadableValue<CollectionDetails | null>;
-    externalLinks: ExternalLinks | null;
-    watchProviders: LoadableValue<MediaDetailProviderPreview | null>;
-    certification: LoadableValue<string | null>;
-    inCinemas: boolean;
+export interface MediaDetailPageData {
+    readonly media: MediaDetails | null;
+    readonly tvYearLabel: string | null;
+    readonly canRateTitle: boolean;
+    readonly detailsState: RemoteData<MediaDetails | null>;
+    readonly photosState: RemoteData<ViewerImage[]>;
+    readonly recommendationsState: RemoteData<CardItem[]>;
+    readonly similarState: RemoteData<CardItem[]>;
+    readonly keywordsState: RemoteData<KeywordListItem[]>;
+    readonly certificationState: RemoteData<string | null>;
+    readonly watchProviderState: RemoteData<MediaDetailProviderPreview | null>;
+    readonly collectionState: RemoteData<CollectionDetails | null>;
+    readonly externalLinks: ExternalLinks | null;
+    readonly inCinemas: boolean;
+    readonly videosState: RemoteData<VideoCardItem[]>;
+    readonly trailer: Video | null;
+    readonly videoTotalCount: number;
+    readonly reviewsState: RemoteData<Review[]>;
+    readonly previewReviews: readonly Review[];
+    readonly reviewTotalResults: number;
+    readonly relatedState: RemoteData<MediaDetailRelatedPreview | null>;
 }
 
-const INITIAL_STATE: MediaState = {
-    mediaId: null,
-    type: '',
-    media: { type: 'idle' },
-    cast: { type: 'idle' },
-    crew: { type: 'idle' },
-    recommendations: { type: 'idle' },
-    photos: { type: 'idle' },
-    keywords: { type: 'idle' },
-    collection: { type: 'idle' },
-    externalLinks: null,
-    watchProviders: { type: 'idle' },
-    certification: { type: 'idle' },
-    inCinemas: false,
+export interface MediaDetailRelatedPreview {
+    readonly state: RemoteData<CardItem[]>;
+}
+
+export interface MediaDetailProviderPreview {
+    readonly providers: readonly WatchProviderItem[];
+    readonly hiddenCount: number;
+    readonly link: string | null;
+}
+
+interface MediaReleaseInfo {
+    readonly certification: string | null;
+    readonly inCinemas: boolean;
+}
+
+interface MediaDetailState {
+    readonly target: MediaTarget | null;
+    readonly recommendationsState: RemoteData<CardItem[]>;
+    readonly similarState: RemoteData<CardItem[]>;
+    readonly keywordsState: RemoteData<KeywordListItem[]>;
+    readonly releaseInfoState: RemoteData<MediaReleaseInfo>;
+    readonly watchProviderState: RemoteData<MediaDetailProviderPreview | null>;
+    readonly collectionState: RemoteData<CollectionDetails | null>;
+}
+
+type RelatedMediaResult = MovieListItem | TvSeriesListItem;
+
+const INITIAL_STATE: MediaDetailState = {
+    target: null,
+    recommendationsState: { state: 'notAsked' },
+    similarState: { state: 'notAsked' },
+    keywordsState: { state: 'notAsked' },
+    releaseInfoState: { state: 'notAsked' },
+    watchProviderState: { state: 'notAsked' },
+    collectionState: { state: 'notAsked' },
 };
 
 @Injectable()
-export class MediaDetailStoreService extends ComponentStore<MediaState> {
-    private readonly rawMediaState$ = this.select((state) => state.media);
-    readonly rawMedia$ = this.rawMediaState$.pipe(map((state) => (state.type === 'loaded' ? state.value : null)));
-    private readonly type$ = this.select((state) => state.type).pipe(filter((type): type is MediaType => !!type));
+export class MediaDetailStoreService extends ComponentStore<MediaDetailState> {
+    readonly mediaDetailsState$ = this.mediaStore.mediaDetailsState$;
 
-    readonly castState$ = this.select((state) => state.cast);
-    readonly crewState$ = this.select((state) => state.crew);
-    readonly recommendationsState$ = this.select((state) => state.recommendations);
-    readonly photosState$ = this.select((state) => state.photos);
-    private readonly keywordsState$ = this.select((state) => state.keywords);
-    private readonly collectionState$ = this.select((state) => state.collection);
-    private readonly watchProvidersState$ = this.select((state) => state.watchProviders);
-    private readonly certificationState$ = this.select((state) => state.certification);
-    private readonly inCinemas$ = this.select((state) => state.inCinemas);
-    private readonly externalLinks$ = this.select((state) => state.externalLinks);
+    readonly photosState$ = this.imagesStore.imagesState$;
 
-    private readonly topCastState$ = this.castState$.pipe(
-        map((state): LoadableItems<PersonCardItem> => {
-            if (state.type === 'loading-more') {
-                return {
-                    type: 'loading-more',
-                    value: state.value.slice(0, TOP_CAST_PREVIEW_COUNT).map((member) => toCastPersonCardItem(member)),
-                    placeholderCount: state.placeholderCount,
-                };
-            }
+    private readonly creditsState$ = this.creditsStore.creditsState$;
+    private readonly topCastState$ = this.creditsStore.topCastState$;
+    private readonly recommendationsState$ = this.select((state) => state.recommendationsState);
+    private readonly similarState$ = this.select((state) => state.similarState);
+    private readonly keywordsState$ = this.select((state) => state.keywordsState);
+    private readonly releaseInfoState$ = this.select((state) => state.releaseInfoState);
+    private readonly watchProviderState$ = this.select((state) => state.watchProviderState);
+    private readonly collectionState$ = this.select((state) => state.collectionState);
+    private readonly externalLinks$ = this.mediaStore.externalLinks$;
 
-            if (state.type === 'loaded') {
-                return loaded(
-                    state.value.slice(0, TOP_CAST_PREVIEW_COUNT).map((member) => toCastPersonCardItem(member)),
-                );
-            }
-
-            return state;
-        }),
+    private readonly certificationState$ = this.releaseInfoState$.pipe(
+        map((state) => this.toCertificationState(state)),
+    );
+    private readonly inCinemas$ = this.releaseInfoState$.pipe(
+        map((state) => (state.state === 'success' ? state.data.inCinemas : false)),
     );
 
-    readonly cast$: Observable<CastCreditWithEpisodes[]> = this.castState$.pipe(map((state) => loadedItems(state)));
-    readonly crew$: Observable<CrewCreditWithEpisodes[]> = this.crewState$.pipe(map((state) => loadedItems(state)));
-    readonly castCrew$ = combineLatest([this.cast$, this.crew$]).pipe(map(([cast, crew]) => ({ cast, crew })));
-    private readonly directors$ = this.crew$.pipe(
-        map((crew) =>
-            crew.reduce<MediaCreditsLinkItem[]>((directors, member) => {
-                if (member.job === 'Director' && !directors.some((director) => director.id === member.id)) {
-                    directors.push({
-                        id: member.id,
-                        name: member.name,
-                    });
-                }
-
-                return directors;
-            }, []),
-        ),
-    );
-    readonly recommendations$ = this.recommendationsState$.pipe(map((state) => loadedItems(state)));
-    readonly allPhotos$ = this.photosState$.pipe(map((state) => loadedItems(state)));
-
-    readonly mediaDetailsState$: Observable<LoadableValue<MediaDetails | null>> = combineLatest([
-        this.rawMediaState$,
-        this.type$,
-        this.configStoreService.languages$,
-    ]).pipe(
-        map(([mediaState, type, languages]) => {
-            if (mediaState.type !== 'loaded') {
-                return { type: mediaState.type };
-            }
-
-            return loaded(mediaState.value ? toMediaDetails(mediaState.value, type, languages) : null);
-        }),
+    readonly creditsSummary$ = this.select(
+        this.mediaDetailsState$,
+        this.creditsState$,
+        this.topCastState$,
+        (detailsState, creditsState, topCastState): RemoteData<CreditsSummary | null> =>
+            this.toCreditsSummary(detailsState, creditsState, topCastState),
     );
 
-    readonly mediaDetails$: Observable<MediaDetails> = this.mediaDetailsState$.pipe(
-        map((state) => (state.type === 'loaded' ? state.value : null)),
-        filter(isDefined),
-    );
+    readonly pageData$ = this.select(
+        this.mediaDetailsState$,
+        this.photosState$,
+        this.recommendationsState$,
+        this.similarState$,
+        this.keywordsState$,
+        this.certificationState$,
+        this.watchProviderState$,
+        this.collectionState$,
+        this.externalLinks$,
+        this.inCinemas$,
+        this.videoStore.videosState$,
+        this.videoStore.trailer$,
+        this.videoStore.youtubeVideosTotalCount$,
+        this.reviewsStore.reviewsState$,
+        this.reviewsStore.previewReviews$,
+        this.reviewsStore.totalResults$,
+        (
+            detailsState,
+            photosState,
+            recommendationsState,
+            similarState,
+            keywordsState,
+            certificationState,
+            watchProviderState,
+            collectionState,
+            externalLinks,
+            inCinemas,
+            videosState,
+            trailer,
+            videoTotalCount,
+            reviewsState,
+            previewReviews,
+            reviewTotalResults,
+        ): MediaDetailPageData => {
+            const media = detailsState.state === 'success' ? detailsState.data : null;
 
-    readonly title$ = this.mediaDetails$.pipe(map((media) => media.title));
-
-    readonly mediaDetailVm$ = combineLatest({
-        mediaDetailsState: this.mediaDetailsState$,
-        topCastState: this.topCastState$,
-        castState: this.castState$,
-        crewState: this.crewState$,
-        directors: this.directors$,
-        externalLinks: this.externalLinks$,
-        certification: this.certificationState$,
-        inCinemas: this.inCinemas$,
-        watchProviders: this.watchProvidersState$,
-        collection: this.collectionState$,
-        photosState: this.photosState$,
-        recommendationsState: this.recommendationsState$,
-        keywordsState: this.keywordsState$,
-        videosState: this.mediaVideoStoreService.videosState$,
-        trailer: this.mediaVideoStoreService.trailer$,
-        videoTotalCount: this.mediaVideoStoreService.youtubeVideosTotalCount$,
-        reviewsState: this.mediaReviewsStoreService.reviewsState$,
-        reviewPreview: this.mediaReviewsStoreService.previewReviews$,
-        reviewTotalResults: this.mediaReviewsStoreService.totalResults$,
-    }).pipe(
-        map(
-            ({
-                mediaDetailsState,
-                topCastState,
-                castState,
-                crewState,
-                directors,
-                externalLinks,
-                certification,
-                inCinemas,
-                watchProviders,
-                collection,
+            return {
+                media,
+                tvYearLabel: media ? this.toTvYearLabel(media) : null,
+                canRateTitle: media ? this.canRateTitle(media) : false,
+                detailsState,
                 photosState,
                 recommendationsState,
+                similarState,
                 keywordsState,
-                videosState,
+                certificationState,
+                watchProviderState,
+                collectionState,
+                externalLinks,
+                inCinemas,
+                videosState: this.toVideoItemsState(videosState, media),
                 trailer,
                 videoTotalCount,
                 reviewsState,
-                reviewPreview,
+                previewReviews,
                 reviewTotalResults,
-            }) => {
-                const media = mediaDetailsState.type === 'loaded' ? mediaDetailsState.value : null;
-                const castItems =
-                    castState.type === 'loaded' || castState.type === 'loading-more' ? castState.value : [];
-                const crewItems =
-                    crewState.type === 'loaded' || crewState.type === 'loading-more' ? crewState.value : [];
-                const photoItems =
-                    photosState.type === 'loaded' || photosState.type === 'loading-more' ? photosState.value : [];
-                const reviewsItems =
-                    reviewsState.type === 'loaded' || reviewsState.type === 'loading-more' ? reviewsState.value : [];
-                const credits =
-                    mediaDetailsState.type !== 'loaded' ||
-                    castState.type === 'idle' ||
-                    castState.type === 'loading' ||
-                    crewState.type === 'idle' ||
-                    crewState.type === 'loading'
-                        ? ({ type: 'loading' } as LoadableValue<MediaCreditsPanelData | null>)
-                        : !media
-                          ? loaded(null)
-                          : !castItems.length && !crewItems.length && !(media.creators?.length ?? 0)
-                            ? loaded(null)
-                            : loaded({
-                                  topCastState,
-                                  castState,
-                                  crewState,
-                                  directors,
-                                  creators: media.creators ?? [],
-                              });
-                const videos =
-                    videosState.type === 'idle' || videosState.type === 'loading'
-                        ? ({ type: 'loading' } as LoadableValue<{
-                              state: LoadableItems<Video>;
-                              totalCount: number;
-                              trailerKey: string | null;
-                          } | null>)
-                        : !videoTotalCount
-                          ? loaded(null)
-                          : loaded({
-                                state: videosState,
-                                totalCount: videoTotalCount,
-                                trailerKey: trailer?.key ?? null,
-                            });
-                const photos =
-                    photosState.type === 'idle' || photosState.type === 'loading'
-                        ? ({ type: 'loading' } as LoadableValue<{
-                              state: LoadableItems<ViewerImage>;
-                              allPhotos: ViewerImage[];
-                              totalCount: number;
-                          } | null>)
-                        : !photoItems.length
-                          ? loaded(null)
-                          : loaded({
-                                state: photosState,
-                                allPhotos: photoItems,
-                                totalCount: photoItems.length,
-                            });
-                const reviews =
-                    reviewsState.type === 'idle' || reviewsState.type === 'loading'
-                          ? ({ type: 'loading' } as LoadableValue<{
-                              state: LoadableItems<Review>;
-                              previewReviews: Review[];
-                              totalResults: number;
-                          } | null>)
-                        : !reviewsItems.length
-                          ? loaded(null)
-                          : loaded({
-                                state: reviewsState,
-                                previewReviews: reviewPreview,
-                                totalResults: reviewTotalResults,
-                            });
-                const recommendations =
-                    recommendationsState.type === 'idle' || recommendationsState.type === 'loading'
-                        ? ({ type: 'loading' } as LoadableValue<{ state: LoadableItems<CardItem> } | null>)
-                        : loaded(loadedItems(recommendationsState).length ? { state: recommendationsState } : null);
-                const keywords =
-                    keywordsState.type === 'idle' || keywordsState.type === 'loading'
-                        ? ({ type: 'loading' } as LoadableValue<KeywordListItem[] | null>)
-                        : loaded(loadedItems(keywordsState).length ? loadedItems(keywordsState) : null);
-                const primaryReleaseDate = media?.releaseDate ?? media?.firstAirDate ?? null;
-
-                return {
-                    mediaState: mediaDetailsState,
-                    media,
-                    inCinemas,
-                    hero: {
-                        canRateTitle: media ? !primaryReleaseDate || primaryReleaseDate <= getISODate(0) : false,
-                        tvYearLabel: media
-                            ? media.mediaType !== 'tv'
-                                ? null
-                                : (() => {
-                                      const first = toYear(media.firstAirDate);
-                                      const last = toYear(media.lastAirDate);
-
-                                      if (!first) {
-                                          return null;
-                                      }
-
-                                      return !last || first === last ? first : `${first} - ${last}`;
-                                  })()
-                            : null,
-                        externalLinks,
-                        certification,
-                        watchProviders,
-                    },
-                    credits,
-                    collection,
-                    latestEpisode: loaded(media?.lastEpisode ? (media.lastEpisode as TvEpisode) : null),
-                    videos,
-                    photos,
-                    reviews,
-                    recommendations,
-                    keywords,
-                };
-            },
-        ),
+                relatedState: this.toRelatedState(recommendationsState, similarState),
+            };
+        },
     );
 
-    readonly loadPage = this.effect<{ id: number; type: MediaType }>((params$) =>
-        params$.pipe(
-            tap(() => {
-                this.resetState();
-                this.mediaReviewsStoreService.resetState();
-                this.mediaVideoStoreService.resetState();
-            }),
-            switchMap(({ id, type }) => {
-                const mediaType = type === 'tv' ? 'tv' : 'movie';
-                this.patchState({
-                    mediaId: id,
-                    type: mediaType,
-                    media: { type: 'loading' },
-                    cast: { type: 'loading' },
-                    crew: { type: 'loading' },
-                    recommendations: { type: 'loading' },
-                    photos: { type: 'loading' },
-                    keywords: { type: 'loading' },
-                    collection: { type: 'loading' },
-                    watchProviders: { type: 'loading' },
-                    certification: { type: 'loading' },
-                    inCinemas: false,
-                    externalLinks: null,
-                });
-
-                return this.mediaApiService.getDetails$(id, mediaType).pipe(
-                    delay(1000),
-                    tap((media) => {
-                        const externalIds = (
-                            media as (Movie | TvSeries) & {
-                                external_ids?: ExternalIds;
-                            }
-                        ).external_ids;
-
-                        this.patchState({
-                            media: loaded(media),
-                            externalLinks: buildExternalLinks(externalIds ?? null, media.homepage ?? null, 'title'),
-                        });
-
-                        this.loadSupplementaryData({
-                            id,
-                            type: mediaType,
-                            media,
-                        });
-                    }),
-                    catchError(() => {
-                        this.router.navigate(['not-found']);
-                        return EMPTY;
-                    }),
-                );
-            }),
-        ),
-    );
-
-    private readonly loadSupplementaryData = this.effect<{
-        id: number;
-        type: MediaType;
-        media: Movie | TvSeries;
-    }>((params$) =>
-        params$.pipe(
-            switchMap(({ id, type, media }) =>
-                forkJoin({
-                    credits: this.fetchCredits$(id, type),
-                    recommendations: this.fetchRecommendations$(id, type, media),
-                    photos: this.fetchPhotos$(id, type),
-                    keywords: this.fetchKeywords$(id, type),
-                    watchProviders: this.fetchWatchProviders$(id, type, this.localStoreService.region()),
-                    certification: this.fetchCertification$(id, type, this.localStoreService.region()),
-                    collection: this.fetchCollection$(media),
-                    reviews: this.mediaReviewsStoreService.loadReviews$(id, type),
-                    videos: this.mediaVideoStoreService.getVideos$(id, type),
-                }).pipe(catchError(() => EMPTY)),
-            ),
-        ),
+    readonly openOverview = this.effect<MediaTarget>((target$) =>
+        target$.pipe(switchMap((target) => this.loadOverview$(target))),
     );
 
     constructor(
+        private readonly creditsStore: MediaCreditsStoreService,
+        private readonly imagesStore: MediaImagesStoreService,
+        private readonly localeStore: LocaleStoreService,
         private readonly mediaApiService: MediaApiService,
-        private readonly collectionRestControllerService: CollectionRestControllerService,
-        private readonly configStoreService: ConfigStoreService,
-        private readonly router: Router,
-        private readonly localStoreService: LocaleStoreService,
-        private readonly mediaReviewsStoreService: MediaReviewsStoreService,
-        private readonly mediaVideoStoreService: MediaVideoStoreService,
+        private readonly mediaStore: MediaStoreService,
+        private readonly reviewsStore: MediaReviewsStoreService,
+        private readonly videoStore: MediaVideoStoreService,
     ) {
         super(INITIAL_STATE);
     }
 
-    resetState(): void {
-        this.setState(INITIAL_STATE);
-    }
+    loadOverview$(target: MediaTarget): Observable<unknown> {
+        this.prepareTarget(target);
 
-    private fetchCredits$(id: number, type: MediaType): Observable<Credits | AggregateCredits> {
-        return this.mediaApiService.getCredits$(id, type).pipe(
-            catchError(() => of({ cast: [], crew: [] } as Credits)),
-            tap((credits) => {
-                const isAggregate = type === 'tv';
-                this.patchState({
-                    cast: loaded(
-                        isAggregate
-                            ? toCastFromAggregate(credits as AggregateCredits)
-                            : (((credits as Credits).cast ?? []) as CastCreditWithEpisodes[]),
-                    ),
-                    crew: loaded(
-                        isAggregate
-                            ? toCrewFromAggregate(credits as AggregateCredits)
-                            : (((credits as Credits).crew ?? []) as CrewCreditWithEpisodes[]),
-                    ),
-                });
-            }),
-        );
-    }
-
-    private fetchRecommendations$(
-        id: number,
-        type: MediaType,
-        sourceMedia: Movie | TvSeries,
-    ): Observable<{
-        similar: { results?: unknown[] };
-        recommendations: { results?: unknown[] };
-    }> {
-        return forkJoin({
-            similar: this.mediaApiService.getSimilar$(id, type).pipe(catchError(() => of({ results: [] }))),
-            recommendations: this.mediaApiService
-                .getRecommendations$(id, type)
-                .pipe(catchError(() => of({ results: [] }))),
-        }).pipe(
-            tap(({ similar, recommendations }) => {
-                const rankedItems = rankRelatedMedia(
-                    sourceMedia,
-                    type,
-                    (similar.results ?? []) as (MovieListItem | TvSeriesListItem)[],
-                    (recommendations.results ?? []) as (MovieListItem | TvSeriesListItem)[],
-                    PAGE_SIZE,
-                );
-
-                this.patchState({
-                    recommendations: loaded(rankedItems.slice(0, PAGE_SIZE).map((item) => toCardItem(item, type))),
-                });
-            }),
-        );
-    }
-
-    private fetchPhotos$(id: number, type: MediaType): Observable<ImageList> {
-        return this.mediaApiService.getImages$(id, type).pipe(
-            catchError(() => of({} as ImageList)),
-            tap((images) => {
-                this.patchState({
-                    photos: loaded([
-                        ...(images.backdrops ?? []).map((image) => ({
-                            ...image,
-                            photoType: 'backdrop' as const,
-                        })),
-                        ...(images.posters ?? []).map((image) => ({
-                            ...image,
-                            photoType: 'poster' as const,
-                        })),
-                    ]),
-                });
-            }),
-        );
-    }
-
-    private fetchKeywords$(id: number, type: MediaType): Observable<{ results?: unknown[]; keywords?: unknown[] }> {
-        return this.mediaApiService.getKeywords$(id, type).pipe(
-            catchError(() => of({ results: [], keywords: [] })),
-            tap((response) => {
-                const items = ((type === 'tv' ? response.results : response.keywords) ?? []) as KeywordListItem[];
-                this.patchState({
-                    keywords: loaded(items.filter((keyword) => !!keyword.id && !!keyword.name)),
-                });
-            }),
-        );
-    }
-
-    private fetchWatchProviders$(id: number, type: MediaType, country: string): Observable<WatchProviderList | null> {
-        return this.mediaApiService.getWatchProviders$(id, type).pipe(
-            catchError(() => of(null)),
-            tap((providers) => {
-                this.patchState({
-                    watchProviders: loaded(this.toWatchProviderPreview(providers, country)),
-                });
-            }),
-        );
-    }
-
-    private fetchCertification$(
-        id: number,
-        type: MediaType,
-        country: string,
-    ): Observable<ContentRatingList | ReleaseDateList | null> {
-        return this.mediaApiService.getCertification$(id, type).pipe(
-            catchError(() => of(null)),
-            tap((response) => {
-                let value: string | null = null;
-
-                if (type === 'tv') {
-                    value =
-                        ((response as ContentRatingList | null)?.results ?? [])
-                            .find((rating) => rating.iso_3166_1 === country)
-                            ?.rating?.trim() || null;
-                } else {
-                    const regionReleaseDates =
-                        ((response as ReleaseDateList | null)?.results ?? []).find(
-                            (releaseDates) => releaseDates.iso_3166_1 === country,
-                        )?.release_dates ?? [];
-
-                    value =
-                        regionReleaseDates
-                            .map((release) => release.certification?.trim())
-                            .find((certification): certification is string => !!certification) ?? null;
-
-                    this.patchState({
-                        inCinemas: isInCinemaWindow(regionReleaseDates),
-                    });
+        const collection$ = this.mediaStore.load$(target).pipe(
+            switchMap((details) => {
+                if (!details) {
+                    this.patchState({ collectionState: { state: 'success', data: null } });
+                    return of(null);
                 }
 
-                this.patchState({
-                    certification: loaded(value),
-                });
+                const currentMedia = this.mediaStore.currentMedia();
+                const collectionId = this.extractCollectionId(currentMedia, target);
+
+                return this.loadCollection$(target, collectionId);
+            }),
+        );
+
+        return forkJoin([
+            collection$,
+            this.creditsStore.load$(target),
+            this.imagesStore.load$(target),
+            this.videoStore.load$(target),
+            this.reviewsStore.load$(target),
+            this.loadRecommendations$(target),
+            this.loadSimilar$(target),
+            this.loadKeywords$(target),
+            this.loadReleaseInfo$(target),
+            this.loadWatchProviders$(target),
+        ]).pipe(map(() => undefined));
+    }
+
+    private prepareTarget(target: MediaTarget): void {
+        if (isSameMediaTarget(this.get().target, target)) {
+            return;
+        }
+
+        this.setState({
+            ...INITIAL_STATE,
+            target,
+        });
+    }
+
+    private loadRecommendations$(target: MediaTarget): Observable<CardItem[]> {
+        const current = this.get().recommendationsState;
+
+        if (current.state === 'success') {
+            return of(current.data);
+        }
+
+        if (current.state === 'loading') {
+            return this.resourceReady$(this.recommendationsState$);
+        }
+
+        this.patchState({ recommendationsState: { state: 'loading' } });
+
+        return this.mediaApiService.getRecommendations$(target).pipe(
+            map((page) => this.toCardItems(page.results ?? [], target.type)),
+            tap((recommendations) => {
+                this.patchState({ recommendationsState: { state: 'success', data: recommendations } });
+            }),
+            catchError(() => {
+                this.patchState({ recommendationsState: { state: 'success', data: [] } });
+                return of([]);
             }),
         );
     }
 
-    private fetchCollection$(media: Movie | TvSeries): Observable<CollectionDetails | null> {
-        const collectionId = (media as Movie).belongs_to_collection?.id;
+    private loadSimilar$(target: MediaTarget): Observable<CardItem[]> {
+        const current = this.get().similarState;
 
-        if (!collectionId) {
-            this.patchState({
-                collection: loaded(null),
-            });
+        if (current.state === 'success') {
+            return of(current.data);
+        }
 
+        if (current.state === 'loading') {
+            return this.resourceReady$(this.similarState$);
+        }
+
+        this.patchState({ similarState: { state: 'loading' } });
+
+        return this.mediaApiService.getSimilar$(target).pipe(
+            map((page) => this.toCardItems(page.results ?? [], target.type)),
+            tap((similar) => {
+                this.patchState({ similarState: { state: 'success', data: similar } });
+            }),
+            catchError(() => {
+                this.patchState({ similarState: { state: 'success', data: [] } });
+                return of([]);
+            }),
+        );
+    }
+
+    private loadKeywords$(target: MediaTarget): Observable<KeywordListItem[]> {
+        const current = this.get().keywordsState;
+
+        if (current.state === 'success') {
+            return of(current.data);
+        }
+
+        if (current.state === 'loading') {
+            return this.resourceReady$(this.keywordsState$);
+        }
+
+        this.patchState({ keywordsState: { state: 'loading' } });
+
+        return this.mediaApiService.getKeywords$(target).pipe(
+            map((response) => this.extractKeywords(response)),
+            tap((keywords) => {
+                this.patchState({ keywordsState: { state: 'success', data: keywords } });
+            }),
+            catchError(() => {
+                this.patchState({ keywordsState: { state: 'success', data: [] } });
+                return of([]);
+            }),
+        );
+    }
+
+    private loadReleaseInfo$(target: MediaTarget): Observable<MediaReleaseInfo> {
+        const current = this.get().releaseInfoState;
+
+        if (current.state === 'success') {
+            return of(current.data);
+        }
+
+        if (current.state === 'loading') {
+            return this.resourceReady$(this.releaseInfoState$);
+        }
+
+        this.patchState({ releaseInfoState: { state: 'loading' } });
+
+        const request$: Observable<ContentRatingList | ReleaseDateList> =
+            target.type === 'tv'
+                ? this.mediaApiService.getTvContentRatings$(target.id)
+                : this.mediaApiService.getMovieReleaseDates$(target.id);
+
+        return request$.pipe(
+            map((response) =>
+                target.type === 'tv'
+                    ? this.toTvReleaseInfo(response as ContentRatingList)
+                    : this.toMovieReleaseInfo(response as ReleaseDateList),
+            ),
+            tap((releaseInfo) => {
+                this.patchState({ releaseInfoState: { state: 'success', data: releaseInfo } });
+            }),
+            catchError(() => {
+                const releaseInfo = this.toTvReleaseInfo(null);
+                this.patchState({ releaseInfoState: { state: 'success', data: releaseInfo } });
+                return of(releaseInfo);
+            }),
+        );
+    }
+
+    private loadWatchProviders$(target: MediaTarget): Observable<MediaDetailProviderPreview | null> {
+        const current = this.get().watchProviderState;
+
+        if (current.state === 'success') {
+            return of(current.data);
+        }
+
+        if (current.state === 'loading') {
+            return this.resourceReady$(this.watchProviderState$);
+        }
+
+        this.patchState({ watchProviderState: { state: 'loading' } });
+
+        return this.mediaApiService.getWatchProviders$(target).pipe(
+            map((response) => this.extractWatchProviderPreview(response)),
+            tap((watchProvider) => {
+                this.patchState({ watchProviderState: { state: 'success', data: watchProvider } });
+            }),
+            catchError(() => {
+                this.patchState({ watchProviderState: { state: 'success', data: null } });
+                return of(null);
+            }),
+        );
+    }
+
+    private loadCollection$(target: MediaTarget, collectionId: number | null): Observable<CollectionDetails | null> {
+        const current = this.get().collectionState;
+
+        if (current.state === 'success') {
+            return of(current.data);
+        }
+
+        if (current.state === 'loading') {
+            return this.resourceReady$(this.collectionState$);
+        }
+
+        if (target.type !== 'movie' || !collectionId) {
+            this.patchState({ collectionState: { state: 'success', data: null } });
             return of(null);
         }
 
-        return this.collectionRestControllerService
-            .collectionDetails(collectionId, undefined, undefined, undefined, API_JSON_OPTIONS)
-            .pipe(
-                tap((collection) => {
-                    this.patchState({
-                        collection: loaded(collection),
-                    });
-                }),
-                catchError(() => {
-                    this.patchState({
-                        collection: loaded(null),
-                    });
+        this.patchState({ collectionState: { state: 'loading' } });
 
-                    return of(null);
-                }),
-            );
+        return this.mediaApiService.getCollectionDetails$(collectionId).pipe(
+            tap((collection) => {
+                this.patchState({ collectionState: { state: 'success', data: collection } });
+            }),
+            catchError(() => {
+                this.patchState({ collectionState: { state: 'success', data: null } });
+                return of(null);
+            }),
+        );
     }
 
-    private toWatchProviderPreview(providers: WatchProviderList | null, country: string) {
-        const results = providers?.results ?? {};
-        const region = (results[country] && country) || (results['US'] && 'US') || Object.keys(results)[0];
+    private toVideoItemsState(
+        videosState: RemoteData<Video[]>,
+        media: MediaDetails | null,
+    ): RemoteData<VideoCardItem[]> {
+        switch (videosState.state) {
+            case 'success':
+                return { state: 'success', data: media ? toVideoCardItems(videosState.data, media) : [] };
+            case 'loading-more':
+                return { state: 'loading-more', data: media ? toVideoCardItems(videosState.data, media) : [] };
+            case 'failure':
+                return { state: 'failure', error: videosState.error };
+            default:
+                return { state: videosState.state };
+        }
+    }
 
-        if (!region) {
+    private toCertificationState(state: RemoteData<MediaReleaseInfo>): RemoteData<string | null> {
+        switch (state.state) {
+            case 'success':
+                return { state: 'success', data: state.data.certification };
+            case 'loading-more':
+                return { state: 'loading-more', data: state.data.certification };
+            case 'failure':
+                return { state: 'failure', error: state.error };
+            default:
+                return { state: state.state };
+        }
+    }
+
+    private toRelatedState(
+        recommendations: RemoteData<CardItem[]>,
+        similar: RemoteData<CardItem[]>,
+    ): RemoteData<MediaDetailRelatedPreview | null> {
+        if (recommendations.state === 'loading' || similar.state === 'loading') {
+            return { state: 'loading' };
+        }
+
+        const state = hasRemoteData(recommendations) && recommendations.data.length ? recommendations : similar;
+        return remoteSuccess(hasRemoteData(state) && state.data.length ? { state } : null);
+    }
+
+    private toTvYearLabel(media: MediaDetails): string | null {
+        if (media.mediaType !== 'tv') {
             return null;
         }
 
-        const seen = new Set<number>();
-        const previewProviders = [results[region].flatrate, results[region].rent, results[region].buy]
-            .flatMap((items) => items ?? [])
-            .filter(
-                (provider): provider is WatchProviderItem =>
-                    !!provider.provider_id && !!provider.provider_name && !!provider.logo_path,
-            )
-            .sort((a, b) => (a.display_priority ?? 999) - (b.display_priority ?? 999))
-            .filter((provider) => {
-                if (seen.has(provider.provider_id!)) {
-                    return false;
-                }
+        const first = media.firstAirDate?.slice(0, 4) || media.year;
+        const last = media.lastAirDate?.slice(0, 4);
 
-                seen.add(provider.provider_id!);
-                return true;
-            });
+        if (!first) {
+            return null;
+        }
 
-        if (!previewProviders.length) {
+        return !last || first === last ? first : `${first} - ${last}`;
+    }
+
+    private canRateTitle(media: MediaDetails): boolean {
+        const primaryReleaseDate = media.releaseDate ?? media.firstAirDate ?? null;
+        return !primaryReleaseDate || primaryReleaseDate <= getISODate(0);
+    }
+
+    private resourceReady$<T>(state$: Observable<RemoteData<T>>): Observable<T> {
+        return state$.pipe(
+            filter((state): state is Extract<RemoteData<T>, { state: 'success' }> => state.state === 'success'),
+            take(1),
+            map((state) => state.data),
+        );
+    }
+
+    private toCardItems(items: RelatedMediaResult[], mediaType: MediaType): CardItem[] {
+        return items.map((item) => toCardItem(item, mediaType));
+    }
+
+    private extractCollectionId(media: Movie | TvSeries | null, target: MediaTarget): number | null {
+        return target.type === 'movie' ? ((media as Movie | null)?.belongs_to_collection?.id ?? null) : null;
+    }
+
+    private extractKeywords(response: KeywordList | TvKeywordList | null | undefined): KeywordListItem[] {
+        const keywordResponse = response as (KeywordList & TvKeywordList) | null | undefined;
+        const keywords = keywordResponse?.keywords ?? keywordResponse?.results ?? [];
+        return keywords || [];
+    }
+
+    private toTvReleaseInfo(response: ContentRatingList | null | undefined): MediaReleaseInfo {
+        return {
+            certification: this.extractTvCertification(response),
+            inCinemas: false,
+        };
+    }
+
+    private toMovieReleaseInfo(response: ReleaseDateList | null | undefined): MediaReleaseInfo {
+        return {
+            certification: this.extractMovieCertification(response),
+            inCinemas: this.isInCinemaWindow(response),
+        };
+    }
+
+    private extractTvCertification(response: ContentRatingList | null | undefined): string | null {
+        const country = this.localeStore.region();
+        const ratings = response?.results ?? [];
+
+        return (
+            ratings.find((item) => item.iso_3166_1 === country && !!item.rating)?.rating ??
+            ratings.find((item) => item.iso_3166_1 === 'US' && !!item.rating)?.rating ??
+            ratings.find((item) => !!item.rating)?.rating ??
+            null
+        );
+    }
+
+    private extractMovieCertification(response: ReleaseDateList | null | undefined): string | null {
+        const country = this.localeStore.region();
+        const releases = response?.results ?? [];
+        const countryReleases =
+            releases.find((item) => item.iso_3166_1 === country)?.release_dates ??
+            releases.find((item) => item.iso_3166_1 === 'US')?.release_dates ??
+            releases.find((item) => !!item.release_dates?.length)?.release_dates ??
+            [];
+        const release =
+            countryReleases.find((item) => item.type === THEATRICAL_MOVIE_RELEASE_TYPE && !!item.certification) ??
+            countryReleases.find((item) => !!item.certification);
+
+        return release?.certification || null;
+    }
+
+    private isInCinemaWindow(response: ReleaseDateList | null | undefined): boolean {
+        const startDate = getISODate(-15);
+        const today = getISODate(15);
+        const releaseDates = (response?.results ?? []).flatMap((region) => region.release_dates ?? []);
+
+        return releaseDates.some((release) => {
+            const releaseDate = release.release_date?.slice(0, 10);
+
+            return (
+                releaseDate &&
+                release.type === THEATRICAL_MOVIE_RELEASE_TYPE &&
+                releaseDate >= startDate &&
+                releaseDate <= today
+            );
+        });
+    }
+
+    private extractWatchProviderPreview(
+        response: WatchProviderList | null | undefined,
+    ): MediaDetailProviderPreview | null {
+        const item = response?.results?.[this.localeStore.region()];
+        const providers = item?.flatrate ?? [];
+
+        if (!providers.length) {
             return null;
         }
 
         return {
-            providers: previewProviders.slice(0, 3),
-            hiddenCount: Math.max(0, previewProviders.length - 3),
-            link: results[region].link ?? null,
+            providers: providers.slice(0, 3),
+            hiddenCount: Math.max(0, providers.length - 3),
+            link: item?.link ?? null,
+        };
+    }
+
+    private toCreditsSummary(
+        detailsState: RemoteData<MediaDetails | null>,
+        creditsState: RemoteData<MediaCreditsResource>,
+        topCastState: RemoteData<PersonCardItem[]>,
+    ): RemoteData<CreditsSummary | null> {
+        if (
+            detailsState.state !== 'success' ||
+            creditsState.state === 'notAsked' ||
+            creditsState.state === 'loading'
+        ) {
+            return { state: 'loading' };
+        }
+
+        const media = detailsState.data;
+        const cast = hasRemoteData(creditsState) ? creditsState.data.cast : [];
+        const crew = hasRemoteData(creditsState) ? creditsState.data.crew : [];
+        const creators = media?.creators ?? [];
+
+        if (!media || (!cast.length && !crew.length && !creators.length)) {
+            return { state: 'success', data: null };
+        }
+
+        return {
+            state: 'success',
+            data: {
+                topCastState,
+                directors: crew
+                    .filter((member) => member.job === 'Director')
+                    .map((member) => ({ id: member.id, name: member.name })),
+                creators: creators.map((creator) => ({ id: creator.id, name: creator.name })),
+            },
         };
     }
 }
-
-const isInCinemaWindow = (releaseDates: readonly ReleaseDate[]): boolean => {
-    const startDate = getISODate(-CINEMA_WINDOW_DAYS);
-    const today = getISODate(0);
-
-    return releaseDates.some((release) => {
-        const releaseDate = release.release_date?.slice(0, 10);
-
-        return (
-            !!releaseDate &&
-            !!release.type &&
-            CINEMA_RELEASE_TYPES.has(release.type) &&
-            releaseDate >= startDate &&
-            releaseDate <= today
-        );
-    });
-};

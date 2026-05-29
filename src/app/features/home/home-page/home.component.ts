@@ -9,7 +9,7 @@ import {
     MediaCarouselPanelComponent,
     PageSectionComponent,
     PersonCarouselPanelComponent,
-    PillToggleComponent,
+    ToggleGroupComponent,
     RatingComponent,
     SkeletonComponent,
 } from '../../../shared';
@@ -25,7 +25,7 @@ import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.compone
         PageSectionComponent,
         MediaCarouselPanelComponent,
         PersonCarouselPanelComponent,
-        PillToggleComponent,
+        ToggleGroupComponent,
         AsyncPipe,
         RouterLink,
         HeroSpotlightComponent,

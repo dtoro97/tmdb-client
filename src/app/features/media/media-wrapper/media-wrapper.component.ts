@@ -1,52 +1,53 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
-import { map, tap } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs';
 
-import { MediaDetailStoreService } from '../media-detail-store.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MediaImagesStoreService } from '../media-images-store.service';
+import { MediaCreditsStoreService } from '../media-credits-store.service';
 import { MediaReviewsStoreService } from '../media-reviews-store.service';
 import { MediaSeasonsStoreService } from '../media-seasons-store.service';
+import { MediaStoreService } from '../media-store.service';
 import { MediaVideoStoreService } from '../media-video-store.service';
-import { MediaType, RATING_ACTIONS } from '../../../shared';
 import { MediaDetailActionsStore } from '../media-detail-actions-store.service';
 import { EpisodeDetailStoreService } from '../episode-detail-page/episode-detail-store.service';
+import { MediaDetailStoreService } from '../media-detail-store.service';
+import { MediaType } from '../../../shared';
 
 @Component({
     selector: 'app-media-wrapper',
     template: '<router-outlet />',
     imports: [RouterOutlet],
     providers: [
+        MediaStoreService,
         MediaDetailStoreService,
         MediaDetailActionsStore,
         EpisodeDetailStoreService,
+        MediaCreditsStoreService,
+        MediaImagesStoreService,
         MediaReviewsStoreService,
         MediaSeasonsStoreService,
         MediaVideoStoreService,
-        { provide: RATING_ACTIONS, useExisting: MediaDetailActionsStore },
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaWrapperComponent {
     constructor(
-        public mediaStoreService: MediaDetailStoreService,
-        public mediaActionsStoreService: MediaDetailActionsStore,
-        private route: ActivatedRoute,
+        private readonly mediaStore: MediaStoreService,
+        private readonly route: ActivatedRoute,
     ) {
         this.route.paramMap
             .pipe(
-                tap(() => {
-                    this.mediaActionsStoreService.resetState();
-                }),
                 map((params) => ({
                     id: Number(params.get('id')),
-                    type: params.get('type')! as MediaType,
+                    type: (params.get('type') ?? 'movie') as MediaType,
                 })),
+                filter(({ id }) => Number.isInteger(id)),
+                switchMap((target) => this.mediaStore.load$(target)),
+                takeUntilDestroyed(),
             )
-            .pipe(takeUntilDestroyed())
-            .subscribe((params) => {
-                this.mediaStoreService.loadPage(params);
-            });
+            .subscribe();
     }
 }

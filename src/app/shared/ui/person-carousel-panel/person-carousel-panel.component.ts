@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { MEDIUM_LIST_COUNT } from '../../../constants';
-import { CarouselComponent, LoadableItems, PersonCardComponent } from '../..';
+import { CarouselComponent, RemoteData, PersonCardComponent } from '../..';
 import { PersonCardItem } from '../../models';
 import { RepeatPipe } from '../../pipes/repeat.pipe';
 
@@ -12,6 +12,6 @@ import { RepeatPipe } from '../../pipes/repeat.pipe';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonCarouselPanelComponent {
-    @Input({ required: true }) state!: LoadableItems<PersonCardItem>;
+    @Input({ required: true }) state!: RemoteData<PersonCardItem[]>;
     @Input() skeletonCount = MEDIUM_LIST_COUNT;
 }

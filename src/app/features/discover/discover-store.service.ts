@@ -32,7 +32,7 @@ import {
     ConfigStoreService,
     formatCompanyName,
     GenreService,
-    LoadableItems,
+    RemoteData,
     LocaleStoreService,
     MediaListItem,
     MediaType,
@@ -122,7 +122,7 @@ interface DiscoverRouteRequest {
 interface DiscoverState {
     readonly definition: DiscoverPageDefinition | null;
     readonly query: DiscoverQueryState;
-    readonly resultsState: LoadableItems<MediaListItem>;
+    readonly resultsState: RemoteData<MediaListItem[]>;
     readonly pagination: DiscoverPagination;
     readonly totalResults: number;
     readonly movieGenreMap: ReadonlyMap<number, string>;
@@ -151,7 +151,7 @@ const INITIAL_STATE: DiscoverState = {
         watchRegion: 'US',
         ...DISCOVER_DEFAULT_FILTERS,
     },
-    resultsState: { type: 'loading' },
+    resultsState: { state: 'notAsked' },
     pagination: { ...EMPTY_PAGINATION },
     totalResults: 0,
     movieGenreMap: new Map(),
@@ -182,7 +182,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         const definition = state.definition;
         const filters = definition?.filters;
         const genreMap = this.getGenreMap(state.query.mediaType, state);
-        const hasLoadedResults = state.resultsState.type === 'loaded' || state.resultsState.type === 'loading-more';
+        const hasLoadedResults = state.resultsState.state === 'success' || state.resultsState.state === 'loading-more';
         const visibleCount = this.getVisibleCount(state.resultsState);
         const activeFilters = this.toActiveFilters(
             definition,
@@ -208,7 +208,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             pageSize: PAGE_SIZE,
             paginatorLength: this.getPaginatorLength(state),
             showPaginator: hasLoadedResults && this.getPaginatorLength(state) > PAGE_SIZE,
-            showEmptyState: state.resultsState.type === 'loaded' && visibleCount === 0,
+            showEmptyState: state.resultsState.state === 'success' && visibleCount === 0,
             showResultCount: hasLoadedResults,
             showSort: !!definition?.showSort,
             showFilters: this.showFilters(definition),
@@ -848,7 +848,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         this.patchState({
             definition,
             query: request.query,
-            resultsState: { type: 'loading' },
+            resultsState: { state: 'loading' },
             pagination: { ...EMPTY_PAGINATION },
             totalResults: 0,
             movieGenreMap: request.movieGenreMap,
@@ -900,7 +900,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         return this.discoverQuery.list$(definition, query, page).pipe(
             tap((result) => {
                 this.patchState({
-                    resultsState: { type: 'loaded', value: [...result.items] },
+                    resultsState: { state: 'success', data: [...result.items] },
                     pagination: {
                         page: result.page,
                         totalPages: result.totalPages,
@@ -912,8 +912,8 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             catchError(() => {
                 this.patchState({
                     resultsState: {
-                        type: 'loaded',
-                        value: [],
+                        state: 'success',
+                        data: [],
                     },
                     pagination: { page, totalPages: page },
                     totalResults: 0,
@@ -1102,11 +1102,11 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
     }
 
     private toDisplayItems(state: DiscoverState, genreMap: ReadonlyMap<number, string>): DiscoverDisplayItem[] {
-        if (state.resultsState.type !== 'loaded' && state.resultsState.type !== 'loading-more') {
+        if (state.resultsState.state !== 'success' && state.resultsState.state !== 'loading-more') {
             return [];
         }
 
-        return state.resultsState.value.map((item) => ({
+        return state.resultsState.data.map((item) => ({
             item,
             genreNames: (item.genreIds ?? [])
                 .map((genreId) => genreMap.get(genreId))
@@ -1280,9 +1280,9 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         return definition?.lockedFilters ? [...definition.lockedFilters] : [];
     }
 
-    private getVisibleCount(resultsState: LoadableItems<MediaListItem>): number {
-        if (resultsState.type === 'loaded' || resultsState.type === 'loading-more') {
-            return resultsState.value.length;
+    private getVisibleCount(resultsState: RemoteData<MediaListItem[]>): number {
+        if (resultsState.state === 'success' || resultsState.state === 'loading-more') {
+            return resultsState.data.length;
         }
 
         return 0;

@@ -32,6 +32,16 @@ export interface MediaListItem {
     badges?: readonly MediaListItemBadge[];
 }
 
+export type MediaListRouteType = 'item' | 'movie' | 'tv';
+
+export interface MediaListEntry {
+    readonly item: MediaListItem;
+    readonly genreNames: readonly string[];
+    readonly userRating: number | null;
+    readonly routerLink: readonly (string | number)[];
+    readonly index: number | null;
+}
+
 export interface PersonListItem {
     id: number;
     thumb: string | null;

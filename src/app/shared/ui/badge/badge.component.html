@@ -3,5 +3,8 @@
     [class.app-badge--accent]="variant === 'accent'"
     [class.app-badge--outline]="variant === 'outline'"
 >
+    @if (iconClass) {
+        <i class="app-badge__icon {{ iconClass }}" aria-hidden="true"></i>
+    }
     {{ label }}
 </span>

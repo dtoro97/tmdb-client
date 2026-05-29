@@ -1,0 +1,15 @@
+@if (viewOptions().length) {
+    <div class="toggle-group">
+        @for (option of viewOptions(); track option.value) {
+            <button
+                type="button"
+                class="toggle-group__button text-meta"
+                [attr.aria-pressed]="option.selected"
+                [class.toggle-group__button--active]="option.selected"
+                (click)="onClick(option.value)"
+            >
+                {{ option.label }}
+            </button>
+        }
+    </div>
+}

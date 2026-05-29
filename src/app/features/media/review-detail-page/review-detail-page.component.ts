@@ -5,9 +5,15 @@ import { Title } from '@angular/platform-browser';
 
 import { catchError, distinctUntilChanged, map, of, shareReplay, startWith, switchMap, tap } from 'rxjs';
 
-import { EmptyStateComponent, ImageComponent, SkeletonComponent, SubPageHeaderComponent, loaded } from '../../../shared';
-import { MediaDetailStoreService } from '../media-detail-store.service';
+import {
+    EmptyStateComponent,
+    ImageComponent,
+    SkeletonComponent,
+    SubPageHeaderComponent,
+    remoteSuccess,
+} from '../../../shared';
 import { MediaApiService } from '../media-api.service';
+import { MediaStoreService } from '../media-store.service';
 import { ReviewCardComponent } from '../review-card/review-card.component';
 
 @Component({
@@ -23,25 +29,25 @@ export class ReviewDetailPageComponent {
         distinctUntilChanged(),
         switchMap((reviewId) => {
             if (!reviewId) {
-                return of(loaded(null));
+                return of(remoteSuccess(null));
             }
 
             return this.mediaApiService.getReviewDetails$(reviewId).pipe(
-                map((review) => loaded(review)),
-                catchError(() => of(loaded(null))),
-                startWith({ type: 'loading' as const }),
+                map((review) => remoteSuccess(review)),
+                catchError(() => of(remoteSuccess(null))),
+                startWith({ state: 'loading' as const }),
             );
         }),
         tap((state) => {
-            if (state.type === 'loaded' && state.value?.media_title) {
-                this.title.setTitle(`${state.value.media_title} | Review`);
+            if (state.state === 'success' && state.data?.media_title) {
+                this.title.setTitle(`${state.data.media_title} | Review`);
             }
         }),
         shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     constructor(
-        public readonly mediaStoreService: MediaDetailStoreService,
+        public readonly mediaStore: MediaStoreService,
         private readonly mediaApiService: MediaApiService,
         private readonly route: ActivatedRoute,
         private readonly title: Title,

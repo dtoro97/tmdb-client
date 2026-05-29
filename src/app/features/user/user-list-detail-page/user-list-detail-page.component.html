@@ -1,14 +1,14 @@
 @if (vm$ | async; as vm) {
     <div class="detail page-container">
-        @if (vm.header.type === "loaded") {
+        @if (vm.header.state === "success") {
             <app-sub-page-header
                 parentTitle="lists"
                 [backLink]="backLink"
-                [pageTitle]="vm.header.value.name"
+                [pageTitle]="vm.header.data.name"
                 [subtitle]="
-                    vm.header.value.itemCount +
+                    vm.header.data.itemCount +
                     ' title' +
-                    (vm.header.value.itemCount === 1 ? '' : 's')
+                    (vm.header.data.itemCount === 1 ? '' : 's')
                 "
                 [titleIconClass]="vm.isPublic ? 'fa-regular fa-eye' : 'fa-solid fa-lock'"
                 [titleIconLabel]="(vm.isPublic ? 'Public' : 'Private') + ' list'"
@@ -16,33 +16,33 @@
 
             <main class="page-main detail__main">
                 @if (
-                    vm.header.value.description ||
-                    vm.header.value.createdBy ||
+                    vm.header.data.description ||
+                    vm.header.data.createdBy ||
                     vm.ownedByCurrentUser
                 ) {
                     <section
                         class="detail__summary"
                         aria-label="List details"
                     >
-                        @if (!vm.ownedByCurrentUser && vm.header.value.createdBy) {
+                        @if (!vm.ownedByCurrentUser && vm.header.data.createdBy) {
                             <div class="detail__owner-summary">
                                 <app-user-avatar
-                                    [name]="vm.header.value.createdBy"
+                                    [name]="vm.header.data.createdBy"
                                 />
                                 <div class="detail__owner-copy">
                                     <span class="text-caption">
-                                        {{ vm.header.value.createdBy }}
+                                        {{ vm.header.data.createdBy }}
                                     </span>
-                                    @if (vm.header.value.description) {
+                                    @if (vm.header.data.description) {
                                         <p class="detail__description text-body-sm">
-                                            {{ vm.header.value.description }}
+                                            {{ vm.header.data.description }}
                                         </p>
                                     }
                                 </div>
                             </div>
-                        } @else if (vm.header.value.description) {
+                        } @else if (vm.header.data.description) {
                             <p class="detail__description text-body-sm">
-                                {{ vm.header.value.description }}
+                                {{ vm.header.data.description }}
                             </p>
                         }
 
@@ -55,14 +55,14 @@
                                 <button
                                     matButton="filled"
                                     type="button"
-                                    (click)="onAddTitles(vm.header.value.id, vm.existingItemKeys)"
+                                    (click)="onAddTitles(vm.header.data.id, vm.existingItemKeys)"
                                 >
                                     Add movies or shows
                                 </button>
                                 <button
                                     mat-stroked-button
                                     type="button"
-                                    (click)="onEditDetails(vm.header.value, vm.isPublic, vm.defaultSortBy)"
+                                    (click)="onEditDetails(vm.header.data, vm.isPublic, vm.defaultSortBy)"
                                 >
                                     Edit list
                                 </button>
@@ -109,18 +109,17 @@
                 </section>
 
                 @if (
-                    vm.items.type === "loading" ||
-                    vm.items.type === "idle"
+                    vm.items.state === "loading"
                 ) {
                     <div class="detail__items" aria-hidden="true">
                         @for (placeholder of initialSkeletonCount | repeat; track placeholder) {
                             <app-account-media-item [loading]="true" />
                         }
                     </div>
-                } @else if (vm.items.type === "loaded") {
-                    @if (vm.items.value.length) {
+                } @else if (vm.items.state === "success") {
+                    @if (vm.items.data.length) {
                         <div class="detail__items">
-                            @for (item of vm.items.value; track item.key) {
+                            @for (item of vm.items.data; track item.key) {
                                 <app-account-media-item
                                     [item]="item.mediaItem"
                                     [link]="item.link"
@@ -230,7 +229,7 @@
                                 <button
                                     matButton="filled"
                                     type="button"
-                                    (click)="onAddTitles(vm.header.value.id, vm.existingItemKeys)"
+                                    (click)="onAddTitles(vm.header.data.id, vm.existingItemKeys)"
                                 >
                                     Add movies or shows
                                 </button>

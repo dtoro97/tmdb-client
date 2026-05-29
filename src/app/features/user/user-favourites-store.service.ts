@@ -13,15 +13,13 @@ import {
 
 import {
     AccountRestControllerService,
-    MovieListItem,
     MoviePage,
-    TvSeriesListItem,
     TvSeriesPage,
 } from '../../api';
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
     CardItem,
-    LoadableItems,
+    RemoteData,
     LocaleStoreService,
     MediaType,
     SortDirection,
@@ -30,7 +28,13 @@ import {
     isDefined,
     toCardItem,
 } from '../../shared';
-import { toLoadedItems } from '../../shared/utils';
+import { remoteSuccess } from '../../shared/utils';
+import {
+    toTotalAfterMediaRemoval,
+    toUserAccountCardItem,
+    toUserAccountSortBy,
+    toUserMediaTotalLabel,
+} from './user-account-media.helpers';
 import {
     DEFAULT_USER_ACCOUNT_SORT_BY,
     DEFAULT_USER_ACCOUNT_SORT_DIRECTION,
@@ -40,9 +44,9 @@ import {
 } from './user-list-sort-options';
 
 interface UserFavouritesState {
-    readonly items: LoadableItems<CardItem>;
+    readonly items: RemoteData<CardItem[]>;
     readonly totalResults: number;
-    readonly pageItems: LoadableItems<CardItem>;
+    readonly pageItems: RemoteData<CardItem[]>;
     readonly mediaType: MediaType;
     readonly page: number;
     readonly pageTotalResults: number;
@@ -59,9 +63,9 @@ interface UserFavouritesPageChanges {
 const INITIAL_PAGE = 1;
 
 const INITIAL_STATE: UserFavouritesState = {
-    items: { type: 'idle' },
+    items: { state: 'notAsked' },
     totalResults: 0,
-    pageItems: { type: 'idle' },
+    pageItems: { state: 'notAsked' },
     mediaType: 'movie',
     page: INITIAL_PAGE,
     pageTotalResults: 0,
@@ -84,7 +88,10 @@ export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
         sortField: state.sortField,
         sortDirection: state.sortDirection,
         total: state.pageTotalResults,
-        totalLabel: this.toTotalLabel(state.mediaType, state.pageTotalResults),
+        totalLabel: toUserMediaTotalLabel(
+            state.mediaType,
+            state.pageTotalResults,
+        ),
     }));
 
     constructor(
@@ -100,13 +107,13 @@ export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
         const previousState = this.get();
 
         this.patchState({
-            items: { type: 'loading' },
+            items: { state: 'loading' },
         });
 
         return this.fetchFavouriteTitles$().pipe(
             tap((result) => {
                 this.patchState({
-                    items: toLoadedItems(result.items),
+                    items: remoteSuccess(result.items),
                     totalResults: result.totalResults,
                 });
             }),
@@ -128,7 +135,7 @@ export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
         this.patchState({
             mediaType,
             page,
-            pageItems: { type: 'loading' },
+            pageItems: { state: 'loading' },
             sortField,
             sortDirection,
         });
@@ -136,11 +143,11 @@ export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
         return this.fetchFavouritePage$(
             mediaType,
             page,
-            this.toSortBy(sortField, sortDirection),
+            toUserAccountSortBy(sortField, sortDirection),
         ).pipe(
             tap((result) => {
                 this.patchState({
-                    pageItems: toLoadedItems(result.items),
+                    pageItems: remoteSuccess(result.items),
                     page: result.page,
                     pageTotalResults: result.totalResults,
                 });
@@ -180,12 +187,16 @@ export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
 
     removeFromFavourites$(item: CardItem) {
         const previousState = this.get();
-        const optimisticTotal = this.toTotalAfterRemoval(previousState, item);
+        const optimisticTotal = toTotalAfterMediaRemoval(
+            previousState.pageItems,
+            item,
+            previousState.pageTotalResults,
+        );
         const nextPage = this.toValidPage(previousState.page, optimisticTotal);
 
         this.patchState({
             page: nextPage,
-            pageItems: { type: 'loading' },
+            pageItems: { state: 'loading' },
             pageTotalResults: optimisticTotal,
         });
 
@@ -290,61 +301,11 @@ export class UserFavouritesStore extends ComponentStore<UserFavouritesState> {
     ) {
         return {
             items: (result.results ?? [])
-                .map((item) => this.toFavouriteItem(item, mediaType))
+                .map((item) => toUserAccountCardItem(item, mediaType))
                 .filter(isDefined),
             page: result.page ?? requestedPage,
             totalResults: result.total_results ?? 0,
         };
-    }
-
-    private toFavouriteItem(
-        item: MovieListItem | TvSeriesListItem,
-        mediaType: MediaType,
-    ): CardItem | null {
-        const cardItem = toCardItem(item, mediaType);
-        const title = cardItem.title.trim();
-
-        if (!cardItem.id || !title) {
-            return null;
-        }
-
-        return {
-            ...cardItem,
-            title,
-            overview: cardItem.overview.trim(),
-        };
-    }
-
-    private toSortBy(
-        sortField: UserAccountSortField,
-        sortDirection: SortDirection,
-    ): UserAccountSortBy {
-        return `${sortField}.${sortDirection}` as UserAccountSortBy;
-    }
-
-    private toTotalLabel(mediaType: MediaType, totalResults: number): string {
-        if (mediaType === 'tv') {
-            return `${totalResults} TV series`;
-        }
-
-        return `${totalResults} movie${totalResults === 1 ? '' : 's'}`;
-    }
-
-    private toTotalAfterRemoval(
-        state: UserFavouritesState,
-        item: CardItem,
-    ): number {
-        const itemWasLoaded =
-            state.pageItems.type === 'loaded' &&
-            state.pageItems.value.some(
-                (pageItem) =>
-                    pageItem.id === item.id &&
-                    pageItem.mediaType === item.mediaType,
-            );
-
-        return itemWasLoaded
-            ? Math.max(0, state.pageTotalResults - 1)
-            : state.pageTotalResults;
     }
 
     private toValidPage(page: number, totalResults: number): number {

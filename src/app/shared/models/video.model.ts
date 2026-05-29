@@ -9,6 +9,5 @@ export interface VideoCardItem {
     publishedAt?: string;
     contextLabel?: string;
     contextLink?: unknown[];
-    routerLink?: unknown[];
     href?: string;
 }

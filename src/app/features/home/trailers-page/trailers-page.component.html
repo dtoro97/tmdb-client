@@ -14,15 +14,14 @@
         <div class="page-main">
             <section class="trailers">
                 <header class="trailers__toolbar">
-                    <app-pill-toggle
+                    <app-toggle-group
                         [options]="feedOptions"
                         [selectedValue]="vm.selectedFeed"
-                        variant="subtle"
                         (selected)="feedSelected($event)"
                     />
                 </header>
 
-                @if (vm.trailersState.type === 'idle' || vm.trailersState.type === 'loading') {
+                @if (vm.trailersState.state === 'loading') {
                     <ul class="grid u-list-none" aria-hidden="true">
                         @for (i of skeletonCount | repeat; track i) {
                             <li>
@@ -37,10 +36,10 @@
                             </li>
                         }
                     </ul>
-                } @else if (vm.trailersState.type === 'loaded' || vm.trailersState.type === 'loading-more') {
+                } @else if (vm.trailersState.state === 'success' || vm.trailersState.state === 'loading-more') {
                     <ul class="grid u-list-none" role="list">
                         @for (
-                            trailer of vm.trailersState.value;
+                            trailer of vm.trailersState.data;
                             track trailer.id + trailer.mediaType;
                             let idx = $index
                         ) {
@@ -49,8 +48,8 @@
                             </li>
                         }
 
-                        @if (vm.trailersState.type === 'loading-more') {
-                            @for (i of vm.trailersState.placeholderCount | repeat; track i) {
+                        @if (vm.trailersState.state === 'loading-more') {
+                            @for (i of skeletonCount | repeat; track i) {
                                 <li>
                                     <div class="thumb u-flex-column">
                                         <div class="thumb__frame aspect-landscape">
@@ -65,15 +64,15 @@
                         }
                     </ul>
 
-                    @if (vm.showMore || vm.trailersState.type === 'loading-more') {
+                    @if (vm.showMore || vm.trailersState.state === 'loading-more') {
                         <div class="u-justify-center u-flex">
                             <button
                                 mat-stroked-button
                                 type="button"
-                                [disabled]="vm.trailersState.type === 'loading-more'"
+                                [disabled]="vm.trailersState.state === 'loading-more'"
                                 (click)="showMoreSelected()"
                             >
-                                {{ vm.trailersState.type === 'loading-more' ? 'Loading more' : 'Show more' }}
+                                {{ vm.trailersState.state === 'loading-more' ? 'Loading more' : 'Show more' }}
                             </button>
                         </div>
                     }

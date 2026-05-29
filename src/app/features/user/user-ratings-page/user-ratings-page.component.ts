@@ -12,12 +12,11 @@ import {
     ConfirmationDialogService,
     EmptyStateComponent,
     IconButtonComponent,
-    isDefined,
     MediaListItem,
     MediaRatingDialogComponent,
     MediaRatingDialogResult,
     PageScrollService,
-    PillToggleComponent,
+    ToggleGroupComponent,
     RepeatPipe,
     SelectOption,
     SnackbarComponent,
@@ -43,7 +42,7 @@ import { UserRatedEpisodeItem, UserRatingContentType, UserRatingsStore } from '.
         BrowseToolbarComponent,
         EmptyStateComponent,
         IconButtonComponent,
-        PillToggleComponent,
+        ToggleGroupComponent,
         RepeatPipe,
         SortButtonComponent,
         SubPageHeaderComponent,
@@ -179,21 +178,17 @@ export class UserRatingsPageComponent {
             .pipe(
                 take(1),
                 switchMap((result: MediaRatingDialogResult | undefined) => {
-                    if (!isDefined(result) || result === 'login') {
+                    if (result === undefined || result.action === 'login') {
                         return EMPTY;
                     }
 
-                    if (result === 'remove') {
+                    if (result.action === 'remove') {
                         return this.confirmRemoveRating$(title).pipe(
                             switchMap((confirmed) => (confirmed ? removeRating() : EMPTY)),
                         );
                     }
 
-                    if (typeof result === 'object') {
-                        return updateRating(result.guestValue);
-                    }
-
-                    return updateRating(result);
+                    return updateRating(result.value);
                 }),
             );
     }

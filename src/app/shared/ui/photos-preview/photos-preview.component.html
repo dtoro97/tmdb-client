@@ -1,14 +1,14 @@
-@if (state.type === 'idle' || state.type === 'loading') {
-    <div class="photos-preview" [class.photos-preview--compact]="variant === 'compact'" aria-hidden="true">
-        @for (skeletonTile of skeletonTiles; track skeletonTile) {
+@if (state().state === 'loading') {
+    <div class="photos-preview" [class.photos-preview--compact]="variant() === 'compact'" aria-hidden="true">
+        @for (skeletonTile of skeletonTiles(); track skeletonTile) {
             <app-skeleton class="photos-preview__skeleton" />
         }
         <span class="photos-preview__spacer" aria-hidden="true"></span>
         <span class="photos-preview__spacer" aria-hidden="true"></span>
     </div>
-} @else if (tiles.length) {
-    <div class="photos-preview" [class.photos-preview--compact]="variant === 'compact'">
-        @for (tile of tiles; track tile.image.file_path) {
+} @else if (tiles().length) {
+    <div class="photos-preview" [class.photos-preview--compact]="variant() === 'compact'">
+        @for (tile of tiles(); track tile.image.file_path) {
             <button
                 type="button"
                 class="photos-preview__item"

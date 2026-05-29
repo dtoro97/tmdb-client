@@ -17,7 +17,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { SearchRestControllerService } from '../../../../api';
 import { API_JSON_OPTIONS } from '../../../../constants';
 import {
-    LoadableItems,
+    RemoteData,
     MediaOrPersonFilterType,
     mediaToSearchResultItem,
     multiToSearchResultItem,
@@ -30,7 +30,7 @@ export type SearchFilterValue = MediaOrPersonFilterType;
 export type HeaderSearchBarState = {
     readonly searchFilter: SearchFilterValue;
     readonly searchOpen: boolean;
-    readonly searchResultsState: LoadableItems<SearchResultItem>;
+    readonly searchResultsState: RemoteData<SearchResultItem[]>;
     readonly showSearchDropdown: boolean;
 };
 
@@ -42,7 +42,7 @@ interface SearchRequest {
 const INITIAL_STATE: HeaderSearchBarState = {
     searchFilter: 'all',
     searchOpen: false,
-    searchResultsState: { type: 'idle' },
+    searchResultsState: { state: 'notAsked' },
     showSearchDropdown: false,
 };
 
@@ -70,8 +70,8 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
         const state = this.get();
 
         if (
-            state.searchResultsState.type === 'loading' ||
-            (state.searchResultsState.type === 'loaded' && state.searchResultsState.value.length > 0)
+            state.searchResultsState.state === 'loading' ||
+            (state.searchResultsState.state === 'success' && state.searchResultsState.data.length > 0)
         ) {
             this.patchState({ showSearchDropdown: true });
         }
@@ -88,7 +88,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
     closeSearch(): void {
         this.patchState({
             searchOpen: false,
-            searchResultsState: { type: 'idle' },
+            searchResultsState: { state: 'loading' },
             showSearchDropdown: false,
         });
     }
@@ -131,14 +131,14 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
 
     private resetSearchState(): void {
         this.patchState({
-            searchResultsState: { type: 'idle' },
+            searchResultsState: { state: 'loading' },
             showSearchDropdown: false,
         });
     }
 
     private setSearchPending(): void {
         this.patchState({
-            searchResultsState: { type: 'loading' },
+            searchResultsState: { state: 'loading' },
             showSearchDropdown: true,
         });
     }
@@ -148,8 +148,8 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
 
         this.patchState({
             searchResultsState: {
-                type: 'loaded',
-                value: [...searchResults],
+                state: 'success',
+                data: [...searchResults],
             },
             showSearchDropdown: showSearchDropdown && searchResults.length > 0,
         });

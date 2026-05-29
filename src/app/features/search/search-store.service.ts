@@ -7,7 +7,7 @@ import { catchError, EMPTY, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { SearchRestControllerService } from '../../api';
 import { API_JSON_OPTIONS, PAGE_SIZE, SMALL_LIST_COUNT } from '../../constants';
 import {
-    LoadableItems,
+    RemoteData,
     MediaListItem,
     MediaOrPersonFilterType,
     PersonListItem,
@@ -30,9 +30,9 @@ interface SearchState {
     movies: SectionState<MediaListItem>;
     tv: SectionState<MediaListItem>;
     people: SectionState<PersonListItem>;
-    movieResultsState: LoadableItems<MediaListItem>;
-    tvResultsState: LoadableItems<MediaListItem>;
-    personResultsState: LoadableItems<PersonListItem>;
+    movieResultsState: RemoteData<MediaListItem[]>;
+    tvResultsState: RemoteData<MediaListItem[]>;
+    personResultsState: RemoteData<PersonListItem[]>;
 }
 
 const EMPTY_SECTION: SectionState<never> = {
@@ -48,9 +48,9 @@ const INITIAL_STATE: SearchState = {
     movies: { ...EMPTY_SECTION, results: [] },
     tv: { ...EMPTY_SECTION, results: [] },
     people: { ...EMPTY_SECTION, results: [] },
-    movieResultsState: { type: 'idle' },
-    tvResultsState: { type: 'idle' },
-    personResultsState: { type: 'idle' },
+    movieResultsState: { state: 'notAsked' },
+    tvResultsState: { state: 'notAsked' },
+    personResultsState: { state: 'notAsked' },
 };
 
 @Injectable()
@@ -63,27 +63,21 @@ export class SearchStoreService extends ComponentStore<SearchState> {
     readonly personResultsState$ = this.select((state) => state.personResultsState);
 
     readonly movieHasMore$ = this.select(
-        (state) =>
-            state.movies.visible < state.movies.results.length ||
-            state.movies.page < state.movies.totalPages,
+        (state) => state.movies.visible < state.movies.results.length || state.movies.page < state.movies.totalPages,
     );
     readonly tvHasMore$ = this.select(
-        (state) =>
-            state.tv.visible < state.tv.results.length ||
-            state.tv.page < state.tv.totalPages,
+        (state) => state.tv.visible < state.tv.results.length || state.tv.page < state.tv.totalPages,
     );
     readonly personHasMore$ = this.select(
-        (state) =>
-            state.people.visible < state.people.results.length ||
-            state.people.page < state.people.totalPages,
+        (state) => state.people.visible < state.people.results.length || state.people.page < state.people.totalPages,
     );
 
     readonly noSearchResults$ = this.select(
         (state) =>
             state.query !== '' &&
-            state.movieResultsState.type === 'loaded' &&
-            state.tvResultsState.type === 'loaded' &&
-            state.personResultsState.type === 'loaded' &&
+            state.movieResultsState.state === 'success' &&
+            state.tvResultsState.state === 'success' &&
+            state.personResultsState.state === 'success' &&
             state.movies.results.length === 0 &&
             state.tv.results.length === 0 &&
             state.people.results.length === 0,
@@ -103,9 +97,9 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                 ...INITIAL_STATE,
                 query,
                 type,
-                movieResultsState: { type: 'loaded', value: [] },
-                tvResultsState: { type: 'loaded', value: [] },
-                personResultsState: { type: 'loaded', value: [] },
+                movieResultsState: { state: 'success', data: [] },
+                tvResultsState: { state: 'success', data: [] },
+                personResultsState: { state: 'success', data: [] },
             });
             return of(undefined);
         }
@@ -115,17 +109,10 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             query,
             type,
             movieResultsState:
-                type === 'movie' || type === 'all'
-                    ? { type: 'loading' }
-                    : { type: 'loaded', value: [] },
-            tvResultsState:
-                type === 'tv' || type === 'all'
-                    ? { type: 'loading' }
-                    : { type: 'loaded', value: [] },
+                type === 'movie' || type === 'all' ? { state: 'loading' } : { state: 'success', data: [] },
+            tvResultsState: type === 'tv' || type === 'all' ? { state: 'loading' } : { state: 'success', data: [] },
             personResultsState:
-                type === 'person' || type === 'all'
-                    ? { type: 'loading' }
-                    : { type: 'loaded', value: [] },
+                type === 'person' || type === 'all' ? { state: 'loading' } : { state: 'success', data: [] },
         });
 
         const initialVisible = type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE;
@@ -160,8 +147,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             this.patchState({
                 movies: nextMovies,
                 movieResultsState: {
-                    type: 'loaded',
-                    value: nextMovies.results.slice(0, nextMovies.visible),
+                    state: 'success',
+                    data: nextMovies.results.slice(0, nextMovies.visible),
                 },
             });
             return of(undefined);
@@ -169,9 +156,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
 
         this.patchState({
             movieResultsState: {
-                type: 'loading-more',
-                value: movies.results.slice(0, movies.visible),
-                placeholderCount: PAGE_SIZE,
+                state: 'loading-more',
+                data: movies.results.slice(0, movies.visible),
             },
         });
 
@@ -189,8 +175,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             this.patchState({
                 tv: nextTv,
                 tvResultsState: {
-                    type: 'loaded',
-                    value: nextTv.results.slice(0, nextTv.visible),
+                    state: 'success',
+                    data: nextTv.results.slice(0, nextTv.visible),
                 },
             });
             return of(undefined);
@@ -198,9 +184,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
 
         this.patchState({
             tvResultsState: {
-                type: 'loading-more',
-                value: tv.results.slice(0, tv.visible),
-                placeholderCount: PAGE_SIZE,
+                state: 'loading-more',
+                data: tv.results.slice(0, tv.visible),
             },
         });
 
@@ -218,8 +203,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             this.patchState({
                 people: nextPeople,
                 personResultsState: {
-                    type: 'loaded',
-                    value: nextPeople.results.slice(0, nextPeople.visible),
+                    state: 'success',
+                    data: nextPeople.results.slice(0, nextPeople.visible),
                 },
             });
             return of(undefined);
@@ -227,9 +212,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
 
         this.patchState({
             personResultsState: {
-                type: 'loading-more',
-                value: people.results.slice(0, people.visible),
-                placeholderCount: PAGE_SIZE,
+                state: 'loading-more',
+                data: people.results.slice(0, people.visible),
             },
         });
 
@@ -254,11 +238,7 @@ export class SearchStoreService extends ComponentStore<SearchState> {
         });
     }
 
-    private fetchMovies$(
-        query: string,
-        page: number,
-        visible: number,
-    ): Observable<void> {
+    private fetchMovies$(query: string, page: number, visible: number): Observable<void> {
         return this.searchService
             .searchMovie(
                 query,
@@ -274,9 +254,7 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             )
             .pipe(
                 tap((result) => {
-                    const mapped = (result.results ?? []).map((item) =>
-                        toMediaListItem(item, 'movie', 'year'),
-                    );
+                    const mapped = (result.results ?? []).map((item) => toMediaListItem(item, 'movie', 'year'));
                     const current = this.get().movies;
                     const nextMovies: SectionState<MediaListItem> = {
                         results: [...current.results, ...mapped],
@@ -287,8 +265,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                     this.patchState({
                         movies: nextMovies,
                         movieResultsState: {
-                            type: 'loaded',
-                            value: nextMovies.results.slice(0, nextMovies.visible),
+                            state: 'success',
+                            data: nextMovies.results.slice(0, nextMovies.visible),
                         },
                     });
                 }),
@@ -297,11 +275,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                     const currentState = this.get().movieResultsState;
                     this.patchState({
                         movieResultsState: {
-                            type: 'loaded',
-                            value:
-                                currentState.type === 'loading-more'
-                                    ? currentState.value
-                                    : [],
+                            state: 'success',
+                            data: currentState.state === 'loading-more' ? currentState.data : [],
                         },
                     });
                     return EMPTY;
@@ -309,28 +284,12 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             );
     }
 
-    private fetchTv$(
-        query: string,
-        page: number,
-        visible: number,
-    ): Observable<void> {
+    private fetchTv$(query: string, page: number, visible: number): Observable<void> {
         return this.searchService
-            .searchTv(
-                query,
-                undefined,
-                undefined,
-                undefined,
-                page,
-                undefined,
-                undefined,
-                undefined,
-                API_JSON_OPTIONS,
-            )
+            .searchTv(query, undefined, undefined, undefined, page, undefined, undefined, undefined, API_JSON_OPTIONS)
             .pipe(
                 tap((result) => {
-                    const mapped = (result.results ?? []).map((item) =>
-                        toMediaListItem(item, 'tv', 'year'),
-                    );
+                    const mapped = (result.results ?? []).map((item) => toMediaListItem(item, 'tv', 'year'));
                     const current = this.get().tv;
                     const nextTv: SectionState<MediaListItem> = {
                         results: [...current.results, ...mapped],
@@ -341,8 +300,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                     this.patchState({
                         tv: nextTv,
                         tvResultsState: {
-                            type: 'loaded',
-                            value: nextTv.results.slice(0, nextTv.visible),
+                            state: 'success',
+                            data: nextTv.results.slice(0, nextTv.visible),
                         },
                     });
                 }),
@@ -351,11 +310,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                     const currentState = this.get().tvResultsState;
                     this.patchState({
                         tvResultsState: {
-                            type: 'loaded',
-                            value:
-                                currentState.type === 'loading-more'
-                                    ? currentState.value
-                                    : [],
+                            state: 'success',
+                            data: currentState.state === 'loading-more' ? currentState.data : [],
                         },
                     });
                     return EMPTY;
@@ -363,26 +319,12 @@ export class SearchStoreService extends ComponentStore<SearchState> {
             );
     }
 
-    private fetchPeople$(
-        query: string,
-        page: number,
-        visible: number,
-    ): Observable<void> {
+    private fetchPeople$(query: string, page: number, visible: number): Observable<void> {
         return this.searchService
-            .searchPerson(
-                query,
-                undefined,
-                undefined,
-                page,
-                undefined,
-                undefined,
-                API_JSON_OPTIONS,
-            )
+            .searchPerson(query, undefined, undefined, page, undefined, undefined, API_JSON_OPTIONS)
             .pipe(
                 tap((result) => {
-                    const mapped = (result.results ?? []).map((item) =>
-                        toPersonListItem(item),
-                    );
+                    const mapped = (result.results ?? []).map((item) => toPersonListItem(item));
                     const current = this.get().people;
                     const nextPeople: SectionState<PersonListItem> = {
                         results: [...current.results, ...mapped],
@@ -393,8 +335,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                     this.patchState({
                         people: nextPeople,
                         personResultsState: {
-                            type: 'loaded',
-                            value: nextPeople.results.slice(0, nextPeople.visible),
+                            state: 'success',
+                            data: nextPeople.results.slice(0, nextPeople.visible),
                         },
                     });
                 }),
@@ -403,11 +345,8 @@ export class SearchStoreService extends ComponentStore<SearchState> {
                     const currentState = this.get().personResultsState;
                     this.patchState({
                         personResultsState: {
-                            type: 'loaded',
-                            value:
-                                currentState.type === 'loading-more'
-                                    ? currentState.value
-                                    : [],
+                            state: 'success',
+                            data: currentState.state === 'loading-more' ? currentState.data : [],
                         },
                     });
                     return EMPTY;

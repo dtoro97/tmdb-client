@@ -6,10 +6,10 @@ import { EMPTY, Observable, catchError, combineLatest, distinctUntilChanged, map
 
 import { PAGE_SIZE } from '../../../constants';
 import {
-    LoadableItems,
+    RemoteData,
     MediaListItem,
     MediaType,
-    PillToggleOption,
+    ToggleGroupOption,
     SortDirection,
     WatchProviderOption,
     WatchProviderStoreService,
@@ -57,7 +57,7 @@ interface StreamingListState {
     readonly sortDirection: SortDirection;
     readonly pagination: StreamingListPagination;
     readonly totalResults: number;
-    readonly resultsState: LoadableItems<MediaListItem>;
+    readonly resultsState: RemoteData<MediaListItem[]>;
     readonly notFound: boolean;
 }
 
@@ -80,7 +80,7 @@ const INITIAL_STATE: StreamingListState = {
     sortDirection: 'desc',
     pagination: { ...EMPTY_PAGINATION },
     totalResults: 0,
-    resultsState: { type: 'loading' },
+    resultsState: { state: 'notAsked' },
     notFound: false,
 };
 
@@ -100,7 +100,7 @@ const MOVIE_SORT_OPTIONS: readonly StreamingSortOption[] = [
     { label: 'Vote Count', value: 'vote_count' },
 ];
 
-const MEDIA_TYPE_OPTIONS: Record<MediaType, PillToggleOption> = {
+const MEDIA_TYPE_OPTIONS: Record<MediaType, ToggleGroupOption> = {
     movie: { label: 'Movies', value: 'movie' },
     tv: { label: 'TV shows', value: 'tv' },
 };
@@ -109,7 +109,7 @@ const MEDIA_TYPE_OPTIONS: Record<MediaType, PillToggleOption> = {
 export class StreamingListStoreService extends ComponentStore<StreamingListState> {
     readonly vm$ = this.select((state) => {
         const visibleCount = this.getVisibleCount(state.resultsState);
-        const hasResults = state.resultsState.type === 'loaded' || state.resultsState.type === 'loading-more';
+        const hasResults = state.resultsState.state === 'success' || state.resultsState.state === 'loading-more';
 
         return {
             notFound: state.notFound,
@@ -127,10 +127,10 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
             totalResults: state.totalResults,
             showResultCount: hasResults,
             hasMore: hasResults && state.pagination.page < state.pagination.totalPages,
-            showEmptyState: state.resultsState.type === 'loaded' && visibleCount === 0,
-            isLoading: state.resultsState.type === 'loading',
+            showEmptyState: state.resultsState.state === 'success' && visibleCount === 0,
+            isLoading: state.resultsState.state === 'loading',
             loadingMorePlaceholderCount:
-                state.resultsState.type === 'loading-more' ? state.resultsState.placeholderCount : 0,
+                state.resultsState.state === 'loading-more' ? state.resultsState.data.length : 0,
             displayItems: this.toDisplayItems(state.resultsState, state.context, state.mediaType),
         };
     });
@@ -302,7 +302,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
                 sortDirection: request.sortDirection,
                 pagination: { ...EMPTY_PAGINATION },
                 totalResults: 0,
-                resultsState: request.pendingProvider ? { type: 'loading' } : { type: 'loaded', value: [] },
+                resultsState: request.pendingProvider ? { state: 'loading' } : { state: 'success', data: [] },
                 notFound: !request.pendingProvider,
             });
             return of(undefined);
@@ -315,7 +315,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
             sortDirection: request.sortDirection,
             pagination: { ...EMPTY_PAGINATION },
             totalResults: 0,
-            resultsState: { type: 'loading' },
+            resultsState: { state: 'loading' },
             notFound: false,
         });
 
@@ -328,7 +328,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
         if (
             state.notFound ||
             !state.context ||
-            state.resultsState.type !== 'loaded' ||
+            state.resultsState.state !== 'success' ||
             state.pagination.page >= state.pagination.totalPages
         ) {
             return of(undefined);
@@ -336,10 +336,8 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
 
         this.patchState({
             resultsState: {
-                type: 'loading-more',
-                value: state.resultsState.value,
-                placeholderCount: PAGE_SIZE,
-            },
+                state: 'loading-more',
+                data: state.resultsState.data,            },
         });
 
         return this.fetchPage$(
@@ -370,7 +368,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
 
     private patchLoadedResults(result: StreamingListResult, requestedPage: number): void {
         const currentState = this.get().resultsState;
-        const currentItems = currentState.type === 'loading-more' ? currentState.value : [];
+        const currentItems = currentState.state === 'loading-more' ? currentState.data : [];
 
         this.patchState({
             pagination: {
@@ -379,8 +377,8 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
             },
             totalResults: result.totalResults,
             resultsState: {
-                type: 'loaded',
-                value: requestedPage === 1 ? [...result.items] : [...currentItems, ...result.items],
+                state: 'success',
+                data: requestedPage === 1 ? [...result.items] : [...currentItems, ...result.items],
             },
         });
     }
@@ -389,8 +387,8 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
         const currentState = this.get().resultsState;
         this.patchState({
             resultsState: {
-                type: 'loaded',
-                value: currentState.type === 'loading-more' ? currentState.value : [],
+                state: 'success',
+                data: currentState.state === 'loading-more' ? currentState.data : [],
             },
         });
 
@@ -417,20 +415,20 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
         return query.mediaTypes.includes('tv') ? 'tv' : (query.mediaTypes[0] ?? 'movie');
     }
 
-    private getVisibleCount(state: LoadableItems<MediaListItem>): number {
-        return state.type === 'loaded' || state.type === 'loading-more' ? state.value.length : 0;
+    private getVisibleCount(state: RemoteData<MediaListItem[]>): number {
+        return state.state === 'success' || state.state === 'loading-more' ? state.data.length : 0;
     }
 
     private toDisplayItems(
-        state: LoadableItems<MediaListItem>,
+        state: RemoteData<MediaListItem[]>,
         context: StreamingListContext | null,
         mediaType: MediaType,
     ): StreamingListDisplayItem[] {
-        if (state.type !== 'loaded' && state.type !== 'loading-more') {
+        if (state.state !== 'success' && state.state !== 'loading-more') {
             return [];
         }
 
-        return state.value.map((item, index) => ({
+        return state.data.map((item, index) => ({
             item,
             index: index + 1,
             routerLink: ['/title', item.id, item.mediaType],
@@ -478,7 +476,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
 
     private getMediaTypeOptions(
         context: StreamingListContext | null,
-    ): PillToggleOption[] {
+    ): ToggleGroupOption[] {
         if (!context) {
             return [];
         }

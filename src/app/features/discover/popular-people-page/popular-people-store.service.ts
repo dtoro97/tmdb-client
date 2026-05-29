@@ -7,7 +7,7 @@ import { EMPTY, Observable, catchError, distinctUntilChanged, map, switchMap, ta
 import { PersonListRestControllerService } from '../../../api';
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../../constants';
 import {
-    LoadableItems,
+    RemoteData,
     LocaleStoreService,
     parsePageParam,
     PersonListItem,
@@ -20,7 +20,7 @@ interface PopularPeoplePagination {
 }
 
 interface PopularPeopleState {
-    readonly resultsState: LoadableItems<PersonListItem>;
+    readonly resultsState: RemoteData<PersonListItem[]>;
     readonly pagination: PopularPeoplePagination;
     readonly totalResults: number;
 }
@@ -31,7 +31,7 @@ const EMPTY_PAGINATION: PopularPeoplePagination = {
 };
 
 const INITIAL_STATE: PopularPeopleState = {
-    resultsState: { type: 'loading' },
+    resultsState: { state: 'notAsked' },
     pagination: { ...EMPTY_PAGINATION },
     totalResults: 0,
 };
@@ -40,7 +40,7 @@ const INITIAL_STATE: PopularPeopleState = {
 export class PopularPeopleStoreService extends ComponentStore<PopularPeopleState> {
     readonly vm$ = this.select((state) => {
         const visibleCount = this.getVisibleCount(state.resultsState);
-        const hasLoadedResults = state.resultsState.type === 'loaded' || state.resultsState.type === 'loading-more';
+        const hasLoadedResults = state.resultsState.state === 'success' || state.resultsState.state === 'loading-more';
 
         return {
             title: 'Popular People',
@@ -54,7 +54,7 @@ export class PopularPeopleStoreService extends ComponentStore<PopularPeopleState
             pageSize: PAGE_SIZE,
             paginatorLength: this.getPaginatorLength(state),
             showResultCount: hasLoadedResults,
-            showEmptyState: state.resultsState.type === 'loaded' && visibleCount === 0,
+            showEmptyState: state.resultsState.state === 'success' && visibleCount === 0,
             showPaginator: hasLoadedResults && this.getPaginatorLength(state) > PAGE_SIZE,
         };
     });
@@ -90,7 +90,7 @@ export class PopularPeopleStoreService extends ComponentStore<PopularPeopleState
 
     private fetchPage$(page: number): Observable<void> {
         this.patchState({
-            resultsState: { type: 'loading' },
+            resultsState: { state: 'loading' },
             pagination: { ...EMPTY_PAGINATION },
             totalResults: 0,
         });
@@ -102,7 +102,7 @@ export class PopularPeopleStoreService extends ComponentStore<PopularPeopleState
                     const results = (response.results ?? []).map((item) => toPersonListItem(item));
 
                     this.patchState({
-                        resultsState: { type: 'loaded', value: results },
+                        resultsState: { state: 'success', data: results },
                         pagination: {
                             page: response.page ?? page,
                             totalPages: response.total_pages ?? 0,
@@ -114,8 +114,8 @@ export class PopularPeopleStoreService extends ComponentStore<PopularPeopleState
                 catchError(() => {
                     this.patchState({
                         resultsState: {
-                            type: 'loaded',
-                            value: [],
+                            state: 'success',
+                            data: [],
                         },
                         pagination: { page, totalPages: page },
                         totalResults: 0,
@@ -125,9 +125,9 @@ export class PopularPeopleStoreService extends ComponentStore<PopularPeopleState
             );
     }
 
-    private getVisibleCount(resultsState: LoadableItems<PersonListItem>): number {
-        if (resultsState.type === 'loaded' || resultsState.type === 'loading-more') {
-            return resultsState.value.length;
+    private getVisibleCount(resultsState: RemoteData<PersonListItem[]>): number {
+        if (resultsState.state === 'success' || resultsState.state === 'loading-more') {
+            return resultsState.data.length;
         }
 
         return 0;

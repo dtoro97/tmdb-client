@@ -1,11 +1,11 @@
 <div class="photos-browser">
-    @if (vm$ | async; as vm) {
+    @if (vm(); as vm) {
         @if (vm.hasImages) {
             <app-browse-toolbar>
                 <div start class="photos-browser__toolbar-start">
                     <span class="text-meta u-nowrap">{{ vm.visibleCountLabel }}</span>
                     @if (vm.typePillOptions.length) {
-                        <app-pill-toggle
+                        <app-toggle-group
                             class="photos-browser__filters"
                             [options]="vm.typePillOptions"
                             [multiple]="true"

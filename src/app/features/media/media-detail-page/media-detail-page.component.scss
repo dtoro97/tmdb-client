@@ -4,6 +4,8 @@
 :host {
     --detail-hero-poster-width: 200px;
     --detail-hero-side-width: 18rem;
+    --detail-hero-shell-min-height: 23rem;
+    --detail-hero-poster-column-height: calc(300px + var(--space-4) + 2rem);
     --poster-mobile-width: 110px;
     --poster-mobile-height: 165px;
 }
@@ -14,6 +16,7 @@
     align-items: end;
     gap: var(--space-8);
     width: 100%;
+    min-height: var(--detail-hero-shell-min-height);
     text-shadow: var(--shadow-text-hero);
 
     &__poster-column,
@@ -28,6 +31,7 @@
     &__poster-column {
         gap: var(--space-4);
         align-items: flex-start;
+        min-height: var(--detail-hero-poster-column-height);
     }
 
     &__main {
@@ -83,7 +87,7 @@
 
     &-title-skeleton {
         width: min(30rem, 72vw);
-        height: 5.75rem;
+        height: 3.5rem;
         --skeleton-radius: var(--radius-md);
     }
 
@@ -91,11 +95,6 @@
         max-width: 48ch;
         font-style: italic;
         color: var(--text-soft);
-    }
-
-    &-tagline-skeleton {
-        width: min(24rem, 60vw);
-        --skeleton-height: 1.25rem;
     }
 
     &-ratings {
@@ -145,7 +144,12 @@
 
     &-overview-line {
         width: min(36rem, 100%);
-        --skeleton-height: 5rem;
+        --skeleton-height: 6rem;
+    }
+
+    &-secondary-skeleton {
+        width: min(28rem, 80%);
+        --skeleton-height: 1rem;
     }
 
     &-next-episode {
@@ -167,7 +171,7 @@
     }
 
     &-action-skeleton {
-        width: 15rem;
+        width: 8rem;
         height: var(--control-height-lg);
         --skeleton-radius: var(--radius-pill);
     }
@@ -181,6 +185,23 @@
         width: 6.5rem;
         height: var(--badge-height);
         --skeleton-radius: var(--badge-radius);
+    }
+
+    &-provider-label-skeleton {
+        width: 4.5rem;
+        --skeleton-height: 0.85rem;
+    }
+
+    &-provider-link-skeleton {
+        width: 9rem;
+        --skeleton-height: 1rem;
+    }
+
+    &-provider-logo-skeleton {
+        width: 2rem;
+        height: 2rem;
+        flex: 0 0 auto;
+        --skeleton-radius: var(--radius-md);
     }
 }
 
@@ -257,11 +278,6 @@
 
     @include media-hover();
 
-    &-skeleton {
-        width: 100%;
-        height: 200px;
-    }
-
     &-backdrop {
         @include absolute-fill;
     }
@@ -304,6 +320,7 @@
     .detail-hero {
         grid-template-columns: var(--detail-hero-poster-width) minmax(0, 1fr);
         align-items: start;
+        min-height: 0;
 
         &__side {
             grid-column: 2;
@@ -330,6 +347,7 @@
             flex-direction: row;
             align-items: flex-end;
             gap: var(--space-4);
+            min-height: 0;
         }
 
         &__main {
@@ -356,8 +374,14 @@
                 height: var(--poster-mobile-height);
             }
         }
+
         &-overview-line {
             width: 100%;
+            --skeleton-height: 4.5rem;
+        }
+
+        &-title-skeleton {
+            height: 3rem;
         }
 
         &-ratings {
@@ -412,10 +436,5 @@
             max-width: 80%;
             padding: var(--space-5);
         }
-
-        &-skeleton {
-            height: 150px;
-        }
     }
-
 }

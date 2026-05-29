@@ -1,28 +1,34 @@
-import type { LoadableItems, LoadableValue } from '../types';
+import type { RemoteData } from '../types';
 
-export const loadedItems = <T>(state: LoadableItems<T>): T[] => (state.type === 'loaded' ? state.value : []);
+export const remoteData = <T>(state: RemoteData<T>, fallback: T): T =>
+    state.state === 'success' || state.state === 'loading-more' ? state.data : fallback;
 
-export const toLoadedItems = <T>(value: readonly T[]): LoadableItems<T> => ({
-    type: 'loaded',
-    value: [...value],
+export const remoteNotAsked = <T>(): RemoteData<T> => ({
+    state: 'notAsked',
 });
 
-export const toLoadedValue = <T>(value: T): LoadableValue<T> => ({
-    type: 'loaded',
-    value,
+export const remoteSuccess = <T>(data: T): RemoteData<T> => ({
+    state: 'success',
+    data,
 });
 
-export const updateLoadedItems = <T>(
-    state: LoadableItems<T>,
-    update: (items: readonly T[]) => readonly T[],
-): LoadableItems<T> => (state.type === 'loaded' ? toLoadedItems(update(state.value)) : state);
+export const remoteLoadingMore = <T>(data: T): RemoteData<T> => ({
+    state: 'loading-more',
+    data,
+});
 
-export function loaded<T>(value: T[]): LoadableItems<T>;
-export function loaded<T>(value: T): LoadableValue<T>;
-export function loaded<T>(value: T | T[]): LoadableItems<T> | LoadableValue<T> {
-    return { type: 'loaded', value } as LoadableItems<T> | LoadableValue<T>;
-}
+export const remoteFailure = (error: unknown): RemoteData<never> => ({
+    state: 'failure',
+    error,
+});
 
-export const loadedValue = <T>(state: LoadableItems<T>) => {
-    return state.type === 'loaded' ? state.value : [];
-};
+export const isRemoteSuccess = <T>(state: RemoteData<T>): state is Extract<RemoteData<T>, { state: 'success' }> =>
+    state.state === 'success';
+
+export const hasRemoteData = <T>(
+    state: RemoteData<T>,
+): state is Extract<RemoteData<T>, { state: 'success' | 'loading-more' }> =>
+    state.state === 'success' || state.state === 'loading-more';
+
+export const updateRemoteData = <T>(state: RemoteData<T>, update: (data: T) => T): RemoteData<T> =>
+    hasRemoteData(state) ? { ...state, data: update(state.data) } : state;

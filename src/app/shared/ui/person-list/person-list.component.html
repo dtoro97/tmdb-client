@@ -1,20 +1,20 @@
 <div class="person-list" role="list">
-    @if (state.type === "loading") {
+    @if (state.state === "loading") {
         <ng-container
             *ngTemplateOutlet="skeleton; context: { $implicit: skeletonCount }"
         />
-    } @else if (state.type === "loaded" || state.type === "loading-more") {
-        @for (person of state.value; track person.id; let idx = $index) {
+    } @else if (state.state === "success" || state.state === "loading-more") {
+        @for (person of state.data; track person.id; let idx = $index) {
             <app-person-list-item
                 [person]="person"
                 [index]="indexStart + idx"
             />
         }
-        @if (state.type === "loading-more") {
+        @if (state.state === "loading-more") {
             <ng-container
                 *ngTemplateOutlet="
                     skeleton;
-                    context: { $implicit: state.placeholderCount }
+                    context: { $implicit: skeletonCount }
                 "
             />
         }

@@ -3,7 +3,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { forkJoin, of, switchMap, tap } from 'rxjs';
 
 import { PAGE_SIZE } from '../../../constants';
-import { LoadableItems, LoadableValue, VideoTrailerSeedItem } from '../../../shared';
+import { RemoteData, VideoTrailerSeedItem } from '../../../shared';
 import {
     TrailerDataStoreService,
     TrailerFeedType,
@@ -11,26 +11,26 @@ import {
 } from '../trailer-data-store.service';
 
 interface TrailersFeedState {
-    readonly trailers: LoadableItems<TrailerVideoCardItem>;
+    readonly trailers: RemoteData<TrailerVideoCardItem[]>;
     readonly pendingSeeds: readonly VideoTrailerSeedItem[];
 }
 
 interface TrailersPageState {
     readonly selectedFeed: TrailerFeedType;
-    readonly featuredTrailer: LoadableValue<TrailerVideoCardItem | null>;
+    readonly featuredTrailer: RemoteData<TrailerVideoCardItem | null>;
     readonly feeds: Record<TrailerFeedType, TrailersFeedState>;
 }
 
 const INITIAL_STATE: TrailersPageState = {
     selectedFeed: 'trending',
-    featuredTrailer: { type: 'idle' },
+    featuredTrailer: { state: 'notAsked' },
     feeds: {
         trending: {
-            trailers: { type: 'idle' },
+            trailers: { state: 'notAsked' },
             pendingSeeds: [],
         },
         new: {
-            trailers: { type: 'idle' },
+            trailers: { state: 'notAsked' },
             pendingSeeds: [],
         },
     },
@@ -41,9 +41,9 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
     readonly vm$ = this.select((state) => {
         const feed = state.feeds[state.selectedFeed];
         const items =
-            feed.trailers.type === 'loaded' || feed.trailers.type === 'loading-more' ? feed.trailers.value : [];
+            feed.trailers.state === 'success' || feed.trailers.state === 'loading-more' ? feed.trailers.data : [];
 
-        const featured = state.featuredTrailer.type === 'loaded' ? state.featuredTrailer.value : null;
+        const featured = state.featuredTrailer.state === 'success' ? state.featuredTrailer.data : null;
 
         return {
             selectedFeed: state.selectedFeed,
@@ -88,7 +88,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         }
 
         this.patchState({
-            featuredTrailer: { type: 'loading' },
+            featuredTrailer: { state: 'loading' },
         });
 
         return this.trailerDataStore.getTrailerSeeds$('trending').pipe(
@@ -98,8 +98,8 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
             tap((trailers) => {
                 this.patchState({
                     featuredTrailer: {
-                        type: 'loaded',
-                        value: trailers[0] ?? null,
+                        state: 'success',
+                        data: trailers[0] ?? null,
                     },
                 });
             }),
@@ -114,7 +114,7 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         }
 
         this.patchFeedState(feedType, {
-            trailers: { type: 'loading' },
+            trailers: { state: 'loading' },
             pendingSeeds: [],
         });
 
@@ -126,8 +126,8 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
                     tap((nextTrailers) => {
                         this.patchFeedState(feedType, {
                             trailers: {
-                                type: 'loaded',
-                                value: nextTrailers,
+                                state: 'success',
+                                data: nextTrailers,
                             },
                             pendingSeeds: trailerSeeds.slice(initialSeeds.length),
                         });
@@ -142,29 +142,27 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         const feedType = state.selectedFeed;
         const feed = state.feeds[feedType];
 
-        if (feed.trailers.type !== 'loaded' || !feed.pendingSeeds.length) {
+        if (feed.trailers.state !== 'success' || !feed.pendingSeeds.length) {
             return of([]);
         }
 
         const nextSeeds = feed.pendingSeeds.slice(0, PAGE_SIZE);
         const remainingSeeds = feed.pendingSeeds.slice(nextSeeds.length);
-        const currentTrailers = feed.trailers.value;
+        const currentTrailers = feed.trailers.data;
 
         this.patchFeedState(feedType, {
             trailers: {
-                type: 'loading-more',
-                value: currentTrailers,
-                placeholderCount: nextSeeds.length,
-            } as LoadableItems<TrailerVideoCardItem>,
+                state: 'loading-more',
+                data: currentTrailers,            } as RemoteData<TrailerVideoCardItem[]>,
         });
 
         return this.trailerDataStore.loadVideoCardsForSeeds$(nextSeeds).pipe(
             tap((items) =>
                 this.patchFeedState(feedType, {
                     trailers: {
-                        type: 'loaded',
-                        value: [...currentTrailers, ...items],
-                    } as LoadableItems<TrailerVideoCardItem>,
+                        state: 'success',
+                        data: [...currentTrailers, ...items],
+                    } as RemoteData<TrailerVideoCardItem[]>,
                     pendingSeeds: remainingSeeds,
                 }),
             ),
@@ -183,11 +181,11 @@ export class TrailersPageStoreService extends ComponentStore<TrailersPageState> 
         }));
     }
 
-    private hasLoadedOrLoading<T>(state: LoadableItems<T>): boolean {
-        return state.type === 'loading' || state.type === 'loading-more' || state.type === 'loaded';
+    private hasLoadedOrLoading<T>(state: RemoteData<T[]>): boolean {
+        return state.state === 'loading' || state.state === 'loading-more' || state.state === 'success';
     }
 
-    private hasLoadedOrLoadingValue<T>(state: LoadableValue<T>): boolean {
-        return state.type === 'loading' || state.type === 'loaded';
+    private hasLoadedOrLoadingValue<T>(state: RemoteData<T>): boolean {
+        return state.state === 'loading' || state.state === 'success';
     }
 }

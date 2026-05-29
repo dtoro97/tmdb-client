@@ -22,6 +22,7 @@ import {
 } from '../../api-v4';
 import { API_JSON_OPTIONS } from '../../constants';
 import { MediaType } from '../types';
+import { isDefined } from '../utils';
 import { LocaleStoreService } from './locale-store.service';
 import { TmdbUserAccountService } from './tmdb-user-account.service';
 import { UserSessionStoreService } from './user-session-store.service';
@@ -206,7 +207,7 @@ export class TmdbListService {
 
                         return summary;
                     })
-                    .filter((list) => list !== null),
+                    .filter(isDefined),
             ),
             switchMap((lists) => this.addItemStatusToLists$(lists, mediaId, mediaType)),
         );

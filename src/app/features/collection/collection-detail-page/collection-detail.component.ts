@@ -52,11 +52,11 @@ export class CollectionDetailComponent {
             .pipe(
                 tap((collectionState) => {
                     if (
-                        collectionState.type === 'loaded' &&
-                        collectionState.value?.name
+                        collectionState.state === 'success' &&
+                        collectionState.data?.name
                     ) {
                         this.titleService.setTitle(
-                            `${collectionState.value.name} | Collection`,
+                            `${collectionState.data.name} | Collection`,
                         );
                     }
                 }),

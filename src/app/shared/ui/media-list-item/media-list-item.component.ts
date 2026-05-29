@@ -17,8 +17,8 @@ import { RatingComponent } from '../rating/rating.component';
 })
 export class MediaListItemComponent {
     @Input({ required: true }) item!: MediaListItem;
-    @Input({ required: true }) link!: (string | number)[];
+    @Input({ required: true }) link!: readonly (string | number)[];
     @Input() index: number | null = null;
-    @Input() genreNames: string[] = [];
+    @Input() genreNames: readonly string[] = [];
     @Input() userRating: number | null = null;
 }

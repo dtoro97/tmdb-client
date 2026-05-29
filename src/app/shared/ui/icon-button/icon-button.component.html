@@ -4,7 +4,7 @@
     type="button"
     [attr.aria-label]="ariaLabel"
     [matTooltip]="title"
-    [matTooltipDisabled]="!title"
+    [matTooltipDisabled]="!title || disableTooltip"
     [disabled]="disabled"
     (click)="click()"
 >

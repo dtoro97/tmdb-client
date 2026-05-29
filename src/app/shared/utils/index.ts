@@ -7,6 +7,7 @@ export * from './relative-time';
 export * from './route-utils';
 export * from './shuffle';
 export * from './sort';
+export * from './tmdb-discover-sort';
 export * from './is-valid-date';
 export * from './browser-country';
 export * from './company-display';

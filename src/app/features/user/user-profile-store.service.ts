@@ -4,27 +4,27 @@ import { ComponentStore } from '@ngrx/component-store';
 import { catchError, tap } from 'rxjs';
 
 import {
-    LoadableValue,
+    RemoteData,
     TmdbUserAccountService,
     UserAccountProfile,
     toUserAccountProfile,
 } from '../../shared';
 
 interface UserProfileState {
-    profileState: LoadableValue<UserAccountProfile>;
+    profileState: RemoteData<UserAccountProfile>;
 }
 
 const INITIAL_STATE: UserProfileState = {
-    profileState: { type: 'idle' },
+    profileState: { state: 'notAsked' },
 };
 
 @Injectable()
 export class UserProfileStore extends ComponentStore<UserProfileState> {
     readonly userProfileVm$ = this.select((state) => {
         const displayName =
-            state.profileState.type === 'loaded'
-                ? (state.profileState.value.name ??
-                  state.profileState.value.username ??
+            state.profileState.state === 'success'
+                ? (state.profileState.data.name ??
+                  state.profileState.data.username ??
                   'Member')
                 : 'Member';
 
@@ -42,15 +42,15 @@ export class UserProfileStore extends ComponentStore<UserProfileState> {
 
     load$() {
         this.patchState({
-            profileState: { type: 'loading' },
+            profileState: { state: 'loading' },
         });
 
         return this.tmdbUserAccountService.getSessionAccountDetails$().pipe(
             tap((profile) => {
                 this.patchState({
                     profileState: {
-                        type: 'loaded',
-                        value: toUserAccountProfile(profile),
+                        state: 'success',
+                        data: toUserAccountProfile(profile),
                     },
                 });
             }),

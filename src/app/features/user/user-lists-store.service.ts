@@ -5,8 +5,8 @@ import { catchError, map, of, switchMap, tap, throwError } from 'rxjs';
 
 import { AccountService as AccountV4Service, V4AccountListSummary } from '../../api-v4';
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
-import { LoadableItems, TmdbListService, UserSessionStoreService, isDefined } from '../../shared';
-import { toLoadedItems, toPageItemRange, updateLoadedItems } from '../../shared/utils';
+import { RemoteData, TmdbListService, UserSessionStoreService, isDefined } from '../../shared';
+import { remoteSuccess, toPageItemRange, updateRemoteData } from '../../shared/utils';
 
 export interface UserListSummaryItem {
     readonly id: number;
@@ -20,7 +20,7 @@ export interface UserListSummaryItem {
 }
 
 interface UserListsState {
-    readonly items: LoadableItems<UserListSummaryItem>;
+    readonly items: RemoteData<UserListSummaryItem[]>;
     readonly page: number;
     readonly totalPages: number;
     readonly totalResults: number;
@@ -29,7 +29,7 @@ interface UserListsState {
 const INITIAL_PAGE = 1;
 
 const INITIAL_STATE: UserListsState = {
-    items: { type: 'idle' },
+    items: { state: 'notAsked' },
     page: INITIAL_PAGE,
     totalPages: INITIAL_PAGE,
     totalResults: 0,
@@ -41,7 +41,7 @@ export class UserListsStore extends ComponentStore<UserListsState> {
         const range = toPageItemRange({
             page: state.page,
             pageSize: PAGE_SIZE,
-            itemCount: state.items.type === 'loaded' ? state.items.value.length : 0,
+            itemCount: state.items.state === 'success' ? state.items.data.length : 0,
             totalResults: state.totalResults,
         });
 
@@ -72,14 +72,14 @@ export class UserListsStore extends ComponentStore<UserListsState> {
         const page = pageIndex + 1;
 
         this.patchState({
-            items: { type: 'loading' },
+            items: { state: 'loading' },
             page,
         });
 
         return this.fetchListsPage$(page).pipe(
             tap((result) => {
                 this.patchState({
-                    items: toLoadedItems(result.items),
+                    items: remoteSuccess(result.items),
                     page: result.page,
                     totalPages: result.totalPages,
                     totalResults: result.totalResults,
@@ -109,7 +109,7 @@ export class UserListsStore extends ComponentStore<UserListsState> {
             .pipe(
                 tap(() => {
                     this.patchState((state) => ({
-                        items: updateLoadedItems(state.items, (items) =>
+                        items: updateRemoteData(state.items, (items) =>
                             items.map((item) =>
                                 item.id === listId
                                     ? {
@@ -134,12 +134,12 @@ export class UserListsStore extends ComponentStore<UserListsState> {
                 const totalPages = Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
                 const page = Math.min(state.page, totalPages);
                 const nextItems =
-                    state.items.type === 'loaded'
-                        ? state.items.value.filter((item) => item.id !== listId)
+                    state.items.state === 'success'
+                        ? state.items.data.filter((item) => item.id !== listId)
                         : null;
 
                 this.patchState({
-                    items: nextItems ? toLoadedItems(nextItems) : state.items,
+                    items: nextItems ? remoteSuccess(nextItems) : state.items,
                     page,
                     totalPages,
                     totalResults,

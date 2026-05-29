@@ -69,7 +69,7 @@ export class PersonDetailsComponent {
         this.personDetailStore.personDetailVm$
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                map((vm) => (vm.person.type === 'loaded' ? vm.person.value : null)),
+                map((vm) => (vm.person.state === 'success' ? vm.person.data : null)),
                 distinctUntilChanged((previous, current) => previous?.id === current?.id),
                 tap((person) => {
                     if (!person || typeof person.id !== 'number') {
@@ -91,12 +91,12 @@ export class PersonDetailsComponent {
 
     openPhotoViewer(index: number): void {
         this.personDetailStore.personDetailVm$.pipe(take(1)).subscribe((vm) => {
-            if (vm.person.type !== 'loaded' || !vm.person.value || vm.photos.type !== 'loaded') {
+            if (vm.person.state !== 'success' || !vm.person.data || vm.photos.state !== 'success') {
                 return;
             }
 
-            const person = vm.person.value;
-            const allPhotos = vm.photos.value;
+            const person = vm.person.data;
+            const allPhotos = vm.photos.data;
 
             this.dialog.open(PhotoViewerComponent, {
                 data: {
@@ -116,11 +116,11 @@ export class PersonDetailsComponent {
 
     openPhotosPage(): void {
         this.personDetailStore.personDetailVm$.pipe(take(1)).subscribe((vm) => {
-            if (vm.person.type !== 'loaded' || !vm.person.value) {
+            if (vm.person.state !== 'success' || !vm.person.data) {
                 return;
             }
 
-            this.router.navigate(['/name', vm.person.value.id, 'photos']);
+            this.router.navigate(['/name', vm.person.data.id, 'photos']);
         });
     }
 

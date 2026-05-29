@@ -13,15 +13,13 @@ import {
 
 import {
     AccountRestControllerService,
-    MovieListItem,
     MoviePage,
-    TvSeriesListItem,
     TvSeriesPage,
 } from '../../api';
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
     CardItem,
-    LoadableItems,
+    RemoteData,
     LocaleStoreService,
     MediaListItem,
     MediaType,
@@ -30,9 +28,14 @@ import {
     TmdbUserAccountService,
     isDefined,
     toCardItem,
-    toMediaListItem,
 } from '../../shared';
-import { toLoadedItems } from '../../shared/utils';
+import { remoteSuccess } from '../../shared/utils';
+import {
+    toTotalAfterMediaRemoval,
+    toUserAccountMediaListItem,
+    toUserAccountSortBy,
+    toUserMediaTotalLabel,
+} from './user-account-media.helpers';
 import {
     DEFAULT_USER_ACCOUNT_SORT_BY,
     DEFAULT_USER_ACCOUNT_SORT_DIRECTION,
@@ -42,9 +45,9 @@ import {
 } from './user-list-sort-options';
 
 interface UserWatchlistState {
-    readonly items: LoadableItems<CardItem>;
+    readonly items: RemoteData<CardItem[]>;
     readonly totalResults: number;
-    readonly pageItems: LoadableItems<MediaListItem>;
+    readonly pageItems: RemoteData<MediaListItem[]>;
     readonly mediaType: MediaType;
     readonly page: number;
     readonly pageTotalResults: number;
@@ -61,9 +64,9 @@ interface UserWatchlistPageChanges {
 const INITIAL_PAGE = 1;
 
 const INITIAL_STATE: UserWatchlistState = {
-    items: { type: 'idle' },
+    items: { state: 'notAsked' },
     totalResults: 0,
-    pageItems: { type: 'idle' },
+    pageItems: { state: 'notAsked' },
     mediaType: 'movie',
     page: INITIAL_PAGE,
     pageTotalResults: 0,
@@ -86,7 +89,10 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         sortField: state.sortField,
         sortDirection: state.sortDirection,
         total: state.pageTotalResults,
-        totalLabel: this.toTotalLabel(state.mediaType, state.pageTotalResults),
+        totalLabel: toUserMediaTotalLabel(
+            state.mediaType,
+            state.pageTotalResults,
+        ),
     }));
 
     constructor(
@@ -102,13 +108,13 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         const previousState = this.get();
 
         this.patchState({
-            items: { type: 'loading' },
+            items: { state: 'loading' },
         });
 
         return this.fetchWatchlistTitles$().pipe(
             tap((result) => {
                 this.patchState({
-                    items: toLoadedItems(result.items),
+                    items: remoteSuccess(result.items),
                     totalResults: result.totalResults,
                 });
             }),
@@ -130,7 +136,7 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         this.patchState({
             mediaType,
             page,
-            pageItems: { type: 'loading' },
+            pageItems: { state: 'loading' },
             sortField,
             sortDirection,
         });
@@ -138,11 +144,11 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
         return this.fetchWatchlistPage$(
             mediaType,
             page,
-            this.toSortBy(sortField, sortDirection),
+            toUserAccountSortBy(sortField, sortDirection),
         ).pipe(
             tap((result) => {
                 this.patchState({
-                    pageItems: toLoadedItems(result.items),
+                    pageItems: remoteSuccess(result.items),
                     page: result.page,
                     pageTotalResults: result.totalResults,
                 });
@@ -182,12 +188,16 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
 
     removeFromWatchlist$(item: MediaListItem) {
         const previousState = this.get();
-        const optimisticTotal = this.toTotalAfterRemoval(previousState, item);
+        const optimisticTotal = toTotalAfterMediaRemoval(
+            previousState.pageItems,
+            item,
+            previousState.pageTotalResults,
+        );
         const nextPage = this.toValidPage(previousState.page, optimisticTotal);
 
         this.patchState({
             page: nextPage,
-            pageItems: { type: 'loading' },
+            pageItems: { state: 'loading' },
             pageTotalResults: optimisticTotal,
         });
 
@@ -292,61 +302,11 @@ export class UserWatchlistStore extends ComponentStore<UserWatchlistState> {
     ) {
         return {
             items: (result.results ?? [])
-                .map((item) => this.toWatchlistItem(item, mediaType))
+                .map((item) => toUserAccountMediaListItem(item, mediaType))
                 .filter(isDefined),
             page: result.page ?? requestedPage,
             totalResults: result.total_results ?? 0,
         };
-    }
-
-    private toWatchlistItem(
-        item: MovieListItem | TvSeriesListItem,
-        mediaType: MediaType,
-    ): MediaListItem | null {
-        const mediaItem = toMediaListItem(item, mediaType, 'year');
-        const title = mediaItem.title.trim();
-
-        if (!mediaItem.id || !title) {
-            return null;
-        }
-
-        return {
-            ...mediaItem,
-            title,
-            overview: mediaItem.overview.trim(),
-        };
-    }
-
-    private toSortBy(
-        sortField: UserAccountSortField,
-        sortDirection: SortDirection,
-    ): UserAccountSortBy {
-        return `${sortField}.${sortDirection}` as UserAccountSortBy;
-    }
-
-    private toTotalLabel(mediaType: MediaType, totalResults: number): string {
-        if (mediaType === 'tv') {
-            return `${totalResults} TV series`;
-        }
-
-        return `${totalResults} movie${totalResults === 1 ? '' : 's'}`;
-    }
-
-    private toTotalAfterRemoval(
-        state: UserWatchlistState,
-        item: MediaListItem,
-    ): number {
-        const itemWasLoaded =
-            state.pageItems.type === 'loaded' &&
-            state.pageItems.value.some(
-                (pageItem) =>
-                    pageItem.id === item.id &&
-                    pageItem.mediaType === item.mediaType,
-            );
-
-        return itemWasLoaded
-            ? Math.max(0, state.pageTotalResults - 1)
-            : state.pageTotalResults;
     }
 
     private toValidPage(page: number, totalResults: number): number {

@@ -3,15 +3,15 @@
     [ariaLabel]="ariaLabel"
     [columns]="columns"
     [items]="
-        state.type === 'loading'
+        state.state === 'loading'
             ? (skeletonCount | repeat)
-            : state.type === 'loaded' || state.type === 'loading-more'
-              ? state.value
+            : state.state === 'success' || state.state === 'loading-more'
+              ? state.data
               : []
     "
 >
     <ng-template let-item>
-        @if (state.type === 'loading') {
+        @if (state.state === 'loading') {
             <div class="media-carousel-panel__skeleton-media">
                 <app-skeleton class="media-carousel-panel__skeleton-fill" />
             </div>

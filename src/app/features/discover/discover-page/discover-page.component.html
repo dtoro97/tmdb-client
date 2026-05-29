@@ -17,10 +17,9 @@
 
                 <div end class="discover-page__toolbar-actions">
                     @if (vm.showMediaTypeToggle) {
-                        <app-pill-toggle
+                        <app-toggle-group
                             [options]="vm.mediaTypeOptions"
                             [selectedValue]="vm.mediaType"
-                            variant="subtle"
                             (selected)="onMediaTypeChange($event)"
                         />
                     }
@@ -169,7 +168,7 @@
                         </div>
                     } @else {
                         <div class="discover-page__items">
-                            @if (vm.resultsState.type === 'loading') {
+                            @if (vm.resultsState.state === 'loading') {
                                 @for (slot of 20 | repeat; track slot) {
                                     <div class="discover-page__skeleton-card">
                                         <app-skeleton class="discover-page__poster-skeleton" />

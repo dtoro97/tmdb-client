@@ -1,4 +1,4 @@
-@if (state.type === 'loading') {
+@if (state.state === 'loading') {
     <app-skeleton class="loading__toolbar" />
     <div class="loading">
         @for (section of 2 | repeat; track section) {
@@ -15,12 +15,11 @@
             </div>
         }
     </div>
-} @else {
+} @else if (state.state === 'success') {
     <app-browse-toolbar>
-        <app-pill-toggle
+        <app-toggle-group
             start
-            [options]="mediaOptions"
-            variant="subtle"
+            [options]="state.data.mediaOptions"
             [selectedValue]="mediaType"
             (selected)="onMediaTypeChange($event)"
         />
@@ -34,13 +33,13 @@
         />
     </app-browse-toolbar>
 
-    @if (state.type === 'loaded' && state.value.totalCount) {
+    @if (state.data.totalCount) {
         <div class="sections">
-            @if (state.value.acting.totalCount) {
+            @if (state.data.acting.totalCount) {
                 <section class="credit-section">
                     <header class="credit-section__header">
                         <h3 class="credit-section__title text-title">Acting</h3>
-                        <span class="text-caption">{{ state.value.acting.totalCount }} credits</span>
+                        <span class="text-caption">{{ state.data.acting.totalCount }} credits</span>
                     </header>
 
                     <div class="table-wrap">
@@ -55,7 +54,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (credit of state.value.acting.rows; track credit.mediaType + '-' + credit.id) {
+                                @for (credit of state.data.acting.rows; track credit.mediaType + '-' + credit.id) {
                                     <tr>
                                         <td class="credits-table__year text-caption">{{ credit.year }}</td>
                                         <td class="credits-table__title">
@@ -90,19 +89,19 @@
                         </table>
                     </div>
 
-                    @if (state.value.acting.hiddenCount || state.value.acting.expanded) {
+                    @if (state.data.acting.hiddenCount || state.data.acting.expanded) {
                         <button class="show-all text-body-sm" type="button" (click)="actingCreditsToggle.emit()">
-                            {{ state.value.acting.expanded ? 'Show less' : 'Show all' }}
+                            {{ state.data.acting.expanded ? 'Show less' : 'Show all' }}
                         </button>
                     }
                 </section>
             }
 
-            @if (state.value.production.totalCount) {
+            @if (state.data.production.totalCount) {
                 <section class="credit-section">
                     <header class="credit-section__header">
                         <h3 class="credit-section__title text-title">Production</h3>
-                        <span class="text-caption">{{ state.value.production.totalCount }} credits</span>
+                        <span class="text-caption">{{ state.data.production.totalCount }} credits</span>
                     </header>
 
                     <div class="table-wrap">
@@ -117,7 +116,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (credit of state.value.production.rows; track credit.mediaType + '-' + credit.id) {
+                                @for (credit of state.data.production.rows; track credit.mediaType + '-' + credit.id) {
                                     <tr>
                                         <td class="credits-table__year text-caption">{{ credit.year }}</td>
                                         <td class="credits-table__title">
@@ -152,30 +151,30 @@
                         </table>
                     </div>
 
-                    @if (state.value.production.hiddenCount || state.value.production.expanded) {
+                    @if (state.data.production.hiddenCount || state.data.production.expanded) {
                         <button class="show-all text-body-sm" type="button" (click)="productionCreditsToggle.emit()">
-                            {{ state.value.production.expanded ? 'Show less' : 'Show all' }}
+                            {{ state.data.production.expanded ? 'Show less' : 'Show all' }}
                         </button>
                     }
                 </section>
             }
         </div>
-    } @else if (state.type === 'loaded') {
+    } @else {
         <div class="empty-panel u-flex-column u-items-center u-gap-3">
             <app-empty-state
                 iconClass="fa-solid fa-table-list"
                 [title]="
-                    state.value.hasActiveFilters
+                    state.data.hasActiveFilters
                         ? 'No filmography matches these filters'
                         : 'No filmography available yet'
                 "
                 [text]="
-                    state.value.hasActiveFilters
+                    state.data.hasActiveFilters
                         ? 'Try resetting the filters to bring back more titles.'
                         : 'We do not have any film or TV credits to show right now.'
                 "
             />
-            @if (state.value.hasActiveFilters) {
+            @if (state.data.hasActiveFilters) {
                 <button class="reset text-caption" type="button" (click)="onResetFilters()">Reset filters</button>
             }
         </div>

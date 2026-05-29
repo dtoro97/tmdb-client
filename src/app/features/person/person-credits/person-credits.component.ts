@@ -3,7 +3,6 @@ import {
     Component,
     EventEmitter,
     Input,
-    OnChanges,
     Output,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -11,8 +10,7 @@ import {
     BadgeComponent,
     BrowseToolbarComponent,
     EmptyStateComponent,
-    PillToggleOption,
-    PillToggleComponent,
+    ToggleGroupComponent,
     RatingComponent,
     RepeatPipe,
     SkeletonComponent,
@@ -27,7 +25,7 @@ import type { PersonCreditsMediaType, PersonCreditsSortBy, PersonDetailVm } from
     imports: [
         RouterLink,
         BadgeComponent,
-        PillToggleComponent,
+        ToggleGroupComponent,
         SortButtonComponent,
         SkeletonComponent,
         EmptyStateComponent,
@@ -39,9 +37,9 @@ import type { PersonCreditsMediaType, PersonCreditsSortBy, PersonDetailVm } from
     styleUrl: './person-credits.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PersonCreditsComponent implements OnChanges {
+export class PersonCreditsComponent {
     @Input({ required: true }) state: PersonDetailVm['creditsDisplay'] = {
-        type: 'idle',
+        state: 'loading',
     };
     @Input() mediaType: PersonCreditsMediaType = 'all';
     @Input() sortBy: PersonCreditsSortBy = 'year';
@@ -54,23 +52,11 @@ export class PersonCreditsComponent implements OnChanges {
     @Output() actingCreditsToggle = new EventEmitter<void>();
     @Output() productionCreditsToggle = new EventEmitter<void>();
 
-    readonly fallbackMediaOptions: PillToggleOption[] =
-        [
-            { label: 'All media', value: 'all' },
-            { label: 'Movies', value: 'movie' },
-            { label: 'TV Shows', value: 'tv' },
-        ];
-    mediaOptions: PillToggleOption[] = this.fallbackMediaOptions;
-
     readonly sortOptions: SelectOption<PersonCreditsSortBy>[] = [
         { label: 'Year', value: 'year' },
         { label: 'Rating', value: 'rating' },
         { label: 'Title', value: 'title' },
     ];
-
-    ngOnChanges(): void {
-        this.mediaOptions = this.state.type === 'loaded' ? this.state.value.mediaOptions : this.fallbackMediaOptions;
-    }
 
     onMediaTypeChange(value: unknown): void {
         this.mediaTypeChange.emit(value as PersonCreditsMediaType);

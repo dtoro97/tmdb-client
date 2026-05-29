@@ -1,3 +1,5 @@
+import { isDefined } from './is-defined';
+
 type NumberParamParser = 'int' | 'float';
 
 const INTEGER_PARAM_PATTERN = /^-?\d+$/;
@@ -27,7 +29,7 @@ export const parseNumberListParam = (
 ): number[] => {
     return parseListParams(value)
         .map((part) => parseNumberParam(part, parser))
-        .filter((part): part is number => part !== null);
+        .filter(isDefined);
 };
 
 export const parseNumberParam = (

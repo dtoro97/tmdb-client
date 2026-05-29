@@ -94,8 +94,8 @@ export class UserListDetailPageComponent {
         this.vm$
             .pipe(
                 tap((vm) => {
-                    if (vm.header.type === 'loaded') {
-                        this.titleService.setTitle(`${vm.header.value.name} | List`);
+                    if (vm.header.state === 'success') {
+                        this.titleService.setTitle(`${vm.header.data.name} | List`);
                         return;
                     }
 

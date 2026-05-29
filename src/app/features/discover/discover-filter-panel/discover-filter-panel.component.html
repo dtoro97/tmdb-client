@@ -29,11 +29,10 @@
     @if (showGenreFilter) {
         <section class="discover-filter-panel__group">
             <h2 class="discover-filter-panel__title text-title">Genres</h2>
-            <app-pill-toggle
+            <app-toggle-group
                 [options]="genreOptions"
                 [selectedValues]="selectedGenreIds"
                 [multiple]="true"
-                variant="subtle"
                 (selected)="genresChange.emit($event)"
             />
         </section>
@@ -154,10 +153,9 @@
     @if (showCertificationFilter) {
         <section class="discover-filter-panel__group">
             <h2 class="discover-filter-panel__title text-title">Certification</h2>
-            <app-pill-toggle
-                [options]="certificationPillOptions"
+            <app-toggle-group
+                [options]="certificationToggleOptions()"
                 [selectedValue]="selectedCertification"
-                variant="subtle"
                 (selected)="certificationChange.emit($event)"
             />
         </section>
@@ -166,10 +164,9 @@
     @if (showReleaseTypeFilter) {
         <section class="discover-filter-panel__group">
             <h2 class="discover-filter-panel__title text-title">Release type</h2>
-            <app-pill-toggle
+            <app-toggle-group
                 [options]="releaseTypeOptions"
                 [selectedValue]="selectedReleaseType"
-                variant="subtle"
                 (selected)="releaseTypeChange.emit($event)"
             />
         </section>
@@ -194,7 +191,7 @@
                         />
                     </mat-option>
                     <mat-option [value]="null">Any language</mat-option>
-                    @for (option of filteredLanguageOptions; track option.value) {
+                    @for (option of filteredLanguageOptions(); track option.value) {
                         <mat-option [value]="option.value">
                             {{ option.label }}
                         </mat-option>
@@ -207,10 +204,9 @@
     @if (showRatingFilter) {
         <section class="discover-filter-panel__group">
             <h2 class="discover-filter-panel__title text-title">Rating</h2>
-            <app-pill-toggle
+            <app-toggle-group
                 [options]="ratingOptions"
                 [selectedValue]="selectedRating"
-                variant="subtle"
                 (selected)="ratingChange.emit($event)"
             />
         </section>
@@ -219,10 +215,9 @@
     @if (showVoteCountFilter) {
         <section class="discover-filter-panel__group">
             <h2 class="discover-filter-panel__title text-title">Votes</h2>
-            <app-pill-toggle
+            <app-toggle-group
                 [options]="voteCountOptions"
                 [selectedValue]="selectedVoteCount"
-                variant="subtle"
                 (selected)="voteCountChange.emit($event)"
             />
         </section>
@@ -231,10 +226,9 @@
     @if (showRuntimeFilter) {
         <section class="discover-filter-panel__group">
             <h2 class="discover-filter-panel__title text-title">Runtime</h2>
-            <app-pill-toggle
+            <app-toggle-group
                 [options]="runtimeOptions"
                 [selectedValue]="selectedRuntime"
-                variant="subtle"
                 (selected)="runtimeChange.emit($event)"
             />
         </section>

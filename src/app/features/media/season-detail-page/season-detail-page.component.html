@@ -3,17 +3,17 @@
         <app-sub-page-header
             [backdropPath]="vm.media?.backdropPath"
             [parentTitle]="vm.media?.title"
-            [backLink]="['../']"
+            [backLink]="vm.overviewLink"
             pageTitle="Episodes"
         />
 
-        <main class="page-main episodes">
+        <main class="page-main season-detail">
             <section class="season-nav" aria-label="Seasons">
                 @if (vm.seasonOptions.length) {
-                    <app-pill-toggle
+                    <app-toggle-group
                         [options]="vm.seasonOptions"
                         [selectedValue]="vm.selectedSeason"
-                        (selected)="changeSeason($event)"
+                        (selected)="changeSeason($event, vm.routeData)"
                     />
                 } @else {
                     <div class="season-nav__skeleton" aria-hidden="true">
@@ -23,34 +23,34 @@
             </section>
 
             <section class="season-summary" aria-label="Selected season">
-                @if (vm.seasonInfo; as seasonInfo) {
+                @if (vm.seasonSummary; as seasonSummary) {
                     <app-image
                         class="season-summary__poster"
-                        [src]="seasonInfo.posterPath"
-                        [alt]="seasonInfo.name"
+                        [src]="seasonSummary.posterPath"
+                        [alt]="seasonSummary.name"
                         params="w342"
                     />
 
                     <div class="season-summary__content">
                         <header class="season-summary__head">
                             <div class="season-summary__title-row">
-                                <h2 class="text-headline">{{ seasonInfo.name }}</h2>
-                                <span class="text-card-meta">{{ seasonInfo.episodeCount }} episodes</span>
+                                <h2 class="text-headline">{{ seasonSummary.name }}</h2>
+                                <span class="text-card-meta">{{ seasonSummary.episodeCount }} episodes</span>
                             </div>
 
-                            @if (seasonInfo.airDate) {
+                            @if (seasonSummary.airDate) {
                                 <div class="season-summary__meta text-card-meta">
-                                    <span>{{ seasonInfo.airDate | date: 'MMM d, y' }}</span>
+                                    <span>{{ seasonSummary.airDate | date: 'MMM d, y' }}</span>
                                 </div>
                             }
 
-                            @if (seasonInfo.voteAverage) {
-                                <app-tmdb-rating [value]="seasonInfo.voteAverage" />
+                            @if (seasonSummary.voteAverage) {
+                                <app-tmdb-rating [value]="seasonSummary.voteAverage" />
                             }
                         </header>
 
                         <p class="season-summary__overview text-hero-summary">
-                            {{ seasonInfo.overview || 'No overview available for this season.' }}
+                            {{ seasonSummary.overview || 'No overview available for this season.' }}
                         </p>
                     </div>
                 } @else {
@@ -64,16 +64,16 @@
             </section>
 
             <section class="season-episodes" aria-label="Season episodes">
-                <app-episode-list [state]="vm.episodesState" [skeletonCount]="5" [routePrefix]="vm.routePrefix" />
+                <app-episode-list [state]="vm.episodesState" [skeletonCount]="5" />
             </section>
 
-            @if (vm.seasonImagesState.type !== 'loaded' || vm.seasonImagesTotalCount) {
-                <app-page-section subtitle="Season Images">
-                    @if (vm.seasonImagesTotalCount && vm.selectedSeason !== undefined) {
+            @if (vm.seasonImagesState.state !== 'success' || vm.seasonImagesTotalCount) {
+                <app-page-section subtitle="Season Photos">
+                    @if (vm.seasonImagesTotalCount && vm.selectedSeason !== null) {
                         <a
                             section-controls
                             class="section-link text-body-sm"
-                            [routerLink]="[vm.selectedSeason, 'photos']"
+                            [routerLink]="vm.seasonPhotosLink"
                         >
                             Browse all photos ({{ vm.seasonImagesTotalCount }})
                             <i class="fa-solid fa-chevron-right"></i>
@@ -84,12 +84,12 @@
                         [totalCount]="vm.seasonImagesTotalCount"
                         variant="compact"
                         (photoClick)="openPhotoViewer($event, vm.seasonImages)"
-                        (moreClick)="openSeasonPhotosPage(vm.selectedSeason)"
+                        (moreClick)="openSeasonPhotosPage(vm.selectedSeason, vm.routeData)"
                     />
                 </app-page-section>
             }
 
-            @if (vm.seasonVideosState.type !== 'loaded' || vm.seasonVideoCount) {
+            @if (vm.seasonVideosState.state !== 'success' || vm.seasonVideoCount) {
                 <app-page-section subtitle="Season Videos">
                     <app-videos-grid [state]="vm.seasonVideosState" />
                 </app-page-section>

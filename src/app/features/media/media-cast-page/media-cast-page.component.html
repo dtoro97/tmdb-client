@@ -38,10 +38,9 @@
                                 }
                             </div>
 
-                            <app-pill-toggle
+                            <app-toggle-group
                                 [options]="vm.filters"
                                 [selectedValue]="visibleSection"
-                                variant="subtle"
                                 (selected)="onVisibleSectionsChange($event)"
                             />
                         </header>
