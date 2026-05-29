@@ -6,16 +6,15 @@ import { EMPTY, catchError, of, switchMap, tap, throwError } from 'rxjs';
 import { V4ListContentItem, V4ListDetails, V4ListSortBy } from '../../api-v4';
 import { PAGE_SIZE } from '../../constants';
 import {
-    LoadableItems,
-    LoadableValue,
+    RemoteData,
     MediaListItem,
     MediaType,
     TmdbListService,
     UserSessionStoreService,
-    toLoadedItems,
-    toLoadedValue,
+    isDefined,
+    remoteSuccess,
     toUpdatedAtLabel,
-    updateLoadedItems,
+    updateRemoteData,
 } from '../../shared';
 import { DEFAULT_USER_LIST_SORT_BY } from './user-list-sort-options';
 
@@ -40,8 +39,8 @@ export interface UserListDetailItem {
 
 interface UserListDetailState {
     readonly listId: number | null;
-    readonly headerState: LoadableValue<UserListDetailHeader>;
-    readonly itemsState: LoadableItems<UserListDetailItem>;
+    readonly headerState: RemoteData<UserListDetailHeader>;
+    readonly itemsState: RemoteData<UserListDetailItem[]>;
     readonly page: number;
     readonly totalPages: number;
     readonly totalResults: number;
@@ -53,8 +52,8 @@ interface UserListDetailState {
 
 const INITIAL_STATE: UserListDetailState = {
     listId: null,
-    headerState: { type: 'idle' },
-    itemsState: { type: 'idle' },
+    headerState: { state: 'notAsked' },
+    itemsState: { state: 'notAsked' },
     page: 1,
     totalPages: 1,
     totalResults: 0,
@@ -76,7 +75,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
         defaultSortBy: state.defaultSortBy,
         ownedByCurrentUser: state.isOwnedByCurrentUser,
         isPublic: state.isPublic,
-        existingItemKeys: state.itemsState.type === 'loaded' ? state.itemsState.value.map((item) => item.key) : [],
+        existingItemKeys: state.itemsState.state === 'success' ? state.itemsState.data.map((item) => item.key) : [],
     }));
 
     constructor(
@@ -89,8 +88,8 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     loadList$(listId: number) {
         this.patchState({
             listId,
-            headerState: { type: 'loading' },
-            itemsState: { type: 'loading' },
+            headerState: { state: 'loading' },
+            itemsState: { state: 'loading' },
             page: 1,
             totalPages: 1,
             totalResults: 0,
@@ -123,7 +122,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
         const page = pageIndex + 1;
 
         this.patchState({
-            itemsState: { type: 'loading' },
+            itemsState: { state: 'loading' },
             page,
         });
 
@@ -139,7 +138,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
 
         this.patchState({
             activeSortBy: sortBy,
-            itemsState: { type: 'loading' },
+            itemsState: { state: 'loading' },
             page: 1,
             totalPages: 1,
             totalResults: 0,
@@ -156,7 +155,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     }) {
         const state = this.get();
 
-        if (state.listId === null || state.headerState.type !== 'loaded') {
+        if (state.listId === null || state.headerState.state !== 'success') {
             return throwError(() => new Error('List detail is not loaded yet.'));
         }
 
@@ -173,9 +172,9 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                 tap(() => {
                     this.patchState((state) => ({
                         headerState:
-                            state.headerState.type === 'loaded'
-                                ? toLoadedValue({
-                                      ...state.headerState.value,
+                            state.headerState.state === 'success'
+                                ? remoteSuccess({
+                                      ...state.headerState.data,
                                       name: request.name,
                                       description: request.description || null,
                                   })
@@ -197,7 +196,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     clearList$() {
         const state = this.get();
 
-        if (state.listId === null || state.headerState.type !== 'loaded') {
+        if (state.listId === null || state.headerState.state !== 'success') {
             return throwError(() => new Error('List detail is not loaded yet.'));
         }
 
@@ -205,13 +204,13 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             tap(() => {
                 this.patchState((state) => ({
                     headerState:
-                        state.headerState.type === 'loaded'
-                            ? toLoadedValue({
-                                  ...state.headerState.value,
+                        state.headerState.state === 'success'
+                            ? remoteSuccess({
+                                  ...state.headerState.data,
                                   itemCount: 0,
                               })
                             : state.headerState,
-                    itemsState: toLoadedItems([]),
+                    itemsState: remoteSuccess([]),
                     page: 1,
                     totalPages: 1,
                     totalResults: 0,
@@ -243,7 +242,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
     removeItem$(item: UserListDetailItem) {
         const state = this.get();
 
-        if (state.listId === null || state.headerState.type !== 'loaded') {
+        if (state.listId === null || state.headerState.state !== 'success') {
             return throwError(() => new Error('List detail is not loaded yet.'));
         }
 
@@ -261,20 +260,20 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                     const totalPages = Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
                     const page = Math.min(state.page, totalPages);
                     const nextItems =
-                        state.itemsState.type === 'loaded'
-                            ? state.itemsState.value.filter((existingItem) => existingItem.key !== item.key)
+                        state.itemsState.state === 'success'
+                            ? state.itemsState.data.filter((existingItem) => existingItem.key !== item.key)
                             : null;
 
                     this.patchState({
-                        itemsState: nextItems ? toLoadedItems(nextItems) : state.itemsState,
+                        itemsState: nextItems ? remoteSuccess(nextItems) : state.itemsState,
                         page,
                         totalPages,
                         totalResults,
                         headerState:
-                            state.headerState.type === 'loaded'
-                                ? toLoadedValue({
-                                      ...state.headerState.value,
-                                      itemCount: Math.max(0, state.headerState.value.itemCount - 1),
+                            state.headerState.state === 'success'
+                                ? remoteSuccess({
+                                      ...state.headerState.data,
+                                      itemCount: Math.max(0, state.headerState.data.itemCount - 1),
                                   })
                                 : state.headerState,
                     });
@@ -306,7 +305,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
             .pipe(
                 tap(() => {
                     this.patchState((state) => ({
-                        itemsState: updateLoadedItems(state.itemsState, (items) =>
+                        itemsState: updateRemoteData(state.itemsState, (items) =>
                             items.map((existingItem) =>
                                 existingItem.key === item.key
                                     ? {
@@ -346,7 +345,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
         const updatedLabel = toUpdatedAtLabel(result.updated_at);
 
         return {
-            headerState: toLoadedValue({
+            headerState: remoteSuccess({
                 id: result.id ?? 0,
                 name: result.name || 'Untitled List',
                 description: result.description ?? null,
@@ -354,7 +353,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                 itemCount: result.item_count ?? items.length,
                 updatedLabel,
             }),
-            itemsState: toLoadedItems(items),
+            itemsState: remoteSuccess(items),
             page: result.page ?? 1,
             totalPages: result.total_pages ?? 1,
             totalResults: result.total_results ?? result.item_count ?? items.length,
@@ -372,7 +371,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
 
         return (result.results ?? [])
             .map((item) => this.toItem(item, commentsByKey))
-            .filter((item): item is UserListDetailItem => item !== null);
+            .filter(isDefined);
     }
 
     private toItem(item: V4ListContentItem, commentsByKey: ReadonlyMap<string, string>): UserListDetailItem | null {

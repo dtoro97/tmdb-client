@@ -24,7 +24,7 @@ import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
     CardItem,
     EpisodeListItemData,
-    LoadableItems,
+    RemoteData,
     LocaleStoreService,
     MediaRatingService,
     MediaListItem,
@@ -33,9 +33,13 @@ import {
     TmdbUserAccountService,
     isDefined,
     toCardItem,
-    toMediaListItem,
 } from '../../shared';
-import { toLoadedItems } from '../../shared/utils';
+import { remoteSuccess } from '../../shared/utils';
+import {
+    toTotalAfterMediaRemoval,
+    toUserAccountMediaListItem,
+    toUserAccountSortBy,
+} from './user-account-media.helpers';
 import {
     DEFAULT_USER_ACCOUNT_SORT_BY,
     DEFAULT_USER_ACCOUNT_SORT_DIRECTION,
@@ -57,10 +61,10 @@ export interface UserRatedEpisodeItem {
 }
 
 interface UserRatingsState {
-    readonly items: LoadableItems<CardItem>;
+    readonly items: RemoteData<CardItem[]>;
     readonly totalResults: number;
-    readonly pageItems: LoadableItems<MediaListItem>;
-    readonly episodePageItems: LoadableItems<UserRatedEpisodeItem>;
+    readonly pageItems: RemoteData<MediaListItem[]>;
+    readonly episodePageItems: RemoteData<UserRatedEpisodeItem[]>;
     readonly contentType: UserRatingContentType;
     readonly page: number;
     readonly pageTotalResults: number;
@@ -77,10 +81,10 @@ interface UserRatingsPageChanges {
 const INITIAL_PAGE = 1;
 
 const INITIAL_STATE: UserRatingsState = {
-    items: { type: 'idle' },
+    items: { state: 'notAsked' },
     totalResults: 0,
-    pageItems: { type: 'idle' },
-    episodePageItems: { type: 'idle' },
+    pageItems: { state: 'notAsked' },
+    episodePageItems: { state: 'notAsked' },
     contentType: 'movie',
     page: INITIAL_PAGE,
     pageTotalResults: 0,
@@ -101,8 +105,8 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         episodeItems: state.episodePageItems,
         itemsState:
             state.contentType === 'episode'
-                ? state.episodePageItems.type
-                : state.pageItems.type,
+                ? state.episodePageItems.state
+                : state.pageItems.state,
         page: state.page - 1,
         pageSize: PAGE_SIZE,
         sortField: state.sortField,
@@ -125,13 +129,13 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         const previousState = this.get();
 
         this.patchState({
-            items: { type: 'loading' },
+            items: { state: 'loading' },
         });
 
         return this.fetchRatedTitles$().pipe(
             tap((result) => {
                 this.patchState({
-                    items: toLoadedItems(result.items),
+                    items: remoteSuccess(result.items),
                     totalResults: result.totalResults,
                 });
             }),
@@ -158,20 +162,20 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         });
 
         if (contentType === 'episode') {
-            this.patchState({ episodePageItems: { type: 'loading' } });
+            this.patchState({ episodePageItems: { state: 'loading' } });
         } else {
-            this.patchState({ pageItems: { type: 'loading' } });
+            this.patchState({ pageItems: { state: 'loading' } });
         }
 
         return this.fetchRatingsPage$(
             contentType,
             page,
-            this.toSortBy(sortField, sortDirection),
+            toUserAccountSortBy(sortField, sortDirection),
         ).pipe(
             tap((result) => {
                 if (result.contentType === 'episode') {
                     this.patchState({
-                        episodePageItems: toLoadedItems(result.items),
+                        episodePageItems: remoteSuccess(result.items),
                         page: result.page,
                         pageTotalResults: result.totalResults,
                     });
@@ -179,7 +183,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
                 }
 
                 this.patchState({
-                    pageItems: toLoadedItems(result.items),
+                    pageItems: remoteSuccess(result.items),
                     page: result.page,
                     pageTotalResults: result.totalResults,
                 });
@@ -219,12 +223,16 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
 
     removeMediaRating$(item: MediaListItem) {
         const previousState = this.get();
-        const optimisticTotal = this.toTotalAfterMediaRemoval(previousState, item);
+        const optimisticTotal = toTotalAfterMediaRemoval(
+            previousState.pageItems,
+            item,
+            previousState.pageTotalResults,
+        );
         const nextPage = this.toValidPage(previousState.page, optimisticTotal);
 
         this.patchState({
             page: nextPage,
-            pageItems: { type: 'loading' },
+            pageItems: { state: 'loading' },
             pageTotalResults: optimisticTotal,
         });
 
@@ -255,7 +263,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
 
         this.patchState({
             page: nextPage,
-            episodePageItems: { type: 'loading' },
+            episodePageItems: { state: 'loading' },
             pageTotalResults: optimisticTotal,
         });
 
@@ -429,19 +437,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         item: RatedMovieListItem | RatedTvSeriesListItem,
         mediaType: MediaType,
     ): MediaListItem | null {
-        const mediaItem = toMediaListItem(item, mediaType, 'year');
-        const title = mediaItem.title.trim();
-
-        if (!mediaItem.id || !title) {
-            return null;
-        }
-
-        return {
-            ...mediaItem,
-            title,
-            overview: mediaItem.overview.trim(),
-            rating: item.rating ?? null,
-        };
+        return toUserAccountMediaListItem(item, mediaType, item.rating ?? null);
     }
 
     private toRatedEpisodeItem(
@@ -518,13 +514,6 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         };
     }
 
-    private toSortBy(
-        sortField: UserAccountSortField,
-        sortDirection: SortDirection,
-    ): UserAccountSortBy {
-        return `${sortField}.${sortDirection}` as UserAccountSortBy;
-    }
-
     private toTotalLabel(
         contentType: UserRatingContentType,
         totalResults: number,
@@ -564,30 +553,13 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
         };
     }
 
-    private toTotalAfterMediaRemoval(
-        state: UserRatingsState,
-        item: MediaListItem,
-    ): number {
-        const itemWasLoaded =
-            state.pageItems.type === 'loaded' &&
-            state.pageItems.value.some(
-                (pageItem) =>
-                    pageItem.id === item.id &&
-                    pageItem.mediaType === item.mediaType,
-            );
-
-        return itemWasLoaded
-            ? Math.max(0, state.pageTotalResults - 1)
-            : state.pageTotalResults;
-    }
-
     private toTotalAfterEpisodeRemoval(
         state: UserRatingsState,
         item: UserRatedEpisodeItem,
     ): number {
         const itemWasLoaded =
-            state.episodePageItems.type === 'loaded' &&
-            state.episodePageItems.value.some(
+            state.episodePageItems.state === 'success' &&
+            state.episodePageItems.data.some(
                 (pageItem) => pageItem.key === item.key,
             );
 
@@ -605,14 +577,14 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
     private patchRatedMediaItemRating(item: MediaListItem, value: number): void {
         const state = this.get();
 
-        if (state.pageItems.type !== 'loaded') {
+        if (state.pageItems.state !== 'success') {
             return;
         }
 
         this.patchState({
             pageItems: {
-                type: 'loaded',
-                value: state.pageItems.value.map((pageItem) =>
+                state: 'success',
+                data: state.pageItems.data.map((pageItem) =>
                     pageItem.id === item.id &&
                     pageItem.mediaType === item.mediaType
                         ? { ...pageItem, rating: value }
@@ -628,14 +600,14 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
     ): void {
         const state = this.get();
 
-        if (state.episodePageItems.type !== 'loaded') {
+        if (state.episodePageItems.state !== 'success') {
             return;
         }
 
         this.patchState({
             episodePageItems: {
-                type: 'loaded',
-                value: state.episodePageItems.value.map((pageItem) =>
+                state: 'success',
+                data: state.episodePageItems.data.map((pageItem) =>
                     pageItem.key === item.key
                         ? {
                               ...pageItem,

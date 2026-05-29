@@ -9,8 +9,7 @@
     <div class="page-main">
         <div class="lists">
             @if (
-                vm.state.type === "loading" ||
-                vm.state.type === "idle"
+                vm.state.state === "loading"
             ) {
                 <app-skeleton class="lists__summary-skeleton" />
 
@@ -19,15 +18,15 @@
                         <app-user-list-card-skeleton />
                     }
                 </div>
-            } @else if (vm.state.type === "loaded") {
-                @if (vm.state.value.length) {
+            } @else if (vm.state.state === "success") {
+                @if (vm.state.data.length) {
                     <p class="lists__summary text-caption">
                         {{ vm.start }} - {{ vm.end }} of
                         {{ vm.total }}
                     </p>
 
                     <div class="lists__grid">
-                        @for (item of vm.state.value; track item.id) {
+                        @for (item of vm.state.data; track item.id) {
                             <app-user-list-card
                                 [item]="item"
                                 [actionsEnabled]="true"

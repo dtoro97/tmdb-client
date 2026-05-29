@@ -2,18 +2,18 @@
     <section class="profile page-main">
         <aside class="profile__rail" aria-label="Profile summary">
             <div class="profile__identity">
-                @if (vm.profileState.type === 'loading') {
+                @if (vm.profileState.state === 'loading') {
                     <app-skeleton class="profile__avatar-skeleton" />
                 } @else {
                     <app-user-avatar
                         [name]="vm.profileDisplayName"
-                        [avatarPath]="vm.profileState.type === 'loaded' ? vm.profileState.value.avatarPath : null"
+                        [avatarPath]="vm.profileState.state === 'success' ? vm.profileState.data.avatarPath : null"
                         size="lg"
                     />
                 }
 
                 <div class="profile__identity-copy">
-                    @if (vm.profileState.type === 'loading') {
+                    @if (vm.profileState.state === 'loading') {
                         <app-skeleton class="profile__name-skeleton" />
                         <app-skeleton class="profile__handle-skeleton" />
                     } @else {
@@ -21,8 +21,8 @@
                             {{ vm.profileDisplayName }}
                         </h1>
 
-                        @if (vm.profileState.type === 'loaded') {
-                            @if (vm.profileState.value.username; as username) {
+                        @if (vm.profileState.state === 'success') {
+                            @if (vm.profileState.data.username; as username) {
                                 <p class="text-meta">@{{ username }}</p>
                             }
                         }
@@ -81,7 +81,7 @@
                     </a>
                 </header>
 
-                @if (vm.watchlist.state.type === 'loaded' && !vm.watchlist.state.value.length) {
+                @if (vm.watchlist.state.state === 'success' && !vm.watchlist.state.data.length) {
                     <div class="profile__empty">
                         <app-empty-state
                             iconClass="fa-regular fa-bookmark"
@@ -116,7 +116,7 @@
                     </a>
                 </header>
 
-                @if (vm.ratings.state.type === 'loaded' && !vm.ratings.state.value.length) {
+                @if (vm.ratings.state.state === 'success' && !vm.ratings.state.data.length) {
                     <div class="profile__empty">
                         <app-empty-state
                             iconClass="fa-regular fa-star"
@@ -151,7 +151,7 @@
                     </a>
                 </header>
 
-                @if (vm.favourites.state.type === 'loaded' && !vm.favourites.state.value.length) {
+                @if (vm.favourites.state.state === 'success' && !vm.favourites.state.data.length) {
                     <div class="profile__empty">
                         <app-empty-state
                             iconClass="fa-regular fa-heart"
@@ -186,15 +186,15 @@
                     </a>
                 </header>
 
-                @if (vm.lists.state.type === 'loading' || vm.lists.state.type === 'idle') {
+                @if (vm.lists.state.state === 'loading') {
                     <div class="profile__list-grid">
                         @for (placeholder of 3 | repeat; track placeholder) {
                             <app-user-list-card-skeleton />
                         }
                     </div>
-                } @else if (vm.lists.state.type === 'loaded' && vm.lists.state.value.length) {
+                } @else if (vm.lists.state.state === 'success' && vm.lists.state.data.length) {
                     <div class="profile__list-grid">
-                        @for (item of vm.lists.state.value | slice: 0 : 3; track item.id) {
+                        @for (item of vm.lists.state.data | slice: 0 : 3; track item.id) {
                             <app-user-list-card [item]="item" />
                         }
                     </div>

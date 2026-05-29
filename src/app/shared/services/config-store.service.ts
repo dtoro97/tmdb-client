@@ -37,6 +37,10 @@ export class ConfigStoreService extends ComponentStore<ConfigStoreState> {
         this.getConfiguration$().subscribe();
     }
 
+    languages(): readonly Language[] {
+        return this.get().languages ?? [];
+    }
+
     getLanguages$() {
         return this.configRestControllerService
             .configurationLanguages(undefined, undefined, API_JSON_OPTIONS)

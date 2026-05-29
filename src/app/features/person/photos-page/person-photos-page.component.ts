@@ -35,8 +35,8 @@ export class PersonPhotosPageComponent {
         this.personDetailStore.personDetailVm$
             .pipe(
                 tap((vm) => {
-                    if (vm.person.type === 'loaded' && vm.person.value) {
-                        this.title.setTitle(`${vm.person.value.name} | Photos`);
+                    if (vm.person.state === 'success' && vm.person.data) {
+                        this.title.setTitle(`${vm.person.data.name} | Photos`);
                     }
                 }),
                 takeUntilDestroyed(),

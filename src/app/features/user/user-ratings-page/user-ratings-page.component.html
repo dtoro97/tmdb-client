@@ -9,16 +9,15 @@
     <main class="page-main page">
         <app-browse-toolbar>
             <div start class="page__total">
-                @if (vm.itemsState === "loaded") {
+                @if (vm.itemsState === "success") {
                     <span class="text-caption">{{ vm.totalLabel }}</span>
                 }
             </div>
 
             <div end class="page__toolbar-actions">
-                <app-pill-toggle
+                <app-toggle-group
                     [options]="contentTypeOptions"
                     [selectedValue]="vm.contentType"
-                    variant="subtle"
                     (selected)="onContentTypeSelected($event)"
                 />
 
@@ -33,7 +32,7 @@
         </app-browse-toolbar>
 
         @if (vm.contentType === "episode") {
-            @if (vm.episodeItems.type === "loading" || vm.episodeItems.type === "idle") {
+            @if (vm.episodeItems.state === "loading") {
                 <ul class="page__episode-list" aria-hidden="true">
                     @for (placeholder of episodeSkeletonCount | repeat; track placeholder) {
                         <li>
@@ -41,10 +40,10 @@
                         </li>
                     }
                 </ul>
-            } @else if (vm.episodeItems.type === "loaded") {
-                @if (vm.episodeItems.value.length) {
+            } @else if (vm.episodeItems.state === "success") {
+                @if (vm.episodeItems.data.length) {
                     <ul class="page__episode-list" aria-label="Rated episodes">
-                        @for (episode of vm.episodeItems.value; track episode.key) {
+                        @for (episode of vm.episodeItems.data; track episode.key) {
                             <li>
                                 <app-account-episode-item [item]="episode.item">
                                     <div class="page__actions">
@@ -91,16 +90,16 @@
                 }
             }
         } @else {
-            @if (vm.mediaItems.type === "loading" || vm.mediaItems.type === "idle") {
+            @if (vm.mediaItems.state === "loading") {
                 <div class="page__list" aria-hidden="true">
                     @for (placeholder of skeletonCount | repeat; track placeholder) {
                         <app-account-media-item [loading]="true" />
                     }
                 </div>
-            } @else if (vm.mediaItems.type === "loaded") {
-                @if (vm.mediaItems.value.length) {
+            } @else if (vm.mediaItems.state === "success") {
+                @if (vm.mediaItems.data.length) {
                     <div class="page__list">
-                        @for (item of vm.mediaItems.value; track item.mediaType + "-" + item.id) {
+                        @for (item of vm.mediaItems.data; track item.mediaType + "-" + item.id) {
                             <app-account-media-item
                                 [item]="item"
                                 [link]="['/title', item.id, item.mediaType]"

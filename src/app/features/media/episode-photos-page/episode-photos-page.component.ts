@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
-import { combineLatest, map, switchMap, tap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, tap } from 'rxjs';
 
 import {
     PhotoViewerComponent,
@@ -15,7 +15,7 @@ import {
     SubPageHeaderComponent,
 } from '../../../shared';
 import { EpisodeDetailStoreService } from '../episode-detail-page/episode-detail-store.service';
-import { MediaDetailStoreService } from '../media-detail-store.service';
+import { MediaStoreService } from '../media-store.service';
 
 @Component({
     selector: 'app-episode-photos-page',
@@ -29,13 +29,13 @@ export class EpisodePhotosPageComponent {
     readonly backLink: readonly string[];
 
     readonly vm$ = combineLatest({
-        mediaState: this.mediaStoreService.mediaDetailsState$,
+        mediaState: this.mediaStore.mediaDetailsState$,
         episodeState: this.episodeStore.episodeState$,
         photosState: this.episodeStore.allStillsState$,
     }).pipe(
         map(({ mediaState, episodeState, photosState }) => {
-            const media = mediaState.type === 'loaded' ? mediaState.value : null;
-            const episode = episodeState.type === 'loaded' ? (episodeState.value[0] ?? null) : null;
+            const media = mediaState.state === 'success' ? mediaState.data : null;
+            const episode = episodeState.state === 'success' ? episodeState.data : null;
             const pageTitle = episode?.name ? `${episode.name} Photos` : `${this.episodeCode} Photos`;
             const subtitle = media?.title
                 ? `${media.title}${media.year ? ` (${media.year})` : ''} - ${this.episodeCode}`
@@ -52,7 +52,7 @@ export class EpisodePhotosPageComponent {
     );
 
     constructor(
-        private readonly mediaStoreService: MediaDetailStoreService,
+        private readonly mediaStore: MediaStoreService,
         private readonly episodeStore: EpisodeDetailStoreService,
         private readonly route: ActivatedRoute,
         private readonly dialog: MatDialog,
@@ -73,18 +73,28 @@ export class EpisodePhotosPageComponent {
             String(episodeNumber),
         ];
 
-        combineLatest([this.route.paramMap, this.route.parent!.paramMap])
-            .pipe(
-                switchMap(([params, parentParams]) =>
-                    this.episodeStore.getEpisodeImages$(
-                        Number(parentParams.get('id')),
-                        Number(params.get('seasonNumber')),
-                        Number(params.get('episodeNumber')),
-                    ),
+        this.episodeStore.loadPhotos(
+            combineLatest([this.route.paramMap, this.route.parent!.paramMap]).pipe(
+                map(([params, parentParams]) => ({
+                    seriesId: Number(parentParams.get('id')),
+                    seasonNumber: Number(params.get('seasonNumber')),
+                    episodeNumber: Number(params.get('episodeNumber')),
+                })),
+                filter(
+                    ({ seriesId, seasonNumber, episodeNumber }) =>
+                        Number.isInteger(seriesId) &&
+                        Number.isInteger(seasonNumber) &&
+                        Number.isInteger(episodeNumber),
+                ),
+                distinctUntilChanged(
+                    (previous, current) =>
+                        previous.seriesId === current.seriesId &&
+                        previous.seasonNumber === current.seasonNumber &&
+                        previous.episodeNumber === current.episodeNumber,
                 ),
                 takeUntilDestroyed(),
-            )
-            .subscribe();
+            ),
+        );
 
         this.vm$
             .pipe(

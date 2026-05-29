@@ -23,13 +23,12 @@ import {
     getCurrentMonthDateWindow,
     getCurrentMonthName,
     getISODate,
-    LoadableItems,
-    LoadableValue,
+    RemoteData,
     LocaleStoreService,
     CardItem,
     MediaType,
     PersonCardItem,
-    PillToggleOption,
+    ToggleGroupOption,
     shuffle,
     toCardItem,
     toPersonCardItem,
@@ -45,39 +44,39 @@ interface StreamingArrivalsFeature {
     readonly title: string;
     readonly description: string;
     readonly ctaLabel: string;
-    readonly items: LoadableItems<CardItem>;
+    readonly items: RemoteData<CardItem[]>;
 }
 
 const TOP_PICKS_MAX_ITEMS = MEDIUM_LIST_COUNT;
 const TOP_PICKS_FEATURED_COUNT = 3;
 
-const WHAT_TO_WATCH_OPTIONS: PillToggleOption[] = [
+const WHAT_TO_WATCH_OPTIONS: ToggleGroupOption[] = [
     { label: 'Movies', value: 'movie' },
     { label: 'TV Shows', value: 'tv' },
 ];
 
 interface HomeState {
-    spotlight: LoadableValue<SpotlightItem | null>;
-    whatToWatchMovies: LoadableItems<CardItem>;
-    whatToWatchTv: LoadableItems<CardItem>;
+    spotlight: RemoteData<SpotlightItem | null>;
+    whatToWatchMovies: RemoteData<CardItem[]>;
+    whatToWatchTv: RemoteData<CardItem[]>;
     selectedWhatToWatchMediaType: MediaType;
-    popularPeople: LoadableItems<PersonCardItem>;
-    trendingToday: LoadableItems<CardItem>;
-    airingToday: LoadableItems<AiringTodayItem>;
-    streamingArrivals: LoadableItems<CardItem>;
-    inTheatres: LoadableItems<CardItem>;
+    popularPeople: RemoteData<PersonCardItem[]>;
+    trendingToday: RemoteData<CardItem[]>;
+    airingToday: RemoteData<AiringTodayItem[]>;
+    streamingArrivals: RemoteData<CardItem[]>;
+    inTheatres: RemoteData<CardItem[]>;
 }
 
 const INITIAL_STATE: HomeState = {
-    spotlight: { type: 'loading' },
-    whatToWatchMovies: { type: 'loading' },
-    whatToWatchTv: { type: 'loading' },
+    spotlight: { state: 'notAsked' },
+    whatToWatchMovies: { state: 'notAsked' },
+    whatToWatchTv: { state: 'notAsked' },
     selectedWhatToWatchMediaType: 'movie',
-    popularPeople: { type: 'loading' },
-    trendingToday: { type: 'loading' },
-    airingToday: { type: 'loading' },
-    streamingArrivals: { type: 'loading' },
-    inTheatres: { type: 'loading' },
+    popularPeople: { state: 'notAsked' },
+    trendingToday: { state: 'notAsked' },
+    airingToday: { state: 'notAsked' },
+    streamingArrivals: { state: 'notAsked' },
+    inTheatres: { state: 'notAsked' },
 };
 
 @Injectable()
@@ -92,7 +91,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             (state.selectedWhatToWatchMediaType === 'movie'
                 ? state.whatToWatchMovies
                 : state.whatToWatchTv
-            ).type === 'loading',
+            ).state === 'loading',
         whatToWatchTopPicks: this.toTopPickGroups(
             state.selectedWhatToWatchMediaType === 'movie'
                 ? state.whatToWatchMovies
@@ -104,7 +103,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         trendingToday: state.trendingToday,
         airingToday: state.airingToday,
         airingTonightPreview:
-            state.airingToday.type === 'loaded' ? state.airingToday.value.slice(0, 12) : [],
+            state.airingToday.state === 'success' ? state.airingToday.data.slice(0, 12) : [],
         streamingArrivals: this.toStreamingArrivalsFeature(state.streamingArrivals),
         inTheatres: state.inTheatres,
     }));
@@ -140,8 +139,8 @@ export class HomeStoreService extends ComponentStore<HomeState> {
 
     private loadWhatToWatch$() {
         this.patchState({
-            whatToWatchMovies: { type: 'loading' },
-            whatToWatchTv: { type: 'loading' },
+            whatToWatchMovies: { state: 'loading' },
+            whatToWatchTv: { state: 'loading' },
         });
 
         return forkJoin({
@@ -175,22 +174,22 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         }).pipe(
             tap((whatToWatch) =>
                 this.patchState({
-                    whatToWatchMovies: { type: 'loaded', value: whatToWatch.movies },
-                    whatToWatchTv: { type: 'loaded', value: whatToWatch.tv },
+                    whatToWatchMovies: { state: 'success', data: whatToWatch.movies },
+                    whatToWatchTv: { state: 'success', data: whatToWatch.tv },
                 }),
             ),
         );
     }
 
     private loadPopularPeople$() {
-        this.patchState({ popularPeople: { type: 'loading' } });
+        this.patchState({ popularPeople: { state: 'loading' } });
 
         return this.personListService.personPopularList(undefined, 1, 'body', undefined, this.opts).pipe(
             map((response) => (response.results ?? []).map((item) => toPersonCardItem(item)).slice(0, PAGE_SIZE)),
             catchError(() => of([] as PersonCardItem[])),
             tap((popularPeople) =>
                 this.patchState({
-                    popularPeople: { type: 'loaded', value: popularPeople },
+                    popularPeople: { state: 'success', data: popularPeople },
                 }),
             ),
         );
@@ -198,8 +197,8 @@ export class HomeStoreService extends ComponentStore<HomeState> {
 
     private loadTrendingToday$() {
         this.patchState({
-            spotlight: { type: 'loading' },
-            trendingToday: { type: 'loading' },
+            spotlight: { state: 'loading' },
+            trendingToday: { state: 'loading' },
         });
 
         return this.trendingService.trendingAll('day', undefined, 'body', undefined, this.opts).pipe(
@@ -230,10 +229,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             ),
             tap(({ spotlight, trendingToday }) =>
                 this.patchState({
-                    spotlight: { type: 'loaded', value: spotlight },
+                    spotlight: { state: 'success', data: spotlight },
                     trendingToday: {
-                        type: 'loaded',
-                        value: trendingToday,
+                        state: 'success',
+                        data: trendingToday,
                     },
                 }),
             ),
@@ -241,7 +240,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     }
 
     private loadAiringToday$() {
-        this.patchState({ airingToday: { type: 'loading' } });
+        this.patchState({ airingToday: { state: 'loading' } });
 
         const today = getISODate(0);
 
@@ -294,8 +293,8 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                 tap((airingToday) =>
                     this.patchState({
                         airingToday: {
-                            type: 'loaded',
-                            value: airingToday,
+                            state: 'success',
+                            data: airingToday,
                         },
                     }),
                 ),
@@ -303,7 +302,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     }
 
     private loadStreamingArrivals$() {
-        this.patchState({ streamingArrivals: { type: 'loading' } });
+        this.patchState({ streamingArrivals: { state: 'loading' } });
 
         const dateWindow = getCurrentMonthDateWindow();
         const region = this.localeStore.region() || 'US';
@@ -367,8 +366,8 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             tap((streamingArrivals) =>
                 this.patchState({
                     streamingArrivals: {
-                        type: 'loaded',
-                        value: streamingArrivals,
+                        state: 'success',
+                        data: streamingArrivals,
                     },
                 }),
             ),
@@ -376,7 +375,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     }
 
     private loadInTheatres$() {
-        this.patchState({ inTheatres: { type: 'loading' } });
+        this.patchState({ inTheatres: { state: 'loading' } });
 
         const releaseDateGte = getISODate(0);
         const releaseDateLte = getISODate(OPENING_SOON_MOVIE_DAYS_AHEAD);
@@ -432,7 +431,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
                 catchError(() => of([] as CardItem[])),
                 tap((inTheatres) =>
                     this.patchState({
-                        inTheatres: { type: 'loaded', value: inTheatres },
+                        inTheatres: { state: 'success', data: inTheatres },
                     }),
                 ),
             );
@@ -459,10 +458,10 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         };
     }
 
-    private toTopPickGroups(state: LoadableItems<CardItem>) {
+    private toTopPickGroups(state: RemoteData<CardItem[]>) {
         const topPickItems =
-            state.type === 'loaded' || state.type === 'loading-more'
-                ? state.value.slice(0, TOP_PICKS_MAX_ITEMS).map((item) => ({
+            state.state === 'success' || state.state === 'loading-more'
+                ? state.data.slice(0, TOP_PICKS_MAX_ITEMS).map((item) => ({
                       item,
                   }))
                 : [];
@@ -483,7 +482,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
     }
 
     private toStreamingArrivalsFeature(
-        items: LoadableItems<CardItem>,
+        items: RemoteData<CardItem[]>,
     ): StreamingArrivalsFeature {
         const month = getCurrentMonthName();
 

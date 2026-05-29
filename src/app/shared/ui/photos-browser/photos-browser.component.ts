@@ -1,8 +1,8 @@
-import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, EventEmitter, input, Output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 
 import type { ConfigurationImages } from '../../../api';
 import { PHOTOS_BROWSER_BATCH } from '../../../constants';
@@ -12,7 +12,7 @@ import type { PhotosBrowserSelection, ViewerImage } from '../../models';
 import { ConfigStoreService } from '../../services/config-store.service';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { BrowseToolbarComponent } from '../browse-toolbar/browse-toolbar.component';
-import { PillToggleComponent } from '../pill-toggle/pill-toggle.component';
+import { ToggleGroupComponent } from '../toggle-group/toggle-group.component';
 import { SortButtonComponent } from '../sort-button/sort-button.component';
 import { ImageComponent } from '../image/image.component';
 
@@ -27,12 +27,11 @@ interface PhotoTileVm {
 @Component({
     selector: 'app-photos-browser',
     imports: [
-        AsyncPipe,
         BrowseToolbarComponent,
         MatButtonModule,
         EmptyStateComponent,
         ImageComponent,
-        PillToggleComponent,
+        ToggleGroupComponent,
         SortButtonComponent,
     ],
     templateUrl: './photos-browser.component.html',
@@ -40,141 +39,107 @@ interface PhotoTileVm {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PhotosBrowserComponent {
+    readonly images = input<readonly ViewerImage[] | null>(null);
+    readonly initialCount = input(PHOTOS_BROWSER_BATCH);
+    readonly incrementCount = input(PHOTOS_BROWSER_BATCH);
+
     readonly sortOptions: ReadonlyArray<SelectOption<SortField>> = [
         { label: 'Rating', value: 'rating' as const },
         { label: 'Votes', value: 'votes' as const },
         { label: 'Resolution', value: 'resolution' as const },
     ];
 
-    private readonly imagesSubject = new BehaviorSubject<ViewerImage[]>([]);
-    private readonly selectedTypesSubject = new BehaviorSubject<string[]>([]);
-    private readonly visibleCountSubject = new BehaviorSubject<number>(PHOTOS_BROWSER_BATCH);
-    private readonly sortFieldSubject = new BehaviorSubject<SortField>('rating');
-    private readonly sortDirectionSubject = new BehaviorSubject<SortDirection>('desc');
-
-    private readonly sortField$ = this.sortFieldSubject.asObservable();
-    private readonly sortDirection$ = this.sortDirectionSubject.asObservable();
-    private readonly selectedTypes$ = this.selectedTypesSubject.asObservable();
-    private readonly configImages$ = this.configStoreService.configuration$.pipe(
-        map(
-            (configuration) =>
-                (
-                    configuration as unknown as {
-                        images?: ConfigurationImages;
-                    }
-                ).images,
+    private readonly selectedTypes = signal<readonly string[]>([]);
+    private readonly visibleCount = signal(PHOTOS_BROWSER_BATCH);
+    private readonly sortField = signal<SortField>('rating');
+    private readonly sortDirection = signal<SortDirection>('desc');
+    private readonly imageList = computed(() => this.images() ?? []);
+    private readonly configImages = toSignal(
+        this.configStoreService.configuration$.pipe(
+            map(
+                (configuration) =>
+                    (
+                        configuration as unknown as {
+                            images?: ConfigurationImages;
+                        }
+                    ).images,
+            ),
         ),
+        { initialValue: undefined },
     );
 
-    private readonly typePillOptions$ = this.imagesSubject.pipe(
-        map((images) => {
-            const uniqueTypes = new Set(images.map((image) => image.photoType).filter(isDefined));
-            return [...uniqueTypes]
-                .sort((a, b) => a.localeCompare(b))
-                .map((type) => ({
-                    label: type.charAt(0).toUpperCase() + type.slice(1),
-                    value: type,
-                }));
-        }),
+    private readonly typePillOptions = computed(() => {
+        const uniqueTypes = new Set(this.imageList().map((image) => image.photoType).filter(isDefined));
+        return [...uniqueTypes]
+            .sort((a, b) => a.localeCompare(b))
+            .map((type) => ({
+                label: type.charAt(0).toUpperCase() + type.slice(1),
+                value: type,
+            }));
+    });
+
+    private readonly filteredSortedImages = computed(() => {
+        const filteredImages = this.getFilteredImages(this.imageList(), this.selectedTypes());
+
+        return this.getSortedImages(filteredImages, this.sortField(), this.sortDirection());
+    });
+
+    private readonly visibleImages = computed(() =>
+        this.filteredSortedImages().slice(0, this.visibleCount()),
     );
 
-    private readonly filteredSortedImages$ = combineLatest([
-        this.imagesSubject,
-        this.selectedTypes$,
-        this.sortField$,
-        this.sortDirection$,
-    ]).pipe(
-        map(([images, selectedTypes, sortField, sortDirection]) => {
-            const filteredImages = this.getFilteredImages(images, selectedTypes);
-
-            return this.getSortedImages(filteredImages, sortField, sortDirection);
-        }),
+    private readonly visibleTiles = computed<PhotoTileVm[]>(() =>
+        this.visibleImages().map((image) => ({
+            image,
+            thumbnailSize: this.getThumbnailSize(image, this.configImages()),
+            layoutAspectRatio: this.getLayoutAspectRatio(image.aspect_ratio),
+        })),
     );
 
-    private readonly visibleImages$ = combineLatest([this.filteredSortedImages$, this.visibleCountSubject]).pipe(
-        map(([images, visibleCount]) => images.slice(0, visibleCount)),
-    );
+    private readonly visibleCountLabel = computed(() => {
+        const visible = this.visibleImages();
+        const total = this.filteredSortedImages();
 
-    private readonly visibleTiles$ = combineLatest([this.visibleImages$, this.configImages$]).pipe(
-        map(([images, configImages]): PhotoTileVm[] =>
-            images.map((image) => ({
-                image,
-                thumbnailSize: this.getThumbnailSize(image, configImages),
-                layoutAspectRatio: this.getLayoutAspectRatio(image.aspect_ratio),
-            })),
-        ),
-    );
+        return total.length > 0 ? `${visible.length ? 1 : 0} - ${visible.length} of ${total.length}` : undefined;
+    });
 
-    private readonly visibleCountLabel$ = combineLatest([this.visibleImages$, this.filteredSortedImages$]).pipe(
-        map(([visible, total]) =>
-            total.length > 0 ? `${visible.length ? 1 : 0} - ${visible.length} of ${total.length}` : undefined,
-        ),
-    );
-
-    readonly vm$ = combineLatest([
-        this.imagesSubject,
-        this.visibleCountLabel$,
-        this.typePillOptions$,
-        this.selectedTypes$,
-        this.sortField$,
-        this.sortDirection$,
-        this.filteredSortedImages$,
-        this.visibleImages$,
-        this.visibleTiles$,
-    ]).pipe(
-        map(
-            ([
-                images,
-                visibleCountLabel,
-                typePillOptions,
-                selectedTypes,
-                sortField,
-                sortDirection,
-                filteredImages,
-                visibleImages,
-                cards,
-            ]) => ({
-                hasImages: images.length > 0,
-                visibleCountLabel,
-                typePillOptions,
-                selectedTypes,
-                sortField,
-                sortDirection,
-                images: visibleImages,
-                cards,
-                hasMore: filteredImages.length > visibleImages.length,
-            }),
-        ),
-    );
-
-    constructor(private readonly configStoreService: ConfigStoreService) {}
-
-    @Input() initialCount = PHOTOS_BROWSER_BATCH;
-    @Input() incrementCount = PHOTOS_BROWSER_BATCH;
-    @Input() set images(value: ViewerImage[] | null) {
-        const images = value ?? [];
-        this.imagesSubject.next(images);
-        this.visibleCountSubject.next(this.initialCount);
-        this.selectedTypesSubject.next([]);
-    }
+    readonly vm = computed(() => ({
+        hasImages: this.imageList().length > 0,
+        visibleCountLabel: this.visibleCountLabel(),
+        typePillOptions: this.typePillOptions(),
+        selectedTypes: this.selectedTypes(),
+        sortField: this.sortField(),
+        sortDirection: this.sortDirection(),
+        images: this.visibleImages(),
+        cards: this.visibleTiles(),
+        hasMore: this.filteredSortedImages().length > this.visibleImages().length,
+    }));
 
     @Output() photoSelect = new EventEmitter<PhotosBrowserSelection>();
 
+    constructor(private readonly configStoreService: ConfigStoreService) {
+        effect(() => {
+            this.imageList();
+            this.visibleCount.set(this.initialCount());
+            this.selectedTypes.set([]);
+        });
+    }
+
     setSortField(value: unknown): void {
-        this.sortFieldSubject.next(value as SortField);
+        this.sortField.set(value as SortField);
     }
 
     toggleSortDirection(): void {
-        this.sortDirectionSubject.next(this.sortDirectionSubject.value === 'asc' ? 'desc' : 'asc');
+        this.sortDirection.update((direction) => (direction === 'asc' ? 'desc' : 'asc'));
     }
 
     setSelectedTypes(value: unknown): void {
-        this.selectedTypesSubject.next((value as string[]) ?? []);
-        this.visibleCountSubject.next(this.initialCount);
+        this.selectedTypes.set((value as string[] | null) ?? []);
+        this.visibleCount.set(this.initialCount());
     }
 
     showMore(): void {
-        this.visibleCountSubject.next(this.visibleCountSubject.value + this.incrementCount);
+        this.visibleCount.update((count) => count + this.incrementCount());
     }
 
     onImageClick(index: number, images: ViewerImage[]): void {

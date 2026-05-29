@@ -11,8 +11,9 @@ import { PAGE_SIZE, SMALL_LIST_COUNT } from '../../../constants';
 import {
     EmptyStateComponent,
     MediaListComponent,
-    PillToggleComponent,
+    ToggleGroupComponent,
     PersonListComponent,
+    toMediaListEntryState,
     type SelectOption,
 } from '../../../shared';
 import { GenreService } from '../../../shared/services';
@@ -27,7 +28,7 @@ import { SearchStoreService, SearchType } from '../search-store.service';
         MatButtonModule,
         EmptyStateComponent,
         MediaListComponent,
-        PillToggleComponent,
+        ToggleGroupComponent,
         PersonListComponent,
     ],
     providers: [SearchStoreService],
@@ -56,6 +57,16 @@ export class SearchPageComponent {
     }).pipe(
         map((vm) => ({
             ...vm,
+            movieListState: toMediaListEntryState(vm.movieState, {
+                genreMap: vm.movieGenreMap,
+                routeType: 'movie',
+                showIndex: true,
+            }),
+            tvListState: toMediaListEntryState(vm.tvState, {
+                genreMap: vm.tvGenreMap,
+                routeType: 'tv',
+                showIndex: true,
+            }),
             listSkeletonCount: vm.type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE,
         })),
     );

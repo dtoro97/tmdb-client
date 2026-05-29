@@ -1,9 +1,5 @@
 <article class="video-card">
-    @if (item.routerLink) {
-        <a class="video-card__media" [routerLink]="item.routerLink" [attr.aria-label]="item.openLabel">
-            <ng-container *ngTemplateOutlet="thumbnail" />
-        </a>
-    } @else if (item.href) {
+    @if (item.href) {
         <a
             class="video-card__media"
             [href]="item.href"

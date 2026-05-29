@@ -7,10 +7,12 @@ import { API_JSON_OPTIONS } from '../../../constants';
 import {
     LocaleStoreService,
     MediaType,
+    isDefined,
     serializeNumberListParam,
     SortDirection,
     toISODate,
     toMediaListItem,
+    toTmdbDiscoverSort,
 } from '../../../shared';
 import {
     StreamingBaseQuery,
@@ -84,7 +86,7 @@ export class StreamingQueryService {
         return Array.from({ length: longestGroupLength }).flatMap((_, index) =>
             groups
                 .map((group) => group[index])
-                .filter((item): item is StreamingPreviewItem => !!item),
+                .filter(isDefined),
         );
     }
 
@@ -126,7 +128,7 @@ export class StreamingQueryService {
                 releaseRegion,
                 undefined,
                 undefined,
-                this.toMovieSort(query),
+                toTmdbDiscoverSort('movie', query.sortBy, 'desc') as MovieDiscoverSort,
                 query.voteAverageMin,
                 undefined,
                 query.voteCountMin,
@@ -158,7 +160,7 @@ export class StreamingQueryService {
                 map((response) =>
                     (response.results ?? [])
                         .map((item) => this.toMoviePreview(item))
-                        .filter((item): item is StreamingPreviewItem => item !== null),
+                        .filter(isDefined),
                 ),
                 catchError(() => of([] as StreamingPreviewItem[])),
             );
@@ -181,7 +183,7 @@ export class StreamingQueryService {
                 undefined,
                 1,
                 undefined,
-                this.toTvSort(query),
+                toTmdbDiscoverSort('tv', query.sortBy, 'desc') as TvDiscoverSort,
                 undefined,
                 query.voteAverageMin,
                 undefined,
@@ -212,7 +214,7 @@ export class StreamingQueryService {
                 map((response) =>
                     (response.results ?? [])
                         .map((item) => this.toTvPreview(item))
-                        .filter((item): item is StreamingPreviewItem => item !== null),
+                        .filter(isDefined),
                 ),
                 catchError(() => of([] as StreamingPreviewItem[])),
             );
@@ -249,7 +251,7 @@ export class StreamingQueryService {
                 releaseRegion,
                 undefined,
                 undefined,
-                this.toMovieSortValue(sortKey, direction),
+                toTmdbDiscoverSort('movie', sortKey, direction) as MovieDiscoverSort,
                 query.voteAverageMin,
                 undefined,
                 query.voteCountMin,
@@ -309,7 +311,7 @@ export class StreamingQueryService {
                 undefined,
                 page,
                 undefined,
-                this.toTvSortValue(sortKey, direction),
+                toTmdbDiscoverSort('tv', sortKey, direction) as TvDiscoverSort,
                 undefined,
                 query.voteAverageMin,
                 undefined,
@@ -374,44 +376,6 @@ export class StreamingQueryService {
             imagePath: item.poster_path,
             backdropPath: item.backdrop_path ?? null,
         };
-    }
-
-    private toMovieSort(query: StreamingBaseQuery): MovieDiscoverSort {
-        return this.toMovieSortValue(query.sortBy, 'desc');
-    }
-
-    private toMovieSortValue(sortKey: StreamingSortKey, direction: SortDirection): MovieDiscoverSort {
-        switch (sortKey) {
-            case 'rating':
-                return `vote_average.${direction}`;
-            case 'release_date':
-                return `primary_release_date.${direction}`;
-            case 'title':
-                return `title.${direction}`;
-            case 'vote_count':
-                return `vote_count.${direction}`;
-            default:
-                return `popularity.${direction}`;
-        }
-    }
-
-    private toTvSort(query: StreamingBaseQuery): TvDiscoverSort {
-        return this.toTvSortValue(query.sortBy, 'desc');
-    }
-
-    private toTvSortValue(sortKey: StreamingSortKey, direction: SortDirection): TvDiscoverSort {
-        switch (sortKey) {
-            case 'rating':
-                return `vote_average.${direction}`;
-            case 'release_date':
-                return `first_air_date.${direction}`;
-            case 'title':
-                return `name.${direction}`;
-            case 'vote_count':
-                return `vote_count.${direction}`;
-            default:
-                return `popularity.${direction}`;
-        }
     }
 
     private resolveDateWindow(preset?: StreamingDatePreset): DateWindow {

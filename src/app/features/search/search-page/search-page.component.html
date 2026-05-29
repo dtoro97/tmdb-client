@@ -4,9 +4,8 @@
             <div class="header-row">
                 <h1 class="text-headline">Results for "{{ vm.query }}"</h1>
             </div>
-            <app-pill-toggle
+            <app-toggle-group
                 [options]="typeOptions"
-                variant="subtle"
                 [selectedValue]="vm.type"
                 (selected)="setType($event)"
             />
@@ -14,21 +13,18 @@
 
         <div class="results inner-container u-flex-column u-gap-8">
             @if (
-                vm.movieState.type === 'loading' ||
-                vm.movieState.type === 'loading-more' ||
-                (vm.movieState.type === 'loaded' && vm.movieState.value.length)
+                vm.movieListState.state === 'loading' ||
+                vm.movieListState.state === 'loading-more' ||
+                (vm.movieListState.state === 'success' && vm.movieListState.data.length)
             ) {
                 <section>
                     <h2 class="section-title text-title">Movies</h2>
                     <div>
                         <app-media-list
-                            [state]="vm.movieState"
-                            [genreMap]="vm.movieGenreMap"
+                            [state]="vm.movieListState"
                             [skeletonCount]="vm.listSkeletonCount"
                             density="compact"
                             [showIndex]="true"
-                            [indexStart]="1"
-                            routeType="movie"
                         />
                     </div>
                     @if (vm.movieHasMore) {
@@ -40,21 +36,18 @@
             }
 
             @if (
-                vm.tvState.type === 'loading' ||
-                vm.tvState.type === 'loading-more' ||
-                (vm.tvState.type === 'loaded' && vm.tvState.value.length)
+                vm.tvListState.state === 'loading' ||
+                vm.tvListState.state === 'loading-more' ||
+                (vm.tvListState.state === 'success' && vm.tvListState.data.length)
             ) {
                 <section>
                     <h2 class="section-title text-title">TV Shows</h2>
                     <div>
                         <app-media-list
-                            [state]="vm.tvState"
-                            [genreMap]="vm.tvGenreMap"
+                            [state]="vm.tvListState"
                             [skeletonCount]="vm.listSkeletonCount"
                             density="compact"
                             [showIndex]="true"
-                            [indexStart]="1"
-                            routeType="tv"
                         />
                     </div>
                     @if (vm.tvHasMore) {
@@ -66,9 +59,9 @@
             }
 
             @if (
-                vm.personState.type === 'loading' ||
-                vm.personState.type === 'loading-more' ||
-                (vm.personState.type === 'loaded' && vm.personState.value.length)
+                vm.personState.state === 'loading' ||
+                vm.personState.state === 'loading-more' ||
+                (vm.personState.state === 'success' && vm.personState.data.length)
             ) {
                 <section>
                     <h2 class="section-title text-title">People</h2>

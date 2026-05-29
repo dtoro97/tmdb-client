@@ -1,9 +1,9 @@
-<span class="user-avatar" [class.user-avatar--lg]="size === 'lg'" [attr.aria-label]="avatarPath ? null : name">
-    @if (avatarPath) {
-        <app-image class="user-avatar__image" [src]="avatarPath" [alt]="name" type="person" params="w185" />
+<span class="user-avatar" [class.user-avatar--lg]="size() === 'lg'" [attr.aria-label]="avatarPath() ? null : name()">
+    @if (avatarPath(); as avatarPath) {
+        <app-image class="user-avatar__image" [src]="avatarPath" [alt]="name()" type="person" params="w185" />
     } @else {
         <span class="user-avatar__fallback" aria-hidden="true">
-            {{ initials }}
+            {{ initials() }}
         </span>
     }
 </span>

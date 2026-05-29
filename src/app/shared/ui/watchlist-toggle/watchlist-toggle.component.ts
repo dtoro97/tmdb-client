@@ -1,29 +1,34 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MatButtonModule } from '@angular/material/button';
 
-import { EMPTY, Subject, catchError, switchMap, take } from 'rxjs';
+import { EMPTY, catchError, take } from 'rxjs';
 
 import { SnackbarComponent, SnackbarService, SnackbarType, TmdbListService, UserSessionStoreService } from '../../index';
 import type { MediaType } from '../../types';
 import { IconButtonComponent } from '../icon-button/icon-button.component';
 import { TmdbSigninDialogService } from '../tmdb-signin-dialog/tmdb-signin-dialog.service';
 
+interface ToggleTarget {
+    readonly mediaId: number;
+    readonly mediaType: MediaType;
+}
+
 @Component({
     selector: 'app-watchlist-toggle',
     imports: [IconButtonComponent, MatButtonModule],
     template: `
-        @if (iconOnly) {
+        @if (iconOnly()) {
             <app-icon-button
-                [ariaLabel]="isInWatchlist ? title + ' is on your watchlist' : 'Add ' + title + ' to watchlist'"
-                [disabled]="pending"
-                [selected]="isInWatchlist"
+                [ariaLabel]="isInWatchlist() ? title() + ' is on your watchlist' : 'Add ' + title() + ' to watchlist'"
+                [disabled]="pending()"
+                [selected]="isInWatchlist()"
                 (onClick)="toggle()"
             >
                 <i
-                    [class.fa-solid]="isInWatchlist"
-                    [class.fa-regular]="!isInWatchlist"
+                    [class.fa-solid]="isInWatchlist()"
+                    [class.fa-regular]="!isInWatchlist()"
                     class="watchlist-toggle__icon watchlist-toggle__icon--only fa-bookmark"
                     aria-hidden="true"
                 ></i>
@@ -33,72 +38,94 @@ import { TmdbSigninDialogService } from '../tmdb-signin-dialog/tmdb-signin-dialo
                 mat-stroked-button
                 type="button"
                 class="watchlist-toggle"
-                [class.watchlist-toggle--active]="isInWatchlist"
-                [disabled]="pending"
-                [attr.aria-label]="isInWatchlist ? title + ' is on your watchlist' : 'Add ' + title + ' to watchlist'"
+                [class.watchlist-toggle--active]="isInWatchlist()"
+                [disabled]="pending()"
+                [attr.aria-label]="isInWatchlist() ? title() + ' is on your watchlist' : 'Add ' + title() + ' to watchlist'"
                 (click)="toggle($event)"
             >
                 <i
-                    [class.fa-solid]="isInWatchlist"
-                    [class.fa-regular]="!isInWatchlist"
+                    [class.fa-solid]="isInWatchlist()"
+                    [class.fa-regular]="!isInWatchlist()"
                     class="watchlist-toggle__icon fa-bookmark"
                     aria-hidden="true"
                 ></i>
-                <span class="watchlist-toggle__label">{{ watchlistLabel }}</span>
+                <span class="watchlist-toggle__label">{{ watchlistLabel() }}</span>
             </button>
         }
     `,
     styleUrl: './watchlist-toggle.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WatchlistToggleComponent implements OnChanges {
-    @Input({ required: true }) mediaId!: number;
-    @Input({ required: true }) mediaType!: MediaType;
-    @Input({ required: true }) title!: string;
-    @Input() iconOnly = false;
-    isInWatchlist = false;
-    watchlistLabel = 'Add to Watchlist';
-    pending = false;
+export class WatchlistToggleComponent {
+    readonly mediaId = input.required<number>();
+    readonly mediaType = input.required<MediaType>();
+    readonly title = input.required<string>();
+    readonly iconOnly = input(false);
 
-    private readonly refresh$ = new Subject<void>();
+    readonly isInWatchlist = signal(false);
+    readonly watchlistLabel = computed(() => (this.isInWatchlist() ? 'On Watchlist' : 'Add to Watchlist'));
+    readonly pending = signal(false);
+
+    private readonly target = computed<ToggleTarget | null>(() => {
+        const mediaId = this.mediaId();
+        const mediaType = this.mediaType();
+
+        if (!mediaId || !mediaType) {
+            return null;
+        }
+
+        return { mediaId, mediaType };
+    });
 
     constructor(
-        private readonly cdr: ChangeDetectorRef,
         private readonly destroyRef: DestroyRef,
         private readonly snackbar: SnackbarService,
         private readonly tmdbListService: TmdbListService,
         private readonly tmdbSigninDialog: TmdbSigninDialogService,
         private readonly userSessionStore: UserSessionStoreService,
     ) {
-        this.refresh$
-            .pipe(
-                switchMap(() => this.tmdbListService.getWatchlistState$(this.mediaId, this.mediaType)),
-                catchError(() => {
-                    this.pending = false;
-                    this.cdr.markForCheck();
-                    return EMPTY;
-                }),
-                takeUntilDestroyed(this.destroyRef),
-            )
-            .subscribe((inWatchlist) => {
-                this.isInWatchlist = inWatchlist;
-                this.watchlistLabel = inWatchlist ? 'On Watchlist' : 'Add to Watchlist';
-                this.pending = false;
-                this.cdr.markForCheck();
+        effect((onCleanup) => {
+            const target = this.target();
+
+            if (!target) {
+                this.isInWatchlist.set(false);
+                this.pending.set(false);
+                return;
+            }
+
+            this.isInWatchlist.set(false);
+            this.pending.set(true);
+
+            const subscription = this.tmdbListService
+                .getWatchlistState$(target.mediaId, target.mediaType)
+                .pipe(
+                    take(1),
+                    catchError(() => {
+                        this.pending.set(false);
+                        return EMPTY;
+                    }),
+                )
+                .subscribe((inWatchlist) => {
+                    this.isInWatchlist.set(inWatchlist);
+                    this.pending.set(false);
+                });
+
+            onCleanup(() => {
+                subscription.unsubscribe();
             });
+        });
     }
 
-    ngOnChanges() {
-        if (!this.mediaId || !this.mediaType) {
+    toggle(event?: Event): void {
+        event?.preventDefault();
+        event?.stopPropagation();
+
+        const target = this.target();
+
+        if (!target || this.pending()) {
             return;
         }
 
-        this.refresh$.next();
-    }
-
-    toggle(event?: Event) {
-        event?.preventDefault();
-        event?.stopPropagation();
         if (!this.userSessionStore.isAuthenticated()) {
             this.tmdbSigninDialog
                 .open$()
@@ -111,27 +138,23 @@ export class WatchlistToggleComponent implements OnChanges {
             return;
         }
 
-        this.pending = true;
-        this.cdr.markForCheck();
+        this.pending.set(true);
 
-        const newValue = !this.isInWatchlist;
+        const newValue = !this.isInWatchlist();
 
         this.tmdbListService
-            .updateWatchlist$(this.mediaId, this.mediaType, newValue)
+            .updateWatchlist$(target.mediaId, target.mediaType, newValue)
             .pipe(
                 take(1),
                 catchError(() => {
-                    this.pending = false;
-                    this.cdr.markForCheck();
+                    this.pending.set(false);
                     return this.showError('Could not update your watchlist.');
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe(() => {
-                this.isInWatchlist = newValue;
-                this.watchlistLabel = newValue ? 'On Watchlist' : 'Add to Watchlist';
-                this.pending = false;
-                this.cdr.markForCheck();
+                this.isInWatchlist.set(newValue);
+                this.pending.set(false);
             });
     }
 

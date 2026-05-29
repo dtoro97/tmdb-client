@@ -1,5 +1,5 @@
 import { Video } from '../../api';
-import type { LoadableItems } from '../types';
+import type { RemoteData } from '../types';
 
 interface PickBestYoutubeTrailerOptions {
     readonly requirePreferredLanguage?: boolean;
@@ -20,20 +20,19 @@ export const sortVideosTrailerFirst = <T extends Video>(videos: readonly T[]): T
     [...videos].sort(compareVideosTrailerFirst);
 
 export const toYoutubeVideoState = (
-    state: LoadableItems<Video>,
-): LoadableItems<Video> => {
-    if (state.type === 'loaded') {
+    state: RemoteData<Video[]>,
+): RemoteData<Video[]> => {
+    if (state.state === 'success') {
         return {
-            type: 'loaded',
-            value: sortVideosTrailerFirst(state.value.filter(isYoutubeVideo)),
+            state: 'success',
+            data: sortVideosTrailerFirst(state.data.filter(isYoutubeVideo)),
         };
     }
 
-    if (state.type === 'loading-more') {
+    if (state.state === 'loading-more') {
         return {
-            type: 'loading-more',
-            value: sortVideosTrailerFirst(state.value.filter(isYoutubeVideo)),
-            placeholderCount: state.placeholderCount,
+            state: 'loading-more',
+            data: sortVideosTrailerFirst(state.data.filter(isYoutubeVideo)),
         };
     }
 

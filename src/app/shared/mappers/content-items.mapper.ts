@@ -1,16 +1,30 @@
 import { CollectionPart, MultiListItem } from '../../api';
-import type { MediaType } from '../types';
+import type { MediaType, RemoteData } from '../types';
 import {
     CardItem,
     KnownForLink,
     PersonCardItem,
     VideoTrailerSeedItem,
+    MediaListEntry,
     MediaListItem,
+    MediaListRouteType,
     PersonListItem,
     SearchResultItem,
 } from '../models';
 
 type DatePrecision = 'year' | 'full';
+
+interface MediaListEntryOptions {
+    readonly genreMap?: ReadonlyMap<number, string>;
+    readonly userRatings?: ReadonlyMap<number, number>;
+    readonly routeType?: MediaListRouteType;
+    readonly showIndex?: boolean;
+    readonly indexStart?: number;
+    readonly descendingFrom?: number | null;
+}
+
+const EMPTY_GENRE_MAP = new Map<number, string>();
+const EMPTY_USER_RATINGS = new Map<number, number>();
 
 type MediaItemLike = {
     id?: number | null;
@@ -141,6 +155,77 @@ export const toCollectionPartMediaListItem = (
         datePrecision,
     );
 
+export const toMediaListEntryState = (
+    state: RemoteData<MediaListItem[]>,
+    options: MediaListEntryOptions = {},
+): RemoteData<MediaListEntry[]> => {
+    switch (state.state) {
+        case 'success':
+            return {
+                state: 'success',
+                data: toMediaListEntries(state.data, options),
+            };
+        case 'loading-more':
+            return {
+                state: 'loading-more',
+                data: toMediaListEntries(state.data, options),
+            };
+        case 'failure':
+            return { state: 'failure', error: state.error };
+        default:
+            return { state: state.state };
+    }
+};
+
+export const toMediaListEntries = (
+    items: readonly MediaListItem[],
+    options: MediaListEntryOptions = {},
+): MediaListEntry[] => {
+    const genreMap = options.genreMap ?? EMPTY_GENRE_MAP;
+    const userRatings = options.userRatings ?? EMPTY_USER_RATINGS;
+    const routeType = options.routeType ?? 'item';
+    const indexStart = options.indexStart ?? 1;
+    const descendingFrom = options.descendingFrom ?? null;
+
+    return items.map((item, index) => ({
+        item,
+        genreNames: (item.genreIds ?? [])
+            .map((genreId) => genreMap.get(genreId))
+            .filter((genreName): genreName is string => !!genreName)
+            .slice(0, 3),
+        userRating: userRatings.get(item.id) ?? null,
+        routerLink: toMediaListRouterLink(item, routeType),
+        index: toMediaListDisplayIndex(
+            index,
+            options.showIndex ?? false,
+            indexStart,
+            descendingFrom,
+        ),
+    }));
+};
+
+const toMediaListRouterLink = (
+    item: MediaListItem,
+    routeType: MediaListRouteType,
+): readonly (string | number)[] => [
+    '/title',
+    item.id,
+    routeType === 'item' ? item.mediaType : routeType,
+];
+
+const toMediaListDisplayIndex = (
+    index: number,
+    showIndex: boolean,
+    indexStart: number,
+    descendingFrom: number | null,
+): number | null => {
+    if (!showIndex) {
+        return null;
+    }
+
+    return descendingFrom !== null ? descendingFrom - index : indexStart + index;
+};
+
 export const toPersonListItem = (person: PersonLike): PersonListItem => ({
     id: person.id ?? 0,
     thumb: person.profile_path ?? null,
@@ -242,17 +327,6 @@ export const toCardItem = (
         overview: item.overview ?? '',
     };
 };
-
-export const mediaListItemToCardItem = (item: MediaListItem): CardItem => ({
-    id: item.id,
-    mediaType: item.mediaType,
-    title: item.title,
-    imagePath: item.thumb,
-    backdropPath: null,
-    rating: item.rating,
-    date: item.date,
-    overview: item.overview,
-});
 
 export const toVideoTrailerSeedItem = (
     item: MediaItemLike,

@@ -2,14 +2,14 @@
     @if (store.collection$ | async; as collectionState) {
         <app-hero-surface
             [backdropPath]="
-                collectionState.type === 'loaded' && collectionState.value ? (store.backdropPath$ | async) : null
+                collectionState.state === 'success' && collectionState.data ? (store.backdropPath$ | async) : null
             "
             [alt]="
-                collectionState.type === 'loaded' && collectionState.value ? collectionState.value.name : 'Collection'
+                collectionState.state === 'success' && collectionState.data ? collectionState.data.name : 'Collection'
             "
             variant="integrated"
         >
-            @if (collectionState.type === 'loaded' ? collectionState.value : null; as collection) {
+            @if (collectionState.state === 'success' ? collectionState.data : null; as collection) {
                 <div class="collection-hero">
                     @if (store.posterPath$ | async; as posterPath) {
                         <app-image
@@ -17,8 +17,8 @@
                             [src]="posterPath"
                             type="media"
                             [alt]="
-                                collectionState.type === 'loaded' && collectionState.value
-                                    ? collectionState.value.name
+                                collectionState.state === 'success' && collectionState.data
+                                    ? collectionState.data.name
                                     : 'Collection poster'
                             "
                         />
@@ -107,19 +107,19 @@
 
         <div class="page-sections">
             @if (store.mappedPartsState$ | async; as partsState) {
-                @if (partsState.type === 'loading' || (partsState.type === 'loaded' && partsState.value.length)) {
+                @if (partsState.state === 'loading' || (partsState.state === 'success' && partsState.data.length)) {
                     <app-page-section subtitle="Movies">
-                        @if (partsState.type === 'loaded') {
-                            <span section-controls class="text-meta"> {{ partsState.value.length }} total </span>
+                        @if (partsState.state === 'success') {
+                            <span section-controls class="text-meta"> {{ partsState.data.length }} total </span>
                         } @else {
                             <span section-controls>
                                 <app-skeleton class="section-count-skeleton" />
                             </span>
                         }
 
-                        <app-media-list [state]="partsState" routeType="movie" />
+                        <app-media-list [state]="partsState" />
                     </app-page-section>
-                } @else if (partsState.type === 'loaded' && !partsState.value.length) {
+                } @else if (partsState.state === 'success' && !partsState.data.length) {
                     <p class="empty-text">No movies in this collection.</p>
                 }
             }

@@ -25,30 +25,27 @@
                                 } @else {
                                     TV Show
                                     @if (vm.hero.tvYearLabel; as tvYearLabel) {
-                                        &#x2022;
-                                        {{ tvYearLabel }}
+                                        &#x2022; {{ tvYearLabel }}
                                     }
                                 }
                             </p>
-                            <h1 class="hero-title text-hero-title">
-                                {{ media.title }}
-                            </h1>
+
+                            <h1 class="hero-title text-hero-title">{{ media.title }}</h1>
+
                             @if (media.tagline) {
                                 <p class="hero-tagline text-hero-summary">"{{ media.tagline }}"</p>
                             }
                         </div>
 
                         <div class="detail-hero__facts">
-                            @if (vm.hero.certification.type === 'loading' || vm.hero.certification.type === 'idle') {
+                            @if (vm.hero.certification.state === 'loading') {
                                 <app-skeleton class="hero-certification-skeleton" aria-hidden="true" />
-                            } @else if (vm.hero.certification.type === 'loaded') {
-                                @if (vm.hero.certification.value; as certification) {
-                                    <app-badge [label]="certification" />
-                                }
+                            } @else if (vm.hero.certification.state === 'success' && vm.hero.certification.data) {
+                                <app-badge [label]="vm.hero.certification.data" />
                             }
 
                             @if (vm.inCinemas) {
-                                <app-badge label="In cinemas" variant="accent" />
+                                <app-badge label="In cinemas" iconClass="fa-solid fa-film" variant="accent" />
                             }
 
                             @if (media.mediaType === 'tv' && media.numberOfSeasons) {
@@ -59,9 +56,7 @@
                             }
 
                             @if (media.runtime) {
-                                <span class="text-body-sm">
-                                    {{ media.runtime | m2h }}
-                                </span>
+                                <span class="text-body-sm">{{ media.runtime | m2h }}</span>
                             }
                         </div>
 
@@ -81,7 +76,7 @@
                         </div>
 
                         <p class="hero-overview text-hero-summary" [class.hero-overview--empty]="!media.overview">
-                            {{ media.overview || 'We don\u2019t have an overview for this title yet.' }}
+                            {{ media.overview || "We don't have an overview for this title yet." }}
                         </p>
 
                         @if (media.nextEpisode) {
@@ -108,15 +103,14 @@
                                 [title]="media.title"
                                 [mediaType]="media.mediaType"
                             />
-                            @if (vm.videos.type === 'loading' || vm.videos.type === 'idle') {
+
+                            @if (vm.videos.state === 'loading') {
                                 <app-skeleton class="hero-trailer-skeleton" aria-hidden="true" />
-                            } @else if (vm.videos.type === 'loaded') {
-                                @if (vm.videos.value?.trailerKey; as trailerKey) {
-                                    <button matButton="filled" type="button" (click)="openTrailer(trailerKey)">
-                                        <i class="fa-solid fa-play"></i>
-                                        Play Trailer
-                                    </button>
-                                }
+                            } @else if (vm.videos.state === 'success' && vm.videos.data?.trailerKey; as trailerKey) {
+                                <button matButton="filled" type="button" (click)="openTrailer(trailerKey)">
+                                    <i class="fa-solid fa-play" aria-hidden="true"></i>
+                                    Play Trailer
+                                </button>
                             }
                         </div>
                     </div>
@@ -129,61 +123,65 @@
                                 @if (vm.hero.canRateTitle) {
                                     <app-user-rating
                                         class="hero-user-rating hero-user-rating--with-divider"
-                                        [title]="media.title"
+                                        [currentRating]="vm.hero.userRating.currentRating"
+                                        [disabled]="vm.hero.userRating.disabled"
+                                        [loading]="vm.hero.userRating.loading"
+                                        [pending]="vm.hero.userRating.pending"
+                                        (ratingClick)="openUserRatingDialog(media.id, media.mediaType, media.title)"
                                     />
                                 }
                             </div>
                         }
 
-                        @if (vm.hero.watchProviders.type === 'loaded') {
-                            @if (vm.hero.watchProviders.value; as providers) {
-                                @if (providers.providers.length) {
-                                    <div class="provider-preview">
-                                        <div class="u-flex-column u-items-start u-gap-1">
-                                            <span class="text-label u-nowrap"> Watch on </span>
-                                            @if (providers.link) {
-                                                <a
-                                                    class="section-link section-link--muted text-body-sm"
-                                                    [href]="providers.link"
-                                                    target="_blank"
-                                                    rel="noopener"
-                                                >
-                                                    Data provided by JustWatch
-                                                </a>
-                                            }
-                                        </div>
-                                        <div class="provider-preview-logos">
-                                            @for (provider of providers.providers; track provider.provider_id) {
-                                                <a
-                                                    class="provider-preview-link"
-                                                    [routerLink]="['/discover']"
-                                                    [queryParams]="{
-                                                        type: media.mediaType,
-                                                        providers: provider.provider_id,
-                                                    }"
-                                                    [attr.aria-label]="provider.provider_name ?? 'Watch provider'"
-                                                >
-                                                    <app-image
-                                                        class="provider-preview-logo"
-                                                        [src]="provider.logo_path ?? null"
-                                                        [params]="'w92'"
-                                                        [alt]="provider.provider_name ?? 'Watch provider'"
-                                                    />
-                                                </a>
-                                            }
-                                            @if (providers.hiddenCount && providers.link) {
-                                                <a
-                                                    class="provider-preview-more text-caption"
-                                                    [href]="providers.link"
-                                                    target="_blank"
-                                                    rel="noopener"
-                                                >
-                                                    +{{ providers.hiddenCount }}
-                                                </a>
-                                            }
-                                        </div>
+                        @if (vm.hero.watchProviders; as providers) {
+                            @if (providers.providers.length) {
+                                <div class="provider-preview">
+                                    <div class="u-flex-column u-items-start u-gap-1">
+                                        <span class="text-label u-nowrap">Watch on</span>
+                                        @if (providers.link) {
+                                            <a
+                                                class="section-link section-link--muted text-body-sm"
+                                                [href]="providers.link"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                Data provided by JustWatch
+                                            </a>
+                                        }
                                     </div>
-                                }
+
+                                    <div class="provider-preview-logos">
+                                        @for (provider of providers.providers; track provider.provider_id) {
+                                            <a
+                                                class="provider-preview-link"
+                                                [routerLink]="['/discover']"
+                                                [queryParams]="{
+                                                    type: media.mediaType,
+                                                    providers: provider.provider_id,
+                                                }"
+                                                [attr.aria-label]="provider.provider_name ?? 'Watch provider'"
+                                            >
+                                                <app-image
+                                                    class="provider-preview-logo"
+                                                    [src]="provider.logo_path ?? null"
+                                                    params="w92"
+                                                    [alt]="provider.provider_name ?? 'Watch provider'"
+                                                />
+                                            </a>
+                                        }
+
+                                        @if (providers.hiddenCount && providers.link) {
+                                            <a
+                                                class="provider-preview-more text-caption"
+                                                [href]="providers.link"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                +{{ providers.hiddenCount }}
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
                             }
                         }
                     </aside>
@@ -197,7 +195,6 @@
                     <div class="detail-hero__main">
                         <app-skeleton class="hero-kicker-skeleton" aria-hidden="true" />
                         <app-skeleton class="hero-title-skeleton" aria-hidden="true" />
-                        <app-skeleton class="hero-tagline-skeleton" aria-hidden="true" />
 
                         <div class="detail-hero__facts">
                             <app-skeleton class="hero-certification-skeleton" aria-hidden="true" />
@@ -210,18 +207,35 @@
                             }
                         </div>
 
-                        <div class="u-flex-column u-gap-2">
-                            <app-skeleton class="hero-overview-line" aria-hidden="true" />
-                        </div>
+                        <app-skeleton class="hero-overview-line" aria-hidden="true" />
+                        <app-skeleton class="hero-secondary-skeleton" aria-hidden="true" />
 
                         <div class="hero-actions">
                             <app-skeleton class="hero-action-skeleton" aria-hidden="true" />
+                            <app-skeleton class="hero-trailer-skeleton" aria-hidden="true" />
                         </div>
                     </div>
 
                     <aside class="detail-hero__side" aria-label="Ratings and availability">
                         <div class="hero-ratings">
                             <app-tmdb-rating [loading]="true" />
+                            <app-user-rating
+                                class="hero-user-rating hero-user-rating--with-divider"
+                                [currentRating]="null"
+                                [disabled]="true"
+                                [loading]="true"
+                            />
+                        </div>
+
+                        <div class="provider-preview provider-preview--skeleton" aria-hidden="true">
+                            <div class="u-flex-column u-items-start u-gap-1">
+                                <app-skeleton class="hero-provider-label-skeleton" />
+                                <app-skeleton class="hero-provider-link-skeleton" />
+                            </div>
+
+                            <div class="provider-preview-logos">
+                                <app-skeleton class="hero-provider-logo-skeleton" />
+                            </div>
                         </div>
                     </aside>
                 </div>
@@ -229,122 +243,110 @@
         </app-hero-surface>
 
         <div class="page-sections">
-            @if (vm.credits.type !== 'loaded' || vm.credits.value) {
+            @if (vm.creditsSummary.state !== 'success' || vm.creditsSummary.data) {
                 <app-page-section subtitle="Top Cast">
-                    <app-media-credits-panel [data]="vm.credits" />
+                    <app-media-credits-summary [data]="vm.creditsSummary" />
                 </app-page-section>
             }
-
-            @if (vm.collection.type === 'loading' || vm.collection.type === 'idle') {
-                <div class="collection">
-                    <app-skeleton class="collection-skeleton" />
-                </div>
-            } @else if (vm.collection.type === 'loaded') {
-                @if (vm.collection.value; as collection) {
-                    <a class="collection" [routerLink]="['/collection', collection.id]">
-                        <app-image class="collection-backdrop" [src]="collection.backdrop_path" [params]="'w1280'" />
-                        <div class="collection-overlay"></div>
-                        <div class="collection-content u-gap-2">
-                            <h2 class="text-title">Part of the {{ collection.name }}</h2>
-                            @if (collection.parts?.length) {
-                                <p class="text-body-sm">
-                                    Includes
-                                    @for (part of collection.parts; track part.id; let last = $last) {
-                                        @if (last && collection.parts!.length > 1) {
-                                            and
-                                        }
-                                        {{ part.title }}
-                                        @if (!last && collection.parts!.length > 2) {
-                                            ,
-                                        }
+            @if (vm.collection.state === 'success' && vm.collection.data; as collection) {
+                <a class="collection" [routerLink]="['/collection', collection.id]">
+                    <app-image class="collection-backdrop" [src]="collection.backdrop_path" params="w1280" />
+                    <div class="collection-overlay"></div>
+                    <div class="collection-content u-gap-2">
+                        <h2 class="text-title">Part of the {{ collection.name }}</h2>
+                        @if (collection.parts?.length) {
+                            <p class="text-body-sm">
+                                Includes
+                                @for (part of collection.parts; track part.id; let last = $last) {
+                                    @if (last && collection.parts!.length > 1) {
+                                        and
                                     }
-                                </p>
-                            }
-                        </div>
-                    </a>
-                }
+                                    {{ part.title }}
+                                    @if (!last && collection.parts!.length > 2) {
+                                        ,
+                                    }
+                                }
+                            </p>
+                        }
+                    </div>
+                </a>
             }
 
             @if (vm.media; as media) {
                 @if (media.mediaType === 'tv' && media.lastEpisode) {
-                    <app-page-section title="Latest Episode">
+                    <app-page-section subtitle="Latest Episode">
                         <a section-controls class="section-link text-body-sm" [routerLink]="['episodes']">
                             Browse all episodes
-                            <i class="fa-solid fa-chevron-right"></i>
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                         </a>
 
-                        @if (vm.latestEpisode.type === 'loaded') {
-                            @if (vm.latestEpisode.value; as episode) {
-                                <app-episode-list-item
-                                    [item]="{
-                                        name: episode.name,
-                                        subtitle: null,
-                                        overview: episode.overview,
-                                        stillPath: episode.still_path,
-                                        seasonNumber: episode.season_number,
-                                        episodeNumber: episode.episode_number,
-                                        airDate: episode.air_date,
-                                        runtime: episode.runtime,
-                                        voteAverage: episode.vote_average,
-                                        routeCommands: [
-                                            '/title',
-                                            vm.media.id,
-                                            vm.media.mediaType,
-                                            'episodes',
-                                            episode.season_number,
-                                            episode.episode_number,
-                                        ],
-                                    }"
-                                />
-                            }
+                        @if (vm.latestEpisode; as episode) {
+                            <app-episode-list-item
+                                [item]="{
+                                    name: episode.name,
+                                    subtitle: null,
+                                    overview: episode.overview,
+                                    stillPath: episode.still_path,
+                                    seasonNumber: episode.season_number,
+                                    episodeNumber: episode.episode_number,
+                                    airDate: episode.air_date,
+                                    runtime: episode.runtime,
+                                    voteAverage: episode.vote_average,
+                                    routeCommands: [
+                                        '/title',
+                                        media.id,
+                                        media.mediaType,
+                                        'episodes',
+                                        episode.season_number,
+                                        episode.episode_number,
+                                    ],
+                                }"
+                            />
                         }
                     </app-page-section>
                 }
             }
 
-            @if (vm.videos.type === 'loading' || vm.videos.type === 'idle') {
+            @if (vm.videos.state === 'loading') {
                 <app-page-section subtitle="Videos">
-                    <app-videos-grid [state]="{ type: 'loading' }" />
+                    <app-videos-grid [state]="{ state: 'loading' }" />
                 </app-page-section>
-            } @else if (vm.videos.type === 'loaded') {
-                @if (vm.videos.value; as videos) {
-                    <app-page-section subtitle="Videos">
-                        @if (videos.totalCount > 0) {
-                            <a section-controls class="section-link text-body-sm" [routerLink]="['videos']">
-                                Browse all videos ({{ videos.totalCount }})
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </a>
-                        }
+            } @else if (vm.videos.state === 'success' && vm.videos.data; as videos) {
+                <app-page-section subtitle="Videos">
+                    @if (videos.totalCount > 0) {
+                        <a section-controls class="section-link text-body-sm" [routerLink]="['videos']">
+                            Browse all videos ({{ videos.totalCount }})
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                        </a>
+                    }
 
-                        <app-videos-grid [state]="videos.state" />
-                    </app-page-section>
-                }
+                    <app-videos-grid [state]="videos.state" />
+                </app-page-section>
             }
 
-            @if (vm.photos.type === 'loading' || vm.photos.type === 'idle') {
+            @if (vm.photos.state === 'loading') {
                 <app-page-section subtitle="Photos">
-                    <app-photos-preview [state]="{ type: 'loading' }" />
+                    <app-photos-preview [state]="{ state: 'loading' }" />
                 </app-page-section>
-            } @else if (vm.photos.type === 'loaded') {
-                @if (vm.photos.value; as photos) {
-                    <app-page-section subtitle="Photos">
-                        @if (photos.totalCount > 0) {
-                            <a section-controls class="section-link text-body-sm" [routerLink]="['photos']">
-                                Browse all photos ({{ photos.totalCount }})
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </a>
-                        }
-                        <app-photos-preview
-                            [state]="photos.state"
-                            [totalCount]="photos.totalCount"
-                            (photoClick)="openPhotoViewer($event)"
-                            (moreClick)="openPhotosPage()"
-                        />
-                    </app-page-section>
-                }
+            } @else if (vm.photos.state === 'success' && vm.photos.data; as photos) {
+                <app-page-section subtitle="Photos">
+                    @if (photos.totalCount > 0) {
+                        <a section-controls class="section-link text-body-sm" [routerLink]="['photos']">
+                            Browse all photos ({{ photos.totalCount }})
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                        </a>
+                    }
+
+                    <app-photos-preview
+                        [state]="photos.state"
+                        [totalCount]="photos.totalCount"
+                        (photoClick)="openPhotoViewer($event)"
+                        (moreClick)="openPhotosPage()"
+                    />
+                </app-page-section>
             }
 
-            @if (vm.reviews.type === 'loading' || vm.reviews.type === 'idle') {
+            @if (vm.reviews.state === 'loading') {
                 <app-page-section subtitle="Reviews">
                     <app-skeleton class="reviews-summary-skeleton" />
                     <div class="reviews-preview-grid">
@@ -353,55 +355,51 @@
                         }
                     </div>
                 </app-page-section>
-            } @else if (vm.reviews.type === 'loaded') {
-                @if (vm.reviews.value; as reviews) {
-                    @if (vm.media; as media) {
-                        <app-page-section subtitle="Reviews">
-                            <a section-controls class="section-link text-body-sm" routerLink="reviews">
-                                Browse all reviews ({{ reviews.totalResults }})
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </a>
+            } @else if (vm.reviews.state === 'success' && vm.reviews.data; as reviews) {
+                @if (reviews.totalResults || reviews.previewReviews.length) {
+                    <app-page-section subtitle="Reviews">
+                        <a section-controls class="section-link text-body-sm" routerLink="reviews">
+                            Browse all reviews ({{ reviews.totalResults || reviews.previewReviews.length }})
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                        </a>
 
-                            <div class="reviews-preview-grid">
-                                @for (review of reviews.previewReviews; track review.id) {
-                                    <app-review-card
-                                        [review]="review"
-                                        variant="preview"
-                                        [reviewLink]="review.id ? ['reviews', review.id] : null"
-                                    />
-                                }
-                            </div>
-                        </app-page-section>
-                    }
-                }
-            }
-
-            @if (vm.recommendations.type === 'loading' || vm.recommendations.type === 'idle') {
-                <app-page-section panel title="More Like This">
-                    <app-media-carousel-panel
-                        [state]="{ type: 'loading' }"
-                        variant="backdrop"
-                        [showRating]="true"
-                        [showDate]="true"
-                    ></app-media-carousel-panel>
-                </app-page-section>
-            } @else if (vm.recommendations.type === 'loaded') {
-                @if (vm.recommendations.value; as recommendations) {
-                    <app-page-section panel title="More Like This">
-                        <app-media-carousel-panel
-                            [state]="recommendations.state"
-                            variant="backdrop"
-                            [showRating]="true"
-                            [showDate]="true"
-                        ></app-media-carousel-panel>
+                        <div class="reviews-preview-grid">
+                            @for (review of reviews.previewReviews; track review.id) {
+                                <app-review-card
+                                    [review]="review"
+                                    variant="preview"
+                                    [reviewLink]="review.id ? ['reviews', review.id] : null"
+                                />
+                            }
+                        </div>
                     </app-page-section>
                 }
             }
 
+            @if (vm.recommendations.state === 'loading') {
+                <app-page-section panel title="More Like This">
+                    <app-media-carousel-panel
+                        [state]="{ state: 'loading' }"
+                        variant="backdrop"
+                        [showRating]="true"
+                        [showDate]="true"
+                    />
+                </app-page-section>
+            } @else if (vm.recommendations.state === 'success' && vm.recommendations.data; as recommendations) {
+                <app-page-section panel title="More Like This">
+                    <app-media-carousel-panel
+                        [state]="recommendations.state"
+                        variant="backdrop"
+                        [showRating]="true"
+                        [showDate]="true"
+                    />
+                </app-page-section>
+            }
+
             @if (vm.media; as media) {
-                @if (vm.keywords.type === 'loaded' && vm.keywords.value; as keywords) {
+                @if (vm.keywords.state === 'success' && vm.keywords.data.length) {
                     <app-page-section subtitle="Keywords">
-                        <app-keywords-list [keywords]="keywords" [mediaType]="media.mediaType" />
+                        <app-keywords-list [keywords]="vm.keywords.data" [mediaType]="media.mediaType" />
                     </app-page-section>
                 }
 

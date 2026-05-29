@@ -13,13 +13,13 @@ import {
     serializeNumberListParam,
     toISODate,
     toMediaListItem,
+    toTmdbDiscoverSort,
 } from '../../shared';
 import {
     DiscoverDateWindow,
     DiscoverPageDefinition,
     DiscoverQueryState,
     DiscoverRuntimePreset,
-    DiscoverSortKey,
 } from './discover-page-definitions';
 
 type MovieDiscoverSort =
@@ -112,7 +112,11 @@ export class DiscoverQueryService {
                 releaseRegion,
                 releaseDates.from,
                 releaseDates.to,
-                this.toMovieSort(query),
+                toTmdbDiscoverSort(
+                    'movie',
+                    query.sortKey,
+                    query.sortDirection,
+                ) as MovieDiscoverSort,
                 query.voteAverageGte ?? undefined,
                 undefined,
                 query.voteCountGte ?? undefined,
@@ -176,7 +180,11 @@ export class DiscoverQueryService {
                 language,
                 page,
                 undefined,
-                this.toTvSort(query),
+                toTmdbDiscoverSort(
+                    'tv',
+                    query.sortKey,
+                    query.sortDirection,
+                ) as TvDiscoverSort,
                 undefined,
                 query.voteAverageGte ?? undefined,
                 undefined,
@@ -282,48 +290,6 @@ export class DiscoverQueryService {
         }
 
         return query.releaseType ?? undefined;
-    }
-
-    private toMovieSort(query: DiscoverQueryState): MovieDiscoverSort {
-        const field = this.toMovieSortField(query.sortKey);
-        return `${field}.${query.sortDirection}` as MovieDiscoverSort;
-    }
-
-    private toTvSort(query: DiscoverQueryState): TvDiscoverSort {
-        const field = this.toTvSortField(query.sortKey);
-        return `${field}.${query.sortDirection}` as TvDiscoverSort;
-    }
-
-    private toMovieSortField(sortKey: DiscoverSortKey): string {
-        if (sortKey === 'rating') {
-            return 'vote_average';
-        }
-
-        if (sortKey === 'release_date') {
-            return 'primary_release_date';
-        }
-
-        if (sortKey === 'title') {
-            return 'title';
-        }
-
-        return sortKey;
-    }
-
-    private toTvSortField(sortKey: DiscoverSortKey): string {
-        if (sortKey === 'rating') {
-            return 'vote_average';
-        }
-
-        if (sortKey === 'release_date') {
-            return 'first_air_date';
-        }
-
-        if (sortKey === 'title') {
-            return 'name';
-        }
-
-        return sortKey;
     }
 
 }

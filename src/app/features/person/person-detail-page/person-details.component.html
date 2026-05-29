@@ -1,6 +1,6 @@
 @if (personDetailStore.personDetailVm$ | async; as vm) {
     <div class="page-container">
-        @if (vm.person.type === 'loaded' && vm.person.value; as person) {
+        @if (vm.person.state === 'success' && vm.person.data; as person) {
             <section class="profile-hero">
                 <div class="profile-hero__inner inner-container">
                     <app-image
@@ -81,7 +81,7 @@
                     </aside>
                 </div>
             </section>
-        } @else if (vm.person.type === 'loading' || vm.person.type === 'idle') {
+        } @else if (vm.person.state === 'loading') {
             <section class="profile-hero">
                 <div class="profile-hero__inner inner-container" aria-hidden="true">
                     <app-skeleton class="portrait portrait--skeleton aspect-poster" />
@@ -127,30 +127,30 @@
         }
 
         <div class="page-sections">
-            @if (vm.knownFor.type === 'loading' || (vm.knownFor.type === 'loaded' && vm.knownFor.value.length)) {
+            @if (vm.knownFor.state === 'loading' || (vm.knownFor.state === 'success' && vm.knownFor.data.length)) {
                 <app-page-section subtitle="Known For">
                     <app-media-carousel-panel [state]="vm.knownFor"></app-media-carousel-panel>
                 </app-page-section>
             }
 
-            @if (vm.photos.type === 'loading' || (vm.photos.type === 'loaded' && vm.photos.value.length > 0)) {
+            @if (vm.photos.state === 'loading' || (vm.photos.state === 'success' && vm.photos.data.length > 0)) {
                 <app-page-section subtitle="Photos">
                     <ng-container section-controls>
                         @if (
-                            vm.person.type === 'loaded' &&
-                            vm.person.value &&
-                            vm.photos.type === 'loaded' &&
-                            vm.photos.value.length
+                            vm.person.state === 'success' &&
+                            vm.person.data &&
+                            vm.photos.state === 'success' &&
+                            vm.photos.data.length
                         ) {
-                            <a class="browse-link text-body-sm" [routerLink]="['/name', vm.person.value.id, 'photos']">
-                                Browse all photos ({{ vm.photos.value.length }})
+                            <a class="browse-link text-body-sm" [routerLink]="['/name', vm.person.data.id, 'photos']">
+                                Browse all photos ({{ vm.photos.data.length }})
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         }
                     </ng-container>
                     <app-photos-preview
                         [state]="vm.photos"
-                        [totalCount]="vm.photos.type === 'loaded' ? vm.photos.value.length : 0"
+                        [totalCount]="vm.photos.state === 'success' ? vm.photos.data.length : 0"
                         mode="person"
                         (photoClick)="openPhotoViewer($event)"
                         (moreClick)="openPhotosPage()"
@@ -158,7 +158,7 @@
                 </app-page-section>
             }
 
-            @if (vm.creditsDisplay.type === 'loading' || vm.creditsDisplay.type === 'loaded') {
+            @if (vm.creditsDisplay.state === 'loading' || vm.creditsDisplay.state === 'success') {
                 <app-page-section panel subtitle="Filmography">
                     <app-person-credits
                         [state]="vm.creditsDisplay"
@@ -175,7 +175,7 @@
                 </app-page-section>
             }
 
-            @if (vm.person.type === 'loaded' && vm.person.value; as person) {
+            @if (vm.person.state === 'success' && vm.person.data; as person) {
                 @if (person.also_known_as?.length) {
                     <app-page-section subtitle="Personal Details">
                         <dl class="info-grid" aria-label="Personal details">

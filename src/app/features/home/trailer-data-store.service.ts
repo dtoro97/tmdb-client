@@ -20,7 +20,7 @@ import {
     buildYoutubeThumbnailUrl,
     buildYoutubeWatchUrl,
     isDefined,
-    LoadableValue,
+    RemoteData,
     pickBestYoutubeTrailer,
     getISODate,
     toVideoTrailerSeedItem,
@@ -44,7 +44,7 @@ export interface TrailerVideoCardItem extends VideoCardItem {
 }
 
 interface TrailerDataState {
-    videoCache: Record<string, LoadableValue<Video[]>>;
+    videoCache: Record<string, RemoteData<Video[]>>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -114,22 +114,22 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
         const cacheKey = `${mediaType}:${mediaId}`;
         const cached = this.get().videoCache[cacheKey];
 
-        if (cached?.type === 'loaded') {
-            return of(cached.value);
+        if (cached?.state === 'success') {
+            return of(cached.data);
         }
 
-        if (cached?.type === 'loading') {
+        if (cached?.state === 'loading') {
             return this.select((state) => state.videoCache[cacheKey]).pipe(
-                filter((entry) => !!entry && entry.type === 'loaded'),
+                filter((entry) => isDefined(entry) && entry.state === 'success'),
                 take(1),
-                map((entry) => entry.value),
+                map((entry) => entry.data),
             );
         }
 
         this.patchState((state) => ({
             videoCache: {
                 ...state.videoCache,
-                [cacheKey]: { type: 'loading' },
+                [cacheKey]: { state: 'loading' },
             },
         }));
 
@@ -138,7 +138,7 @@ export class TrailerDataStoreService extends ComponentStore<TrailerDataState> {
                 this.patchState((state) => ({
                     videoCache: {
                         ...state.videoCache,
-                        [cacheKey]: { type: 'loaded', value: videos },
+                        [cacheKey]: { state: 'success', data: videos },
                     },
                 })),
             ),

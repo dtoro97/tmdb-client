@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { LoadableItems, SearchResultItem } from '../../..';
+import { RemoteData, SearchResultItem } from '../../..';
 import { BadgeComponent } from '../../badge/badge.component';
 import { ImageComponent } from '../../image/image.component';
 import { RatingComponent } from '../../rating/rating.component';
@@ -15,7 +15,7 @@ import { SkeletonComponent } from '../../skeleton/skeleton.component';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderSearchResultsComponent {
-    @Input({ required: true }) state!: LoadableItems<SearchResultItem>;
+    @Input({ required: true }) state!: RemoteData<SearchResultItem[]>;
     @Output() readonly resultSelected = new EventEmitter<SearchResultItem>();
 
     readonly skeletonRows = Array.from({ length: 5 });

@@ -15,11 +15,10 @@ import { EMPTY, catchError, delay, map, of, switchMap, tap } from 'rxjs';
 import {
     CardItem,
     ExternalLinks,
-    LoadableItems,
-    LoadableValue,
+    RemoteData,
     LocaleStoreService,
     MediaType,
-    type SelectOption,
+    SelectOption,
     SortDirection,
     ViewerImage,
     buildExternalLinks,
@@ -66,13 +65,13 @@ export interface PersonCreditsUiState {
 }
 
 export interface PersonDetailVm {
-    person: LoadableValue<PersonWithExternalIds | null>;
+    person: RemoteData<PersonWithExternalIds | null>;
     externalLinks: ExternalLinks | null;
-    knownFor: LoadableItems<CardItem>;
-    photos: LoadableItems<ViewerImage>;
-    credits: LoadableValue<PersonCreditsState>;
+    knownFor: RemoteData<CardItem[]>;
+    photos: RemoteData<ViewerImage[]>;
+    credits: RemoteData<PersonCreditsState>;
     creditsUi: PersonCreditsUiState;
-    creditsDisplay: LoadableValue<{
+    creditsDisplay: RemoteData<{
         totalCount: number;
         hasActiveFilters: boolean;
         mediaOptions: SelectOption<PersonCreditsMediaType>[];
@@ -92,9 +91,9 @@ export interface PersonDetailVm {
 }
 
 interface PersonDetailState {
-    person: LoadableValue<PersonWithExternalIds | null>;
-    photos: LoadableItems<ViewerImage>;
-    credits: LoadableValue<PersonCreditsState>;
+    person: RemoteData<PersonWithExternalIds | null>;
+    photos: RemoteData<ViewerImage[]>;
+    credits: RemoteData<PersonCreditsState>;
     creditsUi: PersonCreditsUiState;
 }
 
@@ -107,9 +106,9 @@ const INITIAL_CREDITS_UI: PersonCreditsUiState = {
 };
 
 const INITIAL_STATE: PersonDetailState = {
-    person: { type: 'idle' },
-    photos: { type: 'idle' },
-    credits: { type: 'idle' },
+    person: { state: 'notAsked' },
+    photos: { state: 'notAsked' },
+    credits: { state: 'notAsked' },
     creditsUi: INITIAL_CREDITS_UI,
 };
 
@@ -138,18 +137,18 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
     getPersonDetails$(id: number) {
         const state = this.get();
         if (
-            state.person.type === 'loaded' &&
-            state.person.value?.id === id &&
-            state.photos.type === 'loaded' &&
-            state.credits.type === 'loaded'
+            state.person.state === 'success' &&
+            state.person.data?.id === id &&
+            state.photos.state === 'success' &&
+            state.credits.state === 'success'
         ) {
             return of(undefined);
         }
 
         this.patchState({
-            person: { type: 'loading' },
-            photos: { type: 'loading' },
-            credits: { type: 'loading' },
+            person: { state: 'loading' },
+            photos: { state: 'loading' },
+            credits: { state: 'loading' },
             creditsUi: INITIAL_CREDITS_UI,
         });
 
@@ -160,7 +159,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                 map((person) => person as PersonWithExternalIds),
                 tap((person) => {
                     this.patchState({
-                        person: { type: 'loaded', value: person },
+                        person: { state: 'success', data: person },
                     });
 
                     this.patchPhotosFromPerson(person);
@@ -181,8 +180,8 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                 tap((raw) => {
                     this.patchState({
                         credits: {
-                            type: 'loaded',
-                            value: this.buildCredits(raw),
+                            state: 'success',
+                            data: this.buildCredits(raw),
                         },
                     });
                 }),
@@ -221,8 +220,8 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         ];
         this.patchState({
             photos: {
-                type: 'loaded',
-                value: shuffle(images),
+                state: 'success',
+                data: shuffle(images),
             },
         });
     }
@@ -374,18 +373,18 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
     }
 
     private buildKnownFor(
-        person: LoadableValue<PersonWithExternalIds | null>,
-        credits: LoadableValue<PersonCreditsState>,
-    ): LoadableItems<CardItem> {
-        if (person.type === 'loading' || credits.type === 'loading') {
-            return { type: 'loading' };
+        person: RemoteData<PersonWithExternalIds | null>,
+        credits: RemoteData<PersonCreditsState>,
+    ): RemoteData<CardItem[]> {
+        if (person.state === 'loading' || credits.state === 'loading') {
+            return { state: 'loading' };
         }
 
-        if (person.type !== 'loaded' || credits.type !== 'loaded' || !person.value) {
-            return { type: 'idle' };
+        if (person.state !== 'success' || credits.state !== 'success' || !person.data) {
+            return { state: 'loading' };
         }
 
-        const seed = person.value.known_for_department === 'Acting' ? credits.value.acting : credits.value.production;
+        const seed = person.data.known_for_department === 'Acting' ? credits.data.acting : credits.data.production;
 
         const cards: CardItem[] = [...seed]
             .sort((a, b) => b.voteCount - a.voteCount)
@@ -402,30 +401,30 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                 role: credit.roleLabel || undefined,
             }));
 
-        return { type: 'loaded', value: cards };
+        return { state: 'success', data: cards };
     }
 
-    private buildCreditsDisplay(credits: LoadableValue<PersonCreditsState>, ui: PersonCreditsUiState) {
-        if (credits.type === 'loading') {
-            return { type: 'loading' } as const;
+    private buildCreditsDisplay(credits: RemoteData<PersonCreditsState>, ui: PersonCreditsUiState) {
+        if (credits.state === 'loading') {
+            return { state: 'loading' } as const;
         }
 
-        if (credits.type !== 'loaded') {
-            return { type: 'idle' } as const;
+        if (credits.state !== 'success') {
+            return { state: 'loading' } as const;
         }
 
-        const acting = this.prepareCreditSection(credits.value.acting, ui, ui.actingExpanded);
-        const production = this.prepareCreditSection(credits.value.production, ui, ui.productionExpanded);
+        const acting = this.prepareCreditSection(credits.data.acting, ui, ui.actingExpanded);
+        const production = this.prepareCreditSection(credits.data.production, ui, ui.productionExpanded);
 
         return {
-            type: 'loaded' as const,
-            value: {
+            state: 'success' as const,
+            data: {
                 totalCount: acting.totalCount + production.totalCount,
                 hasActiveFilters:
                     ui.mediaType !== INITIAL_CREDITS_UI.mediaType ||
                     ui.sortBy !== INITIAL_CREDITS_UI.sortBy ||
                     ui.sortDirection !== INITIAL_CREDITS_UI.sortDirection,
-                mediaOptions: this.buildMediaOptions(credits.value),
+                mediaOptions: this.buildMediaOptions(credits.data),
                 acting,
                 production,
             },
@@ -449,14 +448,14 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
     }
 
     private hasCreditsForMediaType(
-        credits: LoadableValue<PersonCreditsState>,
+        credits: RemoteData<PersonCreditsState>,
         mediaType: PersonCreditsMediaType,
     ): boolean {
         if (mediaType === 'all') {
             return true;
         }
 
-        return credits.type === 'loaded' && this.hasMediaType(credits.value, mediaType);
+        return credits.state === 'success' && this.hasMediaType(credits.data, mediaType);
     }
 
     private hasMediaType(credits: PersonCreditsState, mediaType: MediaType): boolean {
@@ -573,11 +572,15 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         return Number.parseInt(label, 10) || 0;
     }
 
-    private buildPersonExternalLinks(person: LoadableValue<PersonWithExternalIds | null>): ExternalLinks | null {
-        if (person.type !== 'loaded' || !person.value) {
+    private buildPersonExternalLinks(person: RemoteData<PersonWithExternalIds | null>): ExternalLinks | null {
+        if (person.state !== 'success' || !person.data) {
             return null;
         }
 
-        return buildExternalLinks(person.value.external_ids ?? null, person.value.homepage ?? null, 'name');
+        return buildExternalLinks({
+            links: person.data.external_ids,
+            homepage: person.data.homepage,
+            imdbType: 'name',
+        });
     }
 }

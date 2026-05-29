@@ -1,7 +1,7 @@
 import { AccountDetails } from '../../api';
 import { UserAccountIdentity, UserAccountProfile } from '../models';
 
-export function ensureAccountId(account: AccountDetails): number {
+function ensureAccountId(account: AccountDetails): number {
     const accountId = account.id;
 
     if (typeof accountId !== 'number' || !Number.isInteger(accountId)) {

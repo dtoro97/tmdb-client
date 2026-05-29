@@ -1,35 +1,21 @@
 <div class="page-container">
-    @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+    @if (vm$ | async; as vm) {
         <app-sub-page-header
-            [backdropPath]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.backdropPath
-                    : undefined
-            "
-            [parentTitle]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.title
-                    : undefined
-            "
+            [backdropPath]="vm.media?.backdropPath"
+            [parentTitle]="vm.media?.title"
             [backLink]="['../']"
             pageTitle="Photos"
         />
 
         <main class="page-main">
-            @if (mediaStoreService.photosState$ | async; as photosState) {
-                @if (photosState.type === "loaded") {
-                    <app-photos-browser
-                        [images]="mediaStoreService.allPhotos$ | async"
-                        (photoSelect)="openPhotoViewer($event)"
-                    />
-                } @else if (
-                    photosState.type === "loading" ||
-                    photosState.type === "idle"
-                ) {
-                    <app-photos-browser-skeleton />
-                }
+            @if (vm.photosState.state === "success") {
+                <app-photos-browser
+                    [images]="vm.images"
+                    (photoSelect)="openPhotoViewer($event)"
+                />
+            } @else if (vm.photosState.state === "loading") {
+                <app-photos-browser-skeleton />
             }
         </main>
     }
 </div>
-

@@ -5,7 +5,7 @@ import {
     CardDateFormat,
     CardComponent,
     CarouselComponent,
-    LoadableItems,
+    RemoteData,
     SkeletonComponent,
     BackdropCardComponent,
 } from '../..';
@@ -28,7 +28,7 @@ export type MediaCarouselPanelVariant = 'card' | 'backdrop';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaCarouselPanelComponent {
-    @Input({ required: true }) state!: LoadableItems<CardItem>;
+    @Input({ required: true }) state!: RemoteData<CardItem[]>;
     @Input() ariaLabel = 'Media carousel';
     @Input() dateFormat: CardDateFormat = 'year';
     @Input() imageParams?: string;

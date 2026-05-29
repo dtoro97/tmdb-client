@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { ImageComponent } from '../image/image.component';
 
@@ -11,16 +11,12 @@ export type UserAvatarSize = 'sm' | 'lg';
     styleUrl: './user-avatar.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UserAvatarComponent implements OnChanges {
-    @Input({ required: true }) name = 'Member';
-    @Input() avatarPath: string | null = null;
-    @Input() size: UserAvatarSize = 'sm';
+export class UserAvatarComponent {
+    readonly name = input('Member');
+    readonly avatarPath = input<string | null>(null);
+    readonly size = input<UserAvatarSize>('sm');
 
-    initials = 'ME';
-
-    ngOnChanges(): void {
-        this.initials = getInitials(this.name);
-    }
+    readonly initials = computed(() => getInitials(this.name()));
 }
 
 function getInitials(name: string): string {

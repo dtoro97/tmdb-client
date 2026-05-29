@@ -17,8 +17,15 @@ import {
 
 import { MultiListItem, SearchRestControllerService } from '../../../api';
 import { API_JSON_OPTIONS } from '../../../constants';
-import { LoadableItems, LocaleStoreService, MediaType, TmdbListService, updateLoadedItems } from '../../../shared';
-import { toLoadedItems } from '../../../shared/utils';
+import {
+    RemoteData,
+    LocaleStoreService,
+    MediaType,
+    TmdbListService,
+    isDefined,
+    updateRemoteData,
+} from '../../../shared';
+import { remoteSuccess } from '../../../shared/utils';
 
 export interface UserListAddItemsSearchResult {
     readonly key: string;
@@ -34,7 +41,7 @@ interface UserListAddItemsDialogState {
     readonly listId: number | null;
     readonly addedKeys: readonly string[];
     readonly query: string;
-    readonly resultsState: LoadableItems<UserListAddItemsSearchResult>;
+    readonly resultsState: RemoteData<UserListAddItemsSearchResult[]>;
     readonly errorMessage: string | null;
     readonly hasChanges: boolean;
 }
@@ -43,7 +50,7 @@ const INITIAL_STATE: UserListAddItemsDialogState = {
     listId: null,
     addedKeys: [],
     query: '',
-    resultsState: { type: 'idle' },
+    resultsState: { state: 'notAsked' },
     errorMessage: null,
     hasChanges: false,
 };
@@ -63,17 +70,17 @@ export class UserListAddItemsDialogStore extends ComponentStore<UserListAddItems
             distinctUntilChanged(),
             switchMap((query) => {
                 if (!query) {
-                    this.patchState({ resultsState: { type: 'idle' } });
+                    this.patchState({ resultsState: { state: 'loading' } });
                     return of(null);
                 }
 
-                this.patchState({ resultsState: { type: 'loading' } });
+                this.patchState({ resultsState: { state: 'loading' } });
 
                 return this.search$(query).pipe(
                     catchError(() => {
                         this.patchState({
                             errorMessage: 'Search failed. Try another title.',
-                            resultsState: toLoadedItems([]),
+                            resultsState: remoteSuccess([]),
                         });
                         return of(null);
                     }),
@@ -81,7 +88,7 @@ export class UserListAddItemsDialogStore extends ComponentStore<UserListAddItems
             }),
             tap((results) => {
                 if (results !== null) {
-                    this.patchState({ resultsState: toLoadedItems(results) });
+                    this.patchState({ resultsState: remoteSuccess(results) });
                 }
             }),
         ),
@@ -109,7 +116,7 @@ export class UserListAddItemsDialogStore extends ComponentStore<UserListAddItems
         this.patchState({
             query: nextQuery,
             errorMessage: null,
-            resultsState: nextQuery ? this.get().resultsState : { type: 'idle' },
+            resultsState: nextQuery ? this.get().resultsState : { state: 'loading' },
         });
     }
 
@@ -129,7 +136,7 @@ export class UserListAddItemsDialogStore extends ComponentStore<UserListAddItems
                 this.patchState((state) => ({
                     hasChanges: true,
                     addedKeys: [...state.addedKeys, item.key],
-                    resultsState: updateLoadedItems(state.resultsState, (items) =>
+                    resultsState: updateRemoteData(state.resultsState, (items) =>
                         items.map((result) => (result.key === item.key ? { ...result, isAdded: true } : result)),
                     ),
                 }));
@@ -152,7 +159,7 @@ export class UserListAddItemsDialogStore extends ComponentStore<UserListAddItems
                 map((page) =>
                     (page.results ?? [])
                         .map((item) => this.toSearchResult(item))
-                        .filter((item): item is UserListAddItemsSearchResult => item !== null),
+                        .filter(isDefined),
                 ),
                 switchMap((results) => this.addListStatusToResults$(results)),
             );

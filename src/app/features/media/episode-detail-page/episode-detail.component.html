@@ -65,7 +65,11 @@
                                 @if (vm.canRateEpisode) {
                                     <app-user-rating
                                         class="episode-summary__user-rating episode-summary__user-rating--with-divider"
-                                        [title]="episode.name ?? 'this episode'"
+                                        [currentRating]="vm.userRating.currentRating"
+                                        [disabled]="vm.userRating.disabled"
+                                        [loading]="vm.userRating.loading"
+                                        [pending]="vm.userRating.pending"
+                                        (ratingClick)="openUserRatingDialog(vm.seriesId, episode)"
                                     />
                                 }
                             </div>
@@ -104,7 +108,7 @@
             }
 
             <div class="sections">
-                @if (vm.stillsState.type !== 'loaded' || vm.stillsTotalCount) {
+                @if (vm.stillsState.state !== 'success' || vm.stillsTotalCount) {
                     <app-page-section subtitle="Stills">
                         @if (vm.stillsTotalCount) {
                             <a section-controls class="section-link text-body-sm" [routerLink]="['photos']">
@@ -122,7 +126,7 @@
                     </app-page-section>
                 }
 
-                @if (vm.videosState.type !== 'loaded' || vm.videoCount) {
+                @if (vm.videosState.state !== 'success' || vm.videoCount) {
                     <app-page-section subtitle="Videos">
                         <app-videos-grid [state]="vm.videosState" />
                     </app-page-section>

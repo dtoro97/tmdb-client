@@ -2,8 +2,8 @@
     @if (personDetailStore.personDetailVm$ | async; as vm) {
         <app-sub-page-header
             [parentTitle]="
-                (vm.person.type === 'loaded'
-                    ? vm.person.value?.name
+                (vm.person.state === 'success'
+                    ? vm.person.data?.name
                     : undefined) ?? ''
             "
             [backLink]="['../']"
@@ -11,11 +11,11 @@
         />
 
         <div class="page-main">
-            @if (vm.photos.type === "loading" || vm.photos.type === "idle") {
+            @if (vm.photos.state === "loading") {
                 <app-photos-browser-skeleton></app-photos-browser-skeleton>
-            } @else if (vm.photos.type === "loaded") {
+            } @else if (vm.photos.state === "success") {
                 <app-photos-browser
-                    [images]="vm.photos.value"
+                    [images]="vm.photos.data"
                     (photoSelect)="openPhotoViewer($event)"
                 />
             }

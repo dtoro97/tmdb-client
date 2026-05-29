@@ -2,18 +2,22 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 
-import { combineLatest, map, tap } from 'rxjs';
+import { combineLatest, filter, map, switchMap, tap } from 'rxjs';
 
 import {
     EmptyStateComponent,
+    MediaType,
     groupCrewMembers,
-    PillToggleComponent,
+    remoteData,
+    ToggleGroupComponent,
     SkeletonComponent,
     SubPageHeaderComponent,
 } from '../../../shared';
-import { MediaDetailStoreService } from '../media-detail-store.service';
 import { CastCrewGridComponent } from '../cast-crew-grid/cast-crew-grid.component';
+import { MediaCreditsStoreService } from '../media-credits-store.service';
+import { MediaStoreService } from '../media-store.service';
 
 type VisibleSection = 'cast' | 'crew';
 
@@ -21,7 +25,7 @@ type VisibleSection = 'cast' | 'crew';
     selector: 'app-media-cast-crew',
     imports: [
         AsyncPipe,
-        PillToggleComponent,
+        ToggleGroupComponent,
         SkeletonComponent,
         CastCrewGridComponent,
         EmptyStateComponent,
@@ -34,57 +38,49 @@ type VisibleSection = 'cast' | 'crew';
 export class MediaCastPageComponent {
     visibleSection: VisibleSection = 'cast';
 
-    private readonly groupedCrew$ = this.mediaStoreService.crew$.pipe(
-        map((crew) => groupCrewMembers(crew)),
-    );
-
-    private readonly filters$ = this.mediaStoreService.castCrew$.pipe(
-        map((castCrew) => ({
-            options: [
-                ...(castCrew.cast.length
-                    ? [{ label: `Cast (${castCrew.cast.length})`, value: 'cast' as const }]
-                    : []),
-                ...(castCrew.crew.length
-                    ? [{ label: `Crew (${castCrew.crew.length})`, value: 'crew' as const }]
-                    : []),
-            ],
-        })),
-    );
-
     readonly vm$ = combineLatest({
-        mediaState: this.mediaStoreService.mediaDetailsState$,
-        castCrew: this.mediaStoreService.castCrew$,
-        castState: this.mediaStoreService.castState$,
-        crewState: this.mediaStoreService.crewState$,
-        groupedCrew: this.groupedCrew$,
-        filters: this.filters$,
+        mediaState: this.mediaStore.mediaDetailsState$,
+        creditsState: this.mediaCreditsStore.creditsState$,
     }).pipe(
-        map(({ mediaState, castCrew, castState, crewState, groupedCrew, filters }) => ({
-            media: mediaState.type === 'loaded' ? mediaState.value : null,
-            cast: castCrew.cast,
-            crew: castCrew.crew,
-            castState,
-            crewState,
-            groupedCrew,
-            filters: filters.options,
-            isLoading:
-                castState.type === 'loading' ||
-                castState.type === 'idle' ||
-                crewState.type === 'loading' ||
-                crewState.type === 'idle',
-            isEmpty:
-                castState.type === 'loaded' &&
-                crewState.type === 'loaded' &&
-                !castCrew.cast.length &&
-                !castCrew.crew.length,
-        })),
+        map(({ mediaState, creditsState }) => {
+            const credits = remoteData(creditsState, { cast: [], crew: [] });
+            const cast = credits.cast;
+            const crew = credits.crew;
+
+            return {
+                media: mediaState.state === 'success' ? mediaState.data : null,
+                cast,
+                crew,
+                groupedCrew: groupCrewMembers(crew),
+                filters: [
+                    ...(cast.length ? [{ label: `Cast (${cast.length})`, value: 'cast' as const }] : []),
+                    ...(crew.length ? [{ label: `Crew (${crew.length})`, value: 'crew' as const }] : []),
+                ],
+                isLoading: creditsState.state === 'loading',
+                isEmpty: creditsState.state === 'success' && !cast.length && !crew.length,
+            };
+        }),
     );
 
     constructor(
-        public mediaStoreService: MediaDetailStoreService,
+        private readonly mediaStore: MediaStoreService,
+        private readonly mediaCreditsStore: MediaCreditsStoreService,
         private title: Title,
+        private route: ActivatedRoute,
     ) {
-        this.mediaStoreService.title$
+        this.route.parent!.paramMap
+            .pipe(
+                map((params) => ({
+                    id: Number(params.get('id')),
+                    type: (params.get('type') ?? 'movie') as MediaType,
+                })),
+                filter(({ id }) => Number.isInteger(id)),
+                switchMap((target) => this.mediaCreditsStore.load$(target)),
+                takeUntilDestroyed(),
+            )
+            .subscribe();
+
+        this.mediaStore.title$
             .pipe(
                 takeUntilDestroyed(),
                 tap((title) => {

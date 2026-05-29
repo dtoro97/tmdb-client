@@ -14,7 +14,10 @@ export interface MediaRatingDialogData {
     authMode: UserSessionMode;
 }
 
-export type MediaRatingDialogResult = number | 'remove' | 'login' | { guestValue: number };
+export type MediaRatingDialogResult =
+    | { readonly action: 'save'; readonly value: number; readonly saveAsGuest: boolean }
+    | { readonly action: 'remove' }
+    | { readonly action: 'login' };
 
 @Component({
     selector: 'app-media-rating-dialog',
@@ -33,11 +36,15 @@ export class MediaRatingDialogComponent {
     ) {}
 
     removeRating(): void {
-        this.dialogRef.close('remove');
+        this.dialogRef.close({ action: 'remove' });
     }
 
     save(): void {
-        this.dialogRef.close(normalizeRatingValue(this.value()));
+        this.dialogRef.close({
+            action: 'save',
+            value: normalizeRatingValue(this.value()),
+            saveAsGuest: false,
+        });
     }
 
     cancel(): void {
@@ -45,11 +52,15 @@ export class MediaRatingDialogComponent {
     }
 
     loginToSave(): void {
-        this.dialogRef.close('login');
+        this.dialogRef.close({ action: 'login' });
     }
 
     saveAsGuest(): void {
-        this.dialogRef.close({ guestValue: normalizeRatingValue(this.value()) });
+        this.dialogRef.close({
+            action: 'save',
+            value: normalizeRatingValue(this.value()),
+            saveAsGuest: true,
+        });
     }
 
     updateValue(value: number): void {

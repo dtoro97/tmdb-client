@@ -1,110 +1,104 @@
-import { catchError, combineLatest, filter, map, Observable, of, tap } from 'rxjs';
-
 import { Injectable } from '@angular/core';
-import { ComponentStore } from '@ngrx/component-store';
 
-import { MovieRestControllerService, TvSeriesRestControllerService, Video } from '../../api';
-import { API_JSON_OPTIONS, RELATED_COUNT } from '../../constants';
+import { ComponentStore } from '@ngrx/component-store';
+import { Observable, catchError, filter, map, of, take, tap } from 'rxjs';
+
+import { Video } from '../../api';
 import {
-    ConfigStoreService,
-    LoadableItems,
+    MediaDetails,
+    RemoteData,
     pickBestYoutubeTrailer,
-    isDefined,
-    loadedValue,
+    remoteData,
+    toVideoCardItems,
     toYoutubeVideoState,
 } from '../../shared';
-import { MediaType } from '../../shared';
+import { MediaApiService } from './media-api.service';
+import { MediaTarget, isSameMediaTarget } from './media-target';
+import { MediaStoreService } from './media-store.service';
 
 interface MediaVideoState {
-    videos: LoadableItems<Video>;
-    selectedVideoId: string | null;
+    readonly target: MediaTarget | null;
+    readonly videos: RemoteData<Video[]>;
 }
 
 const INITIAL_STATE: MediaVideoState = {
-    videos: { type: 'idle' },
-    selectedVideoId: null,
+    target: null,
+    videos: { state: 'notAsked' },
 };
 
 @Injectable()
 export class MediaVideoStoreService extends ComponentStore<MediaVideoState> {
-    videosState$ = this.select((state) => toYoutubeVideoState(state.videos));
-    private selectedVideoId$ = this.select((state) => state.selectedVideoId);
+    readonly videosState$ = this.select((state) => state.videos);
 
-    allVideos$ = this.videosState$.pipe(map((state) => loadedValue(state)));
+    readonly allVideos$ = this.videosState$.pipe(map((state) => remoteData(state, [])));
 
-    youtubeVideosTotalCount$ = this.allVideos$.pipe(map((videos) => videos.length));
+    readonly youtubeVideosTotalCount$ = this.allVideos$.pipe(map((videos) => videos.length));
 
-    trailer$: Observable<Video | null> = this.allVideos$.pipe(map((videos) => pickBestYoutubeTrailer(videos)));
+    readonly trailer$: Observable<Video | null> = this.allVideos$.pipe(map((videos) => pickBestYoutubeTrailer(videos)));
 
-    selectedVideo$: Observable<Video | null> = combineLatest([this.allVideos$, this.selectedVideoId$]).pipe(
-        map(([videos, selectedVideoId]) => videos.find((video) => video.id === selectedVideoId) ?? null),
-    );
-
-    selectedVideoMeta$ = combineLatest([
-        this.selectedVideo$,
-        this.configStoreService.languages$.pipe(filter(isDefined)),
-    ]).pipe(
-        map(([video, languages]) => ({
-            video,
-            languageName:
-                video?.iso_639_1 && Array.isArray(languages) && languages.length
-                    ? (languages.find((lang) => lang.iso_639_1 === video.iso_639_1)?.english_name ?? video.iso_639_1)
-                    : (video?.iso_639_1 ?? ''),
-        })),
-    );
-
-    relatedVideos$: Observable<Video[]> = combineLatest([this.allVideos$, this.selectedVideoId$]).pipe(
-        map(([videos, selectedVideoId]) =>
-            videos.filter((video) => !!video.id && !!video.key && video.id !== selectedVideoId).slice(0, RELATED_COUNT),
-        ),
+    readonly videoItems$ = this.select(
+        this.mediaStore.mediaDetailsState$,
+        this.allVideos$,
+        (mediaState, videos) => this.toVideoItems(videos, mediaState),
     );
 
     constructor(
-        private movieRestControllerService: MovieRestControllerService,
-        private tvSeriesRestControllerService: TvSeriesRestControllerService,
-        private configStoreService: ConfigStoreService,
+        private readonly mediaApiService: MediaApiService,
+        private readonly mediaStore: MediaStoreService,
     ) {
         super(INITIAL_STATE);
     }
 
-    resetState(): void {
-        this.setState(INITIAL_STATE);
-    }
+    load$(target: MediaTarget): Observable<Video[]> {
+        const state = this.get();
 
-    getVideos$(id: number, type: MediaType): Observable<Video[]> {
-        const videosRequest$ =
-            type === 'tv'
-                ? this.tvSeriesRestControllerService.tvSeriesVideos(
-                      id,
-                      undefined,
-                      undefined,
-                      undefined,
-                      undefined,
-                      API_JSON_OPTIONS,
-                  )
-                : this.movieRestControllerService.movieVideos(id, undefined, undefined, undefined, API_JSON_OPTIONS);
+        if (isSameMediaTarget(state.target, target)) {
+            if (state.videos.state === 'success') {
+                return of(state.videos.data);
+            }
 
-        this.patchState({
-            videos: { type: 'loading' },
+            if (state.videos.state === 'loading') {
+                return this.videosReady$();
+            }
+        }
+
+        this.setState({
+            ...INITIAL_STATE,
+            target,
+            videos: { state: 'loading' },
         });
 
-        return videosRequest$.pipe(
-            catchError(() => of({ results: [] })),
+        return this.mediaApiService.getVideos$(target).pipe(
+            map((videos) => this.toYoutubeVideos(videos.results ?? [])),
             tap((videos) => {
-                this.patchState({
-                    videos: {
-                        type: 'loaded',
-                        value: videos.results ?? [],
-                    },
-                });
+                this.patchState({ videos: { state: 'success', data: videos } });
             }),
-            map((videos) => videos.results ?? []),
+            catchError(() => {
+                this.patchState({ videos: { state: 'success', data: [] } });
+                return of([]);
+            }),
         );
     }
 
-    setSelectedVideoId(videoId: string): void {
-        this.patchState({
-            selectedVideoId: videoId,
-        });
+    private videosReady$(): Observable<Video[]> {
+        return this.videosState$.pipe(
+            filter(
+                (state): state is Extract<RemoteData<Video[]>, { state: 'success' }> =>
+                    state.state === 'success',
+            ),
+            take(1),
+            map((state) => state.data),
+        );
+    }
+
+    private toYoutubeVideos(videos: readonly Video[]): Video[] {
+        const state = toYoutubeVideoState({ state: 'success', data: [...videos] });
+        return state.state === 'success' ? state.data : [];
+    }
+
+    private toVideoItems(videos: readonly Video[], mediaState: RemoteData<MediaDetails | null>) {
+        const media = mediaState.state === 'success' ? mediaState.data : null;
+
+        return media ? toVideoCardItems(videos, media) : [];
     }
 }

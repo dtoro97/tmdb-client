@@ -1,48 +1,70 @@
 import { Injectable } from '@angular/core';
 
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, filter, map, of, take, tap, throwError } from 'rxjs';
 
 import { Review, ReviewPage } from '../../api';
-import { PAGE_SIZE } from '../../constants';
-import { LoadableItems } from '../../shared';
-import type { MediaType } from '../../shared';
+import { RemoteData } from '../../shared';
 import { MediaApiService } from './media-api.service';
+import { MediaTarget, isSameMediaTarget } from './media-target';
 
 const REVIEW_PREVIEW_COUNT = 3;
 const REVIEW_PREVIEW_MIN_CONTENT_LENGTH = 100;
 
 interface ReviewPaginationState {
-    page: number;
-    totalPages: number;
-    totalResults: number;
+    readonly page: number;
+    readonly totalPages: number;
+    readonly totalResults: number;
 }
 
 interface MediaReviewsState {
-    reviews: LoadableItems<Review>;
-    pagination: ReviewPaginationState;
-    mediaId: number | null;
-    mediaType: MediaType | '';
+    readonly target: MediaTarget | null;
+    readonly reviewPage: RemoteData<ReviewPage | null>;
 }
 
 const INITIAL_STATE: MediaReviewsState = {
-    reviews: { type: 'idle' },
-    pagination: { page: 0, totalPages: 0, totalResults: 0 },
-    mediaId: null,
-    mediaType: '',
+    target: null,
+    reviewPage: { state: 'notAsked' },
 };
 
 @Injectable()
 export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> {
-    readonly reviewsState$ = this.select((state) => state.reviews);
+    private readonly reviewPageState$ = this.select((state) => state.reviewPage);
 
-    readonly totalResults$ = this.select((state) => state.pagination.totalResults);
+    readonly reviewsState$ = this.reviewPageState$.pipe(
+        map((state): RemoteData<Review[]> => {
+            switch (state.state) {
+                case 'success':
+                    return { state: 'success', data: state.data?.results ?? [] };
+                case 'loading-more':
+                    return { state: 'loading-more', data: state.data?.results ?? [] };
+                case 'failure':
+                    return { state: 'failure', error: state.error };
+                default:
+                    return { state: state.state };
+            }
+        }),
+    );
 
-    readonly hasMore$ = this.select((state) => state.pagination.page < state.pagination.totalPages);
+    private readonly pagination$ = this.reviewPageState$.pipe(
+        map((state): ReviewPaginationState => {
+            const page = state.state === 'success' || state.state === 'loading-more' ? state.data : null;
+
+            return {
+                page: page?.page ?? 0,
+                totalPages: page?.total_pages ?? 0,
+                totalResults: page?.total_results ?? 0,
+            };
+        }),
+    );
+
+    readonly totalResults$ = this.pagination$.pipe(map((pagination) => pagination.totalResults));
+
+    readonly hasMore$ = this.pagination$.pipe(map((pagination) => pagination.page < pagination.totalPages));
 
     readonly previewReviews$ = this.reviewsState$.pipe(
         map((state) => {
-            const reviews = state.type === 'loaded' ? state.value : [];
+            const reviews = state.state === 'success' ? state.data : [];
             return this.sortReviews(
                 reviews.filter((review) => (review.content?.trim().length ?? 0) >= REVIEW_PREVIEW_MIN_CONTENT_LENGTH),
             ).slice(0, REVIEW_PREVIEW_COUNT);
@@ -53,72 +75,84 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
         super(INITIAL_STATE);
     }
 
-    resetState(): void {
-        this.setState(INITIAL_STATE);
-    }
+    load$(target: MediaTarget): Observable<ReviewPage | null> {
+        const state = this.get();
 
-    loadReviews$(id: number, type: MediaType): Observable<ReviewPage | null> {
-        this.patchState({
-            reviews: { type: 'loading' },
-            mediaId: id,
-            mediaType: type,
-            pagination: { page: 0, totalPages: 0, totalResults: 0 },
+        if (isSameMediaTarget(state.target, target)) {
+            if (state.reviewPage.state === 'success' || state.reviewPage.state === 'loading-more') {
+                return of(state.reviewPage.data);
+            }
+
+            if (state.reviewPage.state === 'loading') {
+                return this.reviewPageReady$();
+            }
+        }
+
+        this.setState({
+            ...INITIAL_STATE,
+            target,
+            reviewPage: { state: 'loading' },
         });
 
-        return this.mediaApiService.getReviews$(id, type, 1).pipe(
-            catchError(() => of(null as ReviewPage | null)),
+        return this.mediaApiService.getReviews$(target, 1).pipe(
             tap((reviewPage) => {
-                this.patchState({
-                    reviews: {
-                        type: 'loaded',
-                        value: reviewPage?.results ?? [],
-                    },
-                    pagination: {
-                        page: reviewPage?.page ?? 1,
-                        totalPages: reviewPage?.total_pages ?? 1,
-                        totalResults: reviewPage?.total_results ?? 0,
-                    },
-                });
+                this.patchState({ reviewPage: { state: 'success', data: reviewPage } });
+            }),
+            catchError(() => {
+                const reviewPage = emptyReviewPage();
+                this.patchState({ reviewPage: { state: 'success', data: reviewPage } });
+                return of(reviewPage);
             }),
         );
     }
 
     loadMoreReviews$(): Observable<ReviewPage | undefined> {
-        const { pagination, reviews, mediaId, mediaType } = this.get();
-        const currentReviews = reviews.type === 'loaded' || reviews.type === 'loading-more' ? reviews.value : [];
+        const { target, reviewPage } = this.get();
 
-        if (!mediaId || !mediaType || pagination.page >= pagination.totalPages || reviews.type === 'loading-more') {
+        if (!target || reviewPage.state !== 'success' || !reviewPage.data) {
+            return of(undefined);
+        }
+
+        const currentPage = reviewPage.data.page ?? 1;
+        const totalPages = reviewPage.data.total_pages ?? 1;
+
+        if (currentPage >= totalPages) {
             return of(undefined);
         }
 
         this.patchState({
-            reviews: {
-                type: 'loading-more',
-                value: currentReviews,
-                placeholderCount: PAGE_SIZE,
+            reviewPage: {
+                state: 'loading-more',
+                data: reviewPage.data,
             },
         });
 
-        return this.mediaApiService.getReviews$(mediaId, mediaType as MediaType, pagination.page + 1).pipe(
-            tap((reviewPage) => {
+        return this.mediaApiService.getReviews$(target, currentPage + 1).pipe(
+            tap((page) => {
                 this.patchState({
-                    reviews: {
-                        type: 'loaded',
-                        value: [...currentReviews, ...(reviewPage.results ?? [])],
-                    },
-                    pagination: {
-                        page: reviewPage?.page ?? pagination.page + 1,
-                        totalPages: reviewPage?.total_pages ?? pagination.totalPages,
-                        totalResults: reviewPage?.total_results ?? pagination.totalResults,
+                    reviewPage: {
+                        state: 'success',
+                        data: {
+                            ...page,
+                            results: [...(reviewPage.data?.results ?? []), ...(page.results ?? [])],
+                        },
                     },
                 });
             }),
             catchError((error) => {
-                this.patchState({
-                    reviews: { type: 'loaded', value: currentReviews },
-                });
+                this.patchState({ reviewPage });
                 return throwError(() => error);
             }),
+        );
+    }
+
+    private reviewPageReady$(): Observable<ReviewPage | null> {
+        return this.reviewPageState$.pipe(
+            filter((state): state is Extract<RemoteData<ReviewPage | null>, { state: 'success' }> =>
+                state.state === 'success',
+            ),
+            take(1),
+            map((state) => state.data),
         );
     }
 
@@ -135,3 +169,10 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
         });
     }
 }
+
+const emptyReviewPage = (): ReviewPage => ({
+    page: 1,
+    results: [],
+    total_pages: 1,
+    total_results: 0,
+});

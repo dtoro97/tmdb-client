@@ -23,7 +23,7 @@
                 </p>
             }
 
-            @if (vm.state.type === 'loading') {
+            @if (vm.state.state === 'loading') {
                 <div class="dialog__results">
                     @for (placeholder of [1, 2, 3, 4]; track placeholder) {
                         <article class="dialog__result">
@@ -35,9 +35,9 @@
                         </article>
                     }
                 </div>
-            } @else if (vm.state.type === 'loaded' && vm.state.value.length) {
+            } @else if (vm.state.state === 'success' && vm.state.data.length) {
                 <div class="dialog__results">
-                    @for (item of vm.state.value; track item.key) {
+                    @for (item of vm.state.data; track item.key) {
                         <article class="dialog__result">
                             <app-image
                                 class="dialog__poster"
@@ -71,7 +71,7 @@
                         </article>
                     }
                 </div>
-            } @else if (vm.state.type === 'loaded') {
+            } @else if (vm.state.state === 'success') {
                 <p class="text-meta">No titles found.</p>
             } @else {
                 <p class="text-meta">

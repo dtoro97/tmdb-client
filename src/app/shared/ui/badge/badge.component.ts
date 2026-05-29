@@ -9,5 +9,6 @@ export type BadgeVariant = 'neutral' | 'accent' | 'outline';
 })
 export class BadgeComponent {
     @Input({ required: true }) label = '';
+    @Input() iconClass: string | null = null;
     @Input() variant: BadgeVariant = 'neutral';
 }

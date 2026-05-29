@@ -1,101 +1,83 @@
 <div class="page-container">
-    @if (mediaStoreService.mediaDetailsState$ | async; as mediaState) {
+    @if (vm$ | async; as vm) {
         <app-sub-page-header
-            [backdropPath]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.backdropPath
-                    : undefined
-            "
-            [parentTitle]="
-                mediaState.type === 'loaded'
-                    ? mediaState.value?.title
-                    : undefined
-            "
+            [backdropPath]="vm.media?.backdropPath"
+            [parentTitle]="vm.media?.title"
             [backLink]="['../']"
             pageTitle="Reviews"
         />
 
         <main class="page-main">
-            @if (mediaReviewsStoreService.reviewsState$ | async; as reviewsState) {
-                @if (
-                    reviewsState.type === "loading" ||
-                    reviewsState.type === "idle"
-                ) {
+            @if (vm.reviewsState.state === "loading") {
+                <section class="content u-flex-column">
+                    <div class="toolbar">
+                        <app-skeleton class="toolbar-count-skeleton" />
+                    </div>
+
+                    <div class="list u-flex-column">
+                        <ng-container
+                            *ngTemplateOutlet="
+                                reviewSkeletonList;
+                                context: { count: skeletonCount }
+                            "
+                        />
+                    </div>
+                </section>
+            } @else if (
+                vm.reviewsState.state === "success" ||
+                vm.reviewsState.state === "loading-more"
+            ) {
+                @if (vm.reviewsState.data.length) {
                     <section class="content u-flex-column">
                         <div class="toolbar">
-                            <app-skeleton class="toolbar-count-skeleton" />
+                            <span class="text-caption">
+                                1-{{ vm.reviewsState.data.length }} of
+                                {{
+                                    vm.totalResults ||
+                                        vm.reviewsState.data.length
+                                }}
+                            </span>
                         </div>
 
                         <div class="list u-flex-column">
-                            <ng-container
-                                *ngTemplateOutlet="
-                                    reviewSkeletonList;
-                                    context: { count: skeletonCount }
-                                "
-                            />
-                        </div>
-                    </section>
-                } @else if (
-                    reviewsState.type === "loaded" ||
-                    reviewsState.type === "loading-more"
-                ) {
-                    @if (reviewsState.value.length) {
-                        <section class="content u-flex-column">
-                            <div class="toolbar">
-                                @if (
-                                    mediaReviewsStoreService.totalResults$ | async;
-                                    as reviewTotalResults
-                                ) {
-                                    <span class="text-caption">
-                                        1-{{ reviewsState.value.length }} of
-                                        {{
-                                            reviewTotalResults ||
-                                                reviewsState.value.length
-                                        }}
-                                    </span>
-                                }
-                            </div>
-
-                            <div class="list u-flex-column">
-                                @for (
-                                    review of reviewsState.value;
-                                    track review.id
-                                ) {
-                                    <app-review-card [review]="review" [reviewLink]="review.id ? [review.id] : null" />
-                                }
-
-                                @if (reviewsState.type === "loading-more") {
-                                    <ng-container
-                                        *ngTemplateOutlet="
-                                            reviewSkeletonList;
-                                            context: {
-                                                count: reviewsState.placeholderCount,
-                                            }
-                                        "
-                                    />
-                                }
-                            </div>
-
-                            @if (mediaReviewsStoreService.hasMore$ | async) {
-                                <div class="u-flex u-justify-center">
-                                    <button
-                                        mat-stroked-button
-                                        type="button"
-                                        (click)="loadMore()"
-                                    >
-                                        Show more reviews
-                                    </button>
-                                </div>
+                            @for (
+                                review of vm.reviewsState.data;
+                                track review.id
+                            ) {
+                                <app-review-card [review]="review" [reviewLink]="review.id ? [review.id] : null" />
                             }
-                        </section>
-                    } @else {
-                        <section class="empty">
-                            <app-empty-state
-                                iconClass="fa-regular fa-comment-dots"
-                                text="No reviews available yet"
-                            />
-                        </section>
-                    }
+
+                            @if (vm.reviewsState.state === "loading-more") {
+                                <ng-container
+                                    *ngTemplateOutlet="
+                                        reviewSkeletonList;
+                                        context: {
+                                            count: vm.reviewsState.data.length,
+                                        }
+                                    "
+                                />
+                            }
+                        </div>
+
+                        @if (vm.hasMore) {
+                            <div class="u-flex u-justify-center">
+                                <button
+                                    mat-stroked-button
+                                    type="button"
+                                    (click)="loadMore()"
+                                >
+                                    Show more reviews
+                                </button>
+                            </div>
+                        }
+                    </section>
+                } @else {
+                    <section class="empty">
+                        <app-empty-state
+                            iconClass="fa-regular fa-comment-dots"
+                            text="No reviews available yet"
+                        />
+                    </section>
                 }
             }
         </main>
@@ -107,4 +89,3 @@
         <app-skeleton class="review-skeleton" />
     }
 </ng-template>
-

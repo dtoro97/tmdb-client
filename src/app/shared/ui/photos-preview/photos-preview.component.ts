@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output } from '@angular/core';
 
-import { LoadableItems } from '../../types';
+import { RemoteData } from '../../types';
 import type { ViewerImage } from '../../models';
 import { ImageComponent, type ImageType } from '../image/image.component';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
@@ -35,135 +35,165 @@ const COMPACT_SKELETON_TILE_COUNT = 4;
     styleUrl: './photos-preview.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PhotosPreviewComponent implements OnChanges {
-    @Input() state: LoadableItems<ViewerImage> = { type: 'idle' };
-    @Input() totalCount = 0;
-    @Input() maxVisible: number | null = null;
-    @Input() mode: PhotosPreviewMode = 'media';
-    @Input() variant: PhotosPreviewVariant = 'mosaic';
-    @Input() showMoreTile = true;
+export class PhotosPreviewComponent {
+    readonly state = input<RemoteData<ViewerImage[]>>({ state: 'notAsked' });
+    readonly totalCount = input(0);
+    readonly maxVisible = input<number | null>(null);
+    readonly mode = input<PhotosPreviewMode>('media');
+    readonly variant = input<PhotosPreviewVariant>('mosaic');
+    readonly showMoreTile = input(true);
     @Output() photoClick = new EventEmitter<number>();
     @Output() moreClick = new EventEmitter<void>();
 
-    skeletonTiles: readonly number[] = Array.from({ length: SKELETON_TILE_COUNT }, (_, index) => index);
-    tiles: PhotosPreviewTile[] = [];
+    readonly skeletonTiles = computed(() => toRange(getSkeletonCount(this.variant())));
+    readonly tiles = computed(() =>
+        toPreviewTiles(
+            this.state(),
+            this.totalCount(),
+            this.maxVisible(),
+            this.mode(),
+            this.variant(),
+            this.showMoreTile(),
+        ),
+    );
+}
 
-    ngOnChanges(): void {
-        this.updateViewModel();
+function toPreviewTiles(
+    state: RemoteData<ViewerImage[]>,
+    totalCount: number,
+    maxVisible: number | null,
+    mode: PhotosPreviewMode,
+    variant: PhotosPreviewVariant,
+    showMoreTile: boolean,
+): PhotosPreviewTile[] {
+    if (state.state !== 'success' || !state.data.length) {
+        return [];
     }
 
-    private updateViewModel(): void {
-        this.skeletonTiles = Array.from({ length: this.getSkeletonCount() }, (_, index) => index);
+    const visibleCount = getVisibleCount(maxVisible, mode, variant);
+    const selectedEntries = selectEntries(state.data, visibleCount, mode);
+    const sourceCount = totalCount || state.data.length;
+    const moreCount = showMoreTile && sourceCount > selectedEntries.length ? sourceCount - selectedEntries.length + 1 : null;
 
-        if (this.state.type !== 'loaded' || !this.state.value.length) {
-            this.tiles = [];
-            return;
+    return selectedEntries.map((entry, index) =>
+        toPreviewTile(entry, index === selectedEntries.length - 1 ? moreCount : null),
+    );
+}
+
+function getVisibleCount(
+    maxVisible: number | null,
+    mode: PhotosPreviewMode,
+    variant: PhotosPreviewVariant,
+): number {
+    const defaultCount = getDefaultVisibleCount(mode, variant);
+    const resolvedMaxVisible = maxVisible ?? defaultCount;
+
+    return Math.min(Math.max(resolvedMaxVisible, 0), MAX_MEDIA_PREVIEW_PHOTOS);
+}
+
+function getDefaultVisibleCount(
+    mode: PhotosPreviewMode,
+    variant: PhotosPreviewVariant,
+): number {
+    if (variant === 'compact') {
+        return MAX_COMPACT_PREVIEW_PHOTOS;
+    }
+
+    return mode === 'person' ? MAX_PERSON_PREVIEW_PHOTOS : MAX_MEDIA_PREVIEW_PHOTOS;
+}
+
+function getSkeletonCount(variant: PhotosPreviewVariant): number {
+    return variant === 'compact' ? COMPACT_SKELETON_TILE_COUNT : SKELETON_TILE_COUNT;
+}
+
+function selectEntries(
+    images: readonly ViewerImage[],
+    visibleCount: number,
+    mode: PhotosPreviewMode,
+): PhotosPreviewEntry[] {
+    const entries = images.map((image, clickIndex) => ({ image, clickIndex }));
+
+    if (mode === 'person') {
+        return selectPersonEntries(entries, visibleCount);
+    }
+
+    return selectMediaEntries(entries, visibleCount);
+}
+
+function selectMediaEntries(
+    entries: readonly PhotosPreviewEntry[],
+    visibleCount: number,
+): PhotosPreviewEntry[] {
+    const groups = [...groupByPhotoType(entries).values()];
+
+    return mixEntries(groups, visibleCount);
+}
+
+function selectPersonEntries(
+    entries: readonly PhotosPreviewEntry[],
+    visibleCount: number,
+): PhotosPreviewEntry[] {
+    const profiles = entries.filter((entry) => entry.image.photoType === 'profile').slice(0, PERSON_PROFILE_COUNT);
+    const tagged = entries.filter((entry) => entry.image.photoType === 'tagged');
+    const mixed = mixEntries([profiles, tagged], visibleCount);
+
+    return mixed.length ? mixed : entries.slice(0, visibleCount);
+}
+
+function groupByPhotoType(entries: readonly PhotosPreviewEntry[]): Map<string, PhotosPreviewEntry[]> {
+    const groups = new Map<string, PhotosPreviewEntry[]>();
+
+    for (const entry of entries) {
+        const key = entry.image.photoType ?? 'photo';
+        groups.set(key, [...(groups.get(key) ?? []), entry]);
+    }
+
+    return groups;
+}
+
+function mixEntries(groups: readonly PhotosPreviewEntry[][], count: number): PhotosPreviewEntry[] {
+    const selected: PhotosPreviewEntry[] = [];
+    const queues = groups.map((group) => [...group]).filter((group) => group.length);
+
+    while (selected.length < count && queues.length) {
+        const queue = queues.shift()!;
+        const next = queue.shift()!;
+
+        selected.push(next);
+
+        if (queue.length) {
+            queues.push(queue);
         }
-
-        const visibleCount = this.getVisibleCount();
-        const selectedEntries = this.selectEntries(this.state.value, visibleCount);
-        const sourceCount = this.totalCount || this.state.value.length;
-        const moreCount = this.showMoreTile && sourceCount > selectedEntries.length ? sourceCount - selectedEntries.length + 1 : null;
-
-        this.tiles = selectedEntries.map((entry, index) =>
-            this.toPreviewTile(entry, index === selectedEntries.length - 1 ? moreCount : null),
-        );
     }
 
-    private getVisibleCount(): number {
-        const defaultCount = this.getDefaultVisibleCount();
-        const maxVisible = this.maxVisible ?? defaultCount;
+    return selected;
+}
 
-        return Math.min(Math.max(maxVisible, 0), MAX_MEDIA_PREVIEW_PHOTOS);
+function toPreviewTile(entry: PhotosPreviewEntry, moreCount: number | null): PhotosPreviewTile {
+    const imageType: ImageType = entry.image.photoType === 'profile' ? 'person' : 'media';
+
+    return {
+        ...entry,
+        imageType,
+        imageParams: entry.image.aspect_ratio && entry.image.aspect_ratio > 1.9 ? 'w780' : 'w500',
+        layoutAspectRatio: getLayoutAspectRatio(entry.image),
+        moreCount,
+        ariaLabel: moreCount ? `Browse all photos, ${moreCount} more` : `Open photo ${entry.clickIndex + 1}`,
+    };
+}
+
+function getLayoutAspectRatio(image: ViewerImage): number {
+    if (image.photoType === 'profile' || image.photoType === 'poster') {
+        return 0.75;
     }
 
-    private getDefaultVisibleCount(): number {
-        if (this.variant === 'compact') {
-            return MAX_COMPACT_PREVIEW_PHOTOS;
-        }
-
-        return this.mode === 'person' ? MAX_PERSON_PREVIEW_PHOTOS : MAX_MEDIA_PREVIEW_PHOTOS;
+    if (!image.aspect_ratio) {
+        return 1.5;
     }
 
-    private getSkeletonCount(): number {
-        return this.variant === 'compact' ? COMPACT_SKELETON_TILE_COUNT : SKELETON_TILE_COUNT;
-    }
+    return Math.min(Math.max(image.aspect_ratio, 0.75), 2.35);
+}
 
-    private selectEntries(images: readonly ViewerImage[], visibleCount: number): PhotosPreviewEntry[] {
-        const entries = images.map((image, clickIndex) => ({ image, clickIndex }));
-
-        if (this.mode === 'person') {
-            return this.selectPersonEntries(entries, visibleCount);
-        }
-
-        return this.selectMediaEntries(entries, visibleCount);
-    }
-
-    private selectMediaEntries(entries: readonly PhotosPreviewEntry[], visibleCount: number): PhotosPreviewEntry[] {
-        const groups = [...this.groupByPhotoType(entries).values()];
-
-        return this.mixEntries(groups, visibleCount);
-    }
-
-    private selectPersonEntries(entries: readonly PhotosPreviewEntry[], visibleCount: number): PhotosPreviewEntry[] {
-        const profiles = entries.filter((entry) => entry.image.photoType === 'profile').slice(0, PERSON_PROFILE_COUNT);
-        const tagged = entries.filter((entry) => entry.image.photoType === 'tagged');
-        const mixed = this.mixEntries([profiles, tagged], visibleCount);
-
-        return mixed.length ? mixed : entries.slice(0, visibleCount);
-    }
-
-    private groupByPhotoType(entries: readonly PhotosPreviewEntry[]): Map<string, PhotosPreviewEntry[]> {
-        const groups = new Map<string, PhotosPreviewEntry[]>();
-
-        for (const entry of entries) {
-            const key = entry.image.photoType ?? 'photo';
-            groups.set(key, [...(groups.get(key) ?? []), entry]);
-        }
-
-        return groups;
-    }
-
-    private mixEntries(groups: readonly PhotosPreviewEntry[][], count: number): PhotosPreviewEntry[] {
-        const selected: PhotosPreviewEntry[] = [];
-        const queues = groups.map((group) => [...group]).filter((group) => group.length);
-
-        while (selected.length < count && queues.length) {
-            const queue = queues.shift()!;
-            const next = queue.shift()!;
-
-            selected.push(next);
-
-            if (queue.length) {
-                queues.push(queue);
-            }
-        }
-
-        return selected;
-    }
-
-    private toPreviewTile(entry: PhotosPreviewEntry, moreCount: number | null): PhotosPreviewTile {
-        const imageType: ImageType = entry.image.photoType === 'profile' ? 'person' : 'media';
-
-        return {
-            ...entry,
-            imageType,
-            imageParams: entry.image.aspect_ratio && entry.image.aspect_ratio > 1.9 ? 'w780' : 'w500',
-            layoutAspectRatio: this.getLayoutAspectRatio(entry.image),
-            moreCount,
-            ariaLabel: moreCount ? `Browse all photos, ${moreCount} more` : `Open photo ${entry.clickIndex + 1}`,
-        };
-    }
-
-    private getLayoutAspectRatio(image: ViewerImage): number {
-        if (image.photoType === 'profile' || image.photoType === 'poster') {
-            return 0.75;
-        }
-
-        if (!image.aspect_ratio) {
-            return 1.5;
-        }
-
-        return Math.min(Math.max(image.aspect_ratio, 0.75), 2.35);
-    }
+function toRange(count: number): readonly number[] {
+    return Array.from({ length: count }, (_, index) => index);
 }

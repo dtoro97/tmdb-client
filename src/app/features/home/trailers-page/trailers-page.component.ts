@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { filter, map, switchMap, tap } from 'rxjs';
 
 import { PAGE_SIZE } from '../../../constants';
-import { PillToggleComponent, SelectOption, SkeletonComponent, VideoCardComponent } from '../../../shared';
+import { ToggleGroupComponent, SelectOption, SkeletonComponent, VideoCardComponent } from '../../../shared';
 import { RepeatPipe } from '../../../shared/pipes/repeat.pipe';
 import { HeroSpotlightComponent } from '../hero-spotlight/hero-spotlight.component';
 import { TrailersPageStoreService } from './trailers-page-store.service';
@@ -22,7 +22,7 @@ const isTrailerFeedType = (value: unknown): value is TrailerFeedType => value ==
         AsyncPipe,
         HeroSpotlightComponent,
         MatButtonModule,
-        PillToggleComponent,
+        ToggleGroupComponent,
         VideoCardComponent,
         SkeletonComponent,
         RepeatPipe,

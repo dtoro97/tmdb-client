@@ -1,4 +1,4 @@
-@if (state.type === "loading") {
+@if (state.state === "loading") {
     <ul class="header-search-results u-list-none" aria-hidden="true">
         @for (_ of skeletonRows; track $index) {
             <li class="header-search-results__row">
@@ -25,9 +25,9 @@
             </li>
         }
     </ul>
-} @else if (state.type === "loaded") {
+} @else if (state.state === "success") {
     <ul class="header-search-results u-list-none">
-        @for (item of state.value; track item.id) {
+        @for (item of state.data; track item.id) {
             <li class="header-search-results__row">
                 <button
                     type="button"

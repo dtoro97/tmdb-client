@@ -1,7 +1,7 @@
-@use "breakpoints" as *;
-@use "mixins" as *;
+@use 'breakpoints' as *;
+@use 'mixins' as *;
 
-.episodes {
+.season-detail {
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
@@ -53,7 +53,7 @@
 .season-summary__overview {
     max-width: 64ch;
     color: var(--text-secondary);
-    @include line-clamp(3);
+    @include line-clamp(4);
 }
 
 .season-summary__line-skeleton {
@@ -61,12 +61,12 @@
 
     &--title {
         width: min(100%, 18rem);
-        --skeleton-height: 1.8rem;
+        --skeleton-height: 2rem;
     }
 
     &--meta {
         width: min(100%, 13rem);
-        --skeleton-height: 0.875rem;
+        --skeleton-height: 1rem;
     }
 
     &--overview {
@@ -101,7 +101,7 @@
 }
 
 @include mobile() {
-    .episodes {
+    .season-detail {
         gap: var(--space-5);
     }
 

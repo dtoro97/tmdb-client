@@ -7,17 +7,17 @@ import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap } from
 import { CollectionDetails, CollectionRestControllerService, MovieRestControllerService } from '../../api';
 import { API_JSON_OPTIONS } from '../../constants';
 import {
-    LoadableItems,
-    LoadableValue,
+    RemoteData,
     MediaListItem,
     PersonLink,
     sortByDate,
     toCollectionPartMediaListItem,
+    toMediaListEntryState,
 } from '../../shared';
 
 interface CollectionState {
-    collection: LoadableValue<CollectionDetails | null>;
-    parts: LoadableItems<MediaListItem>;
+    collection: RemoteData<CollectionDetails | null>;
+    parts: RemoteData<MediaListItem[]>;
 }
 
 @Injectable()
@@ -26,16 +26,18 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
     collection$ = this.select((state) => state.collection);
 
-    mappedPartsState$ = this.select((state) => state.parts);
+    mappedPartsState$ = this.select((state) =>
+        toMediaListEntryState(state.parts, { routeType: 'movie' }),
+    );
 
-    partsCount$ = this.select((state) => (state.parts.type === 'loaded' ? state.parts.value.length : 0));
+    partsCount$ = this.select((state) => (state.parts.state === 'success' ? state.parts.data.length : 0));
 
     timelineLabel$ = this.select((state) => {
-        if (state.parts.type !== 'loaded' || !state.parts.value.length) {
+        if (state.parts.state !== 'success' || !state.parts.data.length) {
             return null;
         }
 
-        const datedParts = state.parts.value.filter((part) => !!part.date);
+        const datedParts = state.parts.data.filter((part) => !!part.date);
         if (!datedParts.length) {
             return null;
         }
@@ -46,26 +48,26 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
     });
 
     backdropPath$ = this.collection$.pipe(
-        map((state) => (state.type === 'loaded' && state.value ? state.value.backdrop_path : null)),
+        map((state) => (state.state === 'success' && state.data ? state.data.backdrop_path : null)),
     );
 
     posterPath$ = this.collection$.pipe(
         map((state) => {
-            if (state.type !== 'loaded' || !state.value) {
+            if (state.state !== 'success' || !state.data) {
                 return null;
             }
 
             return (
-                state.value.poster_path ?? state.value.parts?.find((part) => !!part.poster_path)?.poster_path ?? null
+                state.data.poster_path ?? state.data.parts?.find((part) => !!part.poster_path)?.poster_path ?? null
             );
         }),
     );
 
     averageRating$ = this.select((state) => state.parts).pipe(
         map((parts) => {
-            if (parts.type !== 'loaded') return 0;
+            if (parts.state !== 'success') return 0;
 
-            const rated = parts.value.filter((p) => (p.rating ?? 0) > 0);
+            const rated = parts.data.filter((p) => (p.rating ?? 0) > 0);
             if (!rated.length) return 0;
             return rated.reduce((sum, p) => sum + (p.rating ?? 0), 0) / rated.length;
         }),
@@ -77,15 +79,15 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         private router: Router,
     ) {
         super({
-            collection: { type: 'idle' },
-            parts: { type: 'loading' },
+            collection: { state: 'notAsked' },
+            parts: { state: 'notAsked' },
         });
     }
 
     getCollection$(id: number) {
         this.patchState({
-            collection: { type: 'loading' },
-            parts: { type: 'loading' },
+            collection: { state: 'loading' },
+            parts: { state: 'loading' },
         });
         return this.collectionRestControllerService
             .collectionDetails(id, undefined, undefined, undefined, this.opts)
@@ -101,17 +103,17 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
                 }),
                 tap(({ collection, items }) =>
                     this.patchState({
-                        collection: { type: 'loaded', value: collection },
+                        collection: { state: 'success', data: collection },
                         parts: {
-                            type: 'loaded',
-                            value: items,
+                            state: 'success',
+                            data: items,
                         },
                     }),
                 ),
                 catchError(() => {
                     this.patchState({
-                        collection: { type: 'loaded', value: null },
-                        parts: { type: 'loaded', value: [] },
+                        collection: { state: 'success', data: null },
+                        parts: { state: 'success', data: [] },
                     });
                     this.router.navigate(['not-found']);
                     return EMPTY;

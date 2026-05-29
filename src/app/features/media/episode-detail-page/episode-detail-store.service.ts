@@ -1,8 +1,7 @@
-import { catchError, combineLatest, EMPTY, forkJoin, map, Observable, of, tap } from 'rxjs';
-
 import { Injectable } from '@angular/core';
 
 import { ComponentStore } from '@ngrx/component-store';
+import { Observable, catchError, combineLatest, forkJoin, map, of, switchMap, tap, throwError } from 'rxjs';
 
 import {
     CastMember,
@@ -14,38 +13,56 @@ import {
     VideoList,
 } from '../../../api';
 import {
+    GroupedCrew,
+    LocaleStoreService,
+    MediaDetails,
+    MediaRatingService,
+    RemoteData,
+    VideoCardItem,
+    ViewerImage,
     buildImageLanguageFallback,
     getISODate,
-    MediaDetails,
     groupCrewMembers,
-    LoadableItems,
-    LocaleStoreService,
-    ViewerImage,
-    loadedValue,
-    GroupedCrew,
+    isDefined,
+    normalizeRatingValue,
+    remoteData,
+    toVideoCardItems,
     toYoutubeVideoState,
 } from '../../../shared';
-import { MediaDetailStoreService } from '../media-detail-store.service';
-import { MediaSeasonsStoreService } from '../media-seasons-store.service';
+import { EpisodeTarget, isSameEpisodeTarget } from '../media-target';
+import { MediaStoreService } from '../media-store.service';
 
-export interface EpisodeDetailState {
-    target: EpisodeDetailTarget | null;
-    episode: LoadableItems<TvEpisode>;
-    images: LoadableItems<TvEpisodeImages>;
-    videos: LoadableItems<Video>;
+interface EpisodeDetailState {
+    readonly target: EpisodeRatingTarget | null;
+    readonly episode: RemoteData<TvEpisode | null>;
+    readonly episodeImages: RemoteData<TvEpisodeImages | null>;
+    readonly episodeVideos: RemoteData<VideoList | null>;
+    readonly rating: EpisodeRatingResource;
 }
 
-interface EpisodeDetailTarget {
-    readonly seriesId: number;
-    readonly seasonNumber: number;
-    readonly episodeNumber: number;
+interface EpisodeRatingResource {
+    readonly userRating: RemoteData<number | null>;
+    readonly ratingPending: boolean;
 }
+
+export type EpisodeRatingTarget = EpisodeTarget;
+
+const EMPTY_RATING_RESOURCE: EpisodeRatingResource = {
+    userRating: { state: 'notAsked' },
+    ratingPending: false,
+};
+
+const loadingRatingResource = (): EpisodeRatingResource => ({
+    userRating: { state: 'loading' },
+    ratingPending: false,
+});
 
 const INITIAL_STATE: EpisodeDetailState = {
     target: null,
-    episode: { type: 'idle' },
-    images: { type: 'idle' },
-    videos: { type: 'idle' },
+    episode: { state: 'notAsked' },
+    episodeImages: { state: 'notAsked' },
+    episodeVideos: { state: 'notAsked' },
+    rating: EMPTY_RATING_RESOURCE,
 };
 
 export interface EpisodeDetailVm {
@@ -53,231 +70,353 @@ export interface EpisodeDetailVm {
     episode: TvEpisode | null;
     isLoading: boolean;
     canRateEpisode: boolean;
-    previousEpisode: TvEpisode | null;
-    nextEpisode: TvEpisode | null;
+    userRating: {
+        readonly currentRating: number | null;
+        readonly disabled: boolean;
+        readonly loading: boolean;
+        readonly pending: boolean;
+    };
     headerCrew: {
-        director: CrewMember | null;
-        writer: CrewMember | null;
-        hasCrew: boolean;
+        readonly director: CrewMember | null;
+        readonly writer: CrewMember | null;
+        readonly hasCrew: boolean;
     };
     groupedCrew: GroupedCrew[];
     guestStars: CastMember[];
-    videosState: LoadableItems<Video>;
+    videosState: RemoteData<VideoCardItem[]>;
     videoCount: number;
-    stillsState: LoadableItems<ViewerImage>;
+    stillsState: RemoteData<ViewerImage[]>;
     stillsTotalCount: number;
 }
 
 @Injectable()
 export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState> {
-    constructor(
-        private tvEpisodeRestControllerService: TvEpisodeRestControllerService,
-        private mediaSeasonsStoreService: MediaSeasonsStoreService,
-        private mediaDetailStoreService: MediaDetailStoreService,
-        private localeStore: LocaleStoreService,
-    ) {
-        super(INITIAL_STATE);
-    }
+    private readonly target$ = this.select((state) => state.target);
+    private readonly mediaState$ = this.mediaStore.mediaDetailsState$;
+    private readonly episodeImagesState$ = this.select((state) => state.episodeImages);
+    private readonly episodeVideosState$ = this.select((state) => state.episodeVideos);
+    private readonly activeRating$ = this.select((state) => state.rating);
 
     readonly episodeState$ = this.select((state) => state.episode);
 
-    readonly allStillsState$ = this.select((state): LoadableItems<ViewerImage> => {
-        if (state.images.type === 'loading') {
-            return { type: 'loading' };
-        }
+    readonly userRatingState$ = this.activeRating$.pipe(map((rating) => rating.userRating));
 
-        if (state.images.type !== 'loaded') {
-            return { type: 'idle' };
-        }
+    readonly userRatingVm$ = this.select(
+        this.userRatingState$,
+        this.activeRating$.pipe(map((rating) => rating.ratingPending)),
+        this.target$,
+        (value, pending, target) => ({
+            currentRating: value.state === 'success' ? value.data : null,
+            disabled: target === null || pending || value.state === 'loading',
+            loading: value.state === 'loading',
+            pending,
+        }),
+    );
 
-        return {
-            type: 'loaded',
-            value: this.toEpisodeStillImages(loadedValue(state.images)[0]),
-        };
-    });
+    readonly allStillsState$ = this.episodeImagesState$.pipe(
+        map((images): RemoteData<ViewerImage[]> => {
+            switch (images.state) {
+                case 'success':
+                    return { state: 'success', data: this.toEpisodeStillImages(images.data?.stills ?? []) };
+                case 'loading-more':
+                    return { state: 'loading-more', data: this.toEpisodeStillImages(images.data?.stills ?? []) };
+                case 'failure':
+                    return { state: 'failure', error: images.error };
+                case 'loading':
+                    return { state: 'loading' };
+                case 'notAsked':
+                    return { state: 'loading' };
+            }
+        }),
+    );
 
     readonly stillsState$ = this.allStillsState$.pipe(
-        map((state): LoadableItems<ViewerImage> => {
-            if (state.type !== 'loaded') {
+        map((state): RemoteData<ViewerImage[]> => {
+            if (state.state !== 'success') {
                 return state;
             }
 
             return {
-                type: 'loaded',
-                value: state.value.slice(0, 12),
+                state: 'success',
+                data: state.data.slice(0, 12),
             };
         }),
     );
 
-    readonly allStills$ = this.allStillsState$.pipe(map((state) => loadedValue(state)));
+    readonly allStills$ = this.allStillsState$.pipe(map((state) => remoteData(state, [])));
 
-    readonly videosState$ = this.select((state): LoadableItems<Video> => {
-        if (state.videos.type === 'loading') {
-            return { type: 'loading' };
-        }
-
-        if (state.videos.type !== 'loaded') {
-            return { type: 'idle' };
-        }
-
-        return toYoutubeVideoState(state.videos);
-    });
+    private readonly youtubeVideosState$ = this.episodeVideosState$.pipe(
+        map((videos): RemoteData<Video[]> => {
+            switch (videos.state) {
+                case 'success':
+                case 'loading-more':
+                    return toYoutubeVideoState({
+                        state: videos.state,
+                        data: videos.data?.results ?? [],
+                    });
+                case 'failure':
+                    return { state: 'failure', error: videos.error };
+                case 'loading':
+                    return { state: 'loading' };
+                case 'notAsked':
+                    return { state: 'loading' };
+            }
+        }),
+    );
 
     readonly vm$ = combineLatest([
-        this.mediaDetailStoreService.mediaDetailsState$,
+        this.mediaState$,
         this.episodeState$,
-        this.mediaSeasonsStoreService.seasonEpisodesState$,
         this.stillsState$,
-        this.videosState$,
+        this.youtubeVideosState$,
         this.allStills$,
+        this.userRatingVm$,
     ]).pipe(
-        map(([mediaState, episodeState, seasonEpisodesState, stillsState, videosState, allStills]): EpisodeDetailVm => {
-            const media = mediaState.type === 'loaded' ? mediaState.value : null;
-            const episode = loadedValue(episodeState)[0] ?? null;
-            const isLoading = episodeState.type === 'idle' || episodeState.type === 'loading';
-            const director = episode?.crew?.find((crewMember) => crewMember.job === 'Director') ?? null;
-            const writer =
-                episode?.crew?.find((crewMember) => crewMember.job === 'Writer' || crewMember.job === 'Screenplay') ??
-                null;
-            const groupedCrew = groupCrewMembers(episode?.crew ?? []);
-            const guestStars = episode?.guest_stars ?? [];
-            const stillsTotalCount = allStills.length;
-            const youtubeVideoCount = videosState.type === 'loaded' ? videosState.value.length : 0;
-            const seasonEpisodes = seasonEpisodesState.type === 'loaded' ? seasonEpisodesState.value : [];
-            const episodeIndex = episode
-                ? seasonEpisodes.findIndex((seasonEpisode) => seasonEpisode.id === episode.id)
-                : -1;
-            const previousEpisode = episodeIndex > 0 ? seasonEpisodes[episodeIndex - 1] : null;
-            const nextEpisode =
-                episodeIndex >= 0 && episodeIndex < seasonEpisodes.length - 1 ? seasonEpisodes[episodeIndex + 1] : null;
-
-            const airDate = episode?.air_date;
-
-            return {
-                media,
-                episode,
-                isLoading,
-                canRateEpisode: airDate ? (airDate <= getISODate(0) ? true : false) : false,
-                previousEpisode: isLoading ? null : previousEpisode,
-                nextEpisode: isLoading ? null : nextEpisode,
-                headerCrew: {
-                    director,
-                    writer,
-                    hasCrew: !!director || !!writer,
-                },
-                groupedCrew,
-                guestStars,
-                videosState,
-                videoCount: youtubeVideoCount,
+        map(
+            ([
+                mediaState,
+                episodeState,
                 stillsState,
-                stillsTotalCount,
-            };
-        }),
+                videosState,
+                allStills,
+                userRating,
+            ]): EpisodeDetailVm => {
+                const media = mediaState.state === 'success' ? mediaState.data : null;
+                const episode = episodeState.state === 'success' ? episodeState.data : null;
+                const isLoading = episodeState.state === 'loading';
+                const director = episode?.crew?.find((crewMember) => crewMember.job === 'Director') ?? null;
+                const writer =
+                    episode?.crew?.find(
+                        (crewMember) => crewMember.job === 'Writer' || crewMember.job === 'Screenplay',
+                    ) ?? null;
+                const groupedCrew = groupCrewMembers(episode?.crew ?? []);
+                const guestStars = episode?.guest_stars ?? [];
+                const stillsTotalCount = allStills.length;
+                const videoItemsState = this.toVideoItemsState(videosState, media);
+                const youtubeVideoCount = videoItemsState.state === 'success' ? videoItemsState.data.length : 0;
+                const airDate = episode?.air_date;
+
+                return {
+                    media,
+                    episode,
+                    isLoading,
+                    canRateEpisode: airDate ? airDate <= getISODate(0) : false,
+                    userRating,
+                    headerCrew: {
+                        director,
+                        writer,
+                        hasCrew: isDefined(director) || isDefined(writer),
+                    },
+                    groupedCrew,
+                    guestStars,
+                    videosState: videoItemsState,
+                    videoCount: youtubeVideoCount,
+                    stillsState,
+                    stillsTotalCount,
+                };
+            },
+        ),
     );
 
-    getEpisodeDetails$(
-        seriesId: number,
-        seasonNumber: number,
-        episodeNumber: number,
-    ): Observable<[TvEpisode, TvEpisodeImages, VideoList]> {
-        const target = { seriesId, seasonNumber, episodeNumber };
+    constructor(
+        private readonly localeStore: LocaleStoreService,
+        private readonly mediaRatingService: MediaRatingService,
+        private readonly mediaStore: MediaStoreService,
+        private readonly tvEpisodeService: TvEpisodeRestControllerService,
+    ) {
+        super(INITIAL_STATE);
+    }
 
-        this.patchState({
-            target,
-            episode: { type: 'loading' },
-            images: { type: 'loading' },
-            videos: { type: 'loading' },
-        });
-        const language = this.localeStore.language();
-        const includeImageLanguage = buildImageLanguageFallback();
-
-        return forkJoin([
-            this.tvEpisodeRestControllerService.tvEpisodeDetails(seriesId, seasonNumber, episodeNumber),
-            this.tvEpisodeRestControllerService.tvEpisodeImages(
-                seriesId,
-                seasonNumber,
-                episodeNumber,
-                includeImageLanguage,
-                language,
-            ),
-            this.tvEpisodeRestControllerService
-                .tvEpisodeVideos(seriesId, seasonNumber, episodeNumber)
-                .pipe(catchError(() => of({ results: [] }))),
-        ]).pipe(
-            tap(([episode, images, videos]) => {
-                this.patchState({
+    readonly load = this.effect<EpisodeTarget>((target$) =>
+        target$.pipe(
+            tap((target) => {
+                this.setState({
+                    ...INITIAL_STATE,
                     target,
-                    episode: { type: 'loaded', value: [episode] },
-                    images: { type: 'loaded', value: [images] },
-                    videos: { type: 'loaded', value: videos.results ?? [] },
+                    episode: { state: 'loading' },
+                    episodeImages: { state: 'loading' },
+                    episodeVideos: { state: 'loading' },
+                    rating: loadingRatingResource(),
+                });
+                this.fetchEpisodeRatingEffect(target);
+            }),
+            switchMap((target) =>
+                forkJoin({
+                    episode: this.fetchEpisode$(target),
+                    images: this.fetchEpisodeImages$(target),
+                    videos: this.fetchEpisodeVideos$(target),
+                }).pipe(
+                    tap(({ episode, images, videos }) => {
+                        this.patchState({
+                            episode: { state: 'success', data: episode },
+                            episodeImages: { state: 'success', data: images },
+                            episodeVideos: { state: 'success', data: videos },
+                        });
+                    }),
+                ),
+            ),
+        ),
+    );
+
+    readonly loadPhotos = this.effect<EpisodeTarget>((target$) =>
+        target$.pipe(switchMap((target) => this.loadPhotos$(target))),
+    );
+
+    submitUserRating$(target: EpisodeRatingTarget, value: number): Observable<unknown> {
+        this.patchState((state) =>
+            isSameEpisodeTarget(state.target, target)
+                ? { rating: { ...state.rating, ratingPending: true } }
+                : {},
+        );
+
+        return this.mediaRatingService.rateEpisode$(target.seriesId, target.seasonNumber, target.episodeNumber, value).pipe(
+            tap(() => {
+                this.patchRating(target, {
+                    userRating: {
+                        state: 'success',
+                        data: normalizeRatingValue(value),
+                    },
+                    ratingPending: false,
                 });
             }),
-            catchError(() => {
-                this.patchState({
-                    ...INITIAL_STATE,
-                });
-                return EMPTY;
+            catchError((error) => {
+                this.patchRating(target, { ratingPending: false });
+                return throwError(() => error);
             }),
         );
     }
 
-    getEpisodeImages$(
-        seriesId: number,
-        seasonNumber: number,
-        episodeNumber: number,
-    ): Observable<TvEpisodeImages> {
-        const target = { seriesId, seasonNumber, episodeNumber };
+    deleteUserRating$(target: EpisodeRatingTarget): Observable<unknown> {
+        this.patchState((state) =>
+            isSameEpisodeTarget(state.target, target)
+                ? { rating: { ...state.rating, ratingPending: true } }
+                : {},
+        );
+
+        return this.mediaRatingService.deleteEpisodeRating$(target.seriesId, target.seasonNumber, target.episodeNumber).pipe(
+            tap(() => {
+                this.patchRating(target, {
+                    userRating: { state: 'success', data: null },
+                    ratingPending: false,
+                });
+            }),
+            catchError((error) => {
+                this.patchRating(target, { ratingPending: false });
+                return throwError(() => error);
+            }),
+        );
+    }
+
+    private readonly fetchEpisodeRatingEffect = this.effect<EpisodeRatingTarget>((target$) =>
+        target$.pipe(switchMap((target) => this.fetchEpisodeRating$(target))),
+    );
+
+    private loadPhotos$(target: EpisodeTarget): Observable<unknown> {
         const state = this.get();
 
-        if (this.isCurrentTarget(state.target, target) && state.images.type === 'loaded') {
-            return of(state.images.value[0]);
+        if (
+            isSameEpisodeTarget(state.target, target) &&
+            state.episode.state === 'success' &&
+            state.episodeImages.state === 'success'
+        ) {
+            return of(undefined);
         }
 
-        this.patchState({
+        this.setState({
+            ...INITIAL_STATE,
             target,
-            episode: this.isCurrentTarget(state.target, target) ? state.episode : { type: 'idle' },
-            images: { type: 'loading' },
-            videos: this.isCurrentTarget(state.target, target) ? state.videos : { type: 'idle' },
+            episode: { state: 'loading' },
+            episodeImages: { state: 'loading' },
         });
 
-        const language = this.localeStore.language();
-        const includeImageLanguage = buildImageLanguageFallback();
-
-        return this.tvEpisodeRestControllerService.tvEpisodeImages(
-            seriesId,
-            seasonNumber,
-            episodeNumber,
-            includeImageLanguage,
-            language,
-        ).pipe(
-            tap((images) => {
+        return forkJoin({
+            episode: this.fetchEpisode$(target),
+            images: this.fetchEpisodeImages$(target),
+        }).pipe(
+            tap(({ episode, images }) => {
                 this.patchState({
-                    target,
-                    images: { type: 'loaded', value: [images] },
+                    episode: { state: 'success', data: episode },
+                    episodeImages: { state: 'success', data: images },
+                });
+            }),
+            map(() => undefined),
+        );
+    }
+
+    private fetchEpisode$(target: EpisodeTarget): Observable<TvEpisode | null> {
+        return this.tvEpisodeService.tvEpisodeDetails(target.seriesId, target.seasonNumber, target.episodeNumber).pipe(
+            catchError(() => of(null)),
+        );
+    }
+
+    private fetchEpisodeImages$(target: EpisodeTarget): Observable<TvEpisodeImages | null> {
+        return this.tvEpisodeService
+            .tvEpisodeImages(
+                target.seriesId,
+                target.seasonNumber,
+                target.episodeNumber,
+                buildImageLanguageFallback(),
+                this.localeStore.language(),
+            )
+            .pipe(
+                catchError(() => of(null)),
+            );
+    }
+
+    private fetchEpisodeVideos$(target: EpisodeTarget): Observable<VideoList | null> {
+        return this.tvEpisodeService.tvEpisodeVideos(target.seriesId, target.seasonNumber, target.episodeNumber).pipe(
+            catchError(() => of({ results: [] })),
+        );
+    }
+
+    private fetchEpisodeRating$(target: EpisodeRatingTarget): Observable<unknown> {
+        return this.mediaRatingService.getEpisodeRating$(target.seriesId, target.seasonNumber, target.episodeNumber).pipe(
+            tap((rating) => {
+                this.patchRating(target, {
+                    userRating: { state: 'success', data: rating },
+                    ratingPending: false,
                 });
             }),
             catchError(() => {
-                this.patchState({
-                    images: { type: 'idle' },
+                this.patchRating(target, {
+                    userRating: { state: 'success', data: null },
+                    ratingPending: false,
                 });
-                return EMPTY;
+                return of(undefined);
             }),
         );
     }
 
-    private isCurrentTarget(current: EpisodeDetailTarget | null, next: EpisodeDetailTarget): boolean {
-        return (
-            current?.seriesId === next.seriesId &&
-            current.seasonNumber === next.seasonNumber &&
-            current.episodeNumber === next.episodeNumber
+    private patchRating(target: EpisodeRatingTarget, patch: Partial<EpisodeRatingResource>): void {
+        this.patchState((state) =>
+            isSameEpisodeTarget(state.target, target)
+                ? {
+                      rating: {
+                          ...state.rating,
+                          ...patch,
+                      },
+                  }
+                : {},
         );
     }
 
-    private toEpisodeStillImages(images: TvEpisodeImages | null | undefined): ViewerImage[] {
-        return (images?.stills ?? [])
-            .map((image) => ({
-                ...image,
-                photoType: 'still',
-            }));
+    private toEpisodeStillImages(stills: NonNullable<TvEpisodeImages['stills']>): ViewerImage[] {
+        return stills.map((image) => ({
+            ...image,
+            photoType: 'still',
+        }));
+    }
+
+    private toVideoItemsState(videosState: RemoteData<Video[]>, media: MediaDetails | null): RemoteData<VideoCardItem[]> {
+        switch (videosState.state) {
+            case 'success':
+                return { state: 'success', data: media ? toVideoCardItems(videosState.data, media) : [] };
+            case 'loading-more':
+                return { state: 'loading-more', data: media ? toVideoCardItems(videosState.data, media) : [] };
+            case 'failure':
+                return { state: 'failure', error: videosState.error };
+            default:
+                return { state: videosState.state };
+        }
     }
 }

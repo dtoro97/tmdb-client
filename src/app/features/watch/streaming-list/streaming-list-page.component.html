@@ -28,10 +28,9 @@
 
                     <div end class="streaming-list__toolbar-actions">
                         @if (vm.showMediaTypeToggle) {
-                            <app-pill-toggle
+                            <app-toggle-group
                                 [options]="vm.mediaTypeOptions"
                                 [selectedValue]="vm.mediaType"
-                                variant="subtle"
                                 (selected)="onMediaTypeChange($event)"
                             />
                         }
