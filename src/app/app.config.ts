@@ -12,6 +12,7 @@ import {
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
     provideRouter,
+    TitleStrategy,
     withComponentInputBinding,
     withInMemoryScrolling,
 } from '@angular/router';
@@ -25,7 +26,11 @@ import {
     withEventReplay,
 } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
-import { UserSessionStoreService, WatchProviderStoreService } from './shared';
+import {
+    SeoTitleStrategy,
+    UserSessionStoreService,
+    WatchProviderStoreService,
+} from './shared';
 import { TmdbUserAuthService } from './shared/services/tmdb-user-auth.service';
 import { delayInterceptor } from './shared/utils/delay-interceptor';
 import { localeInterceptor } from './shared/utils/locale-interceptor';
@@ -40,6 +45,7 @@ export const appConfig: ApplicationConfig = {
                 scrollPositionRestoration: 'top',
             }),
         ),
+        { provide: TitleStrategy, useClass: SeoTitleStrategy },
         provideAnimationsAsync(),
         provideHttpClient(
             withFetch(),
