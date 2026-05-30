@@ -2,20 +2,36 @@
     @if (vm$ | async; as vm) {
         <div class="search-header inner-container u-flex-column u-gap-4">
             <div class="header-row">
-                <h1 class="text-headline">Results for "{{ vm.query }}"</h1>
+                <h1 class="text-headline">{{ vm.pageTitle }}</h1>
             </div>
-            <app-toggle-group
-                [options]="typeOptions"
-                [selectedValue]="vm.type"
-                (selected)="setType($event)"
-            />
+            @if (vm.hasQuery) {
+                <app-toggle-group
+                    [options]="typeOptions"
+                    [selectedValue]="vm.type"
+                    (selected)="setType($event)"
+                />
+            }
         </div>
 
         <div class="results inner-container u-flex-column u-gap-8">
+            @if (!vm.hasQuery) {
+                <div class="empty-panel">
+                    <app-empty-state
+                        iconClass="fa-solid fa-magnifying-glass"
+                        title="Start a search"
+                        text="Use the search bar above to find movies, TV series, and people."
+                        iconStyle="plain"
+                    />
+                </div>
+            }
+
             @if (
-                vm.movieListState.state === 'loading' ||
-                vm.movieListState.state === 'loading-more' ||
-                (vm.movieListState.state === 'success' && vm.movieListState.data.length)
+                vm.hasQuery &&
+                (
+                    vm.movieListState.state === 'loading' ||
+                    vm.movieListState.state === 'loading-more' ||
+                    (vm.movieListState.state === 'success' && vm.movieListState.data.length)
+                )
             ) {
                 <section>
                     <h2 class="section-title text-title">Movies</h2>
@@ -36,12 +52,15 @@
             }
 
             @if (
-                vm.tvListState.state === 'loading' ||
-                vm.tvListState.state === 'loading-more' ||
-                (vm.tvListState.state === 'success' && vm.tvListState.data.length)
+                vm.hasQuery &&
+                (
+                    vm.tvListState.state === 'loading' ||
+                    vm.tvListState.state === 'loading-more' ||
+                    (vm.tvListState.state === 'success' && vm.tvListState.data.length)
+                )
             ) {
                 <section>
-                    <h2 class="section-title text-title">TV Shows</h2>
+                    <h2 class="section-title text-title">TV series</h2>
                     <div>
                         <app-media-list
                             [state]="vm.tvListState"
@@ -52,16 +71,19 @@
                     </div>
                     @if (vm.tvHasMore) {
                         <div class="search-section-footer">
-                            <button mat-stroked-button (click)="loadMoreTv()">Show more TV shows</button>
+                            <button mat-stroked-button (click)="loadMoreTv()">Show more TV series</button>
                         </div>
                     }
                 </section>
             }
 
             @if (
-                vm.personState.state === 'loading' ||
-                vm.personState.state === 'loading-more' ||
-                (vm.personState.state === 'success' && vm.personState.data.length)
+                vm.hasQuery &&
+                (
+                    vm.personState.state === 'loading' ||
+                    vm.personState.state === 'loading-more' ||
+                    (vm.personState.state === 'success' && vm.personState.data.length)
+                )
             ) {
                 <section>
                     <h2 class="section-title text-title">People</h2>

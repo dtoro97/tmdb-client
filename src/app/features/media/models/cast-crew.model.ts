@@ -1,4 +1,4 @@
-import { CastMember, CrewMember } from '../../api';
+import { CastMember, CrewMember } from '../../../api';
 
 export type CastGridMember = CastMember & {
     episode_count?: number;

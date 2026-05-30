@@ -162,7 +162,7 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
     advanced: {
         key: 'advanced',
         title: 'Discover',
-        subtitle: 'Find movies and TV shows by genre, rating, runtime, release timing, and catalog signals.',
+        subtitle: 'Find movies and TV series by genre, rating, runtime, release dates, and provider availability.',
         mediaType: 'movie',
         mode: 'advanced',
         defaultSortKey: 'popularity',
@@ -230,7 +230,7 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
     },
     'tv-popular': {
         key: 'tv-popular',
-        title: 'Popular TV Shows',
+        title: 'Popular TV Series',
         subtitle: 'Series currently getting the most attention from TMDb viewers.',
         mediaType: 'tv',
         mode: 'browse',
@@ -242,7 +242,7 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
     },
     'tv-top-rated': {
         key: 'tv-top-rated',
-        title: 'Top Rated TV Shows',
+        title: 'Top Rated TV Series',
         subtitle: 'Highly rated TV series with enough audience activity to keep the list stable.',
         mediaType: 'tv',
         mode: 'browse',
@@ -255,7 +255,7 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
     },
     'tv-airing-today': {
         key: 'tv-airing-today',
-        title: 'TV Shows Airing Today',
+        title: 'TV Series Airing Today',
         subtitle: 'Series with episodes scheduled to air today.',
         mediaType: 'tv',
         mode: 'browse',
@@ -269,7 +269,7 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
     },
     'tv-on-the-air': {
         key: 'tv-on-the-air',
-        title: 'TV Shows On TV',
+        title: 'TV Series Airing This Week',
         subtitle: 'Series with episodes scheduled over the next seven days.',
         mediaType: 'tv',
         mode: 'browse',
@@ -285,7 +285,7 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
 
 export const MEDIA_TYPE_OPTIONS = [
     { label: 'Movies', value: 'movie' },
-    { label: 'TV shows', value: 'tv' },
+    { label: 'TV series', value: 'tv' },
 ] as const;
 
 export const RATING_FILTER_OPTIONS = [
@@ -296,7 +296,7 @@ export const RATING_FILTER_OPTIONS = [
 ] as const;
 
 export const VOTE_COUNT_FILTER_OPTIONS = [
-    { label: 'Any votes', value: null },
+    { label: 'Any vote count', value: null },
     { label: '50+', value: 50 },
     { label: '250+', value: 250 },
     { label: '1000+', value: 1000 },
@@ -304,7 +304,7 @@ export const VOTE_COUNT_FILTER_OPTIONS = [
 ] as const;
 
 export const MOVIE_RELEASE_TYPE_FILTER_OPTIONS = [
-    { label: 'Any release', value: null },
+    { label: 'Any release type', value: null },
     { label: 'Premiere', value: 1 },
     { label: 'Limited theatrical', value: 2 },
     { label: 'Theatrical', value: 3 },
@@ -315,7 +315,7 @@ export const MOVIE_RELEASE_TYPE_FILTER_OPTIONS = [
 
 export const RUNTIME_FILTER_OPTIONS = [
     { label: 'Any runtime', value: 'any' },
-    { label: 'Under 30m', value: 'short' },
-    { label: '30-120m', value: 'standard' },
-    { label: '120m+', value: 'long' },
+    { label: 'Under 30 min', value: 'short' },
+    { label: '30-120 min', value: 'standard' },
+    { label: 'Over 120 min', value: 'long' },
 ] as const;

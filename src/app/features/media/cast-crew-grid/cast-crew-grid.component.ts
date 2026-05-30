@@ -1,7 +1,8 @@
 import { CdkAccordionModule } from '@angular/cdk/accordion';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CastGridMember, GroupedCrew, ImageComponent, RepeatPipe, SkeletonComponent } from '../../../shared';
+import { ImageComponent, RepeatPipe, SkeletonComponent } from '../../../shared';
+import { CastGridMember, GroupedCrew } from '../models/cast-crew.model';
 
 type CastCrewGridVariant = 'accordion' | 'directory';
 

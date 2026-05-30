@@ -24,7 +24,6 @@ import {
     CardItem,
     ExternalLinks,
     LocaleStoreService,
-    MediaDetails,
     MediaType,
     PersonCardItem,
     RemoteData,
@@ -32,6 +31,7 @@ import {
     ViewerImage,
     getISODate,
     hasRemoteData,
+    mapRemoteData,
     remoteSuccess,
     toCardItem,
     toVideoCardItems,
@@ -45,6 +45,7 @@ import { MediaTarget, isSameMediaTarget } from './media-target';
 import { MediaStoreService } from './media-store.service';
 import { MediaVideoStoreService } from './media-video-store.service';
 import { CreditsSummary } from './media-credits-summary/media-credits-summary.model';
+import { MediaDetails } from './models/media-details.model';
 
 export interface MediaDetailPageData {
     readonly media: MediaDetails | null;
@@ -228,7 +229,7 @@ export class MediaDetailStoreService extends ComponentStore<MediaDetailState> {
                 const currentMedia = this.mediaStore.currentMedia();
                 const collectionId = this.extractCollectionId(currentMedia, target);
 
-                return this.loadCollection$(target, collectionId);
+                return this.loadCollection$(target, collectionId, currentMedia);
             }),
         );
 
@@ -392,7 +393,11 @@ export class MediaDetailStoreService extends ComponentStore<MediaDetailState> {
         );
     }
 
-    private loadCollection$(target: MediaTarget, collectionId: number | null): Observable<CollectionDetails | null> {
+    private loadCollection$(
+        target: MediaTarget,
+        collectionId: number | null,
+        media: Movie | TvSeries | null,
+    ): Observable<CollectionDetails | null> {
         const current = this.get().collectionState;
 
         if (current.state === 'success') {
@@ -411,6 +416,10 @@ export class MediaDetailStoreService extends ComponentStore<MediaDetailState> {
         this.patchState({ collectionState: { state: 'loading' } });
 
         return this.mediaApiService.getCollectionDetails$(collectionId).pipe(
+            map((collection) => ({
+                ...collection,
+                backdrop_path: collection.backdrop_path ?? media?.backdrop_path ?? null,
+            })),
             tap((collection) => {
                 this.patchState({ collectionState: { state: 'success', data: collection } });
             }),
@@ -425,29 +434,11 @@ export class MediaDetailStoreService extends ComponentStore<MediaDetailState> {
         videosState: RemoteData<Video[]>,
         media: MediaDetails | null,
     ): RemoteData<VideoCardItem[]> {
-        switch (videosState.state) {
-            case 'success':
-                return { state: 'success', data: media ? toVideoCardItems(videosState.data, media) : [] };
-            case 'loading-more':
-                return { state: 'loading-more', data: media ? toVideoCardItems(videosState.data, media) : [] };
-            case 'failure':
-                return { state: 'failure', error: videosState.error };
-            default:
-                return { state: videosState.state };
-        }
+        return mapRemoteData(videosState, (videos) => (media ? toVideoCardItems(videos, media) : []));
     }
 
     private toCertificationState(state: RemoteData<MediaReleaseInfo>): RemoteData<string | null> {
-        switch (state.state) {
-            case 'success':
-                return { state: 'success', data: state.data.certification };
-            case 'loading-more':
-                return { state: 'loading-more', data: state.data.certification };
-            case 'failure':
-                return { state: 'failure', error: state.error };
-            default:
-                return { state: state.state };
-        }
+        return mapRemoteData(state, (releaseInfo) => releaseInfo.certification);
     }
 
     private toRelatedState(

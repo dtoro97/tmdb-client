@@ -7,7 +7,7 @@ export const homeRoutes: Routes = [
         path: '',
         component: HomePageComponent,
         pathMatch: 'full',
-        title: 'Browse Movies, TV Shows and People',
+        title: 'Browse Movies, TV Series, and People',
     },
     {
         path: 'trailers',
@@ -17,6 +17,6 @@ export const homeRoutes: Routes = [
     {
         path: 'trailers/:feedType',
         component: TrailersPageComponent,
-        title: 'Watch Movie & TV Trailers',
+        title: 'Watch Movie and TV Series Trailers',
     },
 ];

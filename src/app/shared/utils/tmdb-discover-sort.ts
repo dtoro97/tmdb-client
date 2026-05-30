@@ -23,17 +23,17 @@ export const DEFAULT_TMDB_DISCOVER_SORT_DIRECTION: SortDirection = 'desc';
 export const TMDB_DISCOVER_MOVIE_SORT_OPTIONS: readonly TmdbDiscoverSortOption[] = [
     { label: 'Popularity', value: 'popularity' },
     { label: 'Rating', value: 'rating' },
-    { label: 'Release Date', value: 'release_date' },
+    { label: 'Release date', value: 'release_date' },
     { label: 'Title', value: 'title' },
-    { label: 'Vote Count', value: 'vote_count' },
+    { label: 'Vote count', value: 'vote_count' },
 ];
 
 export const TMDB_DISCOVER_TV_SORT_OPTIONS: readonly TmdbDiscoverSortOption[] = [
     { label: 'Popularity', value: 'popularity' },
     { label: 'Rating', value: 'rating' },
-    { label: 'First Air Date', value: 'release_date' },
-    { label: 'Name', value: 'title' },
-    { label: 'Vote Count', value: 'vote_count' },
+    { label: 'First air date', value: 'release_date' },
+    { label: 'Series title', value: 'title' },
+    { label: 'Vote count', value: 'vote_count' },
 ];
 
 const TMDB_MOVIE_DISCOVER_SORT_FIELDS = {

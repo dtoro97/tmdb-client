@@ -122,7 +122,7 @@ export class StreamingQueryService {
                 undefined,
                 query.runtimeMax,
                 query.monetization,
-                query.providerId ? `${query.providerId}` : undefined,
+                this.resolveProviderFilter(query),
                 undefined,
                 undefined,
                 undefined,
@@ -176,7 +176,7 @@ export class StreamingQueryService {
                 query.runtimeMax,
                 undefined,
                 query.monetization,
-                query.providerId ? `${query.providerId}` : undefined,
+                this.resolveProviderFilter(query),
                 undefined,
                 undefined,
                 undefined,
@@ -245,7 +245,7 @@ export class StreamingQueryService {
                 undefined,
                 query.runtimeMax,
                 query.monetization,
-                query.providerId ? `${query.providerId}` : undefined,
+                this.resolveProviderFilter(query),
                 undefined,
                 undefined,
                 undefined,
@@ -304,7 +304,7 @@ export class StreamingQueryService {
                 query.runtimeMax,
                 undefined,
                 query.monetization,
-                query.providerId ? `${query.providerId}` : undefined,
+                this.resolveProviderFilter(query),
                 undefined,
                 undefined,
                 undefined,
@@ -406,7 +406,17 @@ export class StreamingQueryService {
         query: StreamingBaseQuery,
         region: string,
     ): string | undefined {
-        return query.providerId || query.monetization ? region : undefined;
+        return query.providerId || query.providerIds?.length || query.monetization
+            ? region
+            : undefined;
+    }
+
+    private resolveProviderFilter(query: StreamingBaseQuery): string | undefined {
+        if (query.providerId) {
+            return `${query.providerId}`;
+        }
+
+        return serializeNumberListParam(query.providerIds, '|') ?? undefined;
     }
 
 }

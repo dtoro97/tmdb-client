@@ -353,7 +353,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
                 backdropPath: credit.backdrop_path ?? null,
                 roleLabel,
                 episodeLabel: mediaType === 'tv' && episodeCount ? `${episodeCount} ep` : null,
-                mediaTypeLabel: mediaType === 'tv' ? 'TV' : 'Movie',
+                mediaTypeLabel: mediaType === 'tv' ? 'TV series' : 'Movie',
             },
         };
     }
@@ -441,7 +441,7 @@ export class PersonDetailStoreService extends ComponentStore<PersonDetailState> 
         }
 
         if (hasTv) {
-            options.push({ label: 'TV Shows', value: 'tv' });
+            options.push({ label: 'TV series', value: 'tv' });
         }
 
         return options;

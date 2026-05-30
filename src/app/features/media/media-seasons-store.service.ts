@@ -15,19 +15,20 @@ import {
 import { API_JSON_OPTIONS } from '../../constants';
 import {
     LocaleStoreService,
-    MediaDetails,
     RemoteData,
     VideoCardItem,
     ViewerImage,
     buildImageLanguageFallback,
     hasRemoteData,
     isDefined,
+    mapRemoteData,
     remoteData,
     toVideoCardItems,
     toYoutubeVideoState,
 } from '../../shared';
 import { MediaStoreService } from './media-store.service';
 import type { EpisodeListEntry } from './episode-list/episode-list.models';
+import { MediaDetails } from './models/media-details.model';
 
 interface SeasonTarget {
     readonly seriesId: number;
@@ -80,20 +81,11 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
                 return { state: 'notAsked' };
             }
 
-            switch (media.state) {
-                case 'success':
-                    return media.data && 'seasons' in media.data && media.data.id === seriesId
-                        ? { state: 'success', data: media.data }
-                        : { state: 'notAsked' };
-                case 'loading-more':
-                    return media.data && 'seasons' in media.data && media.data.id === seriesId
-                        ? { state: 'loading-more', data: media.data }
-                        : { state: 'notAsked' };
-                case 'failure':
-                    return { state: 'failure', error: media.error };
-                default:
-                    return { state: media.state };
-            }
+            const seriesState: RemoteData<TvSeries | null> = mapRemoteData(media, (data): TvSeries | null =>
+                data && 'seasons' in data && data.id === seriesId ? data : null,
+            );
+
+            return hasRemoteData(seriesState) && !seriesState.data ? { state: 'notAsked' } : seriesState;
         },
     );
 
@@ -501,16 +493,7 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
     }
 
     private toEpisodesState(details: RemoteData<TvSeason | null>): RemoteData<TvEpisode[]> {
-        switch (details.state) {
-            case 'success':
-                return { state: 'success', data: details.data?.episodes ?? [] };
-            case 'loading-more':
-                return { state: 'loading-more', data: details.data?.episodes ?? [] };
-            case 'failure':
-                return { state: 'failure', error: details.error };
-            default:
-                return { state: details.state };
-        }
+        return mapRemoteData(details, (season) => season?.episodes ?? []);
     }
 
     private toEpisodeListState(
@@ -518,22 +501,7 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
         seriesId: number | null,
         selectedSeasonNumber: number | null,
     ): RemoteData<EpisodeListEntry[]> {
-        switch (episodes.state) {
-            case 'success':
-                return {
-                    state: 'success',
-                    data: this.toEpisodeListEntries(episodes.data, seriesId, selectedSeasonNumber),
-                };
-            case 'loading-more':
-                return {
-                    state: 'loading-more',
-                    data: this.toEpisodeListEntries(episodes.data, seriesId, selectedSeasonNumber),
-                };
-            case 'failure':
-                return { state: 'failure', error: episodes.error };
-            default:
-                return { state: episodes.state };
-        }
+        return mapRemoteData(episodes, (items) => this.toEpisodeListEntries(items, seriesId, selectedSeasonNumber));
     }
 
     private toEpisodeListEntries(
@@ -603,16 +571,7 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
     }
 
     private toImagesState(images: RemoteData<TvSeasonImages | null>): RemoteData<ViewerImage[]> {
-        switch (images.state) {
-            case 'success':
-                return { state: 'success', data: this.toSeasonImages(images.data?.posters ?? []) };
-            case 'loading-more':
-                return { state: 'loading-more', data: this.toSeasonImages(images.data?.posters ?? []) };
-            case 'failure':
-                return { state: 'failure', error: images.error };
-            default:
-                return { state: images.state };
-        }
+        return mapRemoteData(images, (data) => this.toSeasonImages(data?.posters ?? []));
     }
 
     private toSeasonImages(posters: NonNullable<TvSeasonImages['posters']>): ViewerImage[] {
@@ -626,28 +585,16 @@ export class MediaSeasonsStoreService extends ComponentStore<MediaSeasonsState> 
         videos: RemoteData<VideoList | null>,
         series: MediaDetails | null,
     ): RemoteData<VideoCardItem[]> {
-        switch (videos.state) {
-            case 'success':
-            case 'loading-more': {
-                const youtubeVideos = toYoutubeVideoState({
-                    state: videos.state,
-                    data: videos.data?.results ?? [],
-                });
+        return mapRemoteData(videos, (videoList) => {
+            const youtubeVideos = toYoutubeVideoState({
+                state: 'success',
+                data: videoList?.results ?? [],
+            });
 
-                if (youtubeVideos.state === 'success' || youtubeVideos.state === 'loading-more') {
-                    return {
-                        state: youtubeVideos.state,
-                        data: series ? toVideoCardItems(youtubeVideos.data, series) : [],
-                    };
-                }
-
-                return youtubeVideos;
-            }
-            case 'failure':
-                return { state: 'failure', error: videos.error };
-            default:
-                return { state: videos.state };
-        }
+            return youtubeVideos.state === 'success' && series
+                ? toVideoCardItems(youtubeVideos.data, series)
+                : [];
+        });
     }
 
     private toSeasonSummary(seasonNumber: number, season: SeasonRecord | null): SeasonSummary {

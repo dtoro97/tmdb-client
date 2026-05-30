@@ -4,7 +4,7 @@ import { StreamingEditorialSection } from '../models/streaming-browse.models';
 export const STREAMING_THIS_MONTH_SLUG = 'streaming-this-month';
 export const AIRING_TODAY_SLUG = 'airing-today';
 
-export const getStreamingThisMonthTitle = (): string => `Find out what's streaming in ${getCurrentMonthName()}`;
+export const getStreamingThisMonthTitle = (): string => `Streaming in ${getCurrentMonthName()}`;
 
 export const getStreamingThisMonthCtaLabel = (): string => `Browse ${getCurrentMonthName()} arrivals`;
 
@@ -12,7 +12,7 @@ export const STREAMING_EDITORIAL_SECTIONS: readonly StreamingEditorialSection[] 
     {
         slug: STREAMING_THIS_MONTH_SLUG,
         title: "This month's streaming arrivals",
-        description: 'A focused mix of recent movie releases and TV premieres available through streaming providers.',
+        description: 'Popular TV series premieres and returning seasons from major streaming services.',
         ctaLabel: 'Browse arrivals',
         baseQuery: {
             mediaTypes: ['movie', 'tv'],
@@ -25,8 +25,8 @@ export const STREAMING_EDITORIAL_SECTIONS: readonly StreamingEditorialSection[] 
         slug: AIRING_TODAY_SLUG,
         title: 'Airing today',
         description:
-            'Popular TV series with episodes scheduled today, tuned for a quick check-in before the evening starts.',
-        ctaLabel: "See today's shows",
+            'Popular TV series with episodes scheduled today.',
+        ctaLabel: "See today's TV series",
         baseQuery: {
             mediaTypes: ['tv'],
             datePreset: 'today',
@@ -37,7 +37,7 @@ export const STREAMING_EDITORIAL_SECTIONS: readonly StreamingEditorialSection[] 
         slug: 'anime-premieres',
         title: 'Japanese animation premieres',
         description:
-            'New and popular animated series from Japan, tuned for seasonal discoveries rather than a full catalog dump.',
+            'New and popular animated series from Japan, grouped by current season.',
         ctaLabel: 'Find anime premieres',
         baseQuery: {
             mediaTypes: ['tv'],
@@ -61,10 +61,10 @@ export const STREAMING_EDITORIAL_SECTIONS: readonly StreamingEditorialSection[] 
     },
     {
         slug: 'hidden-streaming-gems',
-        title: 'Hidden streaming gems',
+        title: 'Under-the-radar streaming',
         description:
-            'Less obvious movies and shows with strong audience scores, filtered away from the usual front-page defaults.',
-        ctaLabel: 'Uncover gems',
+            'Movies and TV series with strong audience scores outside the highest-vote titles.',
+        ctaLabel: 'Browse under-the-radar titles',
         baseQuery: {
             mediaTypes: ['movie', 'tv'],
             monetization: 'flatrate',

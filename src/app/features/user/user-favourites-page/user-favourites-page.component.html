@@ -2,8 +2,8 @@
     <app-sub-page-header
         parentTitle="Profile"
         backLink="/me"
-        pageTitle="Favourites"
-        subtitle="Movies and TV series you marked as favourites."
+        pageTitle="Favorites"
+        subtitle="Movies and TV series you marked as favorites."
     />
 
     <main class="page-main page">
@@ -54,7 +54,7 @@
                             <app-icon-button
                                 class="page__remove"
                                 tone="danger"
-                                [ariaLabel]="'Remove ' + item.title + ' from favourites'"
+                                [ariaLabel]="'Remove ' + item.title + ' from favorites'"
                                 (onClick)="onRemoveFromFavourites(item)"
                             >
                                 <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
@@ -77,8 +77,8 @@
                 <section class="page__empty">
                     <app-empty-state
                         iconClass="fa-regular fa-heart"
-                        title="No favourite titles"
-                        text="Movies and TV series you mark as favourites will appear here."
+                        title="No favorite titles"
+                        text="Movies and TV series you mark as favorites will appear here."
                     />
                 </section>
             }

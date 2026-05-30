@@ -1,5 +1,6 @@
 import { CollectionPart, MultiListItem } from '../../api';
 import type { MediaType, RemoteData } from '../types';
+import { mapRemoteData } from '../utils/remote-data';
 import {
     CardItem,
     KnownForLink,
@@ -158,24 +159,7 @@ export const toCollectionPartMediaListItem = (
 export const toMediaListEntryState = (
     state: RemoteData<MediaListItem[]>,
     options: MediaListEntryOptions = {},
-): RemoteData<MediaListEntry[]> => {
-    switch (state.state) {
-        case 'success':
-            return {
-                state: 'success',
-                data: toMediaListEntries(state.data, options),
-            };
-        case 'loading-more':
-            return {
-                state: 'loading-more',
-                data: toMediaListEntries(state.data, options),
-            };
-        case 'failure':
-            return { state: 'failure', error: state.error };
-        default:
-            return { state: state.state };
-    }
-};
+): RemoteData<MediaListEntry[]> => mapRemoteData(state, (items) => toMediaListEntries(items, options));
 
 export const toMediaListEntries = (
     items: readonly MediaListItem[],
@@ -301,7 +285,7 @@ function toSearchResultMediaTypeLabel(mediaType: string): string {
     }
 
     if (mediaType === 'tv') {
-        return 'TV show';
+        return 'TV series';
     }
 
     if (mediaType === 'person') {

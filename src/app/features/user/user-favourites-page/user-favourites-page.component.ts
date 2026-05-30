@@ -72,7 +72,7 @@ export class UserFavouritesPageComponent {
             .ensureAccountIdentity$()
             .pipe(
                 switchMap(() => this.store.loadPage$(0)),
-                catchError(() => this.showError('Could not load your favourites.')),
+                catchError(() => this.showError('Could not load your favorites.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
@@ -83,7 +83,7 @@ export class UserFavouritesPageComponent {
             .setSortField$(value)
             .pipe(
                 take(1),
-                catchError(() => this.showError('Could not load your favourites.')),
+                catchError(() => this.showError('Could not load your favorites.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
@@ -94,7 +94,7 @@ export class UserFavouritesPageComponent {
             .toggleSortDirection$()
             .pipe(
                 take(1),
-                catchError(() => this.showError('Could not load your favourites.')),
+                catchError(() => this.showError('Could not load your favorites.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
@@ -103,15 +103,15 @@ export class UserFavouritesPageComponent {
     onRemoveFromFavourites(item: CardItem): void {
         this.confirmationDialog
             .confirm$({
-                title: `Remove ${item.title} from favourites?`,
-                message: 'This removes the title from your favourites only.',
-                confirmLabel: 'Remove favourite',
+                title: `Remove ${item.title} from favorites?`,
+                message: 'This removes the title from your favorites only.',
+                confirmLabel: 'Remove favorite',
                 tone: 'danger',
             })
             .pipe(
                 switchMap((confirmed) => (confirmed ? this.store.removeFromFavourites$(item) : EMPTY)),
                 take(1),
-                catchError(() => this.showError('Could not update your favourites.')),
+                catchError(() => this.showError('Could not update your favorites.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
@@ -122,7 +122,7 @@ export class UserFavouritesPageComponent {
             .setMediaType$(value)
             .pipe(
                 take(1),
-                catchError(() => this.showError('Could not load your favourites.')),
+                catchError(() => this.showError('Could not load your favorites.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
@@ -135,7 +135,7 @@ export class UserFavouritesPageComponent {
             .loadPage$(event.pageIndex)
             .pipe(
                 take(1),
-                catchError(() => this.showError('Could not load your favourites.')),
+                catchError(() => this.showError('Could not load your favorites.')),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();

@@ -5,7 +5,6 @@ import { Observable, catchError, filter, map, of, take, tap } from 'rxjs';
 
 import { Video } from '../../api';
 import {
-    MediaDetails,
     RemoteData,
     pickBestYoutubeTrailer,
     remoteData,
@@ -15,6 +14,7 @@ import {
 import { MediaApiService } from './media-api.service';
 import { MediaTarget, isSameMediaTarget } from './media-target';
 import { MediaStoreService } from './media-store.service';
+import { MediaDetails } from './models/media-details.model';
 
 interface MediaVideoState {
     readonly target: MediaTarget | null;

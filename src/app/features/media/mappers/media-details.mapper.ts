@@ -1,7 +1,7 @@
-import { Language, Movie, ProductionCompany, TvSeries } from '../../api';
-import { MediaDetails, MediaProductionCompany } from '../models';
-import type { MediaType } from '../types';
-import { formatCompanyName } from '../utils';
+import { Language, Movie, ProductionCompany, TvSeries } from '../../../api';
+import type { MediaType } from '../../../shared';
+import { formatCompanyName } from '../../../shared/utils';
+import { MediaDetails, MediaProductionCompany } from '../models/media-details.model';
 
 export const toMediaDetails = (
     media: Movie | TvSeries,

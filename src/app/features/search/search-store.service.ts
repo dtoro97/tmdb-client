@@ -92,10 +92,12 @@ export class SearchStoreService extends ComponentStore<SearchState> {
     }
 
     search$(query: string, type: SearchType): Observable<void> {
-        if (!query) {
+        const trimmedQuery = query.trim();
+
+        if (!trimmedQuery) {
             this.patchState({
                 ...INITIAL_STATE,
-                query,
+                query: trimmedQuery,
                 type,
                 movieResultsState: { state: 'success', data: [] },
                 tvResultsState: { state: 'success', data: [] },
@@ -106,7 +108,7 @@ export class SearchStoreService extends ComponentStore<SearchState> {
 
         this.patchState({
             ...INITIAL_STATE,
-            query,
+            query: trimmedQuery,
             type,
             movieResultsState:
                 type === 'movie' || type === 'all' ? { state: 'loading' } : { state: 'success', data: [] },
@@ -118,21 +120,21 @@ export class SearchStoreService extends ComponentStore<SearchState> {
         const initialVisible = type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE;
 
         if (type === 'movie') {
-            return this.fetchMovies$(query, 1, initialVisible);
+            return this.fetchMovies$(trimmedQuery, 1, initialVisible);
         }
 
         if (type === 'tv') {
-            return this.fetchTv$(query, 1, initialVisible);
+            return this.fetchTv$(trimmedQuery, 1, initialVisible);
         }
 
         if (type === 'person') {
-            return this.fetchPeople$(query, 1, initialVisible);
+            return this.fetchPeople$(trimmedQuery, 1, initialVisible);
         }
 
         return forkJoin([
-            this.fetchMovies$(query, 1, initialVisible),
-            this.fetchTv$(query, 1, initialVisible),
-            this.fetchPeople$(query, 1, initialVisible),
+            this.fetchMovies$(trimmedQuery, 1, initialVisible),
+            this.fetchTv$(trimmedQuery, 1, initialVisible),
+            this.fetchPeople$(trimmedQuery, 1, initialVisible),
         ]).pipe(map(() => undefined));
     }
 

@@ -53,7 +53,7 @@
 
                 <a class="profile__nav-link text-body-sm" routerLink="/me/favorites">
                     <i class="fa-regular fa-heart" aria-hidden="true"></i>
-                    <span>Favourites</span>
+                    <span>Favorites</span>
                     <strong class="text-caption-strong">{{ vm.favourites.total }}</strong>
                 </a>
 
@@ -76,7 +76,7 @@
                     </div>
 
                     <a class="profile__section-link text-body-sm" routerLink="/me/watchlists">
-                        View all
+                        View watchlist
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                 </header>
@@ -111,7 +111,7 @@
                     </div>
 
                     <a class="profile__section-link text-body-sm" routerLink="/me/ratings">
-                        View all
+                        View ratings
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                 </header>
@@ -139,14 +139,14 @@
             <section class="profile__section" aria-labelledby="profile-favourites-title">
                 <header class="profile__section-header">
                     <div class="profile__section-heading">
-                        <h2 id="profile-favourites-title" class="text-title">Favourites</h2>
+                        <h2 id="profile-favourites-title" class="text-title">Favorites</h2>
                         <p class="profile__section-count text-caption">
                             {{ vm.favourites.total }} title{{ vm.favourites.total === 1 ? '' : 's' }}
                         </p>
                     </div>
 
                     <a class="profile__section-link text-body-sm" routerLink="/me/favorites">
-                        View all
+                        View favorites
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                 </header>
@@ -156,13 +156,13 @@
                         <app-empty-state
                             iconClass="fa-regular fa-heart"
                             iconStyle="plain"
-                            title="No favourite titles"
-                            text="Movies and TV series you mark as favourites will appear here."
+                            title="No favorite titles"
+                            text="Movies and TV series you mark as favorites will appear here."
                         />
                     </div>
                 } @else {
                     <app-media-carousel-panel
-                        ariaLabel="Favourites preview"
+                        ariaLabel="Favorites preview"
                         [state]="vm.favourites.state"
                         [columns]="previewCarouselColumns"
                         [imageParams]="previewPosterImageParams"
@@ -181,7 +181,7 @@
                     </div>
 
                     <a class="profile__section-link text-body-sm" routerLink="/me/lists">
-                        View all
+                        View lists
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                 </header>

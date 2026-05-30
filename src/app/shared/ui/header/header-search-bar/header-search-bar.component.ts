@@ -29,7 +29,7 @@ type SearchFilterOption = SelectOption<SearchFilterValue>;
 const FILTER_OPTIONS: ReadonlyArray<SearchFilterOption> = [
     { label: 'All', value: 'all' },
     { label: 'Movies', value: 'movie' },
-    { label: 'TV Shows', value: 'tv' },
+    { label: 'TV series', value: 'tv' },
     { label: 'People', value: 'person' },
 ];
 
@@ -88,6 +88,10 @@ export class HeaderSearchBarComponent {
     }
 
     onSearchFocus(): void {
+        if (!this.searchControl.getRawValue().trim()) {
+            return;
+        }
+
         this.store.showDropdownIfNeeded();
     }
 

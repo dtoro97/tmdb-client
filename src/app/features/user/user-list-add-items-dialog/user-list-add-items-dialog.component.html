@@ -11,7 +11,7 @@
                     type="search"
                     autocomplete="off"
                     [formControl]="queryControl"
-                    placeholder="Search by title"
+                    placeholder="Search movies and TV series"
                 />
             </mat-form-field>
         </div>
@@ -52,7 +52,7 @@
                                 </h3>
                                 <div class="dialog__meta text-card-meta">
                                     <app-badge
-                                        [label]="item.mediaType === 'movie' ? 'Movie' : 'TV show'"
+                                        [label]="item.mediaType === 'movie' ? 'Movie' : 'TV series'"
                                     />
                                     @if (item.year) {
                                         <span>{{ item.year }}</span>
@@ -66,23 +66,22 @@
                                     Added
                                 </span>
                             } @else {
-                                <button mat-stroked-button type="button" (click)="addItem(item)">Add</button>
+                                <button mat-stroked-button type="button" (click)="addItem(item)">Add title</button>
                             }
                         </article>
                     }
                 </div>
             } @else if (vm.state.state === 'success') {
-                <p class="text-meta">No titles found.</p>
+                <p class="text-meta">No matching titles found.</p>
             } @else {
                 <p class="text-meta">
-                    Search for a movie or TV show to add it to this list.
+                    Search for a movie or TV series to add it to this list.
                 </p>
             }
         </mat-dialog-content>
 
         <mat-dialog-actions align="end">
-            <button matButton="filled" type="button" (click)="close()">Done</button>
+            <button matButton="filled" type="button" (click)="close()">Done adding</button>
         </mat-dialog-actions>
     </div>
 }
-

@@ -6,7 +6,7 @@
                     matButton="filled"
                     [routerLink]="['/title', homeVM.spotlight.data.id, homeVM.spotlight.data.mediaType]"
                 >
-                    View Details
+                    View title details
                 </a>
             </app-hero-spotlight>
         } @else if (homeVM.spotlight.state !== 'success') {
@@ -14,7 +14,7 @@
         }
 
         <div class="page-sections sections">
-            <app-page-section title="Now Trending" subtitle="Movies and series gaining attention today.">
+            <app-page-section title="Trending today" subtitle="Movies and series gaining attention today.">
                 <app-media-carousel-panel
                     [state]="homeVM.trendingToday"
                     variant="backdrop"
@@ -23,7 +23,7 @@
                 ></app-media-carousel-panel>
             </app-page-section>
 
-            <app-page-section title="Most Popular" subtitle="Popular movies and TV shows, split for quick browsing.">
+            <app-page-section title="Most popular" subtitle="Popular movies and TV series in separate shelves.">
                 <ng-container section-controls>
                     <app-toggle-group
                         [options]="homeVM.whatToWatchOptions"
@@ -40,7 +40,7 @@
 
             <app-page-section
                 panel
-                title="Airing Today"
+                title="Airing today"
                 subtitle="Series with episodes scheduled today."
             >
                 <ng-container section-controls>
@@ -48,7 +48,7 @@
                         class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
                         routerLink="/tv/airing-today"
                     >
-                        <span>Browse airing today</span>
+                        <span>Browse today's episodes</span>
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                 </ng-container>
@@ -110,21 +110,21 @@
                 }
             </app-page-section>
 
-            <app-page-section title="Popular People" subtitle="Actors and creators people are searching for now.">
+            <app-page-section title="Popular people" subtitle="Actors and creators people are searching for now.">
                 <a
                     section-controls
                     class="section-link text-body-sm u-flex u-items-center u-gap-2 u-nowrap"
                     routerLink="/people/popular"
                 >
-                    <span>Browse people</span>
+                    <span>Browse popular people</span>
                     <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                 </a>
                 <app-person-carousel-panel [state]="homeVM.popularPeople" />
             </app-page-section>
 
             <app-page-section
-                title="New on Streaming"
-                subtitle="New TV releases and returning seasons on major streaming services."
+                title="New on streaming"
+                subtitle="New TV series premieres and returning seasons on major streaming services."
             >
                 @if (homeVM.streamingArrivals.items.state === 'success') {
                     @if (homeVM.streamingArrivals.items.data.length) {
@@ -182,7 +182,7 @@
             </app-page-section>
 
             <app-page-section
-                title="Opening Soon"
+                title="Opening soon"
                 subtitle="Theatrical releases scheduled over the next two weeks."
             >
                 <a

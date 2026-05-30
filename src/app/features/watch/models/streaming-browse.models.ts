@@ -14,6 +14,7 @@ export type StreamingSortKey = TmdbDiscoverSortKey;
 export interface StreamingBaseQuery {
     readonly mediaTypes: readonly MediaType[];
     readonly providerId?: number;
+    readonly providerIds?: readonly number[];
     readonly monetization?: StreamingMonetizationType;
     readonly genreIds?: readonly number[];
     readonly keywordIds?: readonly number[];

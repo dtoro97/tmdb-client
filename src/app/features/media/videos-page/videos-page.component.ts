@@ -44,8 +44,8 @@ export class VideosPageComponent {
     readonly skeletonCount = 9;
 
     readonly sortOptions = [
-        { label: 'Date', value: 'published_at' as const },
-        { label: 'Name', value: 'name' as const },
+        { label: 'Published date', value: 'published_at' as const },
+        { label: 'Video title', value: 'name' as const },
     ];
 
     readonly sortFieldSubject = new BehaviorSubject<SortField>('published_at');

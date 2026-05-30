@@ -34,8 +34,8 @@ const isTrailerFeedType = (value: unknown): value is TrailerFeedType => value ==
 })
 export class TrailersPageComponent {
     readonly feedOptions: SelectOption<TrailerFeedType>[] = [
-        { label: 'Trending', value: 'trending' },
-        { label: 'New', value: 'new' },
+        { label: 'Trending trailers', value: 'trending' },
+        { label: 'New trailers', value: 'new' },
     ];
     readonly vm$ = this.store.vm$;
     readonly skeletonCount = PAGE_SIZE;

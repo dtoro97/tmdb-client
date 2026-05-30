@@ -404,7 +404,7 @@ export class UserListDetailStore extends ComponentStore<UserListDetailState> {
                 mediaType,
                 badges: [
                     {
-                        label: mediaType === 'tv' ? 'TV show' : 'Movie',
+                        label: mediaType === 'tv' ? 'TV series' : 'Movie',
                     },
                 ],
             },

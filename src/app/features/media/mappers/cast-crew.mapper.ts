@@ -1,4 +1,4 @@
-import { CrewGridMember, GroupedCrew } from '../models';
+import { CrewGridMember, GroupedCrew } from '../models/cast-crew.model';
 
 export const groupCrewMembers = (
     members: CrewGridMember[] | null | undefined,

@@ -6,8 +6,6 @@ export const getISODate = (daysOffset: number): string => {
     return toISODate(d);
 };
 
-export const toYear = (date?: string | null): string | null => (date ? date.slice(0, 4) : null);
-
 export const getCurrentMonthName = (date = new Date()): string =>
     new Intl.DateTimeFormat(undefined, { month: 'long' }).format(date);
 

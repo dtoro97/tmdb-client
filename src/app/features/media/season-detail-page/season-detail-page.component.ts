@@ -26,6 +26,7 @@ interface SeasonDetailRouteData {
     readonly seriesId: number;
     readonly mediaType: string;
     readonly seasonNumber: number | null;
+    readonly seasonParamValid: boolean;
     readonly routePrefix: readonly [string, number, string, string];
 }
 
@@ -117,11 +118,38 @@ export class SeasonDetailPageComponent {
         this.routeData$
             .pipe(
                 takeUntilDestroyed(),
-                tap(({ seasonNumber, seriesId }) => {
+                tap(({ seasonNumber, seasonParamValid, seriesId }) => {
+                    if (!seasonParamValid) {
+                        this.router.navigate(['/not-found'], { replaceUrl: true });
+                        return;
+                    }
+
                     if (seasonNumber !== null) {
                         this.mediaSeasonsStoreService.openSeason({ seriesId, seasonNumber });
                     } else {
                         this.mediaSeasonsStoreService.openSeries(seriesId);
+                    }
+                }),
+            )
+            .subscribe();
+
+        combineLatest([this.routeData$, this.mediaStore.mediaState$])
+            .pipe(
+                takeUntilDestroyed(),
+                filter(([, mediaState]) => mediaState.state === 'success'),
+                tap(([routeData, mediaState]) => {
+                    const media = mediaState.state === 'success' ? mediaState.data : null;
+
+                    if (!media || !('seasons' in media)) {
+                        this.router.navigate(['/not-found'], { replaceUrl: true });
+                        return;
+                    }
+
+                    if (
+                        routeData.seasonNumber !== null &&
+                        !hasSeasonNumber(media.seasons ?? [], routeData.seasonNumber)
+                    ) {
+                        this.router.navigate(['/not-found'], { replaceUrl: true });
                     }
                 }),
             )
@@ -179,14 +207,13 @@ const readSeasonDetailRoute = (parentParams: ParamMap, params: ParamMap): Season
     const seriesId = Number(parentParams.get('id'));
     const mediaType = parentParams.get('type') ?? 'tv';
     const rawSeasonNumber = params.get('seasonNumber');
-    const parsedSeasonNumber = rawSeasonNumber === null ? null : Number(rawSeasonNumber);
-    const seasonNumber =
-        parsedSeasonNumber !== null && Number.isInteger(parsedSeasonNumber) ? parsedSeasonNumber : null;
+    const seasonNumber = parseRouteNumber(rawSeasonNumber);
 
     return {
         seriesId,
         mediaType,
         seasonNumber,
+        seasonParamValid: rawSeasonNumber === null || seasonNumber !== null,
         routePrefix: ['/title', seriesId, mediaType, 'episodes'],
     };
 };
@@ -194,4 +221,19 @@ const readSeasonDetailRoute = (parentParams: ParamMap, params: ParamMap): Season
 const isSameSeasonDetailRoute = (left: SeasonDetailRouteData, right: SeasonDetailRouteData): boolean =>
     left.seriesId === right.seriesId &&
     left.mediaType === right.mediaType &&
-    left.seasonNumber === right.seasonNumber;
+    left.seasonNumber === right.seasonNumber &&
+    left.seasonParamValid === right.seasonParamValid;
+
+const parseRouteNumber = (value: string | null): number | null => {
+    if (value === null || value.trim() === '') {
+        return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+};
+
+const hasSeasonNumber = (
+    seasons: readonly { readonly season_number?: number }[],
+    seasonNumber: number,
+): boolean => seasons.some((season) => season.season_number === seasonNumber);

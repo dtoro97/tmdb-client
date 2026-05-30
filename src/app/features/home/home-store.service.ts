@@ -53,7 +53,7 @@ const TOP_PICKS_FEATURED_COUNT = 3;
 
 const WHAT_TO_WATCH_OPTIONS: ToggleGroupOption[] = [
     { label: 'Movies', value: 'movie' },
-    { label: 'TV Shows', value: 'tv' },
+    { label: 'TV series', value: 'tv' },
 ];
 
 interface HomeState {
@@ -455,7 +455,7 @@ export class HomeStoreService extends ComponentStore<HomeState> {
             backdropPath: item.backdrop_path,
             rating: item.vote_average ?? null,
             year: (date ?? '').slice(0, 4),
-            mediaTypeLabel: isMovie ? 'Movie' : 'TV Show',
+            mediaTypeLabel: isMovie ? 'Movie' : 'TV series',
         };
     }
 
@@ -490,8 +490,8 @@ export class HomeStoreService extends ComponentStore<HomeState> {
         return {
             title: `What's streaming in ${month}`,
             description:
-                'Popular TV premieres and returning seasons from major streaming services.',
-            ctaLabel: `Browse ${month} TV arrivals`,
+                'Popular TV series premieres and returning seasons from major streaming services.',
+            ctaLabel: `Browse ${month} TV series arrivals`,
             items,
         };
     }

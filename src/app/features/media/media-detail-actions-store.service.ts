@@ -73,7 +73,7 @@ export class MediaDetailActionsStore extends ComponentStore<MediaActionsState> {
             pending: watchlistState.state === 'loading' || favoriteState.state === 'loading',
             watchlistLabel:
                 watchlistState.state === 'success' && watchlistState.data ? 'On Watchlist' : 'Add to Watchlist',
-            favoriteLabel: favoriteState.state === 'success' && favoriteState.data ? 'Favorited' : 'Add to Favorites',
+            favoriteLabel: favoriteState.state === 'success' && favoriteState.data ? 'In favorites' : 'Add to favorites',
         }),
     );
 
