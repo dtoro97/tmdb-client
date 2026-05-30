@@ -17,15 +17,16 @@ const shouldBundleCloudflareWorker =
     rawArgs.includes(CLOUDFLARE_WORKER_FLAG);
 const shouldCreateGithubPagesFallback =
     rawArgs.includes(GITHUB_PAGES_SPA_FLAG);
+const shouldEmbedBrowserApiKey = !shouldBundleCloudflareWorker;
 
-if (!apiKey && (process.env.CI || process.env.CF_PAGES)) {
+if (!apiKey && shouldEmbedBrowserApiKey && (process.env.CI || process.env.CF_PAGES)) {
     console.error(
-        'API_KEY is required for CI production builds. Add it as a Cloudflare Pages environment variable.',
+        'API_KEY is required for builds that call TMDb directly from the browser.',
     );
     process.exit(1);
 }
 
-if (!apiKey) {
+if (!apiKey && shouldEmbedBrowserApiKey) {
     console.warn(
         'API_KEY was not set. Building with the production placeholder value.',
     );

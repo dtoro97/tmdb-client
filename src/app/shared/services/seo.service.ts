@@ -42,13 +42,14 @@ export class SeoService {
 
     setPage(metadata: SeoMetadata = {}): void {
         const pageTitle = this.cleanText(metadata.title) ?? CINEKEEP_SITE_NAME;
+        const previewTitle = this.toPreviewTitle(pageTitle);
         const description =
             this.normalizeDescription(metadata.description) ??
             CINEKEEP_DEFAULT_DESCRIPTION;
         const canonicalUrl = this.resolveCanonicalUrl(metadata);
         const image = this.resolveImageUrl(metadata.image);
         const imageAlt =
-            this.cleanText(metadata.imageAlt) ?? `${pageTitle} on ${CINEKEEP_SITE_NAME}`;
+            this.cleanText(metadata.imageAlt) ?? `${previewTitle} on ${CINEKEEP_SITE_NAME}`;
         const robots = this.cleanText(metadata.robots) ?? DEFAULT_ROBOTS;
         const type = metadata.type ?? 'website';
 
@@ -59,7 +60,7 @@ export class SeoService {
         this.updateNameTag('robots', robots);
         this.updatePropertyTag('og:type', type);
         this.updatePropertyTag('og:site_name', CINEKEEP_SITE_NAME);
-        this.updatePropertyTag('og:title', pageTitle);
+        this.updatePropertyTag('og:title', previewTitle);
         this.updatePropertyTag('og:description', description);
         this.updatePropertyTag('og:url', canonicalUrl);
         this.updatePropertyTag('og:image', image);
@@ -82,24 +83,29 @@ export class SeoService {
             ),
         );
         this.updateNameTag('twitter:card', 'summary_large_image');
-        this.updateNameTag('twitter:title', pageTitle);
+        this.updateNameTag('twitter:title', previewTitle);
         this.updateNameTag('twitter:description', description);
         this.updateNameTag('twitter:image', image);
         this.updateNameTag('twitter:image:alt', imageAlt);
     }
 
     private toDocumentTitle(pageTitle: string): string {
-        const [primaryTitle] = pageTitle
-            .split('|')
-            .map((part) => part.trim())
-            .filter(Boolean);
-        const documentTitle = primaryTitle ?? CINEKEEP_SITE_NAME;
+        const documentTitle = this.toPreviewTitle(pageTitle);
 
         if (documentTitle === CINEKEEP_SITE_NAME) {
             return CINEKEEP_SITE_NAME;
         }
 
         return `${documentTitle} - ${CINEKEEP_SITE_NAME}`;
+    }
+
+    private toPreviewTitle(pageTitle: string): string {
+        const [primaryTitle] = pageTitle
+            .split('|')
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        return primaryTitle ?? CINEKEEP_SITE_NAME;
     }
 
     private normalizeDescription(value: string | null | undefined): string | null {

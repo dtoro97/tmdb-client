@@ -40,23 +40,35 @@ export class PersonDetailWrapperComponent {
             .pipe(
                 map(([vm, url]) => ({
                     person: vm.person.state === 'success' ? vm.person.data : null,
+                    knownForTitles:
+                        vm.knownFor.state === 'success'
+                            ? vm.knownFor.data
+                                  .map((item) => item.title)
+                                  .filter(Boolean)
+                                  .slice(0, 3)
+                            : [],
                     url,
                 })),
                 filter(
                     (
                         value,
-                    ): value is { readonly person: PersonWithExternalIds; readonly url: string } =>
+                    ): value is {
+                        readonly person: PersonWithExternalIds;
+                        readonly knownForTitles: string[];
+                        readonly url: string;
+                    } =>
                         !!value.person,
                 ),
-                tap(({ person, url }) => {
+                tap(({ person, knownForTitles, url }) => {
                     const isPhotosPage = url.split('?')[0]?.endsWith('/photos') ?? false;
                     const title = isPhotosPage
                         ? `${person.name} | Photos`
                         : `${person.name} | People`;
-                    const description = isPhotosPage
-                        ? `Photos of ${person.name} on CineKeep.`
-                        : person.biography ||
-                          `Explore ${person.name}'s biography, credits, photos, and known-for titles on CineKeep.`;
+                    const description = buildPersonDescription(
+                        person,
+                        knownForTitles,
+                        isPhotosPage,
+                    );
 
                     this.seo.setPage({
                         title,
@@ -80,3 +92,27 @@ export class PersonDetailWrapperComponent {
         );
     }
 }
+
+const buildPersonDescription = (
+    person: PersonWithExternalIds,
+    knownForTitles: readonly string[],
+    isPhotosPage: boolean,
+): string => {
+    const knownFor = knownForTitles.length
+        ? `Known for: ${knownForTitles.join(', ')}.`
+        : null;
+
+    if (isPhotosPage) {
+        return [knownFor, `Photos of ${person.name} on CineKeep.`]
+            .filter(Boolean)
+            .join(' ');
+    }
+
+    return [
+        knownFor,
+        person.biography ||
+            `Explore ${person.name}'s biography, credits, photos, and known-for titles on CineKeep.`,
+    ]
+        .filter(Boolean)
+        .join(' ');
+};

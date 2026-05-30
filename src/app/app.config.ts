@@ -1,3 +1,4 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
     provideHttpClient,
     withFetch,
@@ -6,7 +7,9 @@ import {
 import {
     ApplicationConfig,
     inject,
+    PLATFORM_ID,
     provideAppInitializer,
+    REQUEST,
     provideZoneChangeDetection,
 } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -34,6 +37,7 @@ import {
 import { TmdbUserAuthService } from './shared/services/tmdb-user-auth.service';
 import { delayInterceptor } from './shared/utils/delay-interceptor';
 import { localeInterceptor } from './shared/utils/locale-interceptor';
+import { serverOriginInterceptor } from './shared/utils/server-origin-interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -49,10 +53,14 @@ export const appConfig: ApplicationConfig = {
         provideAnimationsAsync(),
         provideHttpClient(
             withFetch(),
-            withInterceptors([localeInterceptor, delayInterceptor]),
+            withInterceptors([
+                localeInterceptor,
+                serverOriginInterceptor,
+                delayInterceptor,
+            ]),
         ),
         provideApi({
-            basePath: 'https://api.themoviedb.org/3',
+            basePath: environment.apiUrl,
             credentials: {
                 bearerAuth: environment.apiKey,
             },
@@ -63,7 +71,7 @@ export const appConfig: ApplicationConfig = {
                 const userSessionStore = inject(UserSessionStoreService);
 
                 return new V4Configuration({
-                    basePath: 'https://api.themoviedb.org/4',
+                    basePath: environment.apiV4Url,
                     credentials: {
                         bearerAuth: () =>
                             userSessionStore.v4AccessToken() ??
@@ -76,6 +84,13 @@ export const appConfig: ApplicationConfig = {
             firstValueFrom(inject(TmdbUserAuthService).tryCompleteLoginFromUrl$()),
         ),
         provideAppInitializer(() => {
+            const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+            const request = inject(REQUEST, { optional: true });
+
+            if (!isBrowser && !request) {
+                return;
+            }
+
             inject(WatchProviderStoreService).load();
         }),
         provideClientHydration(withEventReplay()),
