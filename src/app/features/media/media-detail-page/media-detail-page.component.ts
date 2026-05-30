@@ -225,7 +225,7 @@ export class MediaDetailPageComponent {
                     (previous, current) => previous.id === current.id && previous.mediaType === current.mediaType,
                 ),
                 tap((media) => {
-                    this.title.setTitle(`${media.title} | ${media.mediaType === 'tv' ? 'TV Show' : 'Movie'}`);
+                    this.title.setTitle(`${media.title} | ${media.mediaType === 'tv' ? 'TV series' : 'Movie'}`);
                     this.recentlyViewedStore.addItem({
                         kind: 'media',
                         id: media.id,

@@ -34,7 +34,7 @@ const EXACT_ACTIVE_OPTIONS: IsActiveMatchOptions = {
 export class HeaderBrowseMenuComponent {
     readonly browseActions: readonly HeaderBrowseLink[] = [
         {
-            label: 'Advanced filter',
+            label: 'Explore by filters',
             routerLink: '/discover',
             activeOptions: EXACT_ACTIVE_OPTIONS,
             iconClass: 'fa-solid fa-magnifying-glass',
@@ -48,22 +48,22 @@ export class HeaderBrowseMenuComponent {
             icon: 'movie',
             links: [
                 {
-                    label: 'Popular',
+                    label: 'Popular movies',
                     routerLink: '/movies/popular',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Top Rated',
+                    label: 'Top-rated movies',
                     routerLink: '/movies/top-rated',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Now Playing',
+                    label: 'Now in theaters',
                     routerLink: '/movies/now-playing',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Upcoming',
+                    label: 'Coming soon',
                     routerLink: '/movies/upcoming',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
@@ -71,26 +71,26 @@ export class HeaderBrowseMenuComponent {
         },
         {
             id: 'tv-shows',
-            title: 'TV shows',
+            title: 'TV series',
             icon: 'live_tv',
             links: [
                 {
-                    label: 'Popular',
+                    label: 'Popular series',
                     routerLink: '/tv/popular',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Top Rated',
+                    label: 'Top-rated series',
                     routerLink: '/tv/top-rated',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Airing Today',
+                    label: 'Episodes airing today',
                     routerLink: '/tv/airing-today',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'On TV',
+                    label: 'Airing this week',
                     routerLink: '/tv/on-the-air',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
@@ -102,7 +102,7 @@ export class HeaderBrowseMenuComponent {
             icon: 'groups',
             links: [
                 {
-                    label: 'Popular People',
+                    label: 'Trending people',
                     routerLink: '/people/popular',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
@@ -114,12 +114,12 @@ export class HeaderBrowseMenuComponent {
             icon: 'play_circle',
             links: [
                 {
-                    label: 'Streaming',
+                    label: 'Streaming guide',
                     routerLink: '/watch/streaming',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },
                 {
-                    label: 'Trailers',
+                    label: 'Latest trailers',
                     routerLink: '/trailers/trending',
                     activeOptions: EXACT_ACTIVE_OPTIONS,
                 },

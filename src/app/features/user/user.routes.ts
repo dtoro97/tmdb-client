@@ -34,7 +34,7 @@ export const userRoutes: Routes = [
             {
                 path: 'favorites',
                 component: UserFavouritesPageComponent,
-                title: 'Favourites',
+                title: 'Favorites',
             },
             {
                 path: 'ratings',

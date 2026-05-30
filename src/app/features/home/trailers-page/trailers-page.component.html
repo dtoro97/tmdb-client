@@ -1,10 +1,10 @@
 <div class="page-container">
     @if (vm$ | async; as vm) {
         @if (vm.featuredSpotlight; as featured) {
-            <app-hero-spotlight badge="Featured Trailer" backLink="/" backLabel="Home" [spotlight]="featured.spotlight">
+            <app-hero-spotlight badge="Featured trailer" backLink="/" backLabel="Home" [spotlight]="featured.spotlight">
                 <button matButton="filled" type="button" (click)="openTrailer(featured.videoUrl)">
                     <i class="fa-solid fa-play" aria-hidden="true"></i>
-                    Play Trailer
+                    Play trailer
                 </button>
             </app-hero-spotlight>
         } @else {
@@ -72,7 +72,7 @@
                                 [disabled]="vm.trailersState.state === 'loading-more'"
                                 (click)="showMoreSelected()"
                             >
-                                {{ vm.trailersState.state === 'loading-more' ? 'Loading more' : 'Show more' }}
+                                {{ vm.trailersState.state === 'loading-more' ? 'Loading trailers' : 'Show more trailers' }}
                             </button>
                         </div>
                     }

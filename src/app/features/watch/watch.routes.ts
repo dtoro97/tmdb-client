@@ -12,7 +12,7 @@ export const watchRoutes: Routes = [
     {
         path: 'streaming',
         component: StreamingHubPageComponent,
-        title: 'Current Streaming',
+        title: 'Streaming Guide',
     },
     {
         path: 'streaming/provider/:providerId',

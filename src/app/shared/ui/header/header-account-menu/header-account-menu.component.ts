@@ -62,7 +62,7 @@ export class HeaderAccountMenuComponent {
     readonly accountRoutes: readonly HeaderAccountRoute[] = [
         { label: 'Profile', route: '/me', icon: 'person' },
         { label: 'Watchlist', route: '/me/watchlists', icon: 'bookmark' },
-        { label: 'Favourites', route: '/me/favorites', icon: 'favorite' },
+        { label: 'Favorites', route: '/me/favorites', icon: 'favorite' },
         { label: 'Ratings', route: '/me/ratings', icon: 'star' },
         { label: 'Lists', route: '/me/lists', icon: 'format_list_bulleted' },
         { label: 'Create list', route: '/me/lists/new', icon: 'add' },
@@ -134,7 +134,7 @@ export class HeaderAccountMenuComponent {
             .confirm$({
                 title: 'Sign out?',
                 message:
-                    'You will need to sign in again to manage watchlists, favourites, ratings, and lists.',
+                    'You will need to sign in again to manage your watchlist, favorites, ratings, and lists.',
                 confirmLabel: 'Sign out',
                 tone: 'danger',
             })

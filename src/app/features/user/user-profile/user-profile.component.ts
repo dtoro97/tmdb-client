@@ -93,7 +93,7 @@ export class UserProfileComponent {
                         this.loadSection$(() => this.profileStore.load$(), 'Could not load your profile summary.'),
                         this.loadSection$(() => this.watchlistStore.load$(), 'Could not load your watchlist.'),
                         this.loadSection$(() => this.ratingsStore.load$(), 'Could not load your ratings.'),
-                        this.loadSection$(() => this.favouritesStore.load$(), 'Could not load your favourites.'),
+                        this.loadSection$(() => this.favouritesStore.load$(), 'Could not load your favorites.'),
                         this.loadSection$(() => this.listsStore.load$(), 'Could not load your lists.'),
                     ),
                 ),

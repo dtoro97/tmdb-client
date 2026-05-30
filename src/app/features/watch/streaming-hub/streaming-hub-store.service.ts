@@ -21,9 +21,9 @@ import {
     getStreamingThisMonthTitle,
 } from '../streaming/streaming-browse.config';
 
-const STREAMING_HUB_TITLE = "What's on TV & streaming";
+const STREAMING_HUB_TITLE = 'TV series and streaming';
 const STREAMING_HUB_SUBTITLE =
-    'Currently airing series from popular services in your region, plus fresh arrivals and focused watch lists.';
+    'TV series airing on popular services in your region, plus new arrivals and watch lists.';
 
 interface StreamingHubData {
     readonly providerCards: readonly StreamingProviderCard[];
@@ -34,11 +34,12 @@ interface StreamingHubData {
 @Injectable()
 export class StreamingHubStoreService extends ComponentStore<Record<string, never>> {
     readonly vm$ = combineLatest({
+        providersLoaded: this.watchProviderStore.loaded$,
         movieProviders: this.watchProviderStore.movieProviders$,
         tvProviders: this.watchProviderStore.tvProviders$,
     }).pipe(
-        map(({ movieProviders, tvProviders }) =>
-            this.buildHubData(movieProviders, tvProviders),
+        map(({ providersLoaded, movieProviders, tvProviders }) =>
+            this.buildHubData(providersLoaded, movieProviders, tvProviders),
         ),
         switchMap((hubData) => {
             const providerCards$ = hubData.providerCards.length
@@ -104,6 +105,7 @@ export class StreamingHubStoreService extends ComponentStore<Record<string, neve
     }
 
     private buildHubData(
+        providersLoaded: boolean,
         movieProviders: readonly WatchProviderOption[],
         tvProviders: readonly WatchProviderOption[],
     ): StreamingHubData {
@@ -111,7 +113,7 @@ export class StreamingHubStoreService extends ComponentStore<Record<string, neve
             providerCards: this.getTopProviders(movieProviders, tvProviders)
                 .slice(0, 3)
                 .map((provider) => this.toProviderCard(provider)),
-            featuredSection: this.toFeaturedSection(),
+            featuredSection: this.toFeaturedSection(providersLoaded, tvProviders),
             sections: STREAMING_EDITORIAL_SECTIONS.filter(
                 (section) => section.slug !== STREAMING_THIS_MONTH_SLUG,
             ).map((section) => this.toHubSection(section)),
@@ -130,7 +132,14 @@ export class StreamingHubStoreService extends ComponentStore<Record<string, neve
         };
     }
 
-    private toFeaturedSection(): StreamingHubSection | null {
+    private toFeaturedSection(
+        providersLoaded: boolean,
+        tvProviders: readonly WatchProviderOption[],
+    ): StreamingHubSection | null {
+        if (!providersLoaded) {
+            return null;
+        }
+
         const section =
             STREAMING_EDITORIAL_SECTIONS.find(
                 (item) => item.slug === STREAMING_THIS_MONTH_SLUG,
@@ -144,6 +153,8 @@ export class StreamingHubStoreService extends ComponentStore<Record<string, neve
                   baseQuery: {
                       ...section.baseQuery,
                       mediaTypes: ['tv'],
+                      providerIds: tvProviders.slice(0, 3).map((provider) => provider.id),
+                      sortBy: 'popularity',
                   },
               }
             : null;

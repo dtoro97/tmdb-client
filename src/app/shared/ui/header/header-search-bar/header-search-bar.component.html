@@ -33,7 +33,7 @@
                     [formControl]="searchControl"
                     (focus)="onSearchFocus()"
                     (keydown.enter)="navigateToSearch(vm.searchFilter)"
-                    placeholder="Search movies, TV shows, people..."
+                    placeholder="Search movies, TV series, people..."
                 />
                 <mat-icon class="header-search__suffix header-search__search-icon" matSuffix>search</mat-icon>
                 <button
@@ -41,7 +41,7 @@
                     mat-icon-button
                     class="header-search__suffix header-search__close-button"
                     (click)="closeSearch()"
-                    aria-label="Close"
+                    aria-label="Close search"
                 >
                     <mat-icon>close</mat-icon>
                 </button>

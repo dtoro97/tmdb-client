@@ -38,7 +38,7 @@ export class SearchPageComponent {
     readonly typeOptions: SelectOption<SearchType>[] = [
         { label: 'All', value: 'all' },
         { label: 'Movies', value: 'movie' },
-        { label: 'TV Shows', value: 'tv' },
+        { label: 'TV series', value: 'tv' },
         { label: 'People', value: 'person' },
     ];
 
@@ -55,20 +55,26 @@ export class SearchPageComponent {
         movieGenreMap: this.genreService.movieGenres$,
         tvGenreMap: this.genreService.tvGenres$,
     }).pipe(
-        map((vm) => ({
-            ...vm,
-            movieListState: toMediaListEntryState(vm.movieState, {
-                genreMap: vm.movieGenreMap,
-                routeType: 'movie',
-                showIndex: true,
-            }),
-            tvListState: toMediaListEntryState(vm.tvState, {
-                genreMap: vm.tvGenreMap,
-                routeType: 'tv',
-                showIndex: true,
-            }),
-            listSkeletonCount: vm.type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE,
-        })),
+        map((vm) => {
+            const hasQuery = vm.query.length > 0;
+
+            return {
+                ...vm,
+                hasQuery,
+                pageTitle: hasQuery ? `Results for "${vm.query}"` : 'Search',
+                movieListState: toMediaListEntryState(vm.movieState, {
+                    genreMap: vm.movieGenreMap,
+                    routeType: 'movie',
+                    showIndex: true,
+                }),
+                tvListState: toMediaListEntryState(vm.tvState, {
+                    genreMap: vm.tvGenreMap,
+                    routeType: 'tv',
+                    showIndex: true,
+                }),
+                listSkeletonCount: vm.type === 'all' ? SMALL_LIST_COUNT : PAGE_SIZE,
+            };
+        }),
     );
 
     constructor(

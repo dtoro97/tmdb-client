@@ -23,7 +23,7 @@
                                         &#x2022; {{ media.year }}
                                     }
                                 } @else {
-                                    TV Show
+                                    TV series
                                     @if (vm.hero.tvYearLabel; as tvYearLabel) {
                                         &#x2022; {{ tvYearLabel }}
                                     }
@@ -109,7 +109,7 @@
                             } @else if (vm.videos.state === 'success' && vm.videos.data?.trailerKey; as trailerKey) {
                                 <button matButton="filled" type="button" (click)="openTrailer(trailerKey)">
                                     <i class="fa-solid fa-play" aria-hidden="true"></i>
-                                    Play Trailer
+                                    Play trailer
                                 </button>
                             }
                         </div>
@@ -429,14 +429,14 @@
 
                             @if (media.firstAirDate) {
                                 <div class="info-grid__item">
-                                    <dt class="info-grid__label text-card-meta">First Aired</dt>
+                                    <dt class="info-grid__label text-card-meta">First aired</dt>
                                     <dd class="info-grid__value text-body-strong">{{ media.firstAirDate | date }}</dd>
                                 </div>
                             }
 
                             @if (media.lastAirDate) {
                                 <div class="info-grid__item">
-                                    <dt class="info-grid__label text-card-meta">Last Aired</dt>
+                                    <dt class="info-grid__label text-card-meta">Last aired</dt>
                                     <dd class="info-grid__value text-body-strong">{{ media.lastAirDate | date }}</dd>
                                 </div>
                             }
@@ -492,7 +492,7 @@
 
                             @if (media.originCountries.length) {
                                 <div class="info-grid__item">
-                                    <dt class="info-grid__label text-card-meta">Origin Country</dt>
+                                    <dt class="info-grid__label text-card-meta">Origin country</dt>
                                     <dd class="info-grid__value text-body-strong">
                                         {{ media.originCountries.join(', ') }}
                                     </dd>
@@ -515,7 +515,7 @@
 
                             @if (media.productionCompanies.length) {
                                 <div class="info-grid__item">
-                                    <dt class="info-grid__label text-card-meta">Production Companies</dt>
+                                    <dt class="info-grid__label text-card-meta">Production companies</dt>
                                     <dd class="info-grid__value text-body-strong">
                                         @for (company of media.productionCompanies; track company.id; let i = $index) {
                                             <a

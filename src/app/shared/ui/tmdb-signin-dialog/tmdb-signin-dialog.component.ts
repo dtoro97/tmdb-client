@@ -49,7 +49,7 @@ export class TmdbSigninDialogComponent {
         this.title = data?.title ?? 'Sign in';
         this.description =
             data?.description ??
-            'Track what you love. Create lists, save favorites, and build your watchlist.';
+            'Sign in to create lists, save favorites, and keep a watchlist.';
         this.actionLabel = data?.actionLabel ?? 'Sign in';
     }
 

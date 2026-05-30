@@ -3,8 +3,8 @@ import {
     Network,
     TvCreator,
     TvEpisodeCompact,
-} from '../../api';
-import type { MediaType } from '../types';
+} from '../../../api';
+import type { MediaType } from '../../../shared';
 
 export interface MediaProductionCompany {
     id: number;

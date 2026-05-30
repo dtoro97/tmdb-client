@@ -91,7 +91,7 @@ const INITIAL_STATE: StreamingListState = {
 
 const MEDIA_TYPE_OPTIONS: Record<MediaType, ToggleGroupOption> = {
     movie: { label: 'Movies', value: 'movie' },
-    tv: { label: 'TV shows', value: 'tv' },
+    tv: { label: 'TV series', value: 'tv' },
 };
 
 @Injectable()
@@ -210,6 +210,10 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
         readonly movieProviders: readonly WatchProviderOption[];
         readonly tvProviders: readonly WatchProviderOption[];
     }): StreamingListRequest {
+        const listSlug = source.params.get('listSlug');
+        const needsProviders =
+            source.data['streamingListKind'] === 'provider' ||
+            listSlug === STREAMING_THIS_MONTH_SLUG;
         const context = this.resolveContext(
             source.params,
             source.data,
@@ -223,7 +227,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
 
         return {
             context,
-            pendingProvider: source.data['streamingListKind'] === 'provider' && !source.providersLoaded,
+            pendingProvider: needsProviders && !source.providersLoaded,
             mediaType: this.resolveMediaType(
                 baseQuery,
                 source.queryParams.get('type'),
@@ -256,34 +260,50 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
 
             return provider
                 ? {
-                  key: `provider-${provider.id}`,
-                  title: `Airing now on ${provider.name}`,
-                  description: `Browse popular series with current seasons available through ${provider.name}.`,
-                  providerName: provider.name,
-                  baseQuery: {
-                      mediaTypes: ['movie', 'tv'],
-                      providerId: provider.id,
-                      monetization: 'flatrate',
-                      datePreset: 'current-month',
-                      sortBy: 'popularity',
-                  },
+                      key: `provider-${provider.id}`,
+                      title: `Airing now on ${provider.name}`,
+                      description: `Browse popular movies and TV series currently available through ${provider.name}.`,
+                      providerName: provider.name,
+                      baseQuery: {
+                          mediaTypes: ['movie', 'tv'],
+                          providerId: provider.id,
+                          monetization: 'flatrate',
+                          datePreset: 'current-month',
+                          sortBy: 'popularity',
+                      },
                   }
                 : null;
         }
 
         const section = this.findEditorialSection(params.get('listSlug'));
 
-        return section
-            ? {
-                  key: section.slug,
-                  title:
-                      section.slug === STREAMING_THIS_MONTH_SLUG
-                          ? getStreamingThisMonthTitle()
-                          : section.title,
-                  description: section.description,
-                  baseQuery: section.baseQuery,
-              }
-            : null;
+        if (!section) {
+            return null;
+        }
+
+        if (section.slug === STREAMING_THIS_MONTH_SLUG && !providersLoaded) {
+            return null;
+        }
+
+        const baseQuery =
+            section.slug === STREAMING_THIS_MONTH_SLUG
+                ? {
+                      ...section.baseQuery,
+                      mediaTypes: ['tv'] as const,
+                      providerIds: tvProviders.slice(0, 3).map((provider) => provider.id),
+                      sortBy: 'popularity' as const,
+                  }
+                : section.baseQuery;
+
+        return {
+            key: section.slug,
+            title:
+                section.slug === STREAMING_THIS_MONTH_SLUG
+                    ? getStreamingThisMonthTitle()
+                    : section.title,
+            description: section.description,
+            baseQuery,
+        };
     }
 
     private handleRouteRequest(request: StreamingListRequest): Observable<void> {

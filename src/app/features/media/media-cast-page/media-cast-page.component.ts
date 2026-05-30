@@ -9,13 +9,13 @@ import { combineLatest, filter, map, switchMap, tap } from 'rxjs';
 import {
     EmptyStateComponent,
     MediaType,
-    groupCrewMembers,
     remoteData,
     ToggleGroupComponent,
     SkeletonComponent,
     SubPageHeaderComponent,
 } from '../../../shared';
 import { CastCrewGridComponent } from '../cast-crew-grid/cast-crew-grid.component';
+import { groupCrewMembers } from '../mappers/cast-crew.mapper';
 import { MediaCreditsStoreService } from '../media-credits-store.service';
 import { MediaStoreService } from '../media-store.service';
 

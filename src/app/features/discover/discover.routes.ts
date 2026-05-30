@@ -54,25 +54,25 @@ export const tvBrowseRoutes: Routes = [
         path: 'popular',
         component: DiscoverPageComponent,
         data: { discoverPageKey: 'tv-popular' },
-        title: 'Popular TV Shows',
+        title: 'Popular TV Series',
     },
     {
         path: 'top-rated',
         component: DiscoverPageComponent,
         data: { discoverPageKey: 'tv-top-rated' },
-        title: 'Top Rated TV Shows',
+        title: 'Top Rated TV Series',
     },
     {
         path: 'airing-today',
         component: DiscoverPageComponent,
         data: { discoverPageKey: 'tv-airing-today' },
-        title: 'TV Shows Airing Today',
+        title: 'TV Series Airing Today',
     },
     {
         path: 'on-the-air',
         component: DiscoverPageComponent,
         data: { discoverPageKey: 'tv-on-the-air' },
-        title: 'TV Shows On TV',
+        title: 'TV Series Airing This Week',
     },
 ];
 

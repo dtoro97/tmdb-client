@@ -102,7 +102,7 @@ export class UserListCreatePageComponent {
         this.backParentTitle = this.getBackParentTitle();
         this.pageSubtitle = this.mediaProperties
             ? this.getMediaListSubtitle()
-            : 'Name the list and add a short description so it is easy to find later.';
+            : 'Name the list and add a short description so you can find it later.';
         this.submitLabel = this.mediaProperties ? 'Create and add' : 'Create list';
         this.pendingLabel = this.mediaProperties ? 'Creating and adding...' : 'Creating...';
         this.form = this.formBuilder.group({

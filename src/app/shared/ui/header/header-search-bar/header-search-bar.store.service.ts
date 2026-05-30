@@ -2,6 +2,7 @@ import {
     catchError,
     debounceTime,
     distinctUntilChanged,
+    EMPTY,
     map,
     Observable,
     of,
@@ -88,7 +89,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
     closeSearch(): void {
         this.patchState({
             searchOpen: false,
-            searchResultsState: { state: 'loading' },
+            searchResultsState: { state: 'notAsked' },
             showSearchDropdown: false,
         });
     }
@@ -118,7 +119,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
             }),
             switchMap(({ filter, query }) => {
                 if (!query) {
-                    return of([] as SearchResultItem[]);
+                    return EMPTY;
                 }
 
                 return this.getSearchObservable({ filter, query }).pipe(catchError(() => of([] as SearchResultItem[])));
@@ -131,7 +132,7 @@ export class HeaderSearchBarStoreService extends ComponentStore<HeaderSearchBarS
 
     private resetSearchState(): void {
         this.patchState({
-            searchResultsState: { state: 'loading' },
+            searchResultsState: { state: 'notAsked' },
             showSearchDropdown: false,
         });
     }

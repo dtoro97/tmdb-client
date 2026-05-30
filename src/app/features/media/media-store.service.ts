@@ -7,14 +7,15 @@ import { ExternalIds, Movie, TvExternalIds, TvSeries } from '../../api';
 import {
     ConfigStoreService,
     ExternalLinks,
-    MediaDetails,
     RemoteData,
     buildExternalLinks,
     isDefined,
-    toMediaDetails,
+    mapRemoteData,
 } from '../../shared';
+import { toMediaDetails } from './mappers/media-details.mapper';
 import { MediaApiService } from './media-api.service';
 import { MediaTarget, isSameMediaTarget } from './media-target';
+import { MediaDetails } from './models/media-details.model';
 
 type MediaResponse = (Movie | TvSeries) & {
     readonly external_ids?: ExternalIds | TvExternalIds;
@@ -116,16 +117,7 @@ export class MediaStoreService extends ComponentStore<MediaState> {
             return { state: 'notAsked' };
         }
 
-        switch (media.state) {
-            case 'success':
-                return { state: 'success', data: this.toMediaDetails(media.data, target) };
-            case 'loading-more':
-                return { state: 'loading-more', data: this.toMediaDetails(media.data, target) };
-            case 'failure':
-                return { state: 'failure', error: media.error };
-            default:
-                return { state: media.state };
-        }
+        return mapRemoteData(media, (data) => this.toMediaDetails(data, target));
     }
 
     private toMediaDetails(media: MediaResponse | null, target: MediaTarget): MediaDetails | null {

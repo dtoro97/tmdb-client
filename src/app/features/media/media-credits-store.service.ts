@@ -6,15 +6,15 @@ import { Observable, catchError, filter, map, of, take, tap } from 'rxjs';
 import { AggregateCastMember, AggregateCredits, AggregateCrewMember, Credits } from '../../api';
 import { PAGE_SIZE } from '../../constants';
 import {
-    CastGridMember,
-    CrewGridMember,
     PersonCardItem,
     RemoteData,
+    mapRemoteData,
     remoteData,
     toCastPersonCardItem,
 } from '../../shared';
 import { MediaApiService } from './media-api.service';
 import { MediaTarget, isSameMediaTarget } from './media-target';
+import { CastGridMember, CrewGridMember } from './models/cast-crew.model';
 
 export interface MediaCreditsResource {
     readonly cast: CastGridMember[];
@@ -101,16 +101,7 @@ export class MediaCreditsStoreService extends ComponentStore<MediaCreditsState> 
     }
 
     private toTopCastState(state: RemoteData<MediaCreditsResource>): RemoteData<PersonCardItem[]> {
-        switch (state.state) {
-            case 'success':
-                return { state: 'success', data: this.toTopCast(state.data.cast) };
-            case 'loading-more':
-                return { state: 'loading-more', data: this.toTopCast(state.data.cast) };
-            case 'failure':
-                return { state: 'failure', error: state.error };
-            default:
-                return { state: state.state };
-        }
+        return mapRemoteData(state, (credits) => this.toTopCast(credits.cast));
     }
 
     private toTopCast(cast: CastGridMember[]): PersonCardItem[] {

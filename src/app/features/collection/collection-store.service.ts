@@ -13,6 +13,7 @@ import {
     sortByDate,
     toCollectionPartMediaListItem,
     toMediaListEntryState,
+    isDefined,
 } from '../../shared';
 
 interface CollectionState {
@@ -26,9 +27,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
 
     collection$ = this.select((state) => state.collection);
 
-    mappedPartsState$ = this.select((state) =>
-        toMediaListEntryState(state.parts, { routeType: 'movie' }),
-    );
+    mappedPartsState$ = this.select((state) => toMediaListEntryState(state.parts, { routeType: 'movie' }));
 
     partsCount$ = this.select((state) => (state.parts.state === 'success' ? state.parts.data.length : 0));
 
@@ -37,7 +36,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
             return null;
         }
 
-        const datedParts = state.parts.data.filter((part) => !!part.date);
+        const datedParts = state.parts.data.filter((part) => isDefined(part.date));
         if (!datedParts.length) {
             return null;
         }
@@ -57,9 +56,7 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
                 return null;
             }
 
-            return (
-                state.data.poster_path ?? state.data.parts?.find((part) => !!part.poster_path)?.poster_path ?? null
-            );
+            return state.data.poster_path ?? state.data.parts?.find((part) => isDefined(part.poster_path))?.poster_path ?? null;
         }),
     );
 
@@ -93,12 +90,18 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
             .collectionDetails(id, undefined, undefined, undefined, this.opts)
             .pipe(
                 switchMap((collection) => {
-                    const mappedItems = sortByDate(collection.parts ?? [], (part) => part.release_date).map((part) =>
-                        toCollectionPartMediaListItem(part, 'year'),
-                    );
+                    const sortedParts = sortByDate(collection.parts ?? [], (part) => part.release_date);
+                    const normalizedCollection = {
+                        ...collection,
+                        backdrop_path:
+                            collection.backdrop_path ??
+                            sortedParts.find((part) => isDefined(part.backdrop_path))?.backdrop_path ??
+                            null,
+                    };
+                    const mappedItems = sortedParts.map((part) => toCollectionPartMediaListItem(part, 'year'));
 
                     return this.enrichCastLinks$(withCollectionBadges(mappedItems)).pipe(
-                        map((items) => ({ collection, items })),
+                        map((items) => ({ collection: normalizedCollection, items })),
                     );
                 }),
                 tap(({ collection, items }) =>
@@ -140,7 +143,10 @@ export class CollectionStoreService extends ComponentStore<CollectionState> {
         return this.movieRestControllerService.movieCredits(mediaId, undefined, undefined, undefined, this.opts).pipe(
             map((credits) =>
                 (credits.cast ?? [])
-                    .filter((person): person is { id: number; name: string } => !!person.id && !!person.name)
+                    .filter(
+                        (person): person is { id: number; name: string } =>
+                            isDefined(person.id) && isDefined(person.name),
+                    )
                     .slice(0, 3)
                     .map((person) => ({
                         id: person.id,

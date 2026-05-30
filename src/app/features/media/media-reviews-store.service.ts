@@ -4,7 +4,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { Observable, catchError, filter, map, of, take, tap, throwError } from 'rxjs';
 
 import { Review, ReviewPage } from '../../api';
-import { RemoteData } from '../../shared';
+import { RemoteData, mapRemoteData } from '../../shared';
 import { MediaApiService } from './media-api.service';
 import { MediaTarget, isSameMediaTarget } from './media-target';
 
@@ -32,18 +32,7 @@ export class MediaReviewsStoreService extends ComponentStore<MediaReviewsState> 
     private readonly reviewPageState$ = this.select((state) => state.reviewPage);
 
     readonly reviewsState$ = this.reviewPageState$.pipe(
-        map((state): RemoteData<Review[]> => {
-            switch (state.state) {
-                case 'success':
-                    return { state: 'success', data: state.data?.results ?? [] };
-                case 'loading-more':
-                    return { state: 'loading-more', data: state.data?.results ?? [] };
-                case 'failure':
-                    return { state: 'failure', error: state.error };
-                default:
-                    return { state: state.state };
-            }
-        }),
+        map((state): RemoteData<Review[]> => mapRemoteData(state, (page) => page?.results ?? [])),
     );
 
     private readonly pagination$ = this.reviewPageState$.pipe(

@@ -57,7 +57,7 @@
                                     type="button"
                                     (click)="onAddTitles(vm.header.data.id, vm.existingItemKeys)"
                                 >
-                                    Add movies or shows
+                                    Add movies or TV series
                                 </button>
                                 <button
                                     mat-stroked-button
@@ -88,7 +88,7 @@
 
                 <section class="detail__toolbar">
                     <div>
-                        <h2 class="text-title">Movies and shows</h2>
+                        <h2 class="text-title">Movies and TV series</h2>
                     </div>
 
                     <div class="detail__sort">
@@ -188,14 +188,14 @@
                                                     type="button"
                                                     (click)="onCancelComment()"
                                                 >
-                                                    Cancel
+                                                    Cancel comment
                                                 </button>
                                                 <button
                                                     matButton="filled"
                                                     type="button"
                                                     (click)="onSaveComment(item)"
                                                 >
-                                                    Save
+                                                    Save comment
                                                 </button>
                                             </div>
                                         </div>
@@ -221,7 +221,7 @@
                                 title="This list is empty"
                                 [text]="
                                     vm.ownedByCurrentUser
-                                        ? 'Add a movie or TV show to start building it.'
+                                        ? 'Add a movie or TV series to start building it.'
                                         : 'There are no titles to show here yet.'
                                 "
                             />
@@ -231,7 +231,7 @@
                                     type="button"
                                     (click)="onAddTitles(vm.header.data.id, vm.existingItemKeys)"
                                 >
-                                    Add movies or shows
+                                    Add movies or TV series
                                 </button>
                             }
                         </section>
@@ -255,4 +255,3 @@
         }
     </div>
 }
-

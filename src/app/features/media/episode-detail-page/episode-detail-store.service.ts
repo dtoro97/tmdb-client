@@ -13,24 +13,25 @@ import {
     VideoList,
 } from '../../../api';
 import {
-    GroupedCrew,
     LocaleStoreService,
-    MediaDetails,
     MediaRatingService,
     RemoteData,
     VideoCardItem,
     ViewerImage,
     buildImageLanguageFallback,
     getISODate,
-    groupCrewMembers,
     isDefined,
+    mapRemoteData,
     normalizeRatingValue,
     remoteData,
     toVideoCardItems,
     toYoutubeVideoState,
 } from '../../../shared';
+import { groupCrewMembers } from '../mappers/cast-crew.mapper';
 import { EpisodeTarget, isSameEpisodeTarget } from '../media-target';
 import { MediaStoreService } from '../media-store.service';
+import { GroupedCrew } from '../models/cast-crew.model';
+import { MediaDetails } from '../models/media-details.model';
 
 interface EpisodeDetailState {
     readonly target: EpisodeRatingTarget | null;
@@ -114,20 +115,11 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
     );
 
     readonly allStillsState$ = this.episodeImagesState$.pipe(
-        map((images): RemoteData<ViewerImage[]> => {
-            switch (images.state) {
-                case 'success':
-                    return { state: 'success', data: this.toEpisodeStillImages(images.data?.stills ?? []) };
-                case 'loading-more':
-                    return { state: 'loading-more', data: this.toEpisodeStillImages(images.data?.stills ?? []) };
-                case 'failure':
-                    return { state: 'failure', error: images.error };
-                case 'loading':
-                    return { state: 'loading' };
-                case 'notAsked':
-                    return { state: 'loading' };
-            }
-        }),
+        map((images): RemoteData<ViewerImage[]> =>
+            images.state === 'notAsked'
+                ? { state: 'loading' }
+                : mapRemoteData(images, (data) => this.toEpisodeStillImages(data?.stills ?? [])),
+        ),
     );
 
     readonly stillsState$ = this.allStillsState$.pipe(
@@ -146,22 +138,18 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
     readonly allStills$ = this.allStillsState$.pipe(map((state) => remoteData(state, [])));
 
     private readonly youtubeVideosState$ = this.episodeVideosState$.pipe(
-        map((videos): RemoteData<Video[]> => {
-            switch (videos.state) {
-                case 'success':
-                case 'loading-more':
-                    return toYoutubeVideoState({
-                        state: videos.state,
-                        data: videos.data?.results ?? [],
-                    });
-                case 'failure':
-                    return { state: 'failure', error: videos.error };
-                case 'loading':
-                    return { state: 'loading' };
-                case 'notAsked':
-                    return { state: 'loading' };
-            }
-        }),
+        map((videos): RemoteData<Video[]> =>
+            videos.state === 'notAsked'
+                ? { state: 'loading' }
+                : mapRemoteData(videos, (data) => {
+                      const youtubeVideos = toYoutubeVideoState({
+                          state: 'success',
+                          data: data?.results ?? [],
+                      });
+
+                      return youtubeVideos.state === 'success' ? youtubeVideos.data : [];
+                  }),
+        ),
     );
 
     readonly vm$ = combineLatest([
@@ -408,15 +396,6 @@ export class EpisodeDetailStoreService extends ComponentStore<EpisodeDetailState
     }
 
     private toVideoItemsState(videosState: RemoteData<Video[]>, media: MediaDetails | null): RemoteData<VideoCardItem[]> {
-        switch (videosState.state) {
-            case 'success':
-                return { state: 'success', data: media ? toVideoCardItems(videosState.data, media) : [] };
-            case 'loading-more':
-                return { state: 'loading-more', data: media ? toVideoCardItems(videosState.data, media) : [] };
-            case 'failure':
-                return { state: 'failure', error: videosState.error };
-            default:
-                return { state: videosState.state };
-        }
+        return mapRemoteData(videosState, (videos) => (media ? toVideoCardItems(videos, media) : []));
     }
 }

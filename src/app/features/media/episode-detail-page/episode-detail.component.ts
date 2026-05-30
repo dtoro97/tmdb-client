@@ -117,12 +117,12 @@ export class EpisodeDetailComponent {
                     seasonNumber: Number(params.get('seasonNumber')),
                     episodeNumber: Number(params.get('episodeNumber')),
                 })),
-                filter(
-                    ({ seriesId, seasonNumber, episodeNumber }) =>
-                        Number.isInteger(seriesId) &&
-                        Number.isInteger(seasonNumber) &&
-                        Number.isInteger(episodeNumber),
-                ),
+                tap((target) => {
+                    if (!isValidEpisodeTarget(target)) {
+                        this.router.navigate(['/not-found'], { replaceUrl: true });
+                    }
+                }),
+                filter((target): target is EpisodeRatingTarget => isValidEpisodeTarget(target)),
                 distinctUntilChanged(
                     (previous, current) =>
                         previous.seriesId === current.seriesId &&
@@ -131,6 +131,16 @@ export class EpisodeDetailComponent {
                 ),
             ),
         );
+
+        this.episodeStore.episodeState$
+            .pipe(
+                takeUntilDestroyed(),
+                filter((state) => state.state === 'success' && state.data === null),
+                tap(() => {
+                    this.router.navigate(['/not-found'], { replaceUrl: true });
+                }),
+            )
+            .subscribe();
 
         this.vm$
             .pipe(
@@ -251,3 +261,15 @@ export class EpisodeDetailComponent {
         return EMPTY;
     }
 }
+
+const isValidEpisodeTarget = (target: {
+    readonly seriesId: number;
+    readonly seasonNumber: number;
+    readonly episodeNumber: number;
+}): boolean =>
+    Number.isInteger(target.seriesId) &&
+    target.seriesId > 0 &&
+    Number.isInteger(target.seasonNumber) &&
+    target.seasonNumber >= 0 &&
+    Number.isInteger(target.episodeNumber) &&
+    target.episodeNumber > 0;

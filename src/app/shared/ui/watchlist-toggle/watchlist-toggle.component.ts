@@ -63,7 +63,7 @@ export class WatchlistToggleComponent {
     readonly iconOnly = input(false);
 
     readonly isInWatchlist = signal(false);
-    readonly watchlistLabel = computed(() => (this.isInWatchlist() ? 'On Watchlist' : 'Add to Watchlist'));
+    readonly watchlistLabel = computed(() => (this.isInWatchlist() ? 'On watchlist' : 'Add to watchlist'));
     readonly pending = signal(false);
 
     private readonly target = computed<ToggleTarget | null>(() => {
