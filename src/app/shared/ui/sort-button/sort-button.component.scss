@@ -7,6 +7,7 @@
     flex: 0 0 auto;
     max-width: 100%;
     min-width: 0;
+    min-height: var(--control-height-sm);
     overflow: hidden;
     border: 1px solid var(--control-border);
     border-radius: var(--control-radius);
@@ -41,7 +42,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 1.875rem;
+        flex: 0 0 var(--control-height-sm);
+        inline-size: var(--control-height-sm);
+        min-inline-size: var(--control-height-sm);
+        min-block-size: var(--control-height-sm);
         padding: 0;
         border: 0;
         background: transparent;
@@ -51,7 +55,7 @@
         @include surface-hover-subtle();
 
         mat-icon {
-            @include icon-size(0.875rem);
+            @include icon-size(1rem);
             transition: transform var(--motion-base);
         }
 

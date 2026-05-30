@@ -1,13 +1,25 @@
-import { afterNextRender, Injectable } from '@angular/core';
+import {
+    afterNextRender,
+    Injectable,
+    makeStateKey,
+    TransferState,
+} from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 
 import { BrowserStorageService } from './browser-storage.service';
-import { parseRegionParam } from '../utils/route-utils';
+import {
+    detectBrowserLocale,
+    detectServerLocale,
+    type DetectedLocale,
+} from '../utils/locale-detection';
+import { parseLanguageParam, parseRegionParam } from '../utils/route-utils';
 
 const STORAGE_KEY_LANGUAGE = 'tmdb_language';
 const STORAGE_KEY_REGION = 'tmdb_region';
 const DEFAULT_LANGUAGE = 'en';
 const DEFAULT_REGION = 'US';
+const ACCEPT_LANGUAGE_HEADER = 'accept-language';
+const LOCALE_TRANSFER_KEY = makeStateKey<LocaleState>('tmdb-locale');
 
 interface LocaleState {
     readonly language: string;
@@ -23,22 +35,17 @@ export class LocaleStoreService extends ComponentStore<LocaleState> {
         region: state.region,
     }));
 
-    constructor(private readonly browserStorage: BrowserStorageService) {
-        super({
-            language: normalizeLanguage(
-                browserStorage.getCookieOrDefault(
-                    STORAGE_KEY_LANGUAGE,
-                    DEFAULT_LANGUAGE,
-                ),
-            ),
-            region: parseRegionParam(
-                browserStorage.getCookieOrDefault(
-                    STORAGE_KEY_REGION,
-                    DEFAULT_REGION,
-                ),
-                DEFAULT_REGION,
-            ),
-        });
+    constructor(
+        private readonly browserStorage: BrowserStorageService,
+        private readonly transferState: TransferState,
+    ) {
+        const initialLocale = getInitialLocale(browserStorage, transferState);
+
+        super(initialLocale);
+
+        if (!browserStorage.isBrowserEnvironment()) {
+            transferState.set(LOCALE_TRANSFER_KEY, initialLocale);
+        }
 
         afterNextRender(() => {
             this.hydrateBrowserLocale();
@@ -83,37 +90,13 @@ export class LocaleStoreService extends ComponentStore<LocaleState> {
             STORAGE_KEY_LANGUAGE,
         );
         const storedRegion = this.browserStorage.getItem(STORAGE_KEY_REGION);
-        const nextLanguage = normalizeLanguage(
-            cookieLanguage ?? storedLanguage ?? current.language,
-        );
-        const nextRegion = parseRegionParam(
-            cookieRegion ?? storedRegion ?? current.region,
-            DEFAULT_REGION,
-        );
-        const shouldPromoteStoredLocale =
-            (cookieLanguage === null || cookieRegion === null) &&
-            (storedLanguage !== null || storedRegion !== null);
+        const shouldPersistLocale =
+            cookieLanguage !== current.language ||
+            cookieRegion !== current.region ||
+            storedLanguage !== current.language ||
+            storedRegion !== current.region;
 
-        if (shouldPromoteStoredLocale) {
-            this.persistLocale(nextLanguage, nextRegion);
-
-            const cookiesWereWritten =
-                this.browserStorage.getCookie(STORAGE_KEY_LANGUAGE) ===
-                    nextLanguage &&
-                this.browserStorage.getCookie(STORAGE_KEY_REGION) ===
-                    nextRegion;
-
-            if (
-                cookiesWereWritten &&
-                (nextLanguage !== current.language ||
-                    nextRegion !== current.region)
-            ) {
-                this.reloadBrowserPage();
-                return;
-            }
-        }
-
-        if (cookieLanguage !== null || cookieRegion !== null) {
+        if (shouldPersistLocale) {
             this.persistLocale(current.language, current.region);
         }
     }
@@ -134,6 +117,57 @@ export class LocaleStoreService extends ComponentStore<LocaleState> {
     }
 }
 
-function normalizeLanguage(value: string): string {
-    return (value.split('-')[0] || DEFAULT_LANGUAGE).toLowerCase();
+function normalizeLanguage(value: string | null | undefined): string {
+    const language = value?.replace(/_/g, '-').split('-')[0];
+
+    return parseLanguageParam(language) ?? DEFAULT_LANGUAGE;
+}
+
+function getInitialLocale(
+    browserStorage: BrowserStorageService,
+    transferState: TransferState,
+): LocaleState {
+    const persistedLocale = getPersistedLocale(browserStorage);
+    const detectedLocale = browserStorage.isBrowserEnvironment()
+        ? transferState.get(LOCALE_TRANSFER_KEY, null) ?? detectBrowserLocale()
+        : detectServerLocale(
+              browserStorage.getRequestHeader(ACCEPT_LANGUAGE_HEADER),
+              browserStorage.getRequestCountry(),
+          );
+
+    return {
+        language:
+            persistedLocale.language ??
+            detectedLocale.language ??
+            DEFAULT_LANGUAGE,
+        region:
+            persistedLocale.region ?? detectedLocale.region ?? DEFAULT_REGION,
+    };
+}
+
+function getPersistedLocale(
+    browserStorage: BrowserStorageService,
+): DetectedLocale {
+    return {
+        language: normalizeLanguageOrNull(
+            browserStorage.getCookie(STORAGE_KEY_LANGUAGE) ??
+                browserStorage.getItem(STORAGE_KEY_LANGUAGE),
+        ),
+        region: normalizeRegionOrNull(
+            browserStorage.getCookie(STORAGE_KEY_REGION) ??
+                browserStorage.getItem(STORAGE_KEY_REGION),
+        ),
+    };
+}
+
+function normalizeLanguageOrNull(value: string | null): string | null {
+    const language = value?.replace(/_/g, '-').split('-')[0];
+
+    return parseLanguageParam(language);
+}
+
+function normalizeRegionOrNull(value: string | null): string | null {
+    const region = parseRegionParam(value, '');
+
+    return region || null;
 }

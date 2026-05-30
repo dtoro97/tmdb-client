@@ -9,6 +9,12 @@ import {
 
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
+interface RequestWithCloudflareMetadata extends Request {
+    readonly cf?: {
+        readonly country?: unknown;
+    };
+}
+
 @Injectable({ providedIn: 'root' })
 export class BrowserStorageService {
     private readonly isBrowser: boolean;
@@ -23,6 +29,27 @@ export class BrowserStorageService {
 
     isBrowserEnvironment(): boolean {
         return this.isBrowser;
+    }
+
+    getRequestHeader(name: string): string | null {
+        if (this.isBrowser) {
+            return null;
+        }
+
+        return this.request?.headers.get(name) ?? null;
+    }
+
+    getRequestCountry(): string | null {
+        if (this.isBrowser || !this.request) {
+            return null;
+        }
+
+        const cloudflareCountry = (this.request as RequestWithCloudflareMetadata)
+            .cf?.country;
+
+        return typeof cloudflareCountry === 'string'
+            ? cloudflareCountry
+            : this.request.headers.get('cf-ipcountry');
     }
 
     getItem(key: string): string | null {
