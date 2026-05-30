@@ -1,16 +1,20 @@
 {
-  "name": "tmdb-client",
+  "name": "cinekeep",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "node tools/build-with-api-key.mjs",
+    "build:cloudflare": "node tools/build-with-api-key.mjs --cloudflare-worker --configuration production,cloudflare",
+    "build:github-pages": "node tools/build-with-api-key.mjs --github-pages-spa --configuration production,github-pages --base-href https://dtoro97.github.io/cinekeep/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "ng build --base-href \"https://dtoro97.github.io/tmdb-client/\" && npx angular-cli-ghpages --dir=dist/tmdb-client/",
+    "deploy": "npm run deploy:cloudflare",
+    "deploy:cloudflare": "npm run build:cloudflare",
+    "deploy:github-pages": "npm run build:github-pages && npx angular-cli-ghpages --no-silent --dir=dist/github-pages/",
     "generate-api": "npx -y @openapitools/openapi-generator-cli generate -i openapi.json -g typescript-angular -o src/app/api --additional-properties=providedIn=root,withInterfaces=true,serviceSuffix=RestControllerService",
     "generate-api:v4": "npx -y @openapitools/openapi-generator-cli generate -i openapi-v4-lists.json -g typescript-angular -o src/app/api-v4 --additional-properties=providedIn=root,withInterfaces=true",
-    "serve:ssr:tmdb-client": "node dist/tmdb-client/server/server.mjs"
+    "serve:ssr:cinekeep": "node dist/cinekeep/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -48,6 +52,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
     "angular-cli-ghpages": "^2.0.3",
+    "esbuild": "^0.27.3",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
