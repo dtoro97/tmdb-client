@@ -3,7 +3,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "tmdb-client": {
+        "cinekeep": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -25,11 +25,13 @@
                     "builder": "@angular/build:application",
                     "options": {
                         "outputPath": {
-                            "base": "dist/tmdb-client",
-                            "browser": ""
+                            "base": "dist/cinekeep",
+                            "browser": "browser",
+                            "server": "server"
                         },
                         "index": "src/index.html",
                         "browser": "src/main.ts",
+                        "server": "src/main.server.ts",
                         "polyfills": ["zone.js"],
                         "tsConfig": "tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
@@ -45,6 +47,13 @@
                             "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
                         ],
                         "scripts": [],
+                        "security": {
+                            "allowedHosts": ["localhost", "127.0.0.1"]
+                        },
+                        "outputMode": "server",
+                        "ssr": {
+                            "entry": "src/server.ts"
+                        },
                         "stylePreprocessorOptions": {
                             "includePaths": ["src/styles"]
                         }
@@ -81,6 +90,33 @@
                                     "with": "src/environments/environment.development.ts"
                                 }
                             ]
+                        },
+                        "cloudflare": {
+                            "outputPath": {
+                                "base": "dist/cloudflare",
+                                "browser": "browser",
+                                "server": "server"
+                            },
+                            "security": {
+                                "allowedHosts": [
+                                    "localhost",
+                                    "127.0.0.1",
+                                    "*.pages.dev"
+                                ]
+                            },
+                            "ssr": {
+                                "entry": "src/server.cloudflare.ts",
+                                "experimentalPlatform": "neutral"
+                            }
+                        },
+                        "github-pages": {
+                            "outputPath": {
+                                "base": "dist/github-pages",
+                                "browser": ""
+                            },
+                            "server": false,
+                            "ssr": false,
+                            "outputMode": "static"
                         }
                     },
                     "defaultConfiguration": "production"
@@ -89,10 +125,10 @@
                     "builder": "@angular/build:dev-server",
                     "configurations": {
                         "production": {
-                            "buildTarget": "tmdb-client:build:production"
+                            "buildTarget": "cinekeep:build:production"
                         },
                         "development": {
-                            "buildTarget": "tmdb-client:build:development"
+                            "buildTarget": "cinekeep:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
