@@ -30,7 +30,10 @@ import {
 import { API_JSON_OPTIONS, PAGE_SIZE } from '../../constants';
 import {
     ConfigStoreService,
+    DEFAULT_TMDB_DISCOVER_SORT_DIRECTION,
+    DEFAULT_TMDB_DISCOVER_SORT_KEY,
     formatCompanyName,
+    getTmdbDiscoverSortOptions,
     GenreService,
     RemoteData,
     LocaleStoreService,
@@ -48,6 +51,8 @@ import {
     serializeNumberListParam,
     serializePositiveNumberParam,
     SortDirection,
+    TMDB_DISCOVER_SORT_DIRECTIONS,
+    TMDB_DISCOVER_SORT_KEYS,
     toLanguageOptions,
     toRegionOptions,
 } from '../../shared';
@@ -62,11 +67,9 @@ import {
     DiscoverRuntimePreset,
     DiscoverSortKey,
     MEDIA_TYPE_OPTIONS,
-    MOVIE_SORT_OPTIONS,
     MOVIE_RELEASE_TYPE_FILTER_OPTIONS,
     RATING_FILTER_OPTIONS,
     RUNTIME_FILTER_OPTIONS,
-    TV_SORT_OPTIONS,
     VOTE_COUNT_FILTER_OPTIONS,
 } from './discover-page-definitions';
 import { DiscoverQueryService } from './discover-query.service';
@@ -146,8 +149,8 @@ const INITIAL_STATE: DiscoverState = {
     definition: null,
     query: {
         mediaType: 'movie',
-        sortKey: 'popularity',
-        sortDirection: 'desc',
+        sortKey: DEFAULT_TMDB_DISCOVER_SORT_KEY,
+        sortDirection: DEFAULT_TMDB_DISCOVER_SORT_DIRECTION,
         watchRegion: 'US',
         ...DISCOVER_DEFAULT_FILTERS,
     },
@@ -166,15 +169,11 @@ const INITIAL_STATE: DiscoverState = {
     regionOptions: [],
 };
 
-const DISCOVER_SORT_KEYS: readonly DiscoverSortKey[] = ['popularity', 'rating', 'release_date', 'title', 'vote_count'];
-
 const DISCOVER_MEDIA_TYPES: readonly MediaType[] = ['movie', 'tv'];
 
 const DISCOVER_RUNTIME_PRESETS: readonly DiscoverRuntimePreset[] = ['any', 'short', 'standard', 'long'];
 
 const DISCOVER_MOVIE_RELEASE_TYPES: readonly DiscoverMovieReleaseType[] = [1, 2, 3, 4, 5, 6];
-
-const DISCOVER_SORT_DIRECTIONS: readonly SortDirection[] = ['asc', 'desc'];
 
 @Injectable()
 export class DiscoverStoreService extends ComponentStore<DiscoverState> {
@@ -328,7 +327,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
             return;
         }
 
-        const sortKey = parseEnumParam(value, DISCOVER_SORT_KEYS, query.sortKey);
+        const sortKey = parseEnumParam(value, TMDB_DISCOVER_SORT_KEYS, query.sortKey);
 
         this.router.navigate([], {
             relativeTo: this.route,
@@ -795,8 +794,8 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
         if (!definition) {
             return {
                 mediaType: 'movie',
-                sortKey: 'popularity',
-                sortDirection: 'desc',
+                sortKey: DEFAULT_TMDB_DISCOVER_SORT_KEY,
+                sortDirection: DEFAULT_TMDB_DISCOVER_SORT_DIRECTION,
                 watchRegion: fallbackRegion,
                 ...DISCOVER_DEFAULT_FILTERS,
             };
@@ -814,10 +813,10 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
                 ? parseRegionParam(params.get('watchRegion'), fallbackRegion)
                 : fallbackRegion,
             sortKey: definition.showSort
-                ? parseEnumParam(params.get('sort'), DISCOVER_SORT_KEYS, definition.defaultSortKey)
+                ? parseEnumParam(params.get('sort'), TMDB_DISCOVER_SORT_KEYS, definition.defaultSortKey)
                 : definition.defaultSortKey,
             sortDirection: definition.showSort
-                ? parseEnumParam(params.get('direction'), DISCOVER_SORT_DIRECTIONS, definition.defaultSortDirection)
+                ? parseEnumParam(params.get('direction'), TMDB_DISCOVER_SORT_DIRECTIONS, definition.defaultSortDirection)
                 : definition.defaultSortDirection,
             genreIds: filters.genres ? parsePositiveIntegerListParam(params.get('genres')) : [],
             keywordIds: filters.keywords ? parsePositiveIntegerListParam(params.get('keywords')) : [],
@@ -1340,7 +1339,7 @@ export class DiscoverStoreService extends ComponentStore<DiscoverState> {
     }
 
     private getSortOptions(mediaType: MediaType): SelectOption<DiscoverSortKey>[] {
-        return [...(mediaType === 'movie' ? MOVIE_SORT_OPTIONS : TV_SORT_OPTIONS)];
+        return [...getTmdbDiscoverSortOptions(mediaType)];
     }
 
     private showFilters(definition: DiscoverPageDefinition | null): boolean {

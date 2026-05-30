@@ -38,12 +38,12 @@ import { remoteSuccess } from '../../shared/utils';
 import {
     toTotalAfterMediaRemoval,
     toUserAccountMediaListItem,
-    toUserAccountSortBy,
 } from './user-account-media.helpers';
 import {
     DEFAULT_USER_ACCOUNT_SORT_BY,
     DEFAULT_USER_ACCOUNT_SORT_DIRECTION,
     DEFAULT_USER_ACCOUNT_SORT_FIELD,
+    toUserAccountSortBy,
     UserAccountSortBy,
     UserAccountSortField,
 } from './user-list-sort-options';
@@ -204,7 +204,7 @@ export class UserRatingsStore extends ComponentStore<UserRatingsState> {
     }
 
     setSortField$(sortField: unknown) {
-        if (sortField !== 'created_at') {
+        if (sortField !== DEFAULT_USER_ACCOUNT_SORT_FIELD) {
             return EMPTY;
         }
 

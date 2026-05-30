@@ -2,16 +2,27 @@ import { V4ListSortBy } from '../../api-v4';
 import type { SelectOption, SortDirection } from '../../shared';
 
 export type UserListSortOption = SelectOption<V4ListSortBy>;
-export type UserAccountSortField = 'created_at';
+export const USER_ACCOUNT_SORT_FIELDS = ['created_at'] as const;
+export type UserAccountSortField = (typeof USER_ACCOUNT_SORT_FIELDS)[number];
 export type UserAccountSortOption = SelectOption<UserAccountSortField>;
-export type UserAccountSortBy = 'created_at.asc' | 'created_at.desc';
+export type UserAccountSortBy = `${UserAccountSortField}.${SortDirection}`;
+
+export function toUserAccountSortBy(
+    sortField: UserAccountSortField,
+    sortDirection: SortDirection,
+): UserAccountSortBy {
+    return `${sortField}.${sortDirection}` as UserAccountSortBy;
+}
 
 export const DEFAULT_USER_LIST_SORT_BY = V4ListSortBy.OriginalOrderAsc;
 export const DEFAULT_USER_ACCOUNT_SORT_FIELD: UserAccountSortField =
-    'created_at';
+    USER_ACCOUNT_SORT_FIELDS[0];
 export const DEFAULT_USER_ACCOUNT_SORT_DIRECTION: SortDirection = 'desc';
 export const DEFAULT_USER_ACCOUNT_SORT_BY: UserAccountSortBy =
-    'created_at.desc';
+    toUserAccountSortBy(
+        DEFAULT_USER_ACCOUNT_SORT_FIELD,
+        DEFAULT_USER_ACCOUNT_SORT_DIRECTION,
+    );
 
 export const USER_ACCOUNT_SORT_OPTIONS: readonly UserAccountSortOption[] = [
     { label: 'Date added', value: 'created_at' },

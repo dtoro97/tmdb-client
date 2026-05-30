@@ -1,8 +1,15 @@
-import type { MediaListItem, MediaType, SelectOption, SortDirection, WatchProviderOption } from '../../../shared';
+import type {
+    MediaListItem,
+    MediaType,
+    SortDirection,
+    TmdbDiscoverSortKey,
+    TmdbDiscoverSortOption,
+    WatchProviderOption,
+} from '../../../shared';
 
 export type StreamingDatePreset = 'today' | 'current-month' | 'current-season' | 'current-two-months';
 export type StreamingMonetizationType = 'ads' | 'buy' | 'flatrate' | 'free' | 'rent';
-export type StreamingSortKey = 'popularity' | 'rating' | 'release_date' | 'title' | 'vote_count';
+export type StreamingSortKey = TmdbDiscoverSortKey;
 
 export interface StreamingBaseQuery {
     readonly mediaTypes: readonly MediaType[];
@@ -75,7 +82,7 @@ export interface StreamingListResult {
     readonly totalResults: number;
 }
 
-export type StreamingSortOption = SelectOption<StreamingSortKey>;
+export type StreamingSortOption = TmdbDiscoverSortOption;
 
 export interface StreamingSortState {
     readonly key: StreamingSortKey;

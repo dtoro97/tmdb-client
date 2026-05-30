@@ -1,34 +1,104 @@
-import type { MediaType, SortDirection } from '../types';
+import type { MediaType, SelectOption, SortDirection } from '../types';
 
-export type TmdbDiscoverSortKey =
-    | 'popularity'
-    | 'rating'
-    | 'release_date'
-    | 'title'
-    | 'vote_count';
+export const TMDB_DISCOVER_SORT_KEYS = [
+    'popularity',
+    'rating',
+    'release_date',
+    'title',
+    'vote_count',
+] as const;
 
-const MOVIE_SORT_FIELDS: Record<TmdbDiscoverSortKey, string> = {
+export type TmdbDiscoverSortKey = (typeof TMDB_DISCOVER_SORT_KEYS)[number];
+
+export type TmdbDiscoverSortOption = SelectOption<TmdbDiscoverSortKey>;
+
+export const TMDB_DISCOVER_SORT_DIRECTIONS: readonly SortDirection[] = [
+    'asc',
+    'desc',
+];
+
+export const DEFAULT_TMDB_DISCOVER_SORT_KEY: TmdbDiscoverSortKey = 'popularity';
+export const DEFAULT_TMDB_DISCOVER_SORT_DIRECTION: SortDirection = 'desc';
+
+export const TMDB_DISCOVER_MOVIE_SORT_OPTIONS: readonly TmdbDiscoverSortOption[] = [
+    { label: 'Popularity', value: 'popularity' },
+    { label: 'Rating', value: 'rating' },
+    { label: 'Release Date', value: 'release_date' },
+    { label: 'Title', value: 'title' },
+    { label: 'Vote Count', value: 'vote_count' },
+];
+
+export const TMDB_DISCOVER_TV_SORT_OPTIONS: readonly TmdbDiscoverSortOption[] = [
+    { label: 'Popularity', value: 'popularity' },
+    { label: 'Rating', value: 'rating' },
+    { label: 'First Air Date', value: 'release_date' },
+    { label: 'Name', value: 'title' },
+    { label: 'Vote Count', value: 'vote_count' },
+];
+
+const TMDB_MOVIE_DISCOVER_SORT_FIELDS = {
     popularity: 'popularity',
     rating: 'vote_average',
     release_date: 'primary_release_date',
     title: 'title',
     vote_count: 'vote_count',
-};
+} as const satisfies Record<TmdbDiscoverSortKey, string>;
 
-const TV_SORT_FIELDS: Record<TmdbDiscoverSortKey, string> = {
+const TMDB_TV_DISCOVER_SORT_FIELDS = {
     popularity: 'popularity',
     rating: 'vote_average',
     release_date: 'first_air_date',
     title: 'name',
     vote_count: 'vote_count',
-};
+} as const satisfies Record<TmdbDiscoverSortKey, string>;
 
+export type TmdbMovieDiscoverSort =
+    `${(typeof TMDB_MOVIE_DISCOVER_SORT_FIELDS)[TmdbDiscoverSortKey]}.${SortDirection}`;
+
+export type TmdbTvDiscoverSort =
+    `${(typeof TMDB_TV_DISCOVER_SORT_FIELDS)[TmdbDiscoverSortKey]}.${SortDirection}`;
+
+export function isTmdbDiscoverSortKey(value: unknown): value is TmdbDiscoverSortKey {
+    return (
+        typeof value === 'string' &&
+        (TMDB_DISCOVER_SORT_KEYS as readonly string[]).includes(value)
+    );
+}
+
+export function getTmdbDiscoverSortOptions(
+    mediaType: MediaType,
+): readonly TmdbDiscoverSortOption[] {
+    return mediaType === 'movie'
+        ? TMDB_DISCOVER_MOVIE_SORT_OPTIONS
+        : TMDB_DISCOVER_TV_SORT_OPTIONS;
+}
+
+export function toTmdbDiscoverSort(
+    mediaType: 'movie',
+    sortKey: TmdbDiscoverSortKey,
+    direction: SortDirection,
+): TmdbMovieDiscoverSort;
+export function toTmdbDiscoverSort(
+    mediaType: 'tv',
+    sortKey: TmdbDiscoverSortKey,
+    direction: SortDirection,
+): TmdbTvDiscoverSort;
 export function toTmdbDiscoverSort(
     mediaType: MediaType,
     sortKey: TmdbDiscoverSortKey,
     direction: SortDirection,
-): string {
-    const fields = mediaType === 'movie' ? MOVIE_SORT_FIELDS : TV_SORT_FIELDS;
+): TmdbMovieDiscoverSort | TmdbTvDiscoverSort;
+export function toTmdbDiscoverSort(
+    mediaType: MediaType,
+    sortKey: TmdbDiscoverSortKey,
+    direction: SortDirection,
+): TmdbMovieDiscoverSort | TmdbTvDiscoverSort {
+    const fields =
+        mediaType === 'movie'
+            ? TMDB_MOVIE_DISCOVER_SORT_FIELDS
+            : TMDB_TV_DISCOVER_SORT_FIELDS;
 
-    return `${fields[sortKey]}.${direction}`;
+    return `${fields[sortKey]}.${direction}` as
+        | TmdbMovieDiscoverSort
+        | TmdbTvDiscoverSort;
 }

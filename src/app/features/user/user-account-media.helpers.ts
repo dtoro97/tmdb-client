@@ -4,21 +4,15 @@ import {
     MediaListItem,
     MediaType,
     RemoteData,
-    SortDirection,
     toCardItem,
     toMediaListItem,
 } from '../../shared';
-import { UserAccountSortBy, UserAccountSortField } from './user-list-sort-options';
 
 type UserAccountMediaItem = MovieListItem | TvSeriesListItem | RatedMovieListItem | RatedTvSeriesListItem;
 
 interface MediaIdentity {
     readonly id: number;
     readonly mediaType: MediaType;
-}
-
-export function toUserAccountSortBy(sortField: UserAccountSortField, sortDirection: SortDirection): UserAccountSortBy {
-    return `${sortField}.${sortDirection}` as UserAccountSortBy;
 }
 
 export function toUserMediaTotalLabel(mediaType: MediaType, totalResults: number): string {
