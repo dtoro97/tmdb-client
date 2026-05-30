@@ -57,7 +57,7 @@ if (ngResult.status !== 0) {
 if (shouldBundleCloudflareWorker) {
     await esbuild.build({
         bundle: true,
-        entryPoints: ['dist/cloudflare/server/server.mjs'],
+        entryPoints: ['src/server.cloudflare.ts'],
         format: 'esm',
         logLevel: 'info',
         outfile: 'dist/cloudflare/_worker.js',

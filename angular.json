@@ -94,9 +94,11 @@
                         "cloudflare": {
                             "outputPath": {
                                 "base": "dist/cloudflare",
-                                "browser": "browser",
-                                "server": "server"
+                                "browser": ""
                             },
+                            "server": false,
+                            "ssr": false,
+                            "outputMode": "static",
                             "fileReplacements": [
                                 {
                                     "replace": "src/environments/environment.ts",
@@ -109,10 +111,6 @@
                                     "127.0.0.1",
                                     "*.pages.dev"
                                 ]
-                            },
-                            "ssr": {
-                                "entry": "src/server.cloudflare.ts",
-                                "experimentalPlatform": "neutral"
                             }
                         },
                         "github-pages": {

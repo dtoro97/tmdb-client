@@ -1,5 +1,3 @@
-import { AngularAppEngine, createRequestHandler } from '@angular/ssr';
-
 interface AssetBinding {
     fetch(input: Request | string, init?: RequestInit): Promise<Response>;
 }
@@ -10,8 +8,8 @@ interface CloudflarePagesEnv {
     TMDB_API_KEY?: string;
 }
 
-const BROWSER_ASSET_PREFIX = '/browser';
-const CLIENT_INDEX_PATH = '/index.csr.html';
+const BROWSER_ASSET_PREFIX = '';
+const CLIENT_INDEX_PATH = '/index.html';
 const NOT_FOUND_STATUS = 404;
 const TMDB_API_ORIGIN = 'https://api.themoviedb.org';
 const TMDB_PROXY_PREFIX = '/api/tmdb/';
@@ -41,29 +39,6 @@ const STRIPPED_TMDB_RESPONSE_HEADERS = [
     'access-control-max-age',
     'set-cookie',
 ];
-
-const angularApps = new Map<string, AngularAppEngine>();
-
-const getAngularApp = (request: Request): AngularAppEngine => {
-    const hostname = new URL(request.url).hostname;
-    const existingApp = angularApps.get(hostname);
-
-    if (existingApp) {
-        return existingApp;
-    }
-
-    const angularApp = new AngularAppEngine({
-        allowedHosts: [hostname],
-    });
-
-    angularApps.set(hostname, angularApp);
-
-    return angularApp;
-};
-
-const renderAngular = createRequestHandler((request: Request) =>
-    getAngularApp(request).handle(request),
-);
 
 const isBrowserAssetRequest = (url: URL): boolean =>
     url.pathname.includes('.');
@@ -214,8 +189,6 @@ const fetchBrowserAsset = async (
     return env.ASSETS.fetch(createBrowserAssetRequest(request, CLIENT_INDEX_PATH));
 };
 
-export const reqHandler = renderAngular;
-
 export default {
     async fetch(request: Request, env: CloudflarePagesEnv): Promise<Response> {
         const url = new URL(request.url);
@@ -228,8 +201,6 @@ export default {
             return fetchBrowserAsset(request, env);
         }
 
-        const response = await renderAngular(request);
-
-        return response ?? fetchBrowserAsset(request, env, CLIENT_INDEX_PATH);
+        return fetchBrowserAsset(request, env, CLIENT_INDEX_PATH);
     },
 };
