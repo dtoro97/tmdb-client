@@ -22,30 +22,6 @@ import {
     DiscoverRuntimePreset,
 } from './discover-page-definitions';
 
-type MovieDiscoverSort =
-    | 'popularity.asc'
-    | 'popularity.desc'
-    | 'primary_release_date.asc'
-    | 'primary_release_date.desc'
-    | 'title.asc'
-    | 'title.desc'
-    | 'vote_average.asc'
-    | 'vote_average.desc'
-    | 'vote_count.asc'
-    | 'vote_count.desc';
-
-type TvDiscoverSort =
-    | 'first_air_date.asc'
-    | 'first_air_date.desc'
-    | 'name.asc'
-    | 'name.desc'
-    | 'popularity.asc'
-    | 'popularity.desc'
-    | 'vote_average.asc'
-    | 'vote_average.desc'
-    | 'vote_count.asc'
-    | 'vote_count.desc';
-
 interface DateRange {
     readonly from?: string;
     readonly to?: string;
@@ -116,7 +92,7 @@ export class DiscoverQueryService {
                     'movie',
                     query.sortKey,
                     query.sortDirection,
-                ) as MovieDiscoverSort,
+                ),
                 query.voteAverageGte ?? undefined,
                 undefined,
                 query.voteCountGte ?? undefined,
@@ -184,7 +160,7 @@ export class DiscoverQueryService {
                     'tv',
                     query.sortKey,
                     query.sortDirection,
-                ) as TvDiscoverSort,
+                ),
                 undefined,
                 query.voteAverageGte ?? undefined,
                 undefined,

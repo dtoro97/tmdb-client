@@ -6,11 +6,17 @@ import { EMPTY, Observable, catchError, combineLatest, distinctUntilChanged, map
 
 import { PAGE_SIZE } from '../../../constants';
 import {
+    DEFAULT_TMDB_DISCOVER_SORT_DIRECTION,
+    DEFAULT_TMDB_DISCOVER_SORT_KEY,
+    getTmdbDiscoverSortOptions,
+    parseEnumParam,
     RemoteData,
     MediaListItem,
     MediaType,
     ToggleGroupOption,
     SortDirection,
+    TMDB_DISCOVER_SORT_DIRECTIONS,
+    TMDB_DISCOVER_SORT_KEYS,
     WatchProviderOption,
     WatchProviderStoreService,
 } from '../../../shared';
@@ -19,7 +25,6 @@ import {
     StreamingEditorialSection,
     StreamingListResult,
     StreamingSortKey,
-    StreamingSortOption,
 } from '../models/streaming-browse.models';
 import { StreamingQueryService } from '../services/streaming-query.service';
 import {
@@ -76,29 +81,13 @@ const EMPTY_PAGINATION: StreamingListPagination = {
 const INITIAL_STATE: StreamingListState = {
     context: null,
     mediaType: 'tv',
-    sortKey: 'popularity',
-    sortDirection: 'desc',
+    sortKey: DEFAULT_TMDB_DISCOVER_SORT_KEY,
+    sortDirection: DEFAULT_TMDB_DISCOVER_SORT_DIRECTION,
     pagination: { ...EMPTY_PAGINATION },
     totalResults: 0,
     resultsState: { state: 'notAsked' },
     notFound: false,
 };
-
-const TV_SORT_OPTIONS: readonly StreamingSortOption[] = [
-    { label: 'Popularity', value: 'popularity' },
-    { label: 'Rating', value: 'rating' },
-    { label: 'First Air Date', value: 'release_date' },
-    { label: 'Name', value: 'title' },
-    { label: 'Vote Count', value: 'vote_count' },
-];
-
-const MOVIE_SORT_OPTIONS: readonly StreamingSortOption[] = [
-    { label: 'Popularity', value: 'popularity' },
-    { label: 'Rating', value: 'rating' },
-    { label: 'Release Date', value: 'release_date' },
-    { label: 'Title', value: 'title' },
-    { label: 'Vote Count', value: 'vote_count' },
-];
 
 const MEDIA_TYPE_OPTIONS: Record<MediaType, ToggleGroupOption> = {
     movie: { label: 'Movies', value: 'movie' },
@@ -229,7 +218,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
             source.tvProviders,
         );
         const baseQuery = context?.baseQuery;
-        const fallbackSort = baseQuery?.sortBy ?? 'popularity';
+        const fallbackSort = baseQuery?.sortBy ?? DEFAULT_TMDB_DISCOVER_SORT_KEY;
         const sortKey = this.normalizeSortKey(source.queryParams.get('sort'), fallbackSort);
 
         return {
@@ -240,7 +229,11 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
                 source.queryParams.get('type'),
             ),
             sortKey,
-            sortDirection: (source.queryParams.get('direction') || 'desc') as SortDirection,
+            sortDirection: parseEnumParam(
+                source.queryParams.get('direction'),
+                TMDB_DISCOVER_SORT_DIRECTIONS,
+                DEFAULT_TMDB_DISCOVER_SORT_DIRECTION,
+            ),
         };
     }
 
@@ -470,8 +463,8 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
         }).format(new Date(date));
     }
 
-    private getSortOptions(mediaType: MediaType): readonly StreamingSortOption[] {
-        return mediaType === 'movie' ? MOVIE_SORT_OPTIONS : TV_SORT_OPTIONS;
+    private getSortOptions(mediaType: MediaType) {
+        return getTmdbDiscoverSortOptions(mediaType);
     }
 
     private getMediaTypeOptions(
@@ -489,13 +482,7 @@ export class StreamingListStoreService extends ComponentStore<StreamingListState
     }
 
     private normalizeSortKey(value: unknown, fallback: StreamingSortKey): StreamingSortKey {
-        return value === 'popularity' ||
-            value === 'rating' ||
-            value === 'release_date' ||
-            value === 'title' ||
-            value === 'vote_count'
-            ? value
-            : fallback;
+        return parseEnumParam(value, TMDB_DISCOVER_SORT_KEYS, fallback);
     }
 
     private normalizeMediaType(

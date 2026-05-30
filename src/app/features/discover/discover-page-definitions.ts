@@ -1,4 +1,4 @@
-import type { MediaType, SortDirection } from '../../shared';
+import type { MediaType, SortDirection, TmdbDiscoverSortKey } from '../../shared';
 import {
     DATE_WINDOW_DISCOVER_VOTE_COUNT_GTE,
     DEFAULT_DISCOVER_VOTE_COUNT_GTE,
@@ -10,7 +10,7 @@ export type DiscoverDateWindow = 'airing-today' | 'now-playing' | 'on-the-air' |
 export type DiscoverMovieReleaseTypeFilter = 'theatrical';
 export type DiscoverMovieReleaseType = 1 | 2 | 3 | 4 | 5 | 6;
 
-export type DiscoverSortKey = 'popularity' | 'rating' | 'release_date' | 'title' | 'vote_count';
+export type DiscoverSortKey = TmdbDiscoverSortKey;
 
 export type DiscoverPageKey =
     | 'advanced'
@@ -282,22 +282,6 @@ export const DISCOVER_PAGE_DEFINITIONS: Record<DiscoverPageKey, DiscoverPageDefi
         lockedFilters: [{ id: 'on-the-air', label: 'On TV this week' }],
     },
 };
-
-export const MOVIE_SORT_OPTIONS = [
-    { label: 'Popularity', value: 'popularity' },
-    { label: 'Rating', value: 'rating' },
-    { label: 'Release Date', value: 'release_date' },
-    { label: 'Title', value: 'title' },
-    { label: 'Vote Count', value: 'vote_count' },
-] as const;
-
-export const TV_SORT_OPTIONS = [
-    { label: 'Popularity', value: 'popularity' },
-    { label: 'Rating', value: 'rating' },
-    { label: 'First Air Date', value: 'release_date' },
-    { label: 'Name', value: 'title' },
-    { label: 'Vote Count', value: 'vote_count' },
-] as const;
 
 export const MEDIA_TYPE_OPTIONS = [
     { label: 'Movies', value: 'movie' },

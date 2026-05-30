@@ -27,30 +27,6 @@ interface DateWindow {
     readonly to?: string;
 }
 
-type MovieDiscoverSort =
-    | 'popularity.asc'
-    | 'popularity.desc'
-    | 'primary_release_date.asc'
-    | 'primary_release_date.desc'
-    | 'title.asc'
-    | 'title.desc'
-    | 'vote_average.asc'
-    | 'vote_average.desc'
-    | 'vote_count.asc'
-    | 'vote_count.desc';
-
-type TvDiscoverSort =
-    | 'first_air_date.asc'
-    | 'first_air_date.desc'
-    | 'name.asc'
-    | 'name.desc'
-    | 'popularity.asc'
-    | 'popularity.desc'
-    | 'vote_average.asc'
-    | 'vote_average.desc'
-    | 'vote_count.asc'
-    | 'vote_count.desc';
-
 @Injectable({ providedIn: 'root' })
 export class StreamingQueryService {
     constructor(
@@ -128,7 +104,7 @@ export class StreamingQueryService {
                 releaseRegion,
                 undefined,
                 undefined,
-                toTmdbDiscoverSort('movie', query.sortBy, 'desc') as MovieDiscoverSort,
+                toTmdbDiscoverSort('movie', query.sortBy, 'desc'),
                 query.voteAverageMin,
                 undefined,
                 query.voteCountMin,
@@ -183,7 +159,7 @@ export class StreamingQueryService {
                 undefined,
                 1,
                 undefined,
-                toTmdbDiscoverSort('tv', query.sortBy, 'desc') as TvDiscoverSort,
+                toTmdbDiscoverSort('tv', query.sortBy, 'desc'),
                 undefined,
                 query.voteAverageMin,
                 undefined,
@@ -251,7 +227,7 @@ export class StreamingQueryService {
                 releaseRegion,
                 undefined,
                 undefined,
-                toTmdbDiscoverSort('movie', sortKey, direction) as MovieDiscoverSort,
+                toTmdbDiscoverSort('movie', sortKey, direction),
                 query.voteAverageMin,
                 undefined,
                 query.voteCountMin,
@@ -311,7 +287,7 @@ export class StreamingQueryService {
                 undefined,
                 page,
                 undefined,
-                toTmdbDiscoverSort('tv', sortKey, direction) as TvDiscoverSort,
+                toTmdbDiscoverSort('tv', sortKey, direction),
                 undefined,
                 query.voteAverageMin,
                 undefined,
