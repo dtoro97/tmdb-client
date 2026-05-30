@@ -1,37 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="brandMarkTitle">
-<title id="brandMarkTitle">TMDb Client brand mark</title>
-<defs>
-<linearGradient id="stripeRed" x1="18" y1="24" x2="42" y2="50" gradientUnits="userSpaceOnUse">
-<stop offset="0" stop-color="#ef5350"/>
-<stop offset="0.55" stop-color="#c62828"/>
-<stop offset="1" stop-color="#b71c1c"/>
-</linearGradient>
-<filter id="softShadow" x="-40%" y="-35%" width="180%" height="190%">
-<feDropShadow dx="0" dy="2" stdDeviation="1.8" flood-color="#000" flood-opacity=".24"/>
-</filter>
-<clipPath id="bucketClip">
-<path d="M18.5 24.5h27L42 50H22L18.5 24.5Z"/>
-</clipPath>
-</defs>
-<g filter="url(#softShadow)">
-<g>
-<circle cx="21.8" cy="22.8" r="4.5" fill="#ffffff"/>
-<circle cx="28.7" cy="20.7" r="4.9" fill="#ffffff"/>
-<circle cx="36" cy="21.4" r="4.8" fill="#ffffff"/>
-<circle cx="42.5" cy="23.3" r="4.4" fill="#ffffff"/>
-<circle cx="25.3" cy="26.6" r="3.9" fill="#ffffff"/>
-<circle cx="32.3" cy="27.1" r="4.1" fill="#ffffff"/>
-<circle cx="39.4" cy="26.2" r="3.7" fill="#ffffff"/>
-</g>
-<path d="M18.5 24.5h27L42 50H22L18.5 24.5Z" fill="#ffffff"/>
-<g clip-path="url(#bucketClip)">
-<rect x="18" y="23.5" width="5.4" height="29" rx="2.4" fill="url(#stripeRed)"/>
-<rect x="26" y="23.5" width="5.4" height="29" rx="2.4" fill="url(#stripeRed)"/>
-<rect x="34.1" y="23.5" width="5.4" height="29" rx="2.4" fill="url(#stripeRed)"/>
-<rect x="42.1" y="23.5" width="5.4" height="29" rx="2.4" fill="url(#stripeRed)"/>
-<path d="M42.9 24.5h2.6L42 50h-4.4Z" fill="#8e1515" opacity=".92"/>
-<path d="M17.4 47.4 46.1 33.2 43.4 50H22Z" fill="#111111" opacity=".08"/>
-</g>
-<path d="M18.6 24.5h26.8" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
-</g>
+<title id="brandMarkTitle">CineKeep brand mark</title>
+<path fill="#c7a66e" fill-rule="evenodd" clip-rule="evenodd" d="M30.75 9.25a21.75 21.75 0 1 1 0 43.5 21.75 21.75 0 1 1 0-43.5ZM30.75 15.4a4.85 4.85 0 1 1 0 9.7 4.85 4.85 0 1 1 0-9.7ZM19.1 24.7a4.85 4.85 0 1 1 0 9.7 4.85 4.85 0 1 1 0-9.7ZM42.4 24.7a4.85 4.85 0 1 1 0 9.7 4.85 4.85 0 1 1 0-9.7ZM30.75 27.95a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 1 1 0-6.4ZM24.85 37.55a4.85 4.85 0 1 1 0 9.7 4.85 4.85 0 1 1 0-9.7ZM36.65 37.55a4.85 4.85 0 1 1 0 9.7 4.85 4.85 0 1 1 0-9.7Z"/>
+<rect x="48.25" y="43.6" width="9" height="4.75" rx="2.38" fill="#c7a66e"/>
 </svg>
